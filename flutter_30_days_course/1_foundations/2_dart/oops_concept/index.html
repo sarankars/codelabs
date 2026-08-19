@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dart OOP Codelab — Learn Object-Oriented Programming in Dart</title>
+  <meta name="description" content="An interactive beginner-friendly Dart OOP codelab covering classes, objects, constructors, encapsulation, inheritance, polymorphism, abstraction, interfaces, mixins, and practical challenges.">
+  <meta name="keywords" content="Dart OOP, Dart classes, Dart objects, Dart constructors, Dart inheritance, Dart polymorphism, Dart abstract classes, Dart interfaces, Dart mixins, Flutter OOP">
+  <meta name="theme-color" content="#1769ff">
+  <meta property="og:title" content="Dart OOP Codelab">
+  <meta property="og:description" content="Learn essential Object-Oriented Programming concepts in Dart through an interactive codelab.">
+  <meta property="og:type" content="article">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"LearningResource",
+    "name":"Dart OOP Codelab",
+    "description":"An interactive beginner-friendly tutorial covering essential Object-Oriented Programming concepts in Dart.",
+    "learningResourceType":"Tutorial",
+    "educationalLevel":"Beginner",
+    "about":"Object-Oriented Programming in Dart",
+    "inLanguage":"en"
+  }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root{
+      --blue:#1769ff;--blue-dark:#0b43b7;--blue-light:#dce9ff;--ink:#101010;
+      --paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;
+      --border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);
+      --sidebar:290px;--radius:4px
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:auto}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}
+    button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:var(--blue);border-right:var(--border);padding:22px 18px;z-index:20;overflow:auto}
+    .brand{background:#fff;border:var(--border);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:20px}
+    .eyebrow,.progress-meta,.step-number,.step-kicker,.footer-note{font-family:"DM Mono",monospace}
+    .eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+    .brand h2{margin:5px 0 3px;font-size:1.45rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}
+    .progress-wrap{color:#fff;margin:0 2px 20px}.progress-meta{display:flex;justify-content:space-between;gap:10px;font-size:.72rem;font-weight:500;margin-bottom:7px}
+    .progress-track{height:16px;background:#fff;border:var(--border);padding:2px}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}
+    .steps{display:grid;gap:9px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;text-align:left;color:#fff;background:transparent;border:3px solid transparent;padding:9px 8px;font-weight:700;line-height:1.15}
+    .step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}
+    .step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{font-size:1rem;text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;background:var(--blue);border-bottom:var(--border);padding:10px;align-items:center;gap:10px}
+    .mobile-bar strong{color:#fff}.menu-btn,.mobile-title{border:var(--border);background:#fff;box-shadow:var(--shadow-sm)}
+    .menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{padding:8px 10px;flex:1;font-weight:800}
+    main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}
+    .step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    @media(prefers-reduced-motion:reduce){.step-view.active{animation:none}.progress-bar{transition:none}}
+    .step-header{border:var(--border);background:#fff;box-shadow:var(--shadow);padding:28px;margin-bottom:24px}
+    .step-kicker{display:inline-block;background:var(--blue);color:#fff;border:2px solid var(--ink);padding:5px 9px;font-size:.72rem;font-weight:500;margin-bottom:13px}
+    h1,h2,h3{line-height:1.08}h1{font-size:clamp(2rem,5vw,3.7rem);margin:0 0 12px;letter-spacing:-.045em}
+    h2{font-size:clamp(1.55rem,3vw,2.25rem);margin:30px 0 12px}h3{font-size:1.15rem;margin:24px 0 9px}
+    .lede{font-size:1.08rem;max-width:760px;margin:0}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}
+    .callout{border:var(--border);box-shadow:var(--shadow-sm);padding:16px 18px;margin:20px 0;background:#fff}.callout .label{display:inline-block;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;border:2px solid var(--ink);background:var(--ink);color:#fff;padding:3px 7px;margin-bottom:8px}.callout p:last-child{margin-bottom:0}
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.concept{border:var(--border);padding:18px;background:#fff;box-shadow:var(--shadow-sm)}.concept strong{font-size:1.05rem}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;background:#111;color:#f7f7f7;border:var(--border);box-shadow:var(--shadow-sm);padding:20px;overflow:auto;font-family:"DM Mono",ui-monospace,monospace;font-size:.88rem;line-height:1.65;tab-size:2}
+    .copy-btn{position:absolute;top:8px;right:8px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:5px 9px;font-size:.75rem;font-weight:800;z-index:2}
+    .output{border:var(--border);border-top:0;background:#e9edf4;padding:13px 16px;font-family:"DM Mono",monospace;font-size:.83rem}.output strong{font-family:"Space Grotesk",sans-serif}
+    code:not(pre code){background:#e8edf7;border:1px solid #9da9bb;padding:1px 5px;font-family:"DM Mono",monospace;font-size:.88em}
+    ul,ol{padding-left:1.35rem}li{margin:7px 0}.syntax{background:#edf2ff;border:var(--border);padding:14px;font-family:"DM Mono",monospace;overflow:auto}
+    .quiz{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}
+    .quiz-option{text-align:left;border:2px solid var(--ink);background:#fff;padding:11px 13px;font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}
+    .quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}
+    .reveal{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;font-weight:800;background:var(--blue-light)}.reveal>div{padding:15px 16px}
+    .challenge{background:var(--ink);color:#fff;border:var(--border);box-shadow:var(--shadow);padding:22px;margin:24px 0}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:12px 18px;font-weight:900;min-width:130px}
+    .nav-btn.primary{background:var(--blue);color:#fff}.nav-btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:3px 3px 0 #777}
+    .finish{display:none;background:var(--mint);border:var(--border);box-shadow:var(--shadow);padding:20px;margin-top:24px}.finish.show{display:block}
+    .pill{display:inline-block;border:2px solid var(--ink);background:#fff;padding:4px 8px;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;margin:2px}.footer-note{margin-top:30px;font-size:.8rem;color:#555}
+    .comparison{width:100%;border-collapse:collapse;margin:18px 0;background:#fff;border:var(--border)}.comparison th,.comparison td{border:2px solid var(--ink);padding:11px;text-align:left;vertical-align:top}.comparison th{background:var(--blue);color:#fff}
+    .success{font-weight:800}.small{font-size:.92rem}
+    @media(max-width:850px){:root{--sidebar:270px}.sidebar{transform:translateX(-100%);transition:transform .2s ease;box-shadow:10px 0 0 rgba(16,16,16,.18)}.sidebar.open{transform:none}.mobile-bar{display:flex}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:600px){.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.grid-2{grid-template-columns:1fr}.nav-row{position:sticky;bottom:0;background:var(--paper);padding:12px 0;margin-left:-2px;margin-right:-2px;z-index:10}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{font-size:.78rem;padding:16px 12px}.copy-btn{position:static;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1;align-self:flex-end}.comparison{display:block;overflow-x:auto;white-space:normal}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand">
+      <div class="eyebrow">Dart Codelab</div>
+      <h2>OOP / OOPS</h2>
+      <p>From classes to polymorphism.</p>
+    </div>
+    <div class="progress-wrap" aria-label="Lesson progress">
+      <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+      <div class="progress-track" role="progressbar" aria-label="Codelab progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+
+  <div class="mobile-bar">
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button>
+    <div class="mobile-title" id="mobileTitle">OOP in Dart</div>
+  </div>
+
+  <main>
+    <div class="content" id="content">
+
+      <section class="step-view" data-step="0">
+        <header class="step-header">
+          <span class="step-kicker">STEP 1 · START HERE</span>
+          <h1>Object-Oriented Programming in Dart</h1>
+          <p class="lede">OOP is a way to organize programs around objects: things that combine <strong>state</strong> (data) and <strong>behavior</strong> (what they can do). Dart uses classes, inheritance, interfaces, and mixins to model that behavior.</p>
+          <div class="objective"><strong>By the end:</strong> You will be able to create Dart classes and objects, initialize state with constructors, protect data with encapsulation, and use inheritance, polymorphism, abstraction, interfaces, and mixins.</div>
+        </header>
+        <div class="panel blue">
+          <h2>Why OOP matters</h2>
+          <p>Imagine a bank account. It has state such as an account holder and balance, and behavior such as depositing or withdrawing money. Instead of keeping all those pieces unrelated, an object can keep the data and the operations that work on that data together.</p>
+          <div class="grid-2">
+            <div class="concept"><strong>Model</strong><p>Represent real or conceptual things as objects.</p></div>
+            <div class="concept"><strong>Organize</strong><p>Keep related data and behavior together.</p></div>
+            <div class="concept"><strong>Reuse</strong><p>Share behavior through inheritance, interfaces, or mixins when appropriate.</p></div>
+            <div class="concept"><strong>Maintain</strong><p>Give each type a clear responsibility so larger programs are easier to change.</p></div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="panel mint"><strong>Prerequisites</strong><p>Basic Dart syntax, variables, types, conditionals, loops, and functions.</p></div>
+          <div class="panel yellow"><strong>Mindset</strong><p>OOP is a toolbox, not a rule that every problem must be solved with inheritance.</p></div>
+        </div>
+        <div class="callout"><span class="label">CORE IDEA</span><p>A class describes a kind of object. An object is an instance of that class.</p></div>
+      </section>
+
+      <section class="step-view" data-step="1">
+        <header class="step-header">
+          <span class="step-kicker">STEP 2 · FOUNDATIONS</span>
+          <h1>Classes & objects</h1>
+          <p class="lede">A class is a blueprint for a type. An object is a concrete instance created from that type.</p>
+        </header>
+        <h2>The basic shape</h2>
+        <div class="syntax">class ClassName {<br>&nbsp;&nbsp;// fields and methods<br>}<br><br>final object = ClassName();</div>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class Student {
+  String name = 'Asha';
+  int age = 20;
+
+  void introduce() {
+    print('I am $name and I am $age.');
+  }
+}
+
+void main() {
+  final student = Student();
+  student.introduce();
+}">Copy</button>
+          <pre><code>class Student {
+  String name = 'Asha';
+  int age = 20;
+
+  void introduce() {
+    print('I am $name and I am $age.');
+  }
+}
+
+void main() {
+  final student = Student();
+  student.introduce();
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>I am Asha and I am 20.</div>
+        </div>
+        <div class="grid-2">
+          <div class="concept"><strong>Class</strong><p><code>Student</code> defines what a student object can contain and do.</p></div>
+          <div class="concept"><strong>Object</strong><p><code>student</code> refers to one concrete <code>Student</code> instance.</p></div>
+        </div>
+        <div class="callout"><span class="label">COMMON MISTAKE</span><p>Declaring <code>class Student</code> does not create a student object. You create an instance with <code>Student()</code>.</p></div>
+        <div class="quiz" data-answer="1">
+          <h3>Quick check</h3>
+          <p>Which line creates an object?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0"><code>class Student { }</code></button>
+            <button class="quiz-option" data-choice="1"><code>final student = Student();</code></button>
+            <button class="quiz-option" data-choice="2"><code>void introduce() { }</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. The constructor call creates a <code>Student</code> instance.</div>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="2">
+        <header class="step-header">
+          <span class="step-kicker">STEP 3 · STATE & BEHAVIOR</span>
+          <h1>Fields, methods & <code>this</code></h1>
+          <p class="lede">Fields store object state. Methods describe behavior that can read or change that state.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class BankAccount {
+  double balance = 0;
+
+  void deposit(double amount) {
+    balance += amount;
+  }
+
+  void showBalance() {
+    print('Balance: $balance');
+  }
+}
+
+void main() {
+  final account = BankAccount();
+  account.deposit(500);
+  account.showBalance();
+}">Copy</button>
+          <pre><code>class BankAccount {
+  double balance = 0;
+
+  void deposit(double amount) {
+    balance += amount;
+  }
+
+  void showBalance() {
+    print('Balance: $balance');
+  }
+}
+
+void main() {
+  final account = BankAccount();
+  account.deposit(500);
+  account.showBalance();
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Balance: 500.0</div>
+        </div>
+        <h2>Using <code>this</code></h2>
+        <p>Inside an instance member, <code>this</code> refers to the current object. It is especially useful when a parameter and a field have the same name.</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class Student {
+  String name;
+
+  Student(this.name);
+
+  void rename(String name) {
+    this.name = name;
+  }
+}">Copy</button>
+          <pre><code>class Student {
+  String name;
+
+  Student(this.name);
+
+  void rename(String name) {
+    this.name = name;
+  }
+}</code></pre>
+        </div>
+        <div class="panel mint">
+          <h3>Read it</h3>
+          <ul>
+            <li><code>name</code> on the left of <code>this.name = name</code> is the field.</li>
+            <li><code>name</code> on the right is the method parameter.</li>
+            <li><code>this.name</code> explicitly means “the current object's field.”</li>
+          </ul>
+        </div>
+        <div class="callout"><span class="label">DESIGN TIP</span><p>Keep methods focused on behavior that naturally belongs to the object. A <code>BankAccount</code> should know how to deposit or withdraw rather than exposing every internal detail to callers.</p></div>
+      </section>
+
+      <section class="step-view" data-step="3">
+        <header class="step-header">
+          <span class="step-kicker">STEP 4 · INITIALIZING OBJECTS</span>
+          <h1>Constructors</h1>
+          <p class="lede">Constructors run when an object is created. They are commonly used to put an object into a valid initial state.</p>
+        </header>
+        <h2>Generative & parameterized constructors</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class Student {
+  final String name;
+  final int age;
+
+  Student(this.name, this.age);
+}
+
+void main() {
+  final student = Student('Asha', 20);
+  print('${student.name}, ${student.age}');
+}">Copy</button>
+          <pre><code>class Student {
+  final String name;
+  final int age;
+
+  Student(this.name, this.age);
+}
+
+void main() {
+  final student = Student('Asha', 20);
+  print('${student.name}, ${student.age}');
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Asha, 20</div>
+        </div>
+        <h2>Named constructors</h2>
+        <p>A class can provide additional named construction paths when different ways of creating an object are useful.</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class Point {
+  final double x;
+  final double y;
+
+  Point(this.x, this.y);
+
+  Point.origin()
+      : x = 0,
+        y = 0;
+}
+
+void main() {
+  final p = Point.origin();
+  print('${p.x}, ${p.y}');
+}">Copy</button>
+          <pre><code>class Point {
+  final double x;
+  final double y;
+
+  Point(this.x, this.y);
+
+  Point.origin()
+      : x = 0,
+        y = 0;
+
+  // ...
+}</code></pre>
+        </div>
+        <div class="grid-2">
+          <div class="concept"><strong>Default constructor</strong><p>If you declare no constructor, Dart can provide an unnamed generative constructor with no parameters. Once you declare a constructor, Dart does not also provide that implicit constructor.</p></div>
+          <div class="concept"><strong>Named constructor</strong><p><code>Point.origin()</code> gives callers a readable alternative construction path.</p></div>
+        </div>
+        <h2>Named parameters in constructors</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class Product {
+  final String name;
+  final double price;
+
+  Product({
+    required this.name,
+    required this.price,
+  });
+}
+
+final product = Product(name: 'Keyboard', price: 2500);">Copy</button>
+          <pre><code>class Product {
+  final String name;
+  final double price;
+
+  Product({
+    required this.name,
+    required this.price,
+  });
+}
+
+final product = Product(name: 'Keyboard', price: 2500);</code></pre>
+        </div>
+        <div class="callout"><span class="label">COMMON MISTAKE</span><p>A constructor is not an ordinary method. It has special syntax and is invoked as part of object creation.</p></div>
+      </section>
+
+      <section class="step-view" data-step="4">
+        <header class="step-header">
+          <span class="step-kicker">STEP 5 · ENCAPSULATION</span>
+          <h1>Encapsulation & privacy</h1>
+          <p class="lede">Encapsulation means controlling how an object's internal state is accessed or changed. Dart's privacy model is library-based: an identifier beginning with <code>_</code> is private to its library.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class BankAccount {
+  double _balance = 0;
+
+  double get balance => _balance;
+
+  void deposit(double amount) {
+    if (amount <= 0) return;
+    _balance += amount;
+  }
+
+  bool withdraw(double amount) {
+    if (amount <= 0 || amount > _balance) return false;
+    _balance -= amount;
+    return true;
+  }
+}
+
+void main() {
+  final account = BankAccount();
+  account.deposit(1000);
+  account.withdraw(250);
+  print(account.balance);
+}">Copy</button>
+          <pre><code>class BankAccount {
+  double _balance = 0;
+
+  double get balance => _balance;
+
+  void deposit(double amount) {
+    if (amount <= 0) return;
+    _balance += amount;
+  }
+
+  bool withdraw(double amount) {
+    if (amount <= 0 || amount > _balance) return false;
+    _balance -= amount;
+    return true;
+  }
+}
+
+void main() {
+  final account = BankAccount();
+  account.deposit(1000);
+  account.withdraw(250);
+  print(account.balance);
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>750.0</div>
+        </div>
+        <h2>Getters & setters</h2>
+        <p>A getter exposes a value through property-like syntax. A setter can validate or transform a value before storing it.</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class Person {
+  String _name = '';
+
+  String get name => _name;
+
+  set name(String value) {
+    if (value.trim().isNotEmpty) {
+      _name = value.trim();
+    }
+  }
+}">Copy</button>
+          <pre><code>class Person {
+  String _name = '';
+
+  String get name => _name;
+
+  set name(String value) {
+    if (value.trim().isNotEmpty) {
+      _name = value.trim();
+    }
+  }
+}</code></pre>
+        </div>
+        <div class="panel yellow">
+          <strong>Important Dart nuance:</strong> “Private” does not mean “private to the class.” A leading underscore makes the declaration private to the <em>library</em>. Separate Dart libraries cannot directly access that private identifier.
+        </div>
+        <div class="callout"><span class="label">WHY IT MATTERS</span><p>Encapsulation lets a class protect invariants. Instead of allowing arbitrary code to set a balance to an invalid value, the class can expose controlled operations.</p></div>
+      </section>
+
+      <section class="step-view" data-step="5">
+        <header class="step-header">
+          <span class="step-kicker">STEP 6 · REUSE</span>
+          <h1>Inheritance with <code>extends</code></h1>
+          <p class="lede">Inheritance creates a subtype that extends another class. The child class can reuse accessible behavior and add or replace behavior of its own.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class Animal {
+  void eat() {
+    print('Eating');
+  }
+}
+
+class Dog extends Animal {
+  void bark() {
+    print('Woof!');
+  }
+}
+
+void main() {
+  final dog = Dog();
+  dog.eat();
+  dog.bark();
+}">Copy</button>
+          <pre><code>class Animal {
+  void eat() {
+    print('Eating');
+  }
+}
+
+class Dog extends Animal {
+  void bark() {
+    print('Woof!');
+  }
+}
+
+void main() {
+  final dog = Dog();
+  dog.eat();
+  dog.bark();
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Eating<br>Woof!</div>
+        </div>
+        <h2>Calling parent behavior with <code>super</code></h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class Vehicle {
+  void start() {
+    print('Vehicle started');
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  void start() {
+    super.start();
+    print('Car is ready to drive');
+  }
+}">Copy</button>
+          <pre><code>class Vehicle {
+  void start() {
+    print('Vehicle started');
+  }
+}
+
+class Car extends Vehicle {
+  @override
+  void start() {
+    super.start();
+    print('Car is ready to drive');
+  }
+}</code></pre>
+        </div>
+        <div class="panel blue">
+          <strong>When inheritance fits:</strong> use it when the subtype really represents a specialized form of the parent type and the relationship is meaningful. Do not use inheritance only because it happens to save a few lines of code.
+        </div>
+        <div class="callout"><span class="label">COMMON MISTAKE</span><p><code>extends</code> is not a generic “reuse anything” keyword. For unrelated capabilities, a mixin, interface, or composition may be a better design.</p></div>
+      </section>
+
+      <section class="step-view" data-step="6">
+        <header class="step-header">
+          <span class="step-kicker">STEP 7 · POLYMORPHISM</span>
+          <h1>Overriding & polymorphism</h1>
+          <p class="lede">A subclass can override inherited behavior. Polymorphism lets code work with a common type while the actual object's implementation determines what happens.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class Animal {
+  void makeSound() {
+    print('Some sound');
+  }
+}
+
+class Dog extends Animal {
+  @override
+  void makeSound() {
+    print('Woof!');
+  }
+}
+
+class Cat extends Animal {
+  @override
+  void makeSound() {
+    print('Meow!');
+  }
+}
+
+void playSound(Animal animal) {
+  animal.makeSound();
+}
+
+void main() {
+  playSound(Dog());
+  playSound(Cat());
+}">Copy</button>
+          <pre><code>class Animal {
+  void makeSound() {
+    print('Some sound');
+  }
+}
+
+class Dog extends Animal {
+  @override
+  void makeSound() {
+    print('Woof!');
+  }
+}
+
+class Cat extends Animal {
+  @override
+  void makeSound() {
+    print('Meow!');
+  }
+}
+
+void playSound(Animal animal) {
+  animal.makeSound();
+}
+
+void main() {
+  playSound(Dog());
+  playSound(Cat());
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Woof!<br>Meow!</div>
+        </div>
+        <p><code>playSound</code> only needs to know that it received an <code>Animal</code>. The runtime object can be a <code>Dog</code> or <code>Cat</code>, and its overridden method runs.</p>
+        <div class="quiz" data-answer="2">
+          <h3>Quick check</h3>
+          <p>Why does <code>playSound(Dog())</code> call the dog's implementation?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Because <code>playSound</code> checks the class name manually</button>
+            <button class="quiz-option" data-choice="1">Because <code>Animal</code> is replaced at compile time</button>
+            <button class="quiz-option" data-choice="2">Because the actual object is a <code>Dog</code> whose method overrides <code>Animal.makeSound</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. The variable can use the parent type while the object's overridden implementation is selected.</div>
+        </div>
+        <div class="callout"><span class="label">REMEMBER</span><p><strong>Overriding</strong> is the mechanism; <strong>polymorphism</strong> is the broader idea of using a common abstraction/type with different concrete behavior.</p></div>
+      </section>
+
+      <section class="step-view" data-step="7">
+        <header class="step-header">
+          <span class="step-kicker">STEP 8 · ABSTRACTION</span>
+          <h1>Abstract classes</h1>
+          <p class="lede">An abstract class defines a common contract or shared behavior but is not itself meant to be instantiated directly.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="abstract class Shape {
+  double area();
+
+  void describe() {
+    print('I am a shape.');
+  }
+}
+
+class Circle extends Shape {
+  final double radius;
+
+  Circle(this.radius);
+
+  @override
+  double area() => 3.14159 * radius * radius;
+}
+
+void main() {
+  final shape = Circle(2);
+  shape.describe();
+  print(shape.area());
+}">Copy</button>
+          <pre><code>abstract class Shape {
+  double area();
+
+  void describe() {
+    print('I am a shape.');
+  }
+}
+
+class Circle extends Shape {
+  final double radius;
+
+  Circle(this.radius);
+
+  @override
+  double area() => 3.14159 * radius * radius;
+}
+
+void main() {
+  final shape = Circle(2);
+  shape.describe();
+  print(shape.area());
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>I am a shape.<br>12.56636</div>
+        </div>
+        <h2>What is abstract here?</h2>
+        <ul>
+          <li><code>Shape</code> cannot be instantiated directly.</li>
+          <li><code>area()</code> declares behavior without providing an implementation.</li>
+          <li>A concrete subclass such as <code>Circle</code> must provide the missing implementation.</li>
+        </ul>
+        <div class="panel mint">
+          <strong>Abstraction vs encapsulation:</strong> abstraction focuses on <em>what</em> an object exposes as a useful contract; encapsulation focuses on controlling and protecting its internal state and implementation.
+        </div>
+        <div class="callout"><span class="label">COMMON MISTAKE</span><p>An abstract class is not simply a class with “private fields.” Abstraction is about modeling a contract or essential behavior while hiding unnecessary implementation details.</p></div>
+      </section>
+
+      <section class="step-view" data-step="8">
+        <header class="step-header">
+          <span class="step-kicker">STEP 9 · INTERFACES</span>
+          <h1><code>extends</code> vs <code>implements</code></h1>
+          <p class="lede">In Dart, every class implicitly defines an interface containing its instance members. Another class can implement that interface with <code>implements</code>.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="abstract class PaymentMethod {
+  void pay(double amount);
+}
+
+class UpiPayment implements PaymentMethod {
+  @override
+  void pay(double amount) {
+    print('Paid ₹$amount using UPI');
+  }
+}
+
+class CardPayment implements PaymentMethod {
+  @override
+  void pay(double amount) {
+    print('Paid ₹$amount using card');
+  }
+}
+
+void processPayment(PaymentMethod method) {
+  method.pay(500);
+}">Copy</button>
+          <pre><code>abstract class PaymentMethod {
+  void pay(double amount);
+}
+
+class UpiPayment implements PaymentMethod {
+  @override
+  void pay(double amount) {
+    print('Paid ₹$amount using UPI');
+  }
+}
+
+class CardPayment implements PaymentMethod {
+  @override
+  void pay(double amount) {
+    print('Paid ₹$amount using card');
+  }
+}
+
+void processPayment(PaymentMethod method) {
+  method.pay(500);
+}</code></pre>
+        </div>
+        <table class="comparison">
+          <thead><tr><th>Keyword</th><th>Main idea</th><th>What the child gets</th></tr></thead>
+          <tbody>
+            <tr><td><code>extends</code></td><td>Creates a subtype of a class.</td><td>Inherits implementation and can override behavior.</td></tr>
+            <tr><td><code>implements</code></td><td>Promises to satisfy an interface.</td><td>Must provide implementations for the interface's members; it does not inherit the class's implementation in the same way.</td></tr>
+            <tr><td><code>with</code></td><td>Adds mixin behavior.</td><td>Reusable implementation supplied by one or more mixins.</td></tr>
+          </tbody>
+        </table>
+        <div class="panel blue">
+          <strong>Useful mental model:</strong> <code>extends</code> is primarily about an inheritance relationship, <code>implements</code> is about satisfying a contract, and <code>with</code> is about composing reusable behavior.
+        </div>
+        <div class="quiz" data-answer="0">
+          <h3>Quick check</h3>
+          <p>What must <code>UpiPayment</code> do when it implements <code>PaymentMethod</code>?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Provide the required interface member implementation</button>
+            <button class="quiz-option" data-choice="1">Automatically inherit every implementation from <code>PaymentMethod</code></button>
+            <button class="quiz-option" data-choice="2">Become a subclass only if it also uses <code>extends</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. <code>implements</code> makes the class satisfy the interface contract.</div>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="9">
+        <header class="step-header">
+          <span class="step-kicker">STEP 10 · COMPOSITION</span>
+          <h1>Mixins with <code>with</code></h1>
+          <p class="lede">A mixin is a reusable set of members that can be composed into a class. Mixins are useful when behavior can be shared across types without requiring an inheritance relationship.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="mixin Logger {
+  void log(String message) {
+    print('[LOG] $message');
+  }
+}
+
+mixin JsonSupport {
+  Map<String, dynamic> toJson() => {'type': runtimeType.toString()};
+}
+
+class User with Logger, JsonSupport {
+  final String name;
+
+  User(this.name);
+
+  void save() {
+    log('Saving $name');
+  }
+}
+
+void main() {
+  final user = User('Asha');
+  user.save();
+  print(user.toJson());
+}">Copy</button>
+          <pre><code>mixin Logger {
+  void log(String message) {
+    print('[LOG] $message');
+  }
+}
+
+mixin JsonSupport {
+  Map&lt;String, dynamic&gt; toJson() =&gt;
+      {'type': runtimeType.toString()};
+}
+
+class User with Logger, JsonSupport {
+  final String name;
+
+  User(this.name);
+
+  void save() {
+    log('Saving $name');
+  }
+}
+
+void main() {
+  final user = User('Asha');
+  user.save();
+  print(user.toJson());
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>[LOG] Saving Asha<br>{type: User}</div>
+        </div>
+        <p>The <code>User</code> class receives both <code>log</code> and <code>toJson</code> without extending either mixin as a superclass.</p>
+        <div class="grid-2">
+          <div class="concept"><strong>Inheritance</strong><p>Models a subtype relationship such as <code>Dog extends Animal</code>.</p></div>
+          <div class="concept"><strong>Mixin composition</strong><p>Adds reusable behavior such as logging, serialization helpers, or another capability.</p></div>
+        </div>
+        <div class="callout"><span class="label">GOOD PRACTICE</span><p>Use a mixin for cohesive reusable behavior. Avoid creating huge “utility mixins” that make a class's capabilities difficult to understand.</p></div>
+      </section>
+
+      <section class="step-view" data-step="10">
+        <header class="step-header">
+          <span class="step-kicker">STEP 11 · DART TOOLBOX</span>
+          <h1><code>static</code>, <code>final</code>, <code>const</code>, <code>factory</code> & operators</h1>
+          <p class="lede">These features are useful in Dart OOP, but they solve different problems. Learn the purpose before memorizing the syntax.</p>
+        </header>
+        <h2>Static members</h2>
+        <p>A <code>static</code> member belongs to the class rather than to a particular instance.</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class MathTools {
+  static const double pi = 3.14159;
+
+  static double square(double value) => value * value;
+}
+
+void main() {
+  print(MathTools.square(4));
+  print(MathTools.pi);
+}">Copy</button>
+          <pre><code>class MathTools {
+  static const double pi = 3.14159;
+
+  static double square(double value) => value * value;
+}
+
+void main() {
+  print(MathTools.square(4));
+  print(MathTools.pi);
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>16.0<br>3.14159</div>
+        </div>
+        <h2><code>final</code> vs <code>const</code></h2>
+        <div class="grid-2">
+          <div class="concept"><strong><code>final</code></strong><p>Can be assigned once. The value can be determined at runtime.</p></div>
+          <div class="concept"><strong><code>const</code></strong><p>Represents a compile-time constant. A <code>const</code> object requires a const constructor and constant arguments.</p></div>
+        </div>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class Color {
+  final int red;
+
+  const Color(this.red);
+}
+
+const black = Color(0);
+final current = Color(DateTime.now().millisecond);">Copy</button>
+          <pre><code>class Color {
+  final int red;
+
+  const Color(this.red);
+}
+
+const black = Color(0);
+final current = Color(DateTime.now().millisecond);</code></pre>
+        </div>
+        <h2>Factory constructors</h2>
+        <p>A <code>factory</code> constructor can return an existing object, a subtype, or a newly created instance instead of always creating a new instance of its class.</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class Logger {
+  static final Logger _instance = Logger._internal();
+
+  factory Logger() => _instance;
+
+  Logger._internal();
+}
+
+final a = Logger();
+final b = Logger();
+
+print(identical(a, b));">Copy</button>
+          <pre><code>class Logger {
+  static final Logger _instance = Logger._internal();
+
+  factory Logger() =&gt; _instance;
+
+  Logger._internal();
+}
+
+final a = Logger();
+final b = Logger();
+
+print(identical(a, b));</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>true</div>
+        </div>
+        <h2>Operator methods</h2>
+        <p>Dart lets classes define operators when that makes the type's behavior natural to use.</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class Point {
+  final int x;
+  final int y;
+
+  Point(this.x, this.y);
+
+  Point operator +(Point other) {
+    return Point(x + other.x, y + other.y);
+  }
+}
+
+final total = Point(1, 2) + Point(3, 4);
+print('${total.x}, ${total.y}');">Copy</button>
+          <pre><code>class Point {
+  final int x;
+  final int y;
+
+  Point(this.x, this.y);
+
+  Point operator +(Point other) {
+    return Point(x + other.x, y + other.y);
+  }
+}
+
+final total = Point(1, 2) + Point(3, 4);
+print('${total.x}, ${total.y}');</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>4, 6</div>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="11">
+        <header class="step-header">
+          <span class="step-kicker">STEP 12 · PUT IT TOGETHER</span>
+          <h1>A small OOP system</h1>
+          <p class="lede">Now combine constructors, encapsulation, inheritance, overriding, abstraction, interfaces, polymorphism, and a mixin in one focused example.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="mixin Auditable {
+  void audit(String message) {
+    print('[AUDIT] $message');
+  }
+}
+
+abstract class Employee {
+  final String name;
+  double _salary;
+
+  Employee({
+    required this.name,
+    required double salary,
+  }) : _salary = salary;
+
+  double get salary => _salary;
+
+  void work();
+
+  void giveRaise(double amount) {
+    if (amount > 0) _salary += amount;
+  }
+}
+
+class Developer extends Employee with Auditable {
+  Developer({
+    required super.name,
+    required super.salary,
+  });
+
+  @override
+  void work() {
+    audit('$name is writing Dart code');
+  }
+}
+
+class Teacher extends Employee {
+  Teacher({
+    required super.name,
+    required super.salary,
+  });
+
+  @override
+  void work() {
+    print('$name is teaching a class');
+  }
+}
+
+void runWorkday(List<Employee> employees) {
+  for (final employee in employees) {
+    employee.work();
+  }
+}
+
+void main() {
+  final employees = <Employee>[
+    Developer(name: 'Asha', salary: 60000),
+    Teacher(name: 'Rahul', salary: 55000),
+  ];
+
+  runWorkday(employees);
+  employees[0].giveRaise(5000);
+  print(employees[0].salary);
+}">Copy</button>
+          <pre><code>mixin Auditable {
+  void audit(String message) {
+    print('[AUDIT] $message');
+  }
+}
+
+abstract class Employee {
+  final String name;
+  double _salary;
+
+  Employee({
+    required this.name,
+    required double salary,
+  }) : _salary = salary;
+
+  double get salary => _salary;
+
+  void work();
+
+  void giveRaise(double amount) {
+    if (amount > 0) _salary += amount;
+  }
+}
+
+class Developer extends Employee with Auditable {
+  Developer({
+    required super.name,
+    required super.salary,
+  });
+
+  @override
+  void work() {
+    audit('$name is writing Dart code');
+  }
+}
+
+class Teacher extends Employee {
+  Teacher({
+    required super.name,
+    required super.salary,
+  });
+
+  @override
+  void work() {
+    print('$name is teaching a class');
+  }
+}
+
+void runWorkday(List&lt;Employee&gt; employees) {
+  for (final employee in employees) {
+    employee.work();
+  }
+}
+
+void main() {
+  final employees = &lt;Employee&gt;[
+    Developer(name: 'Asha', salary: 60000),
+    Teacher(name: 'Rahul', salary: 55000),
+  ];
+
+  runWorkday(employees);
+  employees[0].giveRaise(5000);
+  print(employees[0].salary);
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>[AUDIT] Asha is writing Dart code<br>Rahul is teaching a class<br>65000.0</div>
+        </div>
+        <div class="grid-2">
+          <div class="concept"><strong>Abstraction</strong><p><code>Employee</code> defines the common contract with abstract <code>work()</code>.</p></div>
+          <div class="concept"><strong>Encapsulation</strong><p><code>_salary</code> is controlled through a getter and <code>giveRaise()</code>.</p></div>
+          <div class="concept"><strong>Inheritance</strong><p><code>Developer</code> and <code>Teacher</code> extend <code>Employee</code>.</p></div>
+          <div class="concept"><strong>Polymorphism</strong><p><code>runWorkday</code> accepts <code>List&lt;Employee&gt;</code> and invokes each concrete <code>work()</code>.</p></div>
+          <div class="concept"><strong>Mixin</strong><p><code>Developer</code> composes <code>Auditable</code> with <code>with</code>.</p></div>
+          <div class="concept"><strong>Constructors</strong><p>Named parameters initialize each object's required state.</p></div>
+        </div>
+        <div class="callout"><span class="label">DESIGN LESSON</span><p>The power of OOP is not the number of classes you create. It is the clarity of the relationships, responsibilities, and contracts between them.</p></div>
+      </section>
+
+      <section class="step-view" data-step="12">
+        <header class="step-header">
+          <span class="step-kicker">STEP 13 · PRACTICE</span>
+          <h1>Final OOP challenge</h1>
+          <p class="lede">Design a small library system. Do not copy the solution immediately—first sketch the classes and relationships yourself.</p>
+        </header>
+        <div class="challenge">
+          <h3>TRY IT · Library management model</h3>
+          <ol>
+            <li>Create an abstract class <code>LibraryItem</code> with a required <code>title</code> and an abstract method <code>describe()</code>.</li>
+            <li>Create <code>Book</code> and <code>Magazine</code> classes that extend <code>LibraryItem</code>.</li>
+            <li>Give each subclass its own implementation of <code>describe()</code>.</li>
+            <li>Create a <code>Library</code> class that stores a collection of <code>LibraryItem</code> objects.</li>
+            <li>Use a loop to demonstrate polymorphism by calling <code>describe()</code> on every item.</li>
+            <li>Add a private field and a getter/setter or controlled method where encapsulation makes sense.</li>
+            <li>Add a small mixin such as <code>Loggable</code> and use it on one appropriate class.</li>
+          </ol>
+          <p><strong>Success condition:</strong> your program should contain at least two concrete item types and the library should work with them through the common <code>LibraryItem</code> type.</p>
+        </div>
+        <div class="panel yellow">
+          <strong>Planning hint:</strong> Start with the relationship: <code>LibraryItem</code> → <code>Book</code>/<code>Magazine</code>. Then decide which state belongs in the base class and which behavior belongs in each concrete class.
+        </div>
+        <details class="reveal">
+          <summary>Reveal one possible solution</summary>
+          <div>
+            <div class="code-wrap">
+              <button class="copy-btn" data-copy="mixin Loggable {
+  void log(String message) => print('[LOG] $message');
+}
+
+abstract class LibraryItem {
+  final String title;
+
+  LibraryItem(this.title);
+
+  void describe();
+}
+
+class Book extends LibraryItem with Loggable {
+  final String author;
+
+  Book(super.title, this.author);
+
+  @override
+  void describe() {
+    log('Book: $title by $author');
+  }
+}
+
+class Magazine extends LibraryItem {
+  final int issue;
+
+  Magazine(super.title, this.issue);
+
+  @override
+  void describe() {
+    print('Magazine: $title, issue $issue');
+  }
+}
+
+class Library {
+  final List<LibraryItem> items = [];
+
+  void add(LibraryItem item) => items.add(item);
+
+  void describeAll() {
+    for (final item in items) {
+      item.describe();
+    }
+  }
+}
+
+void main() {
+  final library = Library();
+  library.add(Book('Dart Basics', 'Asha'));
+  library.add(Magazine('Tech Monthly', 42));
+  library.describeAll();
+}">Copy</button>
+              <pre><code>mixin Loggable {
+  void log(String message) =&gt; print('[LOG] $message');
+}
+
+abstract class LibraryItem {
+  final String title;
+
+  LibraryItem(this.title);
+
+  void describe();
+}
+
+class Book extends LibraryItem with Loggable {
+  final String author;
+
+  Book(super.title, this.author);
+
+  @override
+  void describe() {
+    log('Book: $title by $author');
+  }
+}
+
+class Magazine extends LibraryItem {
+  final int issue;
+
+  Magazine(super.title, this.issue);
+
+  @override
+  void describe() {
+    print('Magazine: $title, issue $issue');
+  }
+}
+
+class Library {
+  final List&lt;LibraryItem&gt; items = [];
+
+  void add(LibraryItem item) =&gt; items.add(item);
+
+  void describeAll() {
+    for (final item in items) {
+      item.describe();
+    }
+  }
+}
+
+void main() {
+  final library = Library();
+  library.add(Book('Dart Basics', 'Asha'));
+  library.add(Magazine('Tech Monthly', 42));
+  library.describeAll();
+}</code></pre>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section class="step-view" data-step="13">
+        <header class="step-header">
+          <span class="step-kicker">STEP 14 · FINAL CHECK</span>
+          <h1>OOP recap & knowledge check</h1>
+          <p class="lede">You now have the essential Dart OOP toolkit. The next step is repetition: design small models, read class hierarchies, and practice choosing the simplest useful relationship.</p>
+        </header>
+        <div class="panel blue">
+          <h2>The OOP checklist</h2>
+          <p>
+            <span class="pill">class</span><span class="pill">object</span><span class="pill">fields</span><span class="pill">methods</span>
+            <span class="pill">constructors</span><span class="pill">named constructors</span><span class="pill">this</span>
+            <span class="pill">encapsulation</span><span class="pill">_private</span><span class="pill">getters</span><span class="pill">setters</span>
+            <span class="pill">extends</span><span class="pill">override</span><span class="pill">super</span><span class="pill">polymorphism</span>
+            <span class="pill">abstract</span><span class="pill">implements</span><span class="pill">with</span><span class="pill">mixin</span>
+            <span class="pill">static</span><span class="pill">final</span><span class="pill">const</span><span class="pill">factory</span>
+          </p>
+        </div>
+
+        <div class="quiz" data-answer="0">
+          <h3>1. What is an object?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">A concrete instance of a class</button>
+            <button class="quiz-option" data-choice="1">A function that creates a class definition</button>
+            <button class="quiz-option" data-choice="2">A Dart file that contains code</button>
+          </div>
+          <div class="quiz-feedback">Correct. A class describes a type; an object is a concrete instance of that type.</div>
+        </div>
+
+        <div class="quiz" data-answer="1">
+          <h3>2. What does encapsulation help you do?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Make every field globally accessible</button>
+            <button class="quiz-option" data-choice="1">Control access to internal state and protect invariants</button>
+            <button class="quiz-option" data-choice="2">Automatically create subclasses</button>
+          </div>
+          <div class="quiz-feedback">Correct. Encapsulation controls how an object's state and implementation are exposed.</div>
+        </div>
+
+        <div class="quiz" data-answer="2">
+          <h3>3. Which keyword composes a mixin into a class?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0"><code>extends</code></button>
+            <button class="quiz-option" data-choice="1"><code>implements</code></button>
+            <button class="quiz-option" data-choice="2"><code>with</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. A class uses <code>with</code> to compose mixin behavior.</div>
+        </div>
+
+        <div class="quiz" data-answer="1">
+          <h3>4. What is polymorphism in the example with <code>Animal</code>?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Every animal must be exactly the same object</button>
+            <button class="quiz-option" data-choice="1">Code can use a common type while concrete objects provide different overridden behavior</button>
+            <button class="quiz-option" data-choice="2">A class can have unlimited constructors with identical signatures</button>
+          </div>
+          <div class="quiz-feedback">Correct. A common type can represent different concrete implementations.</div>
+        </div>
+
+        <div class="quiz" data-answer="0">
+          <h3>5. Which statement about <code>implements</code> is correct?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">The implementing class must satisfy the interface contract</button>
+            <button class="quiz-option" data-choice="1">It always inherits the superclass implementation</button>
+            <button class="quiz-option" data-choice="2">It can only be used with mixins</button>
+          </div>
+          <div class="quiz-feedback">Correct. <code>implements</code> expresses a contract that the class must fulfill.</div>
+        </div>
+
+        <div class="finish" id="finishBox">
+          <h2>Nice work. 🎯</h2>
+          <p>You completed the OOP in Dart Codelab. Keep practicing by modeling small domains, asking what state and behavior belong together, and choosing between inheritance, interfaces, mixins, and composition deliberately.</p>
+          <strong>Remember:</strong> good OOP is not about creating the most classes. It is about creating clear responsibilities and useful relationships.
+        </div>
+        <p class="footer-note">Dart OOP Codelab · Beginner foundation · Designed as a companion to the Functions in Dart Codelab.</p>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const steps = [...document.querySelectorAll('.step-view')];
+  const nav = document.getElementById('stepNav');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const progressTrack = document.querySelector('.progress-track');
+  const content = document.getElementById('content');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileTitle = document.getElementById('mobileTitle');
+  const titles = [
+    'Start: What is OOP?',
+    'Classes & objects',
+    'Fields, methods & this',
+    'Constructors',
+    'Encapsulation & privacy',
+    'Inheritance with extends',
+    'Overriding & polymorphism',
+    'Abstract classes',
+    'extends vs implements',
+    'Mixins with with',
+    'Dart OOP toolbox',
+    'Put it together',
+    'Final OOP challenge',
+    'Recap & knowledge check'
+  ];
+
+  let current = 0;
+  const completed = new Set();
+
+  function buildNav() {
+    nav.innerHTML = titles.map((title, i) => `
+      <button class="step-link" data-step="${i}" aria-current="${i === 0 ? 'step' : 'false'}" type="button">
+        <span class="step-number">${String(i + 1).padStart(2, '0')}</span>
+        <span>${title}</span>
+        <span class="step-status" aria-hidden="true"></span>
+      </button>
+    `).join('');
+  }
+
+  function getHashStep() {
+    const match = location.hash.match(/^#step-(\d+)$/);
+    if (!match) return 0;
+    const value = Number(match[1]) - 1;
+    return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+  }
+
+  function updateNavButtons() {
+    const prev = document.getElementById('prevBtn');
+    const next = document.getElementById('nextBtn');
+    if (!prev || !next) return;
+    prev.disabled = current === 0;
+    next.disabled = current === steps.length - 1;
+    next.textContent = current === steps.length - 1 ? 'Complete' : 'Next →';
+  }
+
+  function render(updateHash = true) {
+    current = Math.max(0, Math.min(current, steps.length - 1));
+    steps.forEach((step, i) => {
+      step.classList.toggle('active', i === current);
+      step.setAttribute('aria-hidden', i === current ? 'false' : 'true');
+    });
+    document.querySelectorAll('.step-link').forEach((button, i) => {
+      const active = i === current;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-current', active ? 'step' : 'false');
+      button.querySelector('.step-status').textContent = completed.has(i) ? '✓' : '';
+    });
+
+    const percent = Math.round(((current + 1) / steps.length) * 100);
+    progressBar.style.width = `${percent}%`;
+    progressText.textContent = `${percent}%`;
+    progressTrack.setAttribute('aria-valuenow', String(percent));
+    mobileTitle.textContent = titles[current];
+
+    if (updateHash) history.pushState({step: current}, '', `#step-${current + 1}`);
+    window.scrollTo({top: 0, behavior: 'auto'});
+
+    if (current === steps.length - 1) {
+      document.getElementById('finishBox').classList.toggle('show', completed.size >= steps.length - 1);
+    }
+    document.title = `${titles[current]} — Dart OOP Codelab`;
+
+    if (window.innerWidth <= 850) {
+      sidebar.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    }
+    updateNavButtons();
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= steps.length) return;
+    completed.add(current);
+    current = index;
+    render();
+  }
+
+  buildNav();
+  current = getHashStep();
+  render(false);
+
+  nav.addEventListener('click', e => {
+    const button = e.target.closest('.step-link');
+    if (button) goTo(Number(button.dataset.step));
+  });
+
+  document.addEventListener('click', async e => {
+    const copy = e.target.closest('.copy-btn');
+    if (copy) {
+      try {
+        await navigator.clipboard.writeText(copy.dataset.copy);
+        const old = copy.textContent;
+        copy.textContent = 'Copied!';
+        setTimeout(() => copy.textContent = old, 1100);
+      } catch {
+        copy.textContent = 'Select & copy';
+        setTimeout(() => copy.textContent = 'Copy', 1200);
+      }
+      return;
+    }
+
+    const option = e.target.closest('.quiz-option');
+    if (option) {
+      const quiz = option.closest('.quiz');
+      if (quiz.dataset.answered === 'true') return;
+      const answer = Number(quiz.dataset.answer);
+      const choice = Number(option.dataset.choice);
+      quiz.dataset.answered = 'true';
+      quiz.querySelectorAll('.quiz-option').forEach(btn => {
+        btn.classList.remove('correct', 'wrong');
+        btn.disabled = true;
+      });
+      option.classList.add(choice === answer ? 'correct' : 'wrong');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      feedback.classList.add('show');
+      if (choice !== answer) {
+        feedback.textContent = `Not quite. The correct answer is option ${answer + 1}.`;
+      }
+    }
+  });
+
+  const navRow = document.createElement('div');
+  navRow.className = 'nav-row';
+  navRow.innerHTML = `
+    <button class="nav-btn" id="prevBtn" type="button">← Previous</button>
+    <button class="nav-btn primary" id="nextBtn" type="button">Next →</button>
+  `;
+  content.appendChild(navRow);
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if (current < steps.length - 1) goTo(current + 1);
+  });
+
+  menuBtn.addEventListener('click', () => {
+    const open = sidebar.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+    if (open) sidebar.querySelector('.step-link.active')?.focus();
+  });
+
+  window.addEventListener('hashchange', () => {
+    current = getHashStep();
+    render(false);
+  });
+
+  window.addEventListener('popstate', () => {
+    current = getHashStep();
+    render(false);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const tag = document.activeElement?.tagName;
+    if (['INPUT','TEXTAREA','SELECT'].includes(tag)) return;
+    if (e.key === 'ArrowRight' && current < steps.length - 1) {
+      e.preventDefault();
+      goTo(current + 1);
+    }
+    if (e.key === 'ArrowLeft' && current > 0) {
+      e.preventDefault();
+      goTo(current - 1);
+    }
+  });
+})();
+</script>
+</body>
+</html>
