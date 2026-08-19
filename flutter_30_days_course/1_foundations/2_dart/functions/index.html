@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dart Functions Codelab — Learn Functions in Dart</title>
+  <meta name="description" content="An interactive beginner-friendly Dart Functions codelab covering declarations, parameters, return values, named parameters, arrow functions, anonymous functions, callbacks, scope, and practical exercises.">
+  <meta name="keywords" content="Dart functions, functions in Dart, Dart programming tutorial, Dart functions tutorial, Learn Dart, Dart parameters, Dart named parameters, Dart return values, Dart arrow functions, Dart anonymous functions, Dart programming for beginners">
+  <meta name="theme-color" content="#1769ff">
+  <link rel="canonical" href="https://example.com/dart-functions-codelab">
+  <meta property="og:title" content="Dart Functions Codelab">
+  <meta property="og:description" content="Learn Dart Functions through a focused, interactive Codelab experience.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://example.com/dart-functions-codelab">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Dart Functions Codelab">
+  <meta name="twitter:description" content="Learn the essential concepts of functions in Dart.">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"LearningResource",
+    "name":"Dart Functions Codelab",
+    "description":"An interactive beginner-friendly tutorial covering essential functions in Dart.",
+    "learningResourceType":"Tutorial",
+    "educationalLevel":"Beginner",
+    "about":"Dart programming functions",
+    "inLanguage":"en"
+  }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+    :root{
+      --blue:#1769ff;
+      --blue-dark:#0b43b7;
+      --blue-light:#dce9ff;
+      --ink:#101010;
+      --paper:#f5f7fb;
+      --white:#fff;
+      --yellow:#ffd83d;
+      --mint:#75e6c5;
+      --pink:#ff9bb7;
+      --border:3px solid var(--ink);
+      --shadow:6px 6px 0 var(--ink);
+      --shadow-sm:4px 4px 0 var(--ink);
+      --sidebar:290px;
+      --radius:4px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:auto}
+    body{
+      margin:0;
+      background:var(--paper);
+      color:var(--ink);
+      font-family:"Space Grotesk",system-ui,sans-serif;
+      line-height:1.55;
+    }
+    button,a{font:inherit}
+    button{cursor:pointer}
+    :focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+
+    .app{min-height:100vh}
+    .sidebar{
+      position:fixed;
+      inset:0 auto 0 0;
+      width:var(--sidebar);
+      background:var(--blue);
+      border-right:var(--border);
+      padding:22px 18px;
+      z-index:20;
+      overflow:auto;
+    }
+    .brand{
+      background:var(--white);
+      border:var(--border);
+      box-shadow:var(--shadow-sm);
+      padding:16px;
+      margin-bottom:20px;
+    }
+    .eyebrow{
+      font-family:"DM Mono",monospace;
+      font-size:.72rem;
+      font-weight:500;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+    .brand h2{
+      margin:5px 0 3px;
+      font-size:1.45rem;
+      line-height:1.05;
+    }
+    .brand p{margin:0;font-size:.85rem;font-weight:600}
+    .progress-wrap{
+      color:#fff;
+      margin:0 2px 20px;
+    }
+    .progress-meta{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-family:"DM Mono",monospace;
+      font-size:.72rem;
+      font-weight:500;
+      margin-bottom:7px;
+    }
+    .progress-track{
+      height:16px;
+      background:#fff;
+      border:var(--border);
+      padding:2px;
+    }
+    .progress-bar{
+      height:100%;
+      width:0;
+      background:var(--yellow);
+      transition:width .2s ease;
+    }
+    .steps{
+      display:grid;
+      gap:9px;
+    }
+    .step-link{
+      width:100%;
+      display:grid;
+      grid-template-columns:34px 1fr 18px;
+      align-items:center;
+      gap:9px;
+      text-align:left;
+      color:#fff;
+      background:transparent;
+      border:3px solid transparent;
+      padding:9px 8px;
+      font-weight:700;
+      line-height:1.15;
+    }
+    .step-link:hover{background:rgba(255,255,255,.14)}
+    .step-link.active{
+      color:var(--ink);
+      background:var(--white);
+      border-color:var(--ink);
+      box-shadow:var(--shadow-sm);
+    }
+    .step-number{
+      width:30px;height:30px;
+      display:grid;place-items:center;
+      border:2px solid currentColor;
+      font-family:"DM Mono",monospace;
+      font-size:.78rem;
+    }
+    .step-status{
+      font-size:1rem;
+      text-align:center;
+    }
+
+    .mobile-bar{
+      display:none;
+      position:sticky;
+      top:0;
+      z-index:30;
+      background:var(--blue);
+      border-bottom:var(--border);
+      padding:10px;
+      align-items:center;
+      gap:10px;
+    }
+    .mobile-bar strong{color:#fff}
+    .menu-btn,.mobile-title{
+      border:var(--border);
+      background:#fff;
+      box-shadow:var(--shadow-sm);
+    }
+    .menu-btn{
+      width:46px;height:42px;
+      font-size:1.25rem;
+      font-weight:900;
+    }
+    .mobile-title{padding:8px 10px;flex:1;font-weight:800}
+
+    main{
+      margin-left:var(--sidebar);
+      min-height:100vh;
+    }
+    .content{
+      width:min(980px,calc(100% - 48px));
+      margin:0 auto;
+      padding:42px 0 28px;
+    }
+    .step-view{display:none}
+    .step-view.active{display:block;animation:stepIn .18s ease-out}
+    @keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    @media(prefers-reduced-motion:reduce){
+      .step-view.active{animation:none}
+      .progress-bar{transition:none}
+    }
+
+    .step-header{
+      border:var(--border);
+      background:var(--white);
+      box-shadow:var(--shadow);
+      padding:28px;
+      margin-bottom:24px;
+    }
+    .step-kicker{
+      display:inline-block;
+      background:var(--blue);
+      color:#fff;
+      border:2px solid var(--ink);
+      padding:5px 9px;
+      font-family:"DM Mono",monospace;
+      font-size:.72rem;
+      font-weight:500;
+      margin-bottom:13px;
+    }
+    h1,h2,h3{line-height:1.08}
+    h1{font-size:clamp(2rem,5vw,3.7rem);margin:0 0 12px;letter-spacing:-.045em}
+    h2{font-size:clamp(1.55rem,3vw,2.25rem);margin:30px 0 12px}
+    h3{font-size:1.15rem;margin:24px 0 9px}
+    .lede{font-size:1.08rem;max-width:760px;margin:0}
+    .objective{
+      margin-top:20px;
+      padding:14px 16px;
+      background:var(--yellow);
+      border:var(--border);
+      box-shadow:var(--shadow-sm);
+      font-weight:700;
+    }
+
+    .panel{
+      border:var(--border);
+      background:#fff;
+      box-shadow:var(--shadow-sm);
+      padding:22px;
+      margin:20px 0;
+    }
+    .panel.blue{background:var(--blue-light)}
+    .panel.mint{background:var(--mint)}
+    .panel.pink{background:var(--pink)}
+    .panel.yellow{background:var(--yellow)}
+    .callout{
+      border:var(--border);
+      box-shadow:var(--shadow-sm);
+      padding:16px 18px;
+      margin:20px 0;
+      background:#fff;
+    }
+    .callout .label{
+      display:inline-block;
+      font-family:"DM Mono",monospace;
+      font-size:.72rem;
+      font-weight:500;
+      border:2px solid var(--ink);
+      background:var(--ink);
+      color:#fff;
+      padding:3px 7px;
+      margin-bottom:8px;
+    }
+    .callout p:last-child{margin-bottom:0}
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+    }
+    .concept{
+      border:var(--border);
+      padding:18px;
+      background:#fff;
+      box-shadow:var(--shadow-sm);
+    }
+    .concept strong{font-size:1.05rem}
+
+    .code-wrap{
+      position:relative;
+      margin:18px 0;
+    }
+    pre{
+      margin:0;
+      background:#111;
+      color:#f7f7f7;
+      border:var(--border);
+      box-shadow:var(--shadow-sm);
+      padding:20px;
+      overflow:auto;
+      font-family:"DM Mono",ui-monospace,monospace;
+      font-size:.88rem;
+      line-height:1.65;
+      tab-size:2;
+    }
+    .copy-btn{
+      position:absolute;
+      top:8px;right:8px;
+      background:var(--yellow);
+      border:2px solid var(--ink);
+      box-shadow:3px 3px 0 var(--ink);
+      padding:5px 9px;
+      font-size:.75rem;
+      font-weight:800;
+    }
+    .output{
+      border:var(--border);
+      border-top:0;
+      background:#e9edf4;
+      padding:13px 16px;
+      font-family:"DM Mono",monospace;
+      font-size:.83rem;
+    }
+    .output strong{font-family:"Space Grotesk",sans-serif}
+
+    code:not(pre code){
+      background:#e8edf7;
+      border:1px solid #9da9bb;
+      padding:1px 5px;
+      font-family:"DM Mono",monospace;
+      font-size:.88em;
+    }
+    ul,ol{padding-left:1.35rem}
+    li{margin:7px 0}
+    .syntax{
+      background:#edf2ff;
+      border:var(--border);
+      padding:14px;
+      font-family:"DM Mono",monospace;
+      overflow:auto;
+    }
+
+    .quiz{
+      border:var(--border);
+      box-shadow:var(--shadow-sm);
+      background:#fff;
+      padding:20px;
+      margin:20px 0;
+    }
+    .quiz-options{display:grid;gap:9px;margin-top:14px}
+    .quiz-option{
+      text-align:left;
+      border:2px solid var(--ink);
+      background:#fff;
+      padding:11px 13px;
+      font-weight:700;
+    }
+    .quiz-option:hover{background:var(--blue-light)}
+    .quiz-option.correct{background:var(--mint)}
+    .quiz-option.wrong{background:var(--pink)}
+    .quiz-feedback{
+      display:none;
+      margin-top:13px;
+      padding:10px;
+      border:2px solid var(--ink);
+      font-weight:700;
+    }
+    .quiz-feedback.show{display:block}
+
+    .reveal{
+      border:var(--border);
+      background:#fff;
+      box-shadow:var(--shadow-sm);
+      margin:18px 0;
+    }
+    .reveal summary{
+      padding:13px 16px;
+      cursor:pointer;
+      font-weight:800;
+      background:var(--blue-light);
+    }
+    .reveal > div{padding:15px 16px}
+
+    .challenge{
+      background:var(--ink);
+      color:#fff;
+      border:var(--border);
+      box-shadow:var(--shadow);
+      padding:22px;
+      margin:24px 0;
+    }
+    .challenge h3{margin-top:0;color:var(--yellow)}
+    .challenge code{color:#fff;background:#303030;border-color:#777}
+
+    .nav-row{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      margin-top:34px;
+      padding-top:20px;
+      border-top:var(--border);
+    }
+    .nav-btn{
+      border:var(--border);
+      box-shadow:var(--shadow-sm);
+      background:#fff;
+      padding:12px 18px;
+      font-weight:900;
+      min-width:130px;
+    }
+    .nav-btn.primary{background:var(--blue);color:#fff}
+    .nav-btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:3px 3px 0 #777}
+    .finish{
+      display:none;
+      background:var(--mint);
+      border:var(--border);
+      box-shadow:var(--shadow);
+      padding:20px;
+      margin-top:24px;
+    }
+    .finish.show{display:block}
+
+    .pill{
+      display:inline-block;
+      border:2px solid var(--ink);
+      background:#fff;
+      padding:4px 8px;
+      font-family:"DM Mono",monospace;
+      font-size:.72rem;
+      font-weight:500;
+      margin:2px;
+    }
+
+    .footer-note{
+      margin-top:30px;
+      font-size:.8rem;
+      font-family:"DM Mono",monospace;
+      color:#555;
+    }
+
+    @media(max-width:850px){
+      :root{--sidebar:270px}
+      .sidebar{
+        transform:translateX(-100%);
+        transition:transform .2s ease;
+        box-shadow:10px 0 0 rgba(16,16,16,.18);
+      }
+      .sidebar.open{transform:none}
+      .mobile-bar{display:flex}
+      main{margin-left:0}
+      .content{width:min(940px,calc(100% - 28px));padding-top:24px}
+    }
+    @media(max-width:600px){
+      .content{width:calc(100% - 18px);padding-top:16px}
+      .step-header{padding:20px 16px}
+      .panel,.concept,.quiz{padding:16px}
+      .grid-2{grid-template-columns:1fr}
+      .nav-row{position:sticky;bottom:0;background:var(--paper);padding:12px 0;margin-left:-2px;margin-right:-2px}
+      .nav-btn{min-width:0;flex:1;padding:11px 10px}
+      pre{font-size:.78rem;padding:16px 12px}
+      .copy-btn{position:static;margin-bottom:6px}
+      .code-wrap{display:flex;flex-direction:column}
+      .code-wrap pre{order:2}
+      .code-wrap .copy-btn{order:1;align-self:flex-end}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand">
+      <div class="eyebrow">Dart Codelab</div>
+      <h2>Functions</h2>
+      <p>From first function to callbacks.</p>
+    </div>
+    <div class="progress-wrap" aria-label="Lesson progress">
+      <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+    <nav class="steps" id="stepNav"></nav>
+  </aside>
+
+  <div class="mobile-bar">
+    <button class="menu-btn" id="menuBtn" aria-label="Open lesson navigation" aria-expanded="false">☰</button>
+    <div class="mobile-title" id="mobileTitle">Functions in Dart</div>
+  </div>
+
+  <main>
+    <div class="content" id="content">
+      <section class="step-view" data-step="0">
+        <header class="step-header">
+          <span class="step-kicker">STEP 1 · START HERE</span>
+          <h1>Functions in Dart</h1>
+          <p class="lede">A function is a named piece of behavior you can call whenever you need it. In Dart, functions are everywhere—and understanding them makes Flutter code much easier to read and write.</p>
+          <div class="objective"><strong>By the end:</strong> You will be able to declare, call, parameterize, compose, and pass Dart functions with confidence.</div>
+        </header>
+        <div class="panel blue">
+          <h2>Why functions matter</h2>
+          <p>Imagine a coffee machine. You press one button, and a repeatable process happens: grind, brew, pour. A function is similar: you give it a name, optionally give it information, and let it perform a defined job.</p>
+          <div class="grid-2">
+            <div class="concept"><strong>Reuse</strong><p>Write behavior once and call it many times.</p></div>
+            <div class="concept"><strong>Organize</strong><p>Break a large problem into small, understandable jobs.</p></div>
+            <div class="concept"><strong>Test</strong><p>Small functions are easier to reason about and test.</p></div>
+            <div class="concept"><strong>Compose</strong><p>Functions can work together and even be passed around as values.</p></div>
+          </div>
+        </div>
+        <div class="callout"><span class="label">REMEMBER</span><p>A function describes <strong>behavior</strong>. Calling the function is what actually performs that behavior.</p></div>
+      </section>
+
+      <section class="step-view" data-step="1">
+        <header class="step-header">
+          <span class="step-kicker">STEP 2 · BASICS</span>
+          <h1>Declare & call a function</h1>
+          <p class="lede">Start with the simplest useful function: a named block of code that accepts no input and returns no value.</p>
+        </header>
+        <h2>The basic shape</h2>
+        <div class="syntax">returnType functionName() {<br>&nbsp;&nbsp;// statements<br>}</div>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="void sayHello() {
+  print('Hello, Dart!');
+}
+
+void main() {
+  sayHello();
+  sayHello();
+}">Copy</button>
+          <pre><code>void sayHello() {
+  print('Hello, Dart!');
+}
+
+void main() {
+  sayHello();
+  sayHello();
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Hello, Dart!<br>Hello, Dart!</div>
+        </div>
+        <div class="panel mint">
+          <h3>Read it in three moves</h3>
+          <ol>
+            <li><code>void</code> says the function does not return a value.</li>
+            <li><code>sayHello</code> is the function's name.</li>
+            <li><code>sayHello();</code> calls the function.</li>
+          </ol>
+        </div>
+        <div class="callout"><span class="label">COMMON MISTAKE</span><p>Defining a function does not automatically run it. You need to call it, usually with parentheses: <code>sayHello();</code>.</p></div>
+        <div class="quiz" data-answer="1">
+          <h3>Quick check</h3>
+          <p>Which line actually calls <code>sayHello</code>?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0"><code>void sayHello() { }</code></button>
+            <button class="quiz-option" data-choice="1"><code>sayHello();</code></button>
+            <button class="quiz-option" data-choice="2"><code>function sayHello;</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. The declaration creates the function; the call executes it.</div>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="2">
+        <header class="step-header">
+          <span class="step-kicker">STEP 3 · INPUT</span>
+          <h1>Parameters & arguments</h1>
+          <p class="lede">Functions become more useful when they can receive information. A parameter is the variable in the function definition; an argument is the value you pass when calling it.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="void greet(String name) {
+  print('Hello, $name!');
+}
+
+void main() {
+  greet('Asha');
+  greet('Rahul');
+}">Copy</button>
+          <pre><code>void greet(String name) {
+  print('Hello, $name!');
+}
+
+void main() {
+  greet('Asha');
+  greet('Rahul');
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Hello, Asha!<br>Hello, Rahul!</div>
+        </div>
+        <div class="grid-2">
+          <div class="concept"><strong>Parameter</strong><p><code>String name</code> is declared by the function and acts like a local variable.</p></div>
+          <div class="concept"><strong>Argument</strong><p><code>'Asha'</code> is the actual value supplied at the call site.</p></div>
+        </div>
+        <h2>Multiple positional parameters</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="double area(double width, double height) {
+  return width * height;
+}">Copy</button>
+          <pre><code>double area(double width, double height) {
+  return width * height;
+}</code></pre>
+        </div>
+        <p>The order matters: <code>area(4, 3)</code> means <code>width = 4</code> and <code>height = 3</code>.</p>
+        <div class="callout"><span class="label">TYPE SAFETY</span><p>Dart checks the declared parameter types. A function expecting a <code>double</code> should receive a compatible value rather than an unrelated type.</p></div>
+      </section>
+
+      <section class="step-view" data-step="3">
+        <header class="step-header">
+          <span class="step-kicker">STEP 4 · FLEXIBLE INPUT</span>
+          <h1>Named & optional parameters</h1>
+          <p class="lede">Named parameters make calls easier to read, especially when a function accepts several values. They are also a major part of idiomatic Flutter APIs.</p>
+        </header>
+        <h2>Named parameters</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="void createUser({String name = 'Guest', int age = 18}) {
+  print('$name is $age');
+}
+
+void main() {
+  createUser(name: 'Maya', age: 21);
+}">Copy</button>
+          <pre><code>void createUser({String name = 'Guest', int age = 18}) {
+  print('$name is $age');
+}
+
+void main() {
+  createUser(name: 'Maya', age: 21);
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Maya is 21</div>
+        </div>
+        <p>The braces in the parameter list indicate named parameters. At the call site, use <code>name:</code> and <code>age:</code>.</p>
+        <h2>Required named parameters</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="void createProfile({required String username}) {
+  print('Profile: $username');
+}
+
+void main() {
+  createProfile(username: 'pratham');
+}">Copy</button>
+          <pre><code>void createProfile({required String username}) {
+  print('Profile: $username');
+}
+
+void main() {
+  createProfile(username: 'pratham');
+}</code></pre>
+        </div>
+        <div class="panel yellow">
+          <strong>Key idea:</strong> Named does not automatically mean optional in every sense. A named parameter can be marked <code>required</code>, which makes the caller provide it.
+        </div>
+        <h2>Default values</h2>
+        <p>A non-required named parameter can provide a default value. If the caller omits it, Dart uses that default.</p>
+        <div class="callout"><span class="label">FLUTTER CONNECTION</span><p>You will see named parameters constantly in Flutter, for example when configuring widgets. The syntax helps calls remain readable as APIs grow.</p></div>
+      </section>
+
+      <section class="step-view" data-step="4">
+        <header class="step-header">
+          <span class="step-kicker">STEP 5 · OUTPUT</span>
+          <h1>Return values & <code>void</code></h1>
+          <p class="lede">A function can produce a result. Declare its return type and use <code>return</code> to send a value back to the caller.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="int add(int a, int b) {
+  return a + b;
+}
+
+void main() {
+  final result = add(10, 5);
+  print(result);
+}">Copy</button>
+          <pre><code>int add(int a, int b) {
+  return a + b;
+}
+
+void main() {
+  final result = add(10, 5);
+  print(result);
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>15</div>
+        </div>
+        <div class="grid-2">
+          <div class="concept"><strong>Return type</strong><p><code>int</code> tells readers and Dart what kind of result this function produces.</p></div>
+          <div class="concept"><strong>Return statement</strong><p><code>return a + b;</code> sends the calculated value back to the caller.</p></div>
+        </div>
+        <h2>When to use <code>void</code></h2>
+        <p>Use <code>void</code> when the function is intended to perform an action rather than provide a result to its caller.</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="void showWelcome() {
+  print('Welcome!');
+}">Copy</button>
+          <pre><code>void showWelcome() {
+  print('Welcome!');
+}</code></pre>
+        </div>
+        <div class="callout"><span class="label">REMEMBER</span><p>Think <strong>command</strong> for many <code>void</code> functions and <strong>calculation/result</strong> for functions that return a value. This is a useful design heuristic, not an absolute rule.</p></div>
+      </section>
+
+      <section class="step-view" data-step="5">
+        <header class="step-header">
+          <span class="step-kicker">STEP 6 · SHORTER SYNTAX</span>
+          <h1>Arrow functions</h1>
+          <p class="lede">When a function consists of one expression, Dart lets you use arrow syntax to express the same idea more compactly.</p>
+        </header>
+        <div class="grid-2">
+          <div class="concept">
+            <strong>Block body</strong>
+            <div class="code-wrap"><pre><code>int square(int n) {
+  return n * n;
+}</code></pre></div>
+          </div>
+          <div class="concept">
+            <strong>Expression body</strong>
+            <div class="code-wrap"><pre><code>int square(int n) => n * n;</code></pre></div>
+          </div>
+        </div>
+        <div class="panel blue">
+          <p>The <code>=&gt;</code> syntax means “return the value of this single expression.” You do not write <code>return</code> in the expression-bodied form.</p>
+        </div>
+        <h2>Another example</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="bool isAdult(int age) => age >= 18;">Copy</button>
+          <pre><code>bool isAdult(int age) => age >= 18;</code></pre>
+        </div>
+        <div class="callout"><span class="label">COMMON MISTAKE</span><p>Arrow functions are for a <strong>single expression</strong>. If the function needs several statements, use a normal block body.</p></div>
+        <div class="quiz" data-answer="2">
+          <h3>Quick check</h3>
+          <p>Which is a valid expression-bodied function?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0"><code>int f(int x) =&gt; { return x + 1; }</code></button>
+            <button class="quiz-option" data-choice="1"><code>int f(int x) =&gt; return x + 1;</code></button>
+            <button class="quiz-option" data-choice="2"><code>int f(int x) =&gt; x + 1;</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. The expression after <code>=&gt;</code> is implicitly returned.</div>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="6">
+        <header class="step-header">
+          <span class="step-kicker">STEP 7 · FUNCTIONS AS VALUES</span>
+          <h1>Anonymous functions & callbacks</h1>
+          <p class="lede">In Dart, functions are first-class objects. That means you can store a function in a variable, pass it to another function, and return a function.</p>
+        </header>
+        <h2>Anonymous function</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="final numbers = [1, 2, 3];
+
+numbers.forEach((number) {
+  print(number * 2);
+});">Copy</button>
+          <pre><code>final numbers = [1, 2, 3];
+
+numbers.forEach((number) {
+  print(number * 2);
+});</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>2<br>4<br>6</div>
+        </div>
+        <p>The function passed to <code>forEach</code> has no name, so it is an <strong>anonymous function</strong>. It is also a <strong>callback</strong>: code that another function can call later.</p>
+        <h2>Passing a named function</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="void printDouble(int value) {
+  print(value * 2);
+}
+
+void main() {
+  [1, 2, 3].forEach(printDouble);
+}">Copy</button>
+          <pre><code>void printDouble(int value) {
+  print(value * 2);
+}
+
+void main() {
+  [1, 2, 3].forEach(printDouble);
+}</code></pre>
+        </div>
+        <div class="callout"><span class="label">IMPORTANT</span><p><code>printDouble</code> passes the function itself. <code>printDouble()</code> would call it immediately and produce a result instead. Parentheses change the meaning.</p></div>
+        <h2>Why this matters in Flutter</h2>
+        <p>Callbacks are fundamental to event-driven UI. Buttons, gesture handlers, timers, and many framework APIs accept functions that run when something happens.</p>
+      </section>
+
+      <section class="step-view" data-step="7">
+        <header class="step-header">
+          <span class="step-kicker">STEP 8 · SCOPE</span>
+          <h1>Scope & local variables</h1>
+          <p class="lede">A variable declared inside a function normally belongs to that function's local scope. Keeping temporary data local reduces accidental coupling between parts of your program.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="void calculateTotal() {
+  final price = 100;
+  final tax = 18;
+  final total = price + tax;
+
+  print(total);
+}
+
+void main() {
+  calculateTotal();
+}">Copy</button>
+          <pre><code>void calculateTotal() {
+  final price = 100;
+  final tax = 18;
+  final total = price + tax;
+
+  print(total);
+}
+
+void main() {
+  calculateTotal();
+}</code></pre>
+        </div>
+        <p>Here, <code>price</code>, <code>tax</code>, and <code>total</code> are local to <code>calculateTotal</code>. Code outside the function cannot simply refer to those names.</p>
+        <div class="panel mint">
+          <h3>A useful mental model</h3>
+          <p>Every function gets its own workspace. Parameters enter the workspace; local variables live there; a returned value can leave the workspace.</p>
+        </div>
+        <details class="reveal">
+          <summary>What about variables outside the function?</summary>
+          <div>Functions can access names from surrounding scopes when those names are visible, but avoid relying on mutable global state unnecessarily. Passing required information as parameters generally makes functions easier to understand and test.</div>
+        </details>
+        <div class="callout"><span class="label">GOOD PRACTICE</span><p>Prefer functions that clearly communicate what they need through parameters and what they produce through return values.</p></div>
+      </section>
+
+      <section class="step-view" data-step="8">
+        <header class="step-header">
+          <span class="step-kicker">STEP 9 · PRACTICE</span>
+          <h1>Put it together</h1>
+          <p class="lede">Now combine parameters, return values, named arguments, and an arrow function into a small piece of application logic.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="double calculatePrice({
+  required double price,
+  double taxRate = 0.18,
+}) {
+  return price + (price * taxRate);
+}
+
+String formatPrice(double value) => '₹${value.toStringAsFixed(2)}';
+
+void main() {
+  final total = calculatePrice(price: 100);
+  print(formatPrice(total));
+}">Copy</button>
+          <pre><code>double calculatePrice({
+  required double price,
+  double taxRate = 0.18,
+}) {
+  return price + (price * taxRate);
+}
+
+String formatPrice(double value) =>
+    '₹${value.toStringAsFixed(2)}';
+
+void main() {
+  final total = calculatePrice(price: 100);
+  print(formatPrice(total));
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>₹118.00</div>
+        </div>
+        <div class="grid-2">
+          <div class="concept"><strong>1. Input</strong><p><code>price</code> is required; <code>taxRate</code> has a default.</p></div>
+          <div class="concept"><strong>2. Calculation</strong><p><code>calculatePrice</code> returns a <code>double</code>.</p></div>
+          <div class="concept"><strong>3. Formatting</strong><p><code>formatPrice</code> uses an expression body.</p></div>
+          <div class="concept"><strong>4. Composition</strong><p>The result of one function becomes the input of another.</p></div>
+        </div>
+        <div class="challenge">
+          <h3>TRY IT · Mini challenge</h3>
+          <p>Write a function called <code>discountedPrice</code> that accepts a required <code>price</code> and a named <code>discountPercent</code> with a default of <code>10</code>. It should return the discounted price.</p>
+          <p>Hint: <code>price - (price * discountPercent / 100)</code></p>
+          <details class="reveal" style="color:#111;margin-bottom:0">
+            <summary>Reveal one possible solution</summary>
+            <div><pre><code>double discountedPrice({
+  required double price,
+  double discountPercent = 10,
+}) {
+  return price - (price * discountPercent / 100);
+}</code></pre></div>
+          </details>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="9">
+        <header class="step-header">
+          <span class="step-kicker">STEP 10 · FINAL CHECK</span>
+          <h1>Recap & knowledge check</h1>
+          <p class="lede">You now have the essential function toolkit for everyday Dart programming and a strong foundation for Flutter APIs.</p>
+        </header>
+        <div class="panel blue">
+          <h2>The function checklist</h2>
+          <p>
+            <span class="pill">declare</span>
+            <span class="pill">call</span>
+            <span class="pill">parameters</span>
+            <span class="pill">named parameters</span>
+            <span class="pill">required</span>
+            <span class="pill">defaults</span>
+            <span class="pill">return</span>
+            <span class="pill">void</span>
+            <span class="pill">arrow syntax</span>
+            <span class="pill">anonymous functions</span>
+            <span class="pill">callbacks</span>
+            <span class="pill">scope</span>
+          </p>
+        </div>
+
+        <div class="quiz" data-answer="1">
+          <h3>1. What does <code>return</code> do?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Prints a value automatically</button>
+            <button class="quiz-option" data-choice="1">Sends a value back to the caller</button>
+            <button class="quiz-option" data-choice="2">Declares a parameter</button>
+          </div>
+          <div class="quiz-feedback">Correct. A return statement provides the function's result to its caller.</div>
+        </div>
+
+        <div class="quiz" data-answer="0">
+          <h3>2. Which call uses named arguments?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0"><code>login(user: 'Maya', remember: true)</code></button>
+            <button class="quiz-option" data-choice="1"><code>login('Maya', true)</code></button>
+            <button class="quiz-option" data-choice="2"><code>login(user, remember)</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. The <code>name: value</code> syntax identifies named arguments.</div>
+        </div>
+
+        <div class="quiz" data-answer="2">
+          <h3>3. What is a callback?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">A variable inside a function</button>
+            <button class="quiz-option" data-choice="1">A return type</button>
+            <button class="quiz-option" data-choice="2">A function supplied so other code can invoke it</button>
+          </div>
+          <div class="quiz-feedback">Correct. Callbacks are functions passed to other code for later invocation.</div>
+        </div>
+
+        <div class="finish" id="finishBox">
+          <h2>Nice work. 🎯</h2>
+          <p>You completed the Functions in Dart Codelab. The next step is repetition: write small functions, read existing function signatures, and notice how callbacks and named parameters appear in Flutter APIs.</p>
+          <strong>Remember the design rule:</strong> make each function have a clear job, clear inputs, and a clear result when a result is needed.
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const steps = [...document.querySelectorAll('.step-view')];
+  const nav = document.getElementById('stepNav');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const content = document.getElementById('content');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileTitle = document.getElementById('mobileTitle');
+
+  const titles = [
+    'Start: What is a function?',
+    'Declare & call',
+    'Parameters & arguments',
+    'Named & optional parameters',
+    'Return values & void',
+    'Arrow functions',
+    'Anonymous functions & callbacks',
+    'Scope & local variables',
+    'Put it together',
+    'Recap & knowledge check'
+  ];
+
+  let current = 0;
+  const completed = new Set();
+
+  function buildNav() {
+    nav.innerHTML = titles.map((title, i) => `
+      <button class="step-link" data-step="${i}" aria-current="${i === 0 ? 'step' : 'false'}">
+        <span class="step-number">${String(i + 1).padStart(2, '0')}</span>
+        <span>${title}</span>
+        <span class="step-status" aria-hidden="true"></span>
+      </button>
+    `).join('');
+  }
+
+  function getHashStep() {
+    const match = location.hash.match(/^#step-(\d+)$/);
+    if (!match) return 0;
+    const value = Number(match[1]);
+    return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+  }
+
+  function render(updateHash = true) {
+    current = Math.max(0, Math.min(current, steps.length - 1));
+
+    steps.forEach((step, i) => {
+      step.classList.toggle('active', i === current);
+      step.setAttribute('aria-hidden', i === current ? 'false' : 'true');
+    });
+
+    document.querySelectorAll('.step-link').forEach((button, i) => {
+      const active = i === current;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-current', active ? 'step' : 'false');
+      button.querySelector('.step-status').textContent = completed.has(i) ? '✓' : '';
+    });
+
+    const percent = Math.round(((current + 1) / steps.length) * 100);
+    progressBar.style.width = `${percent}%`;
+    progressText.textContent = `${percent}%`;
+    mobileTitle.textContent = titles[current];
+
+    if (updateHash) history.pushState({step: current}, '', `#step-${current + 1}`);
+
+    content.scrollTo({top: 0, behavior: 'auto'});
+    window.scrollTo({top: 0, behavior: 'auto'});
+
+    if (current === steps.length - 1) {
+      document.getElementById('finishBox').classList.toggle('show', completed.size >= steps.length - 1);
+    }
+
+    document.title = `${titles[current]} — Dart Functions Codelab`;
+
+    if (window.innerWidth <= 850) {
+      sidebar.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= steps.length) return;
+    completed.add(current);
+    current = index;
+    render();
+  }
+
+  buildNav();
+  current = getHashStep();
+  render(false);
+
+  nav.addEventListener('click', e => {
+    const button = e.target.closest('.step-link');
+    if (!button) return;
+    goTo(Number(button.dataset.step));
+  });
+
+  document.addEventListener('click', async e => {
+    const copy = e.target.closest('.copy-btn');
+    if (copy) {
+      try {
+        await navigator.clipboard.writeText(copy.dataset.copy);
+        const old = copy.textContent;
+        copy.textContent = 'Copied!';
+        setTimeout(() => copy.textContent = old, 1100);
+      } catch {
+        copy.textContent = 'Select & copy';
+        setTimeout(() => copy.textContent = 'Copy', 1200);
+      }
+      return;
+    }
+
+    const option = e.target.closest('.quiz-option');
+    if (option) {
+      const quiz = option.closest('.quiz');
+      const answer = Number(quiz.dataset.answer);
+      const choice = Number(option.dataset.choice);
+      quiz.querySelectorAll('.quiz-option').forEach(btn => {
+        btn.classList.remove('correct', 'wrong');
+        btn.disabled = true;
+      });
+      option.classList.add(choice === answer ? 'correct' : 'wrong');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      feedback.classList.add('show');
+      if (choice !== answer) {
+        feedback.textContent = `Not quite. The correct answer is option ${answer + 1}.`;
+      }
+    }
+  });
+
+  const navRow = document.createElement('div');
+  navRow.className = 'nav-row';
+  navRow.innerHTML = `
+    <button class="nav-btn" id="prevBtn" type="button">← Previous</button>
+    <button class="nav-btn primary" id="nextBtn" type="button">Next →</button>
+  `;
+  content.appendChild(navRow);
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if (current === steps.length - 1) return;
+    goTo(current + 1);
+  });
+
+  function updateNavButtons() {
+    const prev = document.getElementById('prevBtn');
+    const next = document.getElementById('nextBtn');
+    prev.disabled = current === 0;
+    next.disabled = current === steps.length - 1;
+    next.textContent = current === steps.length - 1 ? 'Complete' : 'Next →';
+  }
+
+  const originalRender = render;
+  render = function(updateHash = true) {
+    originalRender(updateHash);
+    updateNavButtons();
+  };
+  render(false);
+
+  menuBtn.addEventListener('click', () => {
+    const open = sidebar.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+    if (open) sidebar.querySelector('.step-link.active')?.focus();
+  });
+
+  window.addEventListener('hashchange', () => {
+    current = getHashStep();
+    render(false);
+  });
+
+  window.addEventListener('popstate', () => {
+    current = getHashStep();
+    render(false);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === 'ArrowRight' && current < steps.length - 1) {
+      e.preventDefault();
+      goTo(current + 1);
+    }
+    if (e.key === 'ArrowLeft' && current > 0) {
+      e.preventDefault();
+      goTo(current - 1);
+    }
+  });
+})();
+</script>
+</body>
+</html>
