@@ -84,8 +84,8 @@
   <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
     <div class="brand">
       <div class="eyebrow">Dart Codelab</div>
-      <h2>OOP / OOPS</h2>
-      <p>From classes to polymorphism.</p>
+      <h2>Dart OOP</h2>
+      <p>Model app data and behaviour.</p>
     </div>
     <div class="progress-wrap" aria-label="Lesson progress">
       <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
@@ -109,7 +109,7 @@
           <span class="step-kicker">STEP 1 · START HERE</span>
           <h1>Object-Oriented Programming in Dart</h1>
           <p class="lede">OOP is a way to organize programs around objects: things that combine <strong>state</strong> (data) and <strong>behavior</strong> (what they can do). Dart uses classes, inheritance, interfaces, and mixins to model that behavior.</p>
-          <div class="objective"><strong>By the end:</strong> You will be able to create Dart classes and objects, initialize state with constructors, protect data with encapsulation, and use inheritance, polymorphism, abstraction, interfaces, and mixins.</div>
+          <div class="objective"><strong>By the end:</strong> You will be able to model app data with classes, initialize valid objects, protect state, and choose between inheritance, interfaces, mixins, factories, static members, and extensions.</div>
         </header>
         <div class="panel blue">
           <h2>Why OOP matters</h2>
@@ -264,7 +264,7 @@ void main() {
           <h1>Constructors</h1>
           <p class="lede">Constructors run when an object is created. They are commonly used to put an object into a valid initial state.</p>
         </header>
-        <h2>Generative & parameterized constructors</h2>
+        <h2>Generative & initializing constructors</h2>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="class Student {
   final String name;
@@ -290,7 +290,7 @@ void main() {
 }</code></pre>
           <div class="output"><strong>Expected Output</strong><br>Asha, 20</div>
         </div>
-        <h2>Named constructors</h2>
+        <h2>Named constructors and initializer lists</h2>
         <p>A class can provide additional named construction paths when different ways of creating an object are useful.</p>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="class Point {
@@ -320,6 +320,9 @@ void main() {
 
   // ...
 }</code></pre>
+        </div>
+        <div class="panel mint">
+          <strong>Initializer list:</strong> the part after <code>:</code> runs before the constructor body. It initializes <code>final</code> fields when a constructor cannot use <code>this.field</code> directly.
         </div>
         <div class="grid-2">
           <div class="concept"><strong>Default constructor</strong><p>If you declare no constructor, Dart can provide an unnamed generative constructor with no parameters. Once you declare a constructor, Dart does not also provide that implicit constructor.</p></div>
@@ -806,8 +809,8 @@ void main() {
       <section class="step-view" data-step="10">
         <header class="step-header">
           <span class="step-kicker">STEP 11 · DART TOOLBOX</span>
-          <h1><code>static</code>, <code>final</code>, <code>const</code>, <code>factory</code> & operators</h1>
-          <p class="lede">These features are useful in Dart OOP, but they solve different problems. Learn the purpose before memorizing the syntax.</p>
+          <h1><code>static</code>, <code>factory</code> & extensions</h1>
+          <p class="lede">These features make types easier to create and use. They solve different problems: class-level utilities, controlled creation, and focused helper behaviour.</p>
         </header>
         <h2>Static members</h2>
         <p>A <code>static</code> member belongs to the class rather than to a particular instance.</p>
@@ -834,89 +837,69 @@ void main() {
 }</code></pre>
           <div class="output"><strong>Expected Output</strong><br>16.0<br>3.14159</div>
         </div>
-        <h2><code>final</code> vs <code>const</code></h2>
-        <div class="grid-2">
-          <div class="concept"><strong><code>final</code></strong><p>Can be assigned once. The value can be determined at runtime.</p></div>
-          <div class="concept"><strong><code>const</code></strong><p>Represents a compile-time constant. A <code>const</code> object requires a const constructor and constant arguments.</p></div>
-        </div>
-        <div class="code-wrap">
-          <button class="copy-btn" data-copy="class Color {
-  final int red;
-
-  const Color(this.red);
-}
-
-const black = Color(0);
-final current = Color(DateTime.now().millisecond);">Copy</button>
-          <pre><code>class Color {
-  final int red;
-
-  const Color(this.red);
-}
-
-const black = Color(0);
-final current = Color(DateTime.now().millisecond);</code></pre>
-        </div>
         <h2>Factory constructors</h2>
-        <p>A <code>factory</code> constructor can return an existing object, a subtype, or a newly created instance instead of always creating a new instance of its class.</p>
+        <p>A <code>factory</code> constructor can validate input or decide which object to return. Unlike a generative constructor, it does not have to create a new instance every time.</p>
         <div class="code-wrap">
-          <button class="copy-btn" data-copy="class Logger {
-  static final Logger _instance = Logger._internal();
+          <button class="copy-btn" data-copy="class UserId {
+  final String value;
 
-  factory Logger() => _instance;
+  UserId._(this.value);
 
-  Logger._internal();
-}
-
-final a = Logger();
-final b = Logger();
-
-print(identical(a, b));">Copy</button>
-          <pre><code>class Logger {
-  static final Logger _instance = Logger._internal();
-
-  factory Logger() =&gt; _instance;
-
-  Logger._internal();
-}
-
-final a = Logger();
-final b = Logger();
-
-print(identical(a, b));</code></pre>
-          <div class="output"><strong>Expected Output</strong><br>true</div>
-        </div>
-        <h2>Operator methods</h2>
-        <p>Dart lets classes define operators when that makes the type's behavior natural to use.</p>
-        <div class="code-wrap">
-          <button class="copy-btn" data-copy="class Point {
-  final int x;
-  final int y;
-
-  Point(this.x, this.y);
-
-  Point operator +(Point other) {
-    return Point(x + other.x, y + other.y);
+  factory UserId.fromInput(String input) {
+    final cleaned = input.trim();
+    if (cleaned.isEmpty) {
+      throw ArgumentError('A user ID is required.');
+    }
+    return UserId._(cleaned.toLowerCase());
   }
 }
 
-final total = Point(1, 2) + Point(3, 4);
-print('${total.x}, ${total.y}');">Copy</button>
-          <pre><code>class Point {
-  final int x;
-  final int y;
+void main() {
+  final userId = UserId.fromInput('  ASHA_42 ');
+  print(userId.value);
+}">Copy</button>
+          <pre><code>class UserId {
+  final String value;
 
-  Point(this.x, this.y);
+  UserId._(this.value);
 
-  Point operator +(Point other) {
-    return Point(x + other.x, y + other.y);
+  factory UserId.fromInput(String input) {
+    final cleaned = input.trim();
+    if (cleaned.isEmpty) {
+      throw ArgumentError('A user ID is required.');
+    }
+    return UserId._(cleaned.toLowerCase());
   }
 }
 
-final total = Point(1, 2) + Point(3, 4);
-print('${total.x}, ${total.y}');</code></pre>
-          <div class="output"><strong>Expected Output</strong><br>4, 6</div>
+void main() {
+  final userId = UserId.fromInput('  ASHA_42 ');
+  print(userId.value);
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>asha_42</div>
         </div>
+        <h2>Extension methods</h2>
+        <p>An extension adds focused helper behaviour to an existing type without changing that type or creating a subclass. Keep extensions small and easy to discover.</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="extension PriceLabel on double {
+  String asRupees() => '₹${toStringAsFixed(2)}';
+}
+
+void main() {
+  final price = 2499.0;
+  print(price.asRupees());
+}">Copy</button>
+          <pre><code>extension PriceLabel on double {
+  String asRupees() =&gt; '₹${toStringAsFixed(2)}';
+}
+
+void main() {
+  final price = 2499.0;
+  print(price.asRupees());
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>₹2499.00</div>
+        </div>
+        <div class="callout"><span class="label">CHOOSE DELIBERATELY</span><p>Use a static member for behaviour with no instance state, a factory to control object creation, and an extension for a focused convenience on an existing type.</p></div>
       </section>
 
       <section class="step-view" data-step="11">
@@ -1216,7 +1199,7 @@ void main() {
             <span class="pill">encapsulation</span><span class="pill">_private</span><span class="pill">getters</span><span class="pill">setters</span>
             <span class="pill">extends</span><span class="pill">override</span><span class="pill">super</span><span class="pill">polymorphism</span>
             <span class="pill">abstract</span><span class="pill">implements</span><span class="pill">with</span><span class="pill">mixin</span>
-            <span class="pill">static</span><span class="pill">final</span><span class="pill">const</span><span class="pill">factory</span>
+            <span class="pill">static</span><span class="pill">factory</span><span class="pill">extension</span>
           </p>
         </div>
 
@@ -1270,9 +1253,163 @@ void main() {
           <div class="quiz-feedback">Correct. <code>implements</code> expresses a contract that the class must fulfill.</div>
         </div>
 
+        <div class="quiz" data-answer="1">
+          <h3>6. What is the main purpose of a class?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">To store only one value</button>
+            <button class="quiz-option" data-choice="1">To describe the state and behaviour of a type of object</button>
+            <button class="quiz-option" data-choice="2">To run every Dart program automatically</button>
+          </div>
+          <div class="quiz-feedback">Correct. A class describes the fields and methods that its objects can have.</div>
+        </div>
+
+        <div class="quiz" data-answer="2">
+          <h3>7. When does Dart provide an implicit unnamed, no-argument constructor?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Whenever a class has a named constructor</button>
+            <button class="quiz-option" data-choice="1">Only when every field is <code>final</code></button>
+            <button class="quiz-option" data-choice="2">When the class declares no constructor</button>
+          </div>
+          <div class="quiz-feedback">Correct. Declaring any constructor means you define the available construction paths yourself.</div>
+        </div>
+
+        <div class="quiz" data-answer="0">
+          <h3>8. In <code>this.name = name</code>, what does <code>this.name</code> mean?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">The <code>name</code> field on the current object</button>
+            <button class="quiz-option" data-choice="1">A global variable named <code>name</code></button>
+            <button class="quiz-option" data-choice="2">A constructor named <code>name</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. <code>this</code> refers to the current instance.</div>
+        </div>
+
+        <div class="quiz" data-answer="1">
+          <h3>9. Why might a constructor use an initializer list after <code>:</code>?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">To call a method after the object is created</button>
+            <button class="quiz-option" data-choice="1">To initialize fields before the constructor body runs</button>
+            <button class="quiz-option" data-choice="2">To make every field public</button>
+          </div>
+          <div class="quiz-feedback">Correct. Initializer lists are especially useful for initializing <code>final</code> fields.</div>
+        </div>
+
+        <div class="quiz" data-answer="2">
+          <h3>10. What does <code>super.start()</code> do inside an overriding method?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Creates a new superclass object</button>
+            <button class="quiz-option" data-choice="1">Makes the method static</button>
+            <button class="quiz-option" data-choice="2">Calls the inherited implementation from the parent class</button>
+          </div>
+          <div class="quiz-feedback">Correct. <code>super</code> accesses the parent class's accessible member implementation.</div>
+        </div>
+
+        <div class="quiz" data-answer="0">
+          <h3>11. What does the <code>@override</code> annotation communicate?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">This member intentionally replaces an inherited member</button>
+            <button class="quiz-option" data-choice="1">This class cannot be extended</button>
+            <button class="quiz-option" data-choice="2">This field is private</button>
+          </div>
+          <div class="quiz-feedback">Correct. It documents your intent and helps the analyzer catch mistakes.</div>
+        </div>
+
+        <div class="quiz" data-answer="1">
+          <h3>12. Which statement about an abstract class is true?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">It cannot contain implemented methods</button>
+            <button class="quiz-option" data-choice="1">It cannot be instantiated directly</button>
+            <button class="quiz-option" data-choice="2">It must use a mixin</button>
+          </div>
+          <div class="quiz-feedback">Correct. An abstract class can provide shared implementation, but you create a concrete subtype instead.</div>
+        </div>
+
+        <div class="quiz" data-answer="2">
+          <h3>13. What is the key difference between <code>extends</code> and <code>implements</code>?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0"><code>implements</code> automatically inherits all method bodies</button>
+            <button class="quiz-option" data-choice="1"><code>extends</code> can only be used with abstract classes</button>
+            <button class="quiz-option" data-choice="2"><code>extends</code> inherits implementation; <code>implements</code> requires the class to supply the contract's members</button>
+          </div>
+          <div class="quiz-feedback">Correct. Use <code>implements</code> to satisfy a contract, not to inherit its implementation.</div>
+        </div>
+
+        <div class="quiz" data-answer="0">
+          <h3>14. Which situation is a good use for a mixin?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Sharing a focused capability such as logging across unrelated classes</button>
+            <button class="quiz-option" data-choice="1">Replacing every constructor in an app</button>
+            <button class="quiz-option" data-choice="2">Making all fields private</button>
+          </div>
+          <div class="quiz-feedback">Correct. A mixin composes cohesive reusable behaviour into a class.</div>
+        </div>
+
+        <div class="quiz" data-answer="1">
+          <h3>15. What can a <code>factory</code> constructor do?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">It must always create a brand-new instance</button>
+            <button class="quiz-option" data-choice="1">It can validate input and return an existing or selected object</button>
+            <button class="quiz-option" data-choice="2">It can only initialize static fields</button>
+          </div>
+          <div class="quiz-feedback">Correct. A factory controls what object is returned to the caller.</div>
+        </div>
+
+        <div class="quiz" data-answer="2">
+          <h3>16. A <code>static</code> member belongs to:</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Only the first object created from the class</button>
+            <button class="quiz-option" data-choice="1">The current object referenced by <code>this</code></button>
+            <button class="quiz-option" data-choice="2">The class itself</button>
+          </div>
+          <div class="quiz-feedback">Correct. Access a static member through the class name, such as <code>PriceRules.taxRate</code>.</div>
+        </div>
+
+        <div class="quiz" data-answer="0">
+          <h3>17. What does an extension method let you do?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Add focused helper behaviour to an existing type</button>
+            <button class="quiz-option" data-choice="1">Change the source code of Dart's core classes</button>
+            <button class="quiz-option" data-choice="2">Create private fields on any object</button>
+          </div>
+          <div class="quiz-feedback">Correct. Extensions add convenient members without modifying or subclassing the original type.</div>
+        </div>
+
+        <div class="quiz" data-answer="1">
+          <h3>18. In Dart, an identifier beginning with <code>_</code> is private to:</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Only the class where it is declared</button>
+            <button class="quiz-option" data-choice="1">Its library</button>
+            <button class="quiz-option" data-choice="2">The current method</button>
+          </div>
+          <div class="quiz-feedback">Correct. Dart privacy is library-based, not class-based.</div>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="14">
+        <header class="step-header">
+          <span class="step-kicker">STEP 15 · FINAL TASK</span>
+          <h1>Build a course tracker</h1>
+          <p class="lede">Apply the ideas from the codelab by modeling a small course-tracking domain. Start with the requirements, then make each class responsible for one clear job.</p>
+        </header>
+        <div class="challenge">
+          <h3>BUILD IT · Course tracker</h3>
+          <ol>
+            <li>Create an abstract <code>LearningItem</code> with a title and an abstract <code>progressLabel()</code> method.</li>
+            <li>Create <code>VideoLesson</code> and <code>QuizLesson</code> classes that extend it and provide different progress labels.</li>
+            <li>Use a private field to store each learner's completed-item count. Expose it with a getter and a controlled method that prevents invalid changes.</li>
+            <li>Define a <code>Trackable</code> interface and implement it on the learner class.</li>
+            <li>Create a small <code>Loggable</code> mixin and compose it into one class where logging belongs.</li>
+            <li>Add a named or factory constructor that creates a learner from a trimmed name.</li>
+            <li>Add one <code>static</code> utility for a course-wide rule, or one extension that formats a progress percentage.</li>
+            <li>Store different learning items in a <code>List&lt;LearningItem&gt;</code> and loop through it to demonstrate polymorphism.</li>
+          </ol>
+          <p><strong>Success condition:</strong> the program should print each item's progress label and a valid learner summary without directly changing private state.</p>
+        </div>
+        <div class="panel yellow">
+          <strong>Before coding:</strong> write down the “is a,” “has a,” and “can do” relationships. Prefer the smallest design that satisfies the requirements.
+        </div>
         <div class="finish" id="finishBox">
           <h2>Nice work. 🎯</h2>
-          <p>You completed the OOP in Dart Codelab. Keep practicing by modeling small domains, asking what state and behavior belong together, and choosing between inheritance, interfaces, mixins, and composition deliberately.</p>
+          <p>You completed the OOP in Dart codelab. Keep practicing by modeling small domains, asking what state and behaviour belong together, and choosing the simplest useful relationship.</p>
           <strong>Remember:</strong> good OOP is not about creating the most classes. It is about creating clear responsibilities and useful relationships.
         </div>
         <p class="footer-note">Dart OOP Codelab · Beginner foundation · Designed as a companion to the Functions in Dart Codelab.</p>
@@ -1307,8 +1444,9 @@ void main() {
     'Mixins with with',
     'Dart OOP toolbox',
     'Put it together',
-    'Final OOP challenge',
-    'Recap & knowledge check'
+    'Practice: OOP system',
+    'Quiz: knowledge check',
+    'Final task: course tracker'
   ];
 
   let current = 0;
