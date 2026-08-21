@@ -108,31 +108,31 @@
         <header class="step-header">
           <span class="step-kicker">STEP 1 · START HERE</span>
           <h1>Object-Oriented Programming in Dart</h1>
-          <p class="lede">OOP is a way to organize programs around objects: things that combine <strong>state</strong> (data) and <strong>behavior</strong> (what they can do). Dart uses classes, inheritance, interfaces, and mixins to model that behavior.</p>
-          <div class="objective"><strong>By the end:</strong> You will be able to model app data with classes, initialize valid objects, protect state, and choose between inheritance, interfaces, mixins, factories, static members, and extensions.</div>
+          <p class="lede">OOP is a way to group related data and actions. For example, a bank account has data such as its balance and actions such as depositing money. In Dart, we group these things with classes and objects.</p>
+          <div class="objective"><strong>By the end:</strong> You will be able to create classes for app data, keep that data safe, and understand the main ways classes can share code.</div>
         </header>
         <div class="panel blue">
           <h2>Why OOP matters</h2>
           <p>Imagine a bank account. It has state such as an account holder and balance, and behavior such as depositing or withdrawing money. Instead of keeping all those pieces unrelated, an object can keep the data and the operations that work on that data together.</p>
           <div class="grid-2">
-            <div class="concept"><strong>Model</strong><p>Represent real or conceptual things as objects.</p></div>
-            <div class="concept"><strong>Organize</strong><p>Keep related data and behavior together.</p></div>
-            <div class="concept"><strong>Reuse</strong><p>Share behavior through inheritance, interfaces, or mixins when appropriate.</p></div>
-            <div class="concept"><strong>Maintain</strong><p>Give each type a clear responsibility so larger programs are easier to change.</p></div>
+            <div class="concept"><strong>Model</strong><p>Describe a thing in your app, such as a user, product, or bank account.</p></div>
+            <div class="concept"><strong>Organize</strong><p>Keep a thing's data and its actions in one place.</p></div>
+            <div class="concept"><strong>Reuse</strong><p>Share useful code between classes when it makes sense.</p></div>
+            <div class="concept"><strong>Maintain</strong><p>Give each class one clear job so it is easier to change later.</p></div>
           </div>
         </div>
         <div class="grid-2">
           <div class="panel mint"><strong>Prerequisites</strong><p>Basic Dart syntax, variables, types, conditionals, loops, and functions.</p></div>
-          <div class="panel yellow"><strong>Mindset</strong><p>OOP is a toolbox, not a rule that every problem must be solved with inheritance.</p></div>
+          <div class="panel yellow"><strong>Mindset</strong><p>These are tools, not rules. Start simple and only use a more advanced tool when it solves a real problem.</p></div>
         </div>
-        <div class="callout"><span class="label">CORE IDEA</span><p>A class describes a kind of object. An object is an instance of that class.</p></div>
+        <div class="callout"><span class="label">CORE IDEA</span><p>A class is a description. An object is one real item made from that description. <code>Student</code> is a class; Asha's student record is an object.</p></div>
       </section>
 
       <section class="step-view" data-step="1">
         <header class="step-header">
           <span class="step-kicker">STEP 2 · FOUNDATIONS</span>
           <h1>Classes & objects</h1>
-          <p class="lede">A class is a blueprint for a type. An object is a concrete instance created from that type.</p>
+          <p class="lede">Think of a class as a form or recipe. An object is one completed form made from it.</p>
         </header>
         <h2>The basic shape</h2>
         <div class="syntax">class ClassName {<br>&nbsp;&nbsp;// fields and methods<br>}<br><br>final object = ClassName();</div>
@@ -167,7 +167,7 @@ void main() {
         </div>
         <div class="grid-2">
           <div class="concept"><strong>Class</strong><p><code>Student</code> defines what a student object can contain and do.</p></div>
-          <div class="concept"><strong>Object</strong><p><code>student</code> refers to one concrete <code>Student</code> instance.</p></div>
+          <div class="concept"><strong>Object</strong><p><code>student</code> is one <code>Student</code> made from that class.</p></div>
         </div>
         <div class="callout"><span class="label">COMMON MISTAKE</span><p>Declaring <code>class Student</code> does not create a student object. You create an instance with <code>Student()</code>.</p></div>
         <div class="quiz" data-answer="1">
@@ -178,7 +178,7 @@ void main() {
             <button class="quiz-option" data-choice="1"><code>final student = Student();</code></button>
             <button class="quiz-option" data-choice="2"><code>void introduce() { }</code></button>
           </div>
-          <div class="quiz-feedback">Correct. The constructor call creates a <code>Student</code> instance.</div>
+          <div class="quiz-feedback">Correct. <code>Student()</code> makes one <code>Student</code> object.</div>
         </div>
       </section>
 
@@ -186,7 +186,7 @@ void main() {
         <header class="step-header">
           <span class="step-kicker">STEP 3 · STATE & BEHAVIOR</span>
           <h1>Fields, methods & <code>this</code></h1>
-          <p class="lede">Fields store object state. Methods describe behavior that can read or change that state.</p>
+          <p class="lede">Fields store information. Methods are actions the object can perform using that information.</p>
         </header>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="class BankAccount {
@@ -226,7 +226,7 @@ void main() {
           <div class="output"><strong>Expected Output</strong><br>Balance: 500.0</div>
         </div>
         <h2>Using <code>this</code></h2>
-        <p>Inside an instance member, <code>this</code> refers to the current object. It is especially useful when a parameter and a field have the same name.</p>
+        <p>Inside a class, <code>this</code> means “this object.” It helps when a field and a parameter have the same name.</p>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="class Student {
   String name;
@@ -255,16 +255,16 @@ void main() {
             <li><code>this.name</code> explicitly means “the current object's field.”</li>
           </ul>
         </div>
-        <div class="callout"><span class="label">DESIGN TIP</span><p>Keep methods focused on behavior that naturally belongs to the object. A <code>BankAccount</code> should know how to deposit or withdraw rather than exposing every internal detail to callers.</p></div>
+        <div class="callout"><span class="label">DESIGN TIP</span><p>Keep an action close to the data it works with. A <code>BankAccount</code> should handle deposits and withdrawals instead of letting other code directly change its balance.</p></div>
       </section>
 
       <section class="step-view" data-step="3">
         <header class="step-header">
           <span class="step-kicker">STEP 4 · INITIALIZING OBJECTS</span>
           <h1>Constructors</h1>
-          <p class="lede">Constructors run when an object is created. They are commonly used to put an object into a valid initial state.</p>
+          <p class="lede">A constructor runs when you make an object. It gives the object the starting values it needs.</p>
         </header>
-        <h2>Generative & initializing constructors</h2>
+        <h2>A regular constructor</h2>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="class Student {
   final String name;
@@ -290,8 +290,8 @@ void main() {
 }</code></pre>
           <div class="output"><strong>Expected Output</strong><br>Asha, 20</div>
         </div>
-        <h2>Named constructors and initializer lists</h2>
-        <p>A class can provide additional named construction paths when different ways of creating an object are useful.</p>
+        <h2>Named constructors and setup before the body</h2>
+        <p>A class can offer named ways to create an object. For example, <code>Point.origin()</code> clearly says that the point starts at zero.</p>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="class Point {
   final double x;
@@ -322,11 +322,11 @@ void main() {
 }</code></pre>
         </div>
         <div class="panel mint">
-          <strong>Initializer list:</strong> the part after <code>:</code> runs before the constructor body. It initializes <code>final</code> fields when a constructor cannot use <code>this.field</code> directly.
+          <strong>The part after <code>:</code>:</strong> it sets up values before the constructor body runs. Here it gives <code>x</code> and <code>y</code> their starting values.
         </div>
         <div class="grid-2">
-          <div class="concept"><strong>Default constructor</strong><p>If you declare no constructor, Dart can provide an unnamed generative constructor with no parameters. Once you declare a constructor, Dart does not also provide that implicit constructor.</p></div>
-          <div class="concept"><strong>Named constructor</strong><p><code>Point.origin()</code> gives callers a readable alternative construction path.</p></div>
+          <div class="concept"><strong>Default constructor</strong><p>If you write no constructor, Dart gives the class a simple no-argument constructor. Once you add your own constructor, you choose the available ways to create the object.</p></div>
+          <div class="concept"><strong>Named constructor</strong><p><code>Point.origin()</code> is a clearly named extra way to create a <code>Point</code>.</p></div>
         </div>
         <h2>Named parameters in constructors</h2>
         <div class="code-wrap">
@@ -353,14 +353,14 @@ final product = Product(name: 'Keyboard', price: 2500);">Copy</button>
 
 final product = Product(name: 'Keyboard', price: 2500);</code></pre>
         </div>
-        <div class="callout"><span class="label">COMMON MISTAKE</span><p>A constructor is not an ordinary method. It has special syntax and is invoked as part of object creation.</p></div>
+        <div class="callout"><span class="label">COMMON MISTAKE</span><p>A constructor looks a little like a method, but its job is only to create and set up an object.</p></div>
       </section>
 
       <section class="step-view" data-step="4">
         <header class="step-header">
           <span class="step-kicker">STEP 5 · ENCAPSULATION</span>
           <h1>Encapsulation & privacy</h1>
-          <p class="lede">Encapsulation means controlling how an object's internal state is accessed or changed. Dart's privacy model is library-based: an identifier beginning with <code>_</code> is private to its library.</p>
+          <p class="lede">Sometimes a class should protect its own data. In Dart, a name starting with <code>_</code> can only be used from the same Dart file library.</p>
         </header>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="class BankAccount {
@@ -412,7 +412,7 @@ void main() {
           <div class="output"><strong>Expected Output</strong><br>750.0</div>
         </div>
         <h2>Getters & setters</h2>
-        <p>A getter exposes a value through property-like syntax. A setter can validate or transform a value before storing it.</p>
+        <p>A getter lets outside code read a value. A setter lets the class check or clean a value before saving it.</p>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="class Person {
   String _name = '';
@@ -438,16 +438,16 @@ void main() {
 }</code></pre>
         </div>
         <div class="panel yellow">
-          <strong>Important Dart nuance:</strong> “Private” does not mean “private to the class.” A leading underscore makes the declaration private to the <em>library</em>. Separate Dart libraries cannot directly access that private identifier.
+          <strong>Important:</strong> in Dart, “private” means private to the file library, not only to one class. Code in another library cannot use a name that starts with <code>_</code>.
         </div>
-        <div class="callout"><span class="label">WHY IT MATTERS</span><p>Encapsulation lets a class protect invariants. Instead of allowing arbitrary code to set a balance to an invalid value, the class can expose controlled operations.</p></div>
+        <div class="callout"><span class="label">WHY IT MATTERS</span><p>This prevents bad data. For example, other code cannot set a bank balance to an invalid amount; it must use the account's deposit or withdrawal methods.</p></div>
       </section>
 
       <section class="step-view" data-step="5">
         <header class="step-header">
           <span class="step-kicker">STEP 6 · REUSE</span>
           <h1>Inheritance with <code>extends</code></h1>
-          <p class="lede">Inheritance creates a subtype that extends another class. The child class can reuse accessible behavior and add or replace behavior of its own.</p>
+          <p class="lede"><code>extends</code> lets one class start with another class's features. A <code>Dog</code> is an <code>Animal</code>, so it can use <code>Animal</code>'s actions and add its own.</p>
         </header>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="class Animal {
@@ -516,16 +516,16 @@ class Car extends Vehicle {
 }</code></pre>
         </div>
         <div class="panel blue">
-          <strong>When inheritance fits:</strong> use it when the subtype really represents a specialized form of the parent type and the relationship is meaningful. Do not use inheritance only because it happens to save a few lines of code.
+          <strong>When to use it:</strong> use <code>extends</code> when you can honestly say “a dog is an animal” or “a car is a vehicle.” Do not use it just to avoid writing a few lines twice.
         </div>
-        <div class="callout"><span class="label">COMMON MISTAKE</span><p><code>extends</code> is not a generic “reuse anything” keyword. For unrelated capabilities, a mixin, interface, or composition may be a better design.</p></div>
+        <div class="callout"><span class="label">COMMON MISTAKE</span><p><code>extends</code> does not mean “reuse any code.” If two classes only share one small action, a mixin may be a better fit.</p></div>
       </section>
 
       <section class="step-view" data-step="6">
         <header class="step-header">
           <span class="step-kicker">STEP 7 · POLYMORPHISM</span>
           <h1>Overriding & polymorphism</h1>
-          <p class="lede">A subclass can override inherited behavior. Polymorphism lets code work with a common type while the actual object's implementation determines what happens.</p>
+          <p class="lede">A child class can replace an action it inherited. This lets one function work with different kinds of <code>Animal</code>; each animal still makes its own sound.</p>
         </header>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="class Animal {
@@ -586,7 +586,7 @@ void main() {
 }</code></pre>
           <div class="output"><strong>Expected Output</strong><br>Woof!<br>Meow!</div>
         </div>
-        <p><code>playSound</code> only needs to know that it received an <code>Animal</code>. The runtime object can be a <code>Dog</code> or <code>Cat</code>, and its overridden method runs.</p>
+        <p><code>playSound</code> only needs to know that it got an <code>Animal</code>. It can receive a <code>Dog</code> or a <code>Cat</code>, and Dart runs that object's own <code>makeSound</code> method.</p>
         <div class="quiz" data-answer="2">
           <h3>Quick check</h3>
           <p>Why does <code>playSound(Dog())</code> call the dog's implementation?</p>
@@ -595,16 +595,16 @@ void main() {
             <button class="quiz-option" data-choice="1">Because <code>Animal</code> is replaced at compile time</button>
             <button class="quiz-option" data-choice="2">Because the actual object is a <code>Dog</code> whose method overrides <code>Animal.makeSound</code></button>
           </div>
-          <div class="quiz-feedback">Correct. The variable can use the parent type while the object's overridden implementation is selected.</div>
+          <div class="quiz-feedback">Correct. The function accepts an <code>Animal</code>, but the real object is a <code>Dog</code>, so the dog's version runs.</div>
         </div>
-        <div class="callout"><span class="label">REMEMBER</span><p><strong>Overriding</strong> is the mechanism; <strong>polymorphism</strong> is the broader idea of using a common abstraction/type with different concrete behavior.</p></div>
+        <div class="callout"><span class="label">REMEMBER</span><p><strong>Overriding</strong> means replacing an inherited method. <strong>Polymorphism</strong> is the longer name for letting one function work with different related objects.</p></div>
       </section>
 
       <section class="step-view" data-step="7">
         <header class="step-header">
           <span class="step-kicker">STEP 8 · ABSTRACTION</span>
           <h1>Abstract classes</h1>
-          <p class="lede">An abstract class defines a common contract or shared behavior but is not itself meant to be instantiated directly.</p>
+          <p class="lede">An abstract class is a starting template. You cannot make one directly, but other classes can build on it.</p>
         </header>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="abstract class Shape {
@@ -655,21 +655,21 @@ void main() {
         </div>
         <h2>What is abstract here?</h2>
         <ul>
-          <li><code>Shape</code> cannot be instantiated directly.</li>
-          <li><code>area()</code> declares behavior without providing an implementation.</li>
-          <li>A concrete subclass such as <code>Circle</code> must provide the missing implementation.</li>
+          <li>You cannot write <code>Shape()</code> directly.</li>
+          <li><code>area()</code> says every shape needs an area, but it does not say how to calculate it.</li>
+          <li><code>Circle</code> fills in that missing calculation.</li>
         </ul>
         <div class="panel mint">
-          <strong>Abstraction vs encapsulation:</strong> abstraction focuses on <em>what</em> an object exposes as a useful contract; encapsulation focuses on controlling and protecting its internal state and implementation.
+          <strong>Two similar words:</strong> abstraction means showing the useful actions, such as <code>area()</code>. Encapsulation means protecting data, such as a bank balance.
         </div>
-        <div class="callout"><span class="label">COMMON MISTAKE</span><p>An abstract class is not simply a class with “private fields.” Abstraction is about modeling a contract or essential behavior while hiding unnecessary implementation details.</p></div>
+        <div class="callout"><span class="label">COMMON MISTAKE</span><p>An abstract class is not about private fields. It is a way to say, “every class of this kind must provide these actions.”</p></div>
       </section>
 
       <section class="step-view" data-step="8">
         <header class="step-header">
           <span class="step-kicker">STEP 9 · INTERFACES</span>
           <h1><code>extends</code> vs <code>implements</code></h1>
-          <p class="lede">In Dart, every class implicitly defines an interface containing its instance members. Another class can implement that interface with <code>implements</code>.</p>
+          <p class="lede"><code>implements</code> is a promise: “my class will provide these methods.” Unlike <code>extends</code>, it does not copy the other class's method code.</p>
         </header>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="abstract class PaymentMethod {
@@ -718,23 +718,23 @@ void processPayment(PaymentMethod method) {
         <table class="comparison">
           <thead><tr><th>Keyword</th><th>Main idea</th><th>What the child gets</th></tr></thead>
           <tbody>
-            <tr><td><code>extends</code></td><td>Creates a subtype of a class.</td><td>Inherits implementation and can override behavior.</td></tr>
-            <tr><td><code>implements</code></td><td>Promises to satisfy an interface.</td><td>Must provide implementations for the interface's members; it does not inherit the class's implementation in the same way.</td></tr>
-            <tr><td><code>with</code></td><td>Adds mixin behavior.</td><td>Reusable implementation supplied by one or more mixins.</td></tr>
+            <tr><td><code>extends</code></td><td>“This is a kind of that.”</td><td>It gets the parent class's code and can change parts of it.</td></tr>
+            <tr><td><code>implements</code></td><td>“I promise to provide these methods.”</td><td>It writes the promised methods itself.</td></tr>
+            <tr><td><code>with</code></td><td>“Add this small extra ability.”</td><td>It gets the mixin's ready-made methods.</td></tr>
           </tbody>
         </table>
         <div class="panel blue">
-          <strong>Useful mental model:</strong> <code>extends</code> is primarily about an inheritance relationship, <code>implements</code> is about satisfying a contract, and <code>with</code> is about composing reusable behavior.
+          <strong>Easy way to remember:</strong> <code>extends</code> reuses a parent class, <code>implements</code> makes a promise you must write yourself, and <code>with</code> adds a small ready-made ability.
         </div>
         <div class="quiz" data-answer="0">
           <h3>Quick check</h3>
           <p>What must <code>UpiPayment</code> do when it implements <code>PaymentMethod</code>?</p>
           <div class="quiz-options">
-            <button class="quiz-option" data-choice="0">Provide the required interface member implementation</button>
-            <button class="quiz-option" data-choice="1">Automatically inherit every implementation from <code>PaymentMethod</code></button>
+            <button class="quiz-option" data-choice="0">Write the <code>pay</code> method that <code>PaymentMethod</code> requires</button>
+            <button class="quiz-option" data-choice="1">Automatically get every method from <code>PaymentMethod</code></button>
             <button class="quiz-option" data-choice="2">Become a subclass only if it also uses <code>extends</code></button>
           </div>
-          <div class="quiz-feedback">Correct. <code>implements</code> makes the class satisfy the interface contract.</div>
+          <div class="quiz-feedback">Correct. <code>implements</code> means <code>UpiPayment</code> must write the methods it promised to provide.</div>
         </div>
       </section>
 
@@ -742,7 +742,7 @@ void processPayment(PaymentMethod method) {
         <header class="step-header">
           <span class="step-kicker">STEP 10 · COMPOSITION</span>
           <h1>Mixins with <code>with</code></h1>
-          <p class="lede">A mixin is a reusable set of members that can be composed into a class. Mixins are useful when behavior can be shared across types without requiring an inheritance relationship.</p>
+          <p class="lede">A mixin is a small bundle of ready-made methods. Use <code>with</code> to add that bundle to a class without making it a child of another class.</p>
         </header>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="mixin Logger {
@@ -798,22 +798,22 @@ void main() {
 }</code></pre>
           <div class="output"><strong>Expected Output</strong><br>[LOG] Saving Asha<br>{type: User}</div>
         </div>
-        <p>The <code>User</code> class receives both <code>log</code> and <code>toJson</code> without extending either mixin as a superclass.</p>
+        <p>The <code>User</code> class gets both <code>log</code> and <code>toJson</code> from the mixins. It is not a kind of logger or JSON helper; it simply gains those useful methods.</p>
         <div class="grid-2">
-          <div class="concept"><strong>Inheritance</strong><p>Models a subtype relationship such as <code>Dog extends Animal</code>.</p></div>
-          <div class="concept"><strong>Mixin composition</strong><p>Adds reusable behavior such as logging, serialization helpers, or another capability.</p></div>
+          <div class="concept"><strong>Inheritance</strong><p>Use it for a real “is a” relationship, such as <code>Dog extends Animal</code>.</p></div>
+          <div class="concept"><strong>Mixin</strong><p>Use it to add one small ability, such as logging.</p></div>
         </div>
-        <div class="callout"><span class="label">GOOD PRACTICE</span><p>Use a mixin for cohesive reusable behavior. Avoid creating huge “utility mixins” that make a class's capabilities difficult to understand.</p></div>
+        <div class="callout"><span class="label">GOOD PRACTICE</span><p>Keep a mixin small and focused. A <code>Logger</code> mixin is easy to understand; one giant mixin with dozens of unrelated methods is not.</p></div>
       </section>
 
       <section class="step-view" data-step="10">
         <header class="step-header">
           <span class="step-kicker">STEP 11 · DART TOOLBOX</span>
           <h1><code>static</code>, <code>factory</code> & extensions</h1>
-          <p class="lede">These features make types easier to create and use. They solve different problems: class-level utilities, controlled creation, and focused helper behaviour.</p>
+          <p class="lede">These are three useful extras. They help you put a helper on a class, choose how an object is made, or add a small helper to an existing type.</p>
         </header>
         <h2>Static members</h2>
-        <p>A <code>static</code> member belongs to the class rather than to a particular instance.</p>
+        <p>A <code>static</code> member belongs to the class itself. You use it with the class name, so you do not need to make an object first.</p>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="class MathTools {
   static const double pi = 3.14159;
@@ -838,7 +838,7 @@ void main() {
           <div class="output"><strong>Expected Output</strong><br>16.0<br>3.14159</div>
         </div>
         <h2>Factory constructors</h2>
-        <p>A <code>factory</code> constructor can validate input or decide which object to return. Unlike a generative constructor, it does not have to create a new instance every time.</p>
+        <p>A <code>factory</code> constructor can check input and decide what object to return. It can return a new object, or reuse one that already exists.</p>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="class UserId {
   final String value;
@@ -879,7 +879,7 @@ void main() {
           <div class="output"><strong>Expected Output</strong><br>asha_42</div>
         </div>
         <h2>Extension methods</h2>
-        <p>An extension adds focused helper behaviour to an existing type without changing that type or creating a subclass. Keep extensions small and easy to discover.</p>
+        <p>An extension adds a small helper to a type you already use. Here it lets any <code>double</code> format itself as rupees. Keep extensions small and clearly named.</p>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="extension PriceLabel on double {
   String asRupees() => '₹${toStringAsFixed(2)}';
@@ -899,14 +899,14 @@ void main() {
 }</code></pre>
           <div class="output"><strong>Expected Output</strong><br>₹2499.00</div>
         </div>
-        <div class="callout"><span class="label">CHOOSE DELIBERATELY</span><p>Use a static member for behaviour with no instance state, a factory to control object creation, and an extension for a focused convenience on an existing type.</p></div>
+        <div class="callout"><span class="label">WHICH ONE?</span><p>Use <code>static</code> for a helper that needs no object, <code>factory</code> when creation needs a decision or check, and an extension for a small extra helper on an existing type.</p></div>
       </section>
 
       <section class="step-view" data-step="11">
         <header class="step-header">
           <span class="step-kicker">STEP 12 · PUT IT TOGETHER</span>
           <h1>A small OOP system</h1>
-          <p class="lede">Now combine constructors, encapsulation, inheritance, overriding, abstraction, interfaces, polymorphism, and a mixin in one focused example.</p>
+          <p class="lede">This example brings the ideas together. Read it slowly: notice what each class stores, what it can do, and which code it shares.</p>
         </header>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="mixin Auditable {
@@ -1040,37 +1040,37 @@ void main() {
           <div class="output"><strong>Expected Output</strong><br>[AUDIT] Asha is writing Dart code<br>Rahul is teaching a class<br>65000.0</div>
         </div>
         <div class="grid-2">
-          <div class="concept"><strong>Abstraction</strong><p><code>Employee</code> defines the common contract with abstract <code>work()</code>.</p></div>
-          <div class="concept"><strong>Encapsulation</strong><p><code>_salary</code> is controlled through a getter and <code>giveRaise()</code>.</p></div>
-          <div class="concept"><strong>Inheritance</strong><p><code>Developer</code> and <code>Teacher</code> extend <code>Employee</code>.</p></div>
-          <div class="concept"><strong>Polymorphism</strong><p><code>runWorkday</code> accepts <code>List&lt;Employee&gt;</code> and invokes each concrete <code>work()</code>.</p></div>
-          <div class="concept"><strong>Mixin</strong><p><code>Developer</code> composes <code>Auditable</code> with <code>with</code>.</p></div>
-          <div class="concept"><strong>Constructors</strong><p>Named parameters initialize each object's required state.</p></div>
+          <div class="concept"><strong>Shared starting point</strong><p><code>Employee</code> says that every employee must have a <code>work()</code> action.</p></div>
+          <div class="concept"><strong>Protected salary</strong><p><code>_salary</code> is read through a getter and changed through <code>giveRaise()</code>.</p></div>
+          <div class="concept"><strong>Different employees</strong><p><code>Developer</code> and <code>Teacher</code> both build on <code>Employee</code>.</p></div>
+          <div class="concept"><strong>One loop, different results</strong><p><code>runWorkday</code> can call <code>work()</code> for every employee, and each one does its own job.</p></div>
+          <div class="concept"><strong>Extra ability</strong><p><code>Developer</code> gets the <code>audit</code> method from <code>Auditable</code>.</p></div>
+          <div class="concept"><strong>Starting values</strong><p>Named parameters give each new employee the values it needs.</p></div>
         </div>
-        <div class="callout"><span class="label">DESIGN LESSON</span><p>The power of OOP is not the number of classes you create. It is the clarity of the relationships, responsibilities, and contracts between them.</p></div>
+        <div class="callout"><span class="label">DESIGN LESSON</span><p>Good OOP is not about making many classes. It is about giving each class a clear, useful job.</p></div>
       </section>
 
       <section class="step-view" data-step="12">
         <header class="step-header">
           <span class="step-kicker">STEP 13 · PRACTICE</span>
           <h1>Final OOP challenge</h1>
-          <p class="lede">Design a small library system. Do not copy the solution immediately—first sketch the classes and relationships yourself.</p>
+          <p class="lede">Build a small library system. First try the steps yourself, then use the sample solution if you need it.</p>
         </header>
         <div class="challenge">
           <h3>TRY IT · Library management model</h3>
           <ol>
-            <li>Create an abstract class <code>LibraryItem</code> with a required <code>title</code> and an abstract method <code>describe()</code>.</li>
+            <li>Create an abstract <code>LibraryItem</code> class with a required <code>title</code> and a <code>describe()</code> method that every item must provide.</li>
             <li>Create <code>Book</code> and <code>Magazine</code> classes that extend <code>LibraryItem</code>.</li>
-            <li>Give each subclass its own implementation of <code>describe()</code>.</li>
+            <li>Let each class print its own description in <code>describe()</code>.</li>
             <li>Create a <code>Library</code> class that stores a collection of <code>LibraryItem</code> objects.</li>
-            <li>Use a loop to demonstrate polymorphism by calling <code>describe()</code> on every item.</li>
-            <li>Add a private field and a getter/setter or controlled method where encapsulation makes sense.</li>
-            <li>Add a small mixin such as <code>Loggable</code> and use it on one appropriate class.</li>
+            <li>Use a loop to call <code>describe()</code> for every item, even though the items are different types.</li>
+            <li>Add one private field and a safe way to read or change it.</li>
+            <li>Add a small mixin such as <code>Loggable</code> to one class.</li>
           </ol>
-          <p><strong>Success condition:</strong> your program should contain at least two concrete item types and the library should work with them through the common <code>LibraryItem</code> type.</p>
+          <p><strong>Success condition:</strong> your program has at least a book and a magazine, and the library can store and describe both.</p>
         </div>
         <div class="panel yellow">
-          <strong>Planning hint:</strong> Start with the relationship: <code>LibraryItem</code> → <code>Book</code>/<code>Magazine</code>. Then decide which state belongs in the base class and which behavior belongs in each concrete class.
+          <strong>Planning hint:</strong> start with <code>LibraryItem</code> → <code>Book</code>/<code>Magazine</code>. Put shared information, such as the title, in <code>LibraryItem</code>. Put book-only or magazine-only information in its own class.
         </div>
         <details class="reveal">
           <summary>Reveal one possible solution</summary>

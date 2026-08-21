@@ -476,8 +476,8 @@
         <header class="step-header">
           <span class="step-kicker">STEP 1 · START HERE</span>
           <h1>Functions in Dart</h1>
-          <p class="lede">A function is a named piece of behavior you can call whenever you need it. In Dart, functions are everywhere—and understanding them makes Flutter code much easier to read and write.</p>
-          <div class="objective"><strong>By the end:</strong> You will be able to declare, call, parameterize, compose, and pass Dart functions with confidence.</div>
+          <p class="lede">A function is a named piece of code that does one job. You can run it whenever you need it. Functions appear everywhere in Dart and Flutter.</p>
+          <div class="objective"><strong>By the end:</strong> You will be able to write functions, give them input, get a result back, and pass a function to other code.</div>
         </header>
         <div class="panel blue">
           <h2>Why functions matter</h2>
@@ -544,7 +544,7 @@ void main() {
         <header class="step-header">
           <span class="step-kicker">STEP 3 · INPUT</span>
           <h1>Parameters & arguments</h1>
-          <p class="lede">Functions become more useful when they can receive information. A parameter is the variable in the function definition; an argument is the value you pass when calling it.</p>
+          <p class="lede">Functions become more useful when you give them information. A parameter is the named space in the function; an argument is the real value you put into that space.</p>
         </header>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="void greet(String name) {
@@ -566,8 +566,8 @@ void main() {
           <div class="output"><strong>Expected Output</strong><br>Hello, Asha!<br>Hello, Rahul!</div>
         </div>
         <div class="grid-2">
-          <div class="concept"><strong>Parameter</strong><p><code>String name</code> is declared by the function and acts like a local variable.</p></div>
-          <div class="concept"><strong>Argument</strong><p><code>'Asha'</code> is the actual value supplied at the call site.</p></div>
+          <div class="concept"><strong>Parameter</strong><p><code>String name</code> is the label the function uses for incoming information.</p></div>
+          <div class="concept"><strong>Argument</strong><p><code>'Asha'</code> is the actual value you give the function when you call it.</p></div>
         </div>
         <h2>Multiple positional parameters</h2>
         <div class="code-wrap">
@@ -579,14 +579,14 @@ void main() {
 }</code></pre>
         </div>
         <p>The order matters: <code>area(4, 3)</code> means <code>width = 4</code> and <code>height = 3</code>.</p>
-        <div class="callout"><span class="label">TYPE SAFETY</span><p>Dart checks the declared parameter types. A function expecting a <code>double</code> should receive a compatible value rather than an unrelated type.</p></div>
+        <div class="callout"><span class="label">TYPE CHECK</span><p>Dart checks the type of a value. If a function expects a number such as <code>double</code>, give it a number—not text like <code>'hello'</code>.</p></div>
       </section>
 
       <section class="step-view" data-step="3">
         <header class="step-header">
           <span class="step-kicker">STEP 4 · FLEXIBLE INPUT</span>
           <h1>Named & optional parameters</h1>
-          <p class="lede">Named parameters make calls easier to read, especially when a function accepts several values. They are also a major part of idiomatic Flutter APIs.</p>
+          <p class="lede">Named parameters label each value in a function call. They make calls easier to read, especially when there are several values. You will see them often in Flutter.</p>
         </header>
         <h2>Named parameters</h2>
         <div class="code-wrap">
@@ -606,7 +606,7 @@ void main() {
 }</code></pre>
           <div class="output"><strong>Expected Output</strong><br>Maya is 21</div>
         </div>
-        <p>The braces in the parameter list indicate named parameters. At the call site, use <code>name:</code> and <code>age:</code>.</p>
+        <p>The braces mean these are named parameters. When calling the function, write the label too: <code>name:</code> and <code>age:</code>.</p>
         <h2>Required named parameters</h2>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="void createProfile({required String username}) {
@@ -625,7 +625,7 @@ void main() {
 }</code></pre>
         </div>
         <div class="panel yellow">
-          <strong>Key idea:</strong> Named does not automatically mean optional in every sense. A named parameter can be marked <code>required</code>, which makes the caller provide it.
+          <strong>Key idea:</strong> a named parameter can still be required. When it has <code>required</code>, you must give that value when calling the function.
         </div>
         <h2>Default values</h2>
         <p>A non-required named parameter can provide a default value. If the caller omits it, Dart uses that default.</p>
@@ -693,7 +693,7 @@ void main() {
           </div>
         </div>
         <div class="panel blue">
-          <p>The <code>=&gt;</code> syntax means “return the value of this single expression.” You do not write <code>return</code> in the expression-bodied form.</p>
+          <p>The <code>=&gt;</code> form is a short way to return one value. Use it only when the function is one simple expression; do not write <code>return</code> after the arrow.</p>
         </div>
         <h2>Another example</h2>
         <div class="code-wrap">
@@ -717,7 +717,7 @@ void main() {
         <header class="step-header">
           <span class="step-kicker">STEP 7 · FUNCTIONS AS VALUES</span>
           <h1>Anonymous functions & callbacks</h1>
-          <p class="lede">In Dart, functions are first-class objects. That means you can store a function in a variable, pass it to another function, and return a function.</p>
+          <p class="lede">In Dart, a function can be treated like a value. You can put one in a variable or give one to another function.</p>
         </header>
         <h2>Anonymous function</h2>
         <div class="code-wrap">
@@ -733,7 +733,7 @@ numbers.forEach((number) {
 });</code></pre>
           <div class="output"><strong>Expected Output</strong><br>2<br>4<br>6</div>
         </div>
-        <p>The function passed to <code>forEach</code> has no name, so it is an <strong>anonymous function</strong>. It is also a <strong>callback</strong>: code that another function can call later.</p>
+        <p>The function given to <code>forEach</code> has no name, so it is an <strong>anonymous function</strong>. It is also a <strong>callback</strong>: a function that another function runs for you.</p>
         <h2>Passing a named function</h2>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="void printDouble(int value) {
@@ -760,7 +760,7 @@ void main() {
         <header class="step-header">
           <span class="step-kicker">STEP 8 · SCOPE</span>
           <h1>Scope & local variables</h1>
-          <p class="lede">A variable declared inside a function normally belongs to that function's local scope. Keeping temporary data local reduces accidental coupling between parts of your program.</p>
+          <p class="lede">A variable made inside a function normally stays inside that function. This keeps temporary information from affecting other parts of your program.</p>
         </header>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="void calculateTotal() {
@@ -789,20 +789,20 @@ void main() {
         <p>Here, <code>price</code>, <code>tax</code>, and <code>total</code> are local to <code>calculateTotal</code>. Code outside the function cannot simply refer to those names.</p>
         <div class="panel mint">
           <h3>A useful mental model</h3>
-          <p>Every function gets its own workspace. Parameters enter the workspace; local variables live there; a returned value can leave the workspace.</p>
+          <p>Think of every function as its own small workspace. Values come in through parameters, temporary variables stay inside, and a result can go back out with <code>return</code>.</p>
         </div>
         <details class="reveal">
           <summary>What about variables outside the function?</summary>
-          <div>Functions can access names from surrounding scopes when those names are visible, but avoid relying on mutable global state unnecessarily. Passing required information as parameters generally makes functions easier to understand and test.</div>
+          <div>A function can sometimes see values around it, but do not depend too much on changing global values. Passing in what a function needs usually makes it easier to read and test.</div>
         </details>
-        <div class="callout"><span class="label">GOOD PRACTICE</span><p>Prefer functions that clearly communicate what they need through parameters and what they produce through return values.</p></div>
+        <div class="callout"><span class="label">GOOD PRACTICE</span><p>Make it clear what a function needs and what it gives back. Use parameters for input and <code>return</code> for a result.</p></div>
       </section>
 
       <section class="step-view" data-step="8">
         <header class="step-header">
           <span class="step-kicker">STEP 9 · PRACTICE</span>
           <h1>Put it together</h1>
-          <p class="lede">Now combine parameters, return values, named arguments, and an arrow function into a small piece of application logic.</p>
+          <p class="lede">Now use inputs, return values, named arguments, and an arrow function in one small app-style example.</p>
         </header>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="double calculatePrice({
@@ -837,8 +837,8 @@ void main() {
         <div class="grid-2">
           <div class="concept"><strong>1. Input</strong><p><code>price</code> is required; <code>taxRate</code> has a default.</p></div>
           <div class="concept"><strong>2. Calculation</strong><p><code>calculatePrice</code> returns a <code>double</code>.</p></div>
-          <div class="concept"><strong>3. Formatting</strong><p><code>formatPrice</code> uses an expression body.</p></div>
-          <div class="concept"><strong>4. Composition</strong><p>The result of one function becomes the input of another.</p></div>
+          <div class="concept"><strong>3. Formatting</strong><p><code>formatPrice</code> uses the short arrow form.</p></div>
+          <div class="concept"><strong>4. Use the result</strong><p>The total from one function is given to the next function.</p></div>
         </div>
         <div class="challenge">
           <h3>TRY IT · Mini challenge</h3>
@@ -858,7 +858,7 @@ void main() {
 
       <section class="step-view" data-step="9">
         <header class="step-header">
-          <span class="step-kicker">STEP 10 · FINAL CHECK</span>
+          <span class="step-kicker">STEP 10 · QUIZ</span>
           <h1>Recap & knowledge check</h1>
           <p class="lede">You now have the essential function toolkit for everyday Dart programming and a strong foundation for Flutter APIs.</p>
         </header>
@@ -910,11 +910,88 @@ void main() {
           <div class="quiz-feedback">Correct. Callbacks are functions passed to other code for later invocation.</div>
         </div>
 
+        <div class="quiz" data-answer="0">
+          <h3>4. Which named parameter must callers provide?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0"><code>required String name</code></button>
+            <button class="quiz-option" data-choice="1"><code>String? name</code></button>
+            <button class="quiz-option" data-choice="2"><code>String name = 'Guest'</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. <code>required</code> makes a named argument mandatory at the call site.</div>
+        </div>
+
+        <div class="quiz" data-answer="1">
+          <h3>5. When is <code>void</code> the right return type?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">When a function returns an integer</button>
+            <button class="quiz-option" data-choice="1">When a function performs work but does not produce a value for its caller</button>
+            <button class="quiz-option" data-choice="2">When a function accepts named parameters</button>
+          </div>
+          <div class="quiz-feedback">Correct. Use <code>void</code> for a function whose caller does not receive a result.</div>
+        </div>
+
+        <div class="quiz" data-answer="2">
+          <h3>6. Why would you choose a block body instead of <code>=&gt;</code>?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">To make a function private</button>
+            <button class="quiz-option" data-choice="1">To make every parameter optional</button>
+            <button class="quiz-option" data-choice="2">When the function needs more than one statement</button>
+          </div>
+          <div class="quiz-feedback">Correct. Arrow syntax is for one expression; a block body can contain several statements.</div>
+        </div>
+
+        <div class="quiz" data-answer="0">
+          <h3>7. Where can a local variable declared inside a function be used?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Inside that function's scope</button>
+            <button class="quiz-option" data-choice="1">Anywhere in the Dart project</button>
+            <button class="quiz-option" data-choice="2">Only inside <code>main()</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. Local variables belong to the function or block where they are declared.</div>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="10">
+        <header class="step-header">
+          <span class="step-kicker">STEP 11 · FINAL TASK</span>
+          <h1>Build checkout helpers</h1>
+          <p class="lede">Create a small set of functions that could sit behind a Flutter checkout screen. Give every function one clear responsibility.</p>
+        </header>
+        <div class="challenge">
+          <h3>BUILD IT · Checkout helpers</h3>
+          <ol>
+            <li>Write <code>double calculateSubtotal(List&lt;double&gt; prices)</code> to add the item prices.</li>
+            <li>Write <code>double applyDiscount({required double subtotal, double discountPercent = 0})</code> that returns the discounted amount.</li>
+            <li>Write an arrow function named <code>formatPrice</code> that formats a total as rupees with two decimal places.</li>
+            <li>Write <code>void checkout(...)</code> with a required <code>onComplete</code> callback. It should calculate and print the final total, then call the callback with a success message.</li>
+            <li>Use a local variable or helper inside <code>checkout</code> to make the calculation easier to read.</li>
+          </ol>
+          <p><strong>Success condition:</strong> calling <code>checkout</code> with a list of prices and a discount prints a formatted total and then prints a completion message from the callback.</p>
+        </div>
+        <div class="panel yellow">
+          <strong>Flutter connection:</strong> in a Flutter app, the callback could update UI state, show a confirmation, or trigger navigation after the checkout logic completes.
+        </div>
+        <details class="reveal">
+          <summary>Need a starting point?</summary>
+          <div><pre><code>double calculateSubtotal(List&lt;double&gt; prices) {
+  var total = 0.0;
+  for (final price in prices) {
+    total += price;
+  }
+  return total;
+}
+
+double applyDiscount({
+  required double subtotal,
+  double discountPercent = 0,
+}) =&gt; subtotal - (subtotal * discountPercent / 100);</code></pre></div>
+        </details>
         <div class="finish" id="finishBox">
           <h2>Nice work. 🎯</h2>
           <p>You completed the Functions in Dart Codelab. The next step is repetition: write small functions, read existing function signatures, and notice how callbacks and named parameters appear in Flutter APIs.</p>
           <strong>Remember the design rule:</strong> make each function have a clear job, clear inputs, and a clear result when a result is needed.
         </div>
+        <p class="footer-note">Dart Functions Codelab · Beginner foundation · Next: Object-Oriented Programming in Dart.</p>
       </section>
     </div>
   </main>
@@ -943,7 +1020,8 @@ void main() {
     'Anonymous functions & callbacks',
     'Scope & local variables',
     'Put it together',
-    'Recap & knowledge check'
+    'Quiz: knowledge check',
+    'Final task: checkout helpers'
   ];
 
   let current = 0;
