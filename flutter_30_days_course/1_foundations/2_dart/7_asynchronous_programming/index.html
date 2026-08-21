@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dart Async Codelab — Learn Asynchronous Programming in Dart</title>
+  <meta name="description" content="An interactive beginner-friendly Dart codelab covering asynchronous work, Future, async and await, error handling, Future.wait, Stream, listening to updates, async generators, and loading states.">
+  <meta name="keywords" content="Dart asynchronous programming, Dart Future, async await Dart, Dart Stream, Future.wait, async generator, Flutter loading state">
+  <meta name="theme-color" content="#1769ff">
+  <meta property="og:title" content="Dart Asynchronous Programming Codelab">
+  <meta property="og:description" content="Learn how Dart handles values and events that arrive later through an interactive codelab.">
+  <meta property="og:type" content="article">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"LearningResource",
+    "name":"Dart Asynchronous Programming Codelab",
+    "description":"An interactive beginner-friendly tutorial covering Future, async and await, errors, Future.wait, Stream, and asynchronous generators in Dart.",
+    "learningResourceType":"Tutorial",
+    "educationalLevel":"Beginner",
+    "about":"Asynchronous Programming in Dart",
+    "inLanguage":"en"
+  }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root{
+      --blue:#1769ff;--blue-dark:#0b43b7;--blue-light:#dce9ff;--ink:#101010;
+      --paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;
+      --border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);
+      --sidebar:290px;--radius:4px
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:auto}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}
+    button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:var(--blue);border-right:var(--border);padding:22px 18px;z-index:20;overflow:auto}
+    .brand{background:#fff;border:var(--border);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:20px}
+    .eyebrow,.progress-meta,.step-number,.step-kicker,.footer-note{font-family:"DM Mono",monospace}
+    .eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+    .brand h2{margin:5px 0 3px;font-size:1.45rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}
+    .progress-wrap{color:#fff;margin:0 2px 20px}.progress-meta{display:flex;justify-content:space-between;gap:10px;font-size:.72rem;font-weight:500;margin-bottom:7px}
+    .progress-track{height:16px;background:#fff;border:var(--border);padding:2px}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}
+    .steps{display:grid;gap:9px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;text-align:left;color:#fff;background:transparent;border:3px solid transparent;padding:9px 8px;font-weight:700;line-height:1.15}
+    .step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}
+    .step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{font-size:1rem;text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;background:var(--blue);border-bottom:var(--border);padding:10px;align-items:center;gap:10px}
+    .mobile-bar strong{color:#fff}.menu-btn,.mobile-title{border:var(--border);background:#fff;box-shadow:var(--shadow-sm)}
+    .menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{padding:8px 10px;flex:1;font-weight:800}
+    main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}
+    .step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    @media(prefers-reduced-motion:reduce){.step-view.active{animation:none}.progress-bar{transition:none}}
+    .step-header{border:var(--border);background:#fff;box-shadow:var(--shadow);padding:28px;margin-bottom:24px}
+    .step-kicker{display:inline-block;background:var(--blue);color:#fff;border:2px solid var(--ink);padding:5px 9px;font-size:.72rem;font-weight:500;margin-bottom:13px}
+    h1,h2,h3{line-height:1.08}h1{font-size:clamp(2rem,5vw,3.7rem);margin:0 0 12px;letter-spacing:-.045em}
+    h2{font-size:clamp(1.55rem,3vw,2.25rem);margin:30px 0 12px}h3{font-size:1.15rem;margin:24px 0 9px}
+    .lede{font-size:1.08rem;max-width:760px;margin:0}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}
+    .callout{border:var(--border);box-shadow:var(--shadow-sm);padding:16px 18px;margin:20px 0;background:#fff}.callout .label{display:inline-block;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;border:2px solid var(--ink);background:var(--ink);color:#fff;padding:3px 7px;margin-bottom:8px}.callout p:last-child{margin-bottom:0}
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.concept{border:var(--border);padding:18px;background:#fff;box-shadow:var(--shadow-sm)}.concept strong{font-size:1.05rem}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;background:#111;color:#f7f7f7;border:var(--border);box-shadow:var(--shadow-sm);padding:20px;overflow:auto;font-family:"DM Mono",ui-monospace,monospace;font-size:.88rem;line-height:1.65;tab-size:2}
+    .copy-btn{position:absolute;top:8px;right:8px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:5px 9px;font-size:.75rem;font-weight:800;z-index:2}
+    .output{border:var(--border);border-top:0;background:#e9edf4;padding:13px 16px;font-family:"DM Mono",monospace;font-size:.83rem}.output strong{font-family:"Space Grotesk",sans-serif}
+    code:not(pre code){background:#e8edf7;border:1px solid #9da9bb;padding:1px 5px;font-family:"DM Mono",monospace;font-size:.88em}
+    ul,ol{padding-left:1.35rem}li{margin:7px 0}.syntax{background:#edf2ff;border:var(--border);padding:14px;font-family:"DM Mono",monospace;overflow:auto}
+    .quiz{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}
+    .quiz-option{text-align:left;border:2px solid var(--ink);background:#fff;padding:11px 13px;font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}
+    .quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}
+    .reveal{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;font-weight:800;background:var(--blue-light)}.reveal>div{padding:15px 16px}
+    .challenge{background:var(--ink);color:#fff;border:var(--border);box-shadow:var(--shadow);padding:22px;margin:24px 0}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:12px 18px;font-weight:900;min-width:130px}
+    .nav-btn.primary{background:var(--blue);color:#fff}.nav-btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:3px 3px 0 #777}
+    .finish{display:none;background:var(--mint);border:var(--border);box-shadow:var(--shadow);padding:20px;margin-top:24px}.finish.show{display:block}
+    .pill{display:inline-block;border:2px solid var(--ink);background:#fff;padding:4px 8px;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;margin:2px}.footer-note{margin-top:30px;font-size:.8rem;color:#555}
+    .comparison{width:100%;border-collapse:collapse;margin:18px 0;background:#fff;border:var(--border)}.comparison th,.comparison td{border:2px solid var(--ink);padding:11px;text-align:left;vertical-align:top}.comparison th{background:var(--blue);color:#fff}
+    .success{font-weight:800}.small{font-size:.92rem}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease;box-shadow:10px 0 0 rgba(16,16,16,.18)}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:600px){.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.grid-2{grid-template-columns:1fr}.nav-row{position:sticky;bottom:0;background:var(--paper);padding:12px 0;margin-left:-2px;margin-right:-2px;z-index:10}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{font-size:.78rem;padding:16px 12px}.copy-btn{position:static;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1;align-self:flex-end}.comparison{display:block;overflow-x:auto;white-space:normal}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand">
+      <div class="eyebrow">Dart Codelab</div>
+      <h2>Dart Async</h2>
+      <p>Handle work that finishes later.</p>
+    </div>
+    <div class="progress-wrap" aria-label="Lesson progress">
+      <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+      <div class="progress-track" role="progressbar" aria-label="Codelab progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+
+  <div class="mobile-bar">
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button>
+    <div class="mobile-title" id="mobileTitle">Async in Dart</div>
+  </div>
+
+  <main>
+    <div class="content" id="content">
+
+      <section class="step-view" data-step="0">
+        <header class="step-header">
+          <span class="step-kicker">STEP 1 · START HERE</span>
+          <h1>Asynchronous programming in Dart</h1>
+          <p class="lede">Apps often start work now and receive the result later. A server responds, a file finishes loading, or a timer fires. Dart uses <code>Future</code> for one eventual result and <code>Stream</code> for a sequence of results over time.</p>
+          <div class="objective"><strong>By the end:</strong> You will be able to read and write the asynchronous code used in Flutter apps, handle failures, run independent work together, consume streams, and represent loading, error, and success states.</div>
+        </header>
+        <div class="panel blue">
+          <h2>Why async matters</h2>
+          <p>Imagine tapping “Refresh.” The app should start the request, remain responsive while it waits, and update the screen when data or an error arrives. Asynchronous code gives the waiting a clear structure.</p>
+          <div class="grid-2">
+            <div class="concept"><strong>Network</strong><p>Wait for an API without freezing the rest of the app.</p></div>
+            <div class="concept"><strong>Files &amp; databases</strong><p>Continue useful work while input or output completes.</p></div>
+            <div class="concept"><strong>Timers</strong><p>Schedule something to happen after a duration.</p></div>
+            <div class="concept"><strong>Live updates</strong><p>React to many events such as location, messages, or button taps.</p></div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="panel mint"><strong>Prerequisites</strong><p>Variables, types, conditionals, loops, functions, collections, and basic classes in Dart.</p></div>
+          <div class="panel yellow"><strong>Mental model</strong><p>Start the work, keep the handle Dart returns, and decide what should happen when the work completes.</p></div>
+        </div>
+        <div class="callout"><span class="label">CORE IDEA</span><p><code>await</code> pauses the current async function; it does not freeze the whole program. Other work can continue while that function waits.</p></div>
+        <div class="callout"><span class="label">BEGINNER NOTE</span><p>You do not need to learn threads or the event loop yet. Start with this simple idea: some work finishes now, and some work gives you its result later.</p></div>
+      </section>
+
+      <section class="step-view" data-step="1">
+        <header class="step-header">
+          <span class="step-kicker">STEP 2 · THE DIFFERENCE</span>
+          <h1>Synchronous vs asynchronous work</h1>
+          <p class="lede">Synchronous code finishes one instruction before starting the next. Asynchronous code can start an operation, let later code run, and report its result when it is ready.</p>
+        </header>
+        <h2>Synchronous: each call finishes first</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="void prepareOrder() {
+  print('1. Take order');
+  print('2. Prepare order');
+  print('3. Serve order');
+}
+
+void main() {
+  prepareOrder();
+  print('4. Take next order');
+}">Copy</button>
+          <pre><code>void prepareOrder() {
+  print('1. Take order');
+  print('2. Prepare order');
+  print('3. Serve order');
+}
+
+void main() {
+  prepareOrder();
+  print('4. Take next order');
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>1. Take order<br>2. Prepare order<br>3. Serve order<br>4. Take next order</div>
+        </div>
+        <h2>Before the async example: create a delay</h2>
+        <p>The next example uses two Dart tools to represent cooking time. Learn these pieces first, then the complete example will be easier to read.</p>
+        <div class="grid-2">
+          <div class="concept"><strong><code>Duration</code></strong><p>Describes an amount of time. It does not pause anything by itself. For example, <code>Duration(seconds: 1)</code> represents one second.</p></div>
+          <div class="concept"><strong><code>Future.delayed()</code></strong><p>Creates a future that completes after the supplied duration. For now, think of a future as a receipt for work that will finish later.</p></div>
+        </div>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="const cookingTime = Duration(seconds: 1);
+final waiting = Future<void>.delayed(cookingTime);">Copy</button>
+          <pre><code>const cookingTime = Duration(seconds: 1);
+final waiting = Future&lt;void&gt;.delayed(cookingTime);</code></pre>
+        </div>
+        <div class="panel mint">
+          <strong>Read it in plain language:</strong> <code>cookingTime</code> describes a one-second period. <code>Future.delayed(cookingTime)</code> starts that timer and gives us <code>waiting</code>, which completes after one second. In the next example, <code>await</code> pauses <em>that function</em> until this future completes.
+        </div>
+        <h2>Asynchronous: start, continue, complete</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="Future<void> prepareOrder() async {
+  print('1. Start preparing');
+  await Future.delayed(const Duration(seconds: 1));
+  print('3. Order ready');
+}
+
+Future<void> main() async {
+  final order = prepareOrder();
+  print('2. Take next order');
+  await order;
+}">Copy</button>
+          <pre><code>Future&lt;void&gt; prepareOrder() async {
+  print('1. Start preparing');
+  await Future.delayed(const Duration(seconds: 1));
+  print('3. Order ready');
+}
+
+Future&lt;void&gt; main() async {
+  final order = prepareOrder();
+  print('2. Take next order');
+  await order;
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>1. Start preparing<br>2. Take next order<br>3. Order ready</div>
+        </div>
+        <table class="comparison">
+          <thead><tr><th>Kind</th><th>What the caller receives</th><th>Typical use</th></tr></thead>
+          <tbody>
+            <tr><td>Synchronous</td><td>The result immediately, or an error is thrown immediately.</td><td>Calculations and in-memory transformations.</td></tr>
+            <tr><td>Asynchronous</td><td>A <code>Future</code> or <code>Stream</code> representing later results.</td><td>Network, file, database, timer, and event work.</td></tr>
+          </tbody>
+        </table>
+        <div class="quiz" data-answer="1">
+          <h3>Quick check</h3>
+          <p>What happens while <code>prepareOrder()</code> awaits the delay?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">The entire Dart program is frozen</button>
+            <button class="quiz-option" data-choice="1">That async function pauses, and other code can run</button>
+            <button class="quiz-option" data-choice="2">The delay becomes synchronous</button>
+          </div>
+          <div class="quiz-feedback">Correct. The awaiting function pauses, but the program can continue other work.</div>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="2">
+        <header class="step-header">
+          <span class="step-kicker">STEP 3 · ONE LATER VALUE</span>
+          <h1><code>Future</code>: a result that arrives later</h1>
+          <p class="lede">A <code>Future&lt;T&gt;</code> is a handle to one asynchronous result. It eventually completes with a value of type <code>T</code> or with an error.</p>
+        </header>
+        <div class="grid-2">
+          <div class="concept"><strong>Uncompleted</strong><p>The operation is still running or waiting. Its value is not available yet.</p></div>
+          <div class="concept"><strong>Completed with a value</strong><p>The operation succeeded and produced its <code>T</code> value.</p></div>
+          <div class="concept"><strong>Completed with an error</strong><p>The operation failed. The error travels through the future.</p></div>
+          <div class="concept"><strong>Completed once</strong><p>A future produces one completion. Use a stream when results keep arriving.</p></div>
+        </div>
+        <h2>Read the return type</h2>
+        <div class="syntax">Future&lt;int&gt; → one integer later<br>Future&lt;String&gt; → one string later<br>Future&lt;void&gt; → finishes later without returning a value</div>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="Future<String> fetchUsername() {
+  return Future.delayed(
+    const Duration(seconds: 1),
+    () => 'Asha',
+  );
+}
+
+Future<void> main() async {
+  final Future<String> usernameLater = fetchUsername();
+  print('Request started');
+
+  final String username = await usernameLater;
+  print('Hello, $username!');
+}">Copy</button>
+          <pre><code>Future&lt;String&gt; fetchUsername() {
+  return Future.delayed(
+    const Duration(seconds: 1),
+    () =&gt; 'Asha',
+  );
+}
+
+Future&lt;void&gt; main() async {
+  final Future&lt;String&gt; usernameLater = fetchUsername();
+  print('Request started');
+
+  final String username = await usernameLater;
+  print('Hello, $username!');
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Request started<br>Hello, Asha!</div>
+        </div>
+        <div class="callout"><span class="label">COMMON MISTAKE</span><p>A <code>Future&lt;String&gt;</code> is not a <code>String</code>. It is a promise that a string will arrive later. In the next lessons, you will use <code>then()</code> and <code>await</code> to receive it.</p></div>
+      </section>
+
+      <section class="step-view" data-step="3">
+        <header class="step-header">
+          <span class="step-kicker">STEP 4 · YOUR FIRST FUTURE</span>
+          <h1>Create and receive a future</h1>
+          <p class="lede">Let us use one small function throughout this lesson. It waits for one second, then provides a score.</p>
+        </header>
+        <h2>1. Create the future</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="Future<int> fetchScore() {
+  return Future.delayed(
+    const Duration(seconds: 1),
+    () => 95,
+  );
+}">Copy</button>
+          <pre><code>Future&lt;int&gt; fetchScore() {
+  return Future.delayed(
+    const Duration(seconds: 1),
+    () =&gt; 95,
+  );
+}</code></pre>
+        </div>
+        <div class="panel blue">
+          <strong>Read it one line at a time:</strong>
+          <ol>
+            <li><code>Future&lt;int&gt;</code> says the function will provide one integer later.</li>
+            <li><code>Duration(seconds: 1)</code> describes how long to wait.</li>
+            <li><code>() =&gt; 95</code> supplies the value when the delay finishes.</li>
+          </ol>
+        </div>
+        <h2>2. Receive it with <code>then()</code></h2>
+        <p><code>then()</code> means “run this function when the future succeeds.” The parameter named <code>score</code> receives the completed value.</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="Future<int> fetchScore() {
+  return Future.delayed(
+    const Duration(seconds: 1),
+    () => 95,
+  );
+}
+
+void main() {
+  print('Fetching score...');
+  fetchScore().then((score) {
+    print('Score: $score');
+  });
+}">Copy</button>
+          <pre><code>Future&lt;int&gt; fetchScore() {
+  return Future.delayed(
+    const Duration(seconds: 1),
+    () =&gt; 95,
+  );
+}
+
+void main() {
+  print('Fetching score...');
+  fetchScore().then((score) {
+    print('Score: $score');
+  });
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Fetching score...<br>Score: 95</div>
+        </div>
+        <div class="panel mint"><strong>About <code>Future.value(95)</code>:</strong> it creates a future whose value is already available. It adds no timer or intentional delay. Beginners can usually return a value from an <code>async</code> function instead, so we will not use <code>Future.value()</code> in the main examples.</div>
+        <div class="callout"><span class="label">NEXT</span><p><code>then()</code> works, but nested callbacks can become hard to read. The next lesson introduces <code>async</code> and <code>await</code>, which make the same idea read from top to bottom.</p></div>
+      </section>
+
+      <section class="step-view" data-step="4">
+        <header class="step-header">
+          <span class="step-kicker">STEP 5 · ASYNC &amp; AWAIT</span>
+          <h1>Make future code easier to read</h1>
+          <p class="lede"><code>async</code> lets a function use <code>await</code>. <code>await</code> pauses that function until a future finishes and gives you its value.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="Future<int> fetchScore() async {
+  await Future.delayed(const Duration(seconds: 1));
+  return 95;
+}
+
+Future<void> main() async {
+  print('Fetching score...');
+  final score = await fetchScore();
+  print('Score: $score');
+}">Copy</button>
+          <pre><code>Future&lt;int&gt; fetchScore() async {
+  await Future.delayed(const Duration(seconds: 1));
+  return 95;
+}
+
+Future&lt;void&gt; main() async {
+  print('Fetching score...');
+  final score = await fetchScore();
+  print('Score: $score');
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Fetching score...<br>Score: 95</div>
+        </div>
+        <div class="panel blue">
+          <strong>Read it one line at a time:</strong>
+          <ol>
+            <li><code>main() async</code> allows <code>main</code> to use <code>await</code>.</li>
+            <li><code>fetchScore()</code> starts the delayed work.</li>
+            <li><code>await</code> pauses <code>main</code> until the score arrives.</li>
+            <li>The completed integer is stored in <code>score</code>.</li>
+          </ol>
+        </div>
+        <div class="quiz" data-answer="2">
+          <h3>Quick check</h3>
+          <p>What value is stored in <code>score</code>?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">A <code>Duration</code> object</button>
+            <button class="quiz-option" data-choice="1">The unfinished <code>Future&lt;int&gt;</code></button>
+            <button class="quiz-option" data-choice="2">The completed integer <code>95</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. <code>await</code> unwraps the completed future value, so <code>score</code> is an integer.</div>
+        </div>
+        <div class="callout"><span class="label">REMEMBER</span><p>Put <code>async</code> on the function. Put <code>await</code> before the future you want to wait for.</p></div>
+      </section>
+
+      <section class="step-view" data-step="5">
+        <header class="step-header">
+          <span class="step-kicker">STEP 6 · FAILURES</span>
+          <h1>What if the future fails?</h1>
+          <p class="lede">A future can finish with a value or an error. Put an awaited call inside <code>try</code> and use <code>catch</code> to show what should happen when it fails.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="Future<int> fetchScore() async {
+  await Future.delayed(const Duration(seconds: 1));
+  throw Exception('Could not load score');
+}
+
+Future<void> main() async {
+  print('Loading...');
+  try {
+    final score = await fetchScore();
+    print('Score: $score');
+  } catch (error) {
+    print('Something went wrong: $error');
+  } finally {
+    print('Finished');
+  }
+}">Copy</button>
+          <pre><code>Future&lt;int&gt; fetchScore() async {
+  await Future.delayed(const Duration(seconds: 1));
+  throw Exception('Could not load score');
+}
+
+Future&lt;void&gt; main() async {
+  print('Loading...');
+  try {
+    final score = await fetchScore();
+    print('Score: $score');
+  } catch (error) {
+    print('Something went wrong: $error');
+  } finally {
+    print('Finished');
+  }
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Loading...<br>Something went wrong: Exception: Could not load score<br>Finished</div>
+        </div>
+        <div class="panel blue">
+          <strong>Three simple jobs:</strong>
+          <ul>
+            <li><code>try</code>: run the code that might fail.</li>
+            <li><code>catch</code>: respond if it fails.</li>
+            <li><code>finally</code>: run one last action after success or failure.</li>
+          </ul>
+        </div>
+        <div class="callout"><span class="label">TRY IT</span><p>Replace the <code>throw</code> line with <code>return 95;</code>. Now the <code>try</code> block succeeds, <code>catch</code> is skipped, and <code>finally</code> still prints <code>Finished</code>.</p></div>
+      </section>
+
+      <section class="step-view" data-step="6">
+        <header class="step-header">
+          <span class="step-kicker">STEP 7 · TWO TASKS</span>
+          <h1>Wait for two futures together</h1>
+          <p class="lede">Sometimes a page needs two separate pieces of data. If neither one needs the other's result, <code>Future.wait</code> can start both and wait until both are ready.</p>
+        </header>
+        <h2>Sequential waits</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="final user = await fetchUser();
+final settings = await fetchSettings();">Copy</button>
+          <pre><code>final user = await fetchUser();
+final settings = await fetchSettings();</code></pre>
+        </div>
+        <p>Here, <code>fetchSettings()</code> starts only after <code>fetchUser()</code> finishes.</p>
+        <h2>Use <code>Future.wait</code></h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="Future<String> fetchUser() async {
+  await Future.delayed(const Duration(seconds: 1));
+  return 'Asha';
+}
+
+Future<String> fetchSettings() async {
+  await Future.delayed(const Duration(seconds: 1));
+  return 'dark mode';
+}
+
+Future<void> main() async {
+  final results = await Future.wait([
+    fetchUser(),
+    fetchSettings(),
+  ]);
+
+  print('User: ${results[0]}');
+  print('Settings: ${results[1]}');
+}">Copy</button>
+          <pre><code>Future&lt;String&gt; fetchUser() async {
+  await Future.delayed(const Duration(seconds: 1));
+  return 'Asha';
+}
+
+Future&lt;String&gt; fetchSettings() async {
+  await Future.delayed(const Duration(seconds: 1));
+  return 'dark mode';
+}
+
+Future&lt;void&gt; main() async {
+  final results = await Future.wait([
+    fetchUser(),
+    fetchSettings(),
+  ]);
+
+  print('User: ${results[0]}');
+  print('Settings: ${results[1]}');
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>User: Asha<br>Settings: dark mode</div>
+        </div>
+        <div class="panel blue">
+          <strong>Read it step by step:</strong>
+          <ol>
+            <li><code>fetchUser()</code> and <code>fetchSettings()</code> both start.</li>
+            <li><code>await</code> waits until both futures finish.</li>
+            <li><code>results[0]</code> belongs to the first future in the list.</li>
+            <li><code>results[1]</code> belongs to the second future.</li>
+          </ol>
+        </div>
+        <div class="quiz" data-answer="0">
+          <h3>Quick check</h3>
+          <p>When should two calls usually be awaited sequentially?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">When the second call needs the first call's result</button>
+            <button class="quiz-option" data-choice="1">Whenever both return a <code>Future</code></button>
+            <button class="quiz-option" data-choice="2">Only when both calls use a timer</button>
+          </div>
+          <div class="quiz-feedback">Correct. A data dependency requires ordering; independent work can usually start together.</div>
+        </div>
+        <div class="callout"><span class="label">SIMPLE RULE</span><p>If task B needs the result from task A, await them one after another. If they are unrelated, you can use <code>Future.wait</code>.</p></div>
+      </section>
+
+      <section class="step-view" data-step="7">
+        <header class="step-header">
+          <span class="step-kicker">STEP 8 · MANY LATER VALUES</span>
+          <h1><code>Stream</code>: values over time</h1>
+          <p class="lede">A future gives you one result. A stream can give you several results, one after another.</p>
+        </header>
+        <table class="comparison">
+          <thead><tr><th>Type</th><th>Think of it as</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td><code>Future&lt;int&gt;</code></td><td>One package delivered later</td><td>One score: <code>95</code></td></tr>
+            <tr><td><code>Stream&lt;int&gt;</code></td><td>Several packages delivered over time</td><td>Progress: <code>25, 50, 75, 100</code></td></tr>
+          </tbody>
+        </table>
+        <h2>Read each value with <code>await for</code></h2>
+        <p><code>Stream.fromIterable()</code> turns a list into a simple stream. <code>await for</code> runs once for every value.</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="Stream<int> progressUpdates() {
+  return Stream.fromIterable([25, 50, 75, 100]);
+}
+
+Future<void> main() async {
+  await for (final percent in progressUpdates()) {
+    print('Downloaded $percent%');
+  }
+  print('Done');
+}">Copy</button>
+          <pre><code>Stream&lt;int&gt; progressUpdates() {
+  return Stream.fromIterable([25, 50, 75, 100]);
+}
+
+Future&lt;void&gt; main() async {
+  await for (final percent in progressUpdates()) {
+    print('Downloaded $percent%');
+  }
+  print('Done');
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Downloaded 25%<br>Downloaded 50%<br>Downloaded 75%<br>Downloaded 100%<br>Done</div>
+        </div>
+        <div class="panel blue">
+          <strong>Read it step by step:</strong>
+          <ol>
+            <li>The stream provides <code>25</code>.</li>
+            <li>The loop prints it and waits for the next value.</li>
+            <li>The same thing happens for <code>50</code>, <code>75</code>, and <code>100</code>.</li>
+            <li>When there are no more values, the loop ends and prints <code>Done</code>.</li>
+          </ol>
+        </div>
+        <div class="callout"><span class="label">REMEMBER</span><p>Use a future for one result. Use a stream when several updates can arrive.</p></div>
+      </section>
+
+      <section class="step-view" data-step="8">
+        <header class="step-header">
+          <span class="step-kicker">STEP 9 · LISTEN</span>
+          <h1>Listen to a stream</h1>
+          <p class="lede"><code>listen()</code> is another way to receive stream values. You give it a small function that runs whenever a value arrives.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="Stream<String> statusUpdates() {
+  return Stream.fromIterable([
+    'Preparing',
+    'Cooking',
+    'Ready',
+  ]);
+}
+
+void main() {
+  statusUpdates().listen(
+    (status) => print('Status: $status'),
+    onDone: () => print('Stream closed'),
+  );
+}">Copy</button>
+          <pre><code>Stream&lt;String&gt; statusUpdates() {
+  return Stream.fromIterable([
+    'Preparing',
+    'Cooking',
+    'Ready',
+  ]);
+}
+
+void main() {
+  statusUpdates().listen(
+    (status) =&gt; print('Status: $status'),
+    onDone: () =&gt; print('Stream closed'),
+  );
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Status: Preparing<br>Status: Cooking<br>Status: Ready<br>Stream closed</div>
+        </div>
+        <div class="grid-2">
+          <div class="concept"><strong>First function</strong><p><code>(status) =&gt; ...</code> runs for every value.</p></div>
+          <div class="concept"><strong><code>onDone</code></strong><p>Runs once when the stream has no more values.</p></div>
+        </div>
+        <h2>Handle a stream error</h2>
+        <p>Add <code>onError</code> when a stream might fail. This example creates an error stream only to demonstrate the callback.</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="void main() {
+  final updates = Stream<int>.error(
+    Exception('No connection'),
+  );
+
+  updates.listen(
+    (value) => print(value),
+    onError: (error) => print('Error: $error'),
+  );
+}">Copy</button>
+          <pre><code>void main() {
+  final updates = Stream&lt;int&gt;.error(
+    Exception('No connection'),
+  );
+
+  updates.listen(
+    (value) =&gt; print(value),
+    onError: (error) =&gt; print('Error: $error'),
+  );
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Error: Exception: No connection</div>
+        </div>
+        <div class="callout"><span class="label">FOR NOW</span><p>Focus on three ideas: a value arrives, an error happens, or the stream finishes. Subscription pause and cancel controls can wait until you build a real Flutter screen.</p></div>
+      </section>
+
+      <section class="step-view" data-step="9">
+        <header class="step-header">
+          <span class="step-kicker">STEP 10 · GENERATORS</span>
+          <h1>Your first <code>async*</code> stream</h1>
+          <p class="lede"><code>async*</code> marks a function that creates a stream. Inside it, <code>yield</code> sends one value to the listener.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="Stream<int> countdown(int from) async* {
+  for (var value = from; value >= 1; value--) {
+    await Future.delayed(const Duration(seconds: 1));
+    yield value;
+  }
+}
+
+Future<void> main() async {
+  await for (final value in countdown(3)) {
+    print(value);
+  }
+  print('Go!');
+}">Copy</button>
+          <pre><code>Stream&lt;int&gt; countdown(int from) async* {
+  for (var value = from; value &gt;= 1; value--) {
+    await Future.delayed(const Duration(seconds: 1));
+    yield value;
+  }
+}
+
+Future&lt;void&gt; main() async {
+  await for (final value in countdown(3)) {
+    print(value);
+  }
+  print('Go!');
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>3<br>2<br>1<br>Go!</div>
+        </div>
+        <div class="panel blue">
+          <strong>Only three new pieces:</strong>
+          <ol>
+            <li><code>Stream&lt;int&gt;</code>: this function provides several integers.</li>
+            <li><code>async*</code>: this function is an asynchronous stream generator.</li>
+            <li><code>yield value</code>: send one value into the stream.</li>
+          </ol>
+        </div>
+        <div class="callout"><span class="label">DO NOT OVERTHINK IT</span><p>For this course, remember: <code>async</code> creates a future-producing function, while <code>async*</code> creates a stream-producing function.</p></div>
+      </section>
+
+      <section class="step-view" data-step="10">
+        <header class="step-header">
+          <span class="step-kicker">STEP 11 · APP STATE</span>
+          <h1>Loading, error &amp; success states</h1>
+          <p class="lede">While a screen waits for data, the user should know what is happening. Start with three simple states: loading, success, and error.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="Future<List<String>> fetchProducts() async {
+  await Future.delayed(const Duration(seconds: 1));
+  return ['Keyboard', 'Mouse'];
+}
+
+Future<void> loadProducts() async {
+  print('Loading...');
+  try {
+    final products = await fetchProducts();
+    print('Success: $products');
+  } catch (error) {
+    print('Error: $error');
+  }
+}
+
+Future<void> main() => loadProducts();">Copy</button>
+          <pre><code>Future&lt;List&lt;String&gt;&gt; fetchProducts() async {
+  await Future.delayed(const Duration(seconds: 1));
+  return ['Keyboard', 'Mouse'];
+}
+
+Future&lt;void&gt; loadProducts() async {
+  print('Loading...');
+  try {
+    final products = await fetchProducts();
+    print('Success: $products');
+  } catch (error) {
+    print('Error: $error');
+  }
+}
+
+Future&lt;void&gt; main() =&gt; loadProducts();</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Loading...<br>Success: [Keyboard, Mouse]</div>
+        </div>
+        <div class="grid-2">
+          <div class="concept"><strong>Loading</strong><p>Show a spinner or the words “Loading...” while waiting.</p></div>
+          <div class="concept"><strong>Success</strong><p>Show the data when the future returns successfully.</p></div>
+          <div class="concept"><strong>Error</strong><p>Show a friendly message if the future throws an error.</p></div>
+        </div>
+        <div class="callout"><span class="label">FLUTTER CONNECTION</span><p>Later, these three print statements can become three UI views: a progress indicator, the product list, or an error message.</p></div>
+      </section>
+
+      <section class="step-view" data-step="11">
+        <header class="step-header">
+          <span class="step-kicker">STEP 12 · PUT IT TOGETHER</span>
+          <h1>Practice: load data and read updates</h1>
+          <p class="lede">This final example combines one future with one small stream. Notice that each part uses syntax you have already learned.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="Future<String> loadOrder() async {
+  await Future.delayed(const Duration(seconds: 1));
+  return 'Veg burger';
+}
+
+Stream<String> orderUpdates() async* {
+  yield 'Preparing';
+  yield 'Cooking';
+  yield 'Ready';
+}
+
+Future<void> main() async {
+  print('Loading order...');
+  try {
+    final order = await loadOrder();
+    print('Order: $order');
+
+    await for (final status in orderUpdates()) {
+      print('Status: $status');
+    }
+  } catch (error) {
+    print('Error: $error');
+  }
+}">Copy</button>
+          <pre><code>Future&lt;String&gt; loadOrder() async {
+  await Future.delayed(const Duration(seconds: 1));
+  return 'Veg burger';
+}
+
+Stream&lt;String&gt; orderUpdates() async* {
+  yield 'Preparing';
+  yield 'Cooking';
+  yield 'Ready';
+}
+
+Future&lt;void&gt; main() async {
+  print('Loading order...');
+  try {
+    final order = await loadOrder();
+    print('Order: $order');
+
+    await for (final status in orderUpdates()) {
+      print('Status: $status');
+    }
+  } catch (error) {
+    print('Error: $error');
+  }
+}</code></pre>
+          <div class="output"><strong>Expected Output</strong><br>Loading order...<br>Order: Veg burger<br>Status: Preparing<br>Status: Cooking<br>Status: Ready</div>
+        </div>
+        <div class="grid-2">
+          <div class="concept"><strong>One order</strong><p><code>loadOrder()</code> returns a future because the order name arrives once.</p></div>
+          <div class="concept"><strong>Several statuses</strong><p><code>orderUpdates()</code> returns a stream because several status values arrive.</p></div>
+        </div>
+        <div class="challenge">
+          <h3>TRY IT · Small changes</h3>
+          <ol>
+            <li>Change the order name.</li>
+            <li>Add a fourth status named <code>Delivered</code>.</li>
+            <li>Replace <code>return 'Veg burger';</code> with an exception and observe the error output.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="12">
+        <header class="step-header">
+          <span class="step-kicker">STEP 13 · FINAL CHECK</span>
+          <h1>Async recap &amp; knowledge check</h1>
+          <p class="lede">You now have the foundation for the asynchronous code used throughout Flutter. Check the mental model before moving to the final build.</p>
+        </header>
+        <div class="panel blue">
+          <h2>The async checklist</h2>
+          <p>
+            <span class="pill">synchronous</span><span class="pill">asynchronous</span><span class="pill">Future&lt;T&gt;</span>
+            <span class="pill">async</span><span class="pill">await</span><span class="pill">then</span>
+            <span class="pill">try</span><span class="pill">catch</span><span class="pill">finally</span><span class="pill">Future.wait</span>
+            <span class="pill">Stream&lt;T&gt;</span><span class="pill">await for</span><span class="pill">listen</span>
+            <span class="pill">async*</span><span class="pill">yield</span>
+          </p>
+        </div>
+
+        <div class="quiz" data-answer="1">
+          <h3>1. What does a <code>Future&lt;String&gt;</code> represent?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Many string values over time</button>
+            <button class="quiz-option" data-choice="1">One string value or error that completes later</button>
+            <button class="quiz-option" data-choice="2">A nullable string available immediately</button>
+          </div>
+          <div class="quiz-feedback">Correct. A future has one eventual completion: a value or an error.</div>
+        </div>
+
+        <div class="quiz" data-answer="0">
+          <h3>2. Where can you use <code>await</code>?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Inside an <code>async</code> or <code>async*</code> function</button>
+            <button class="quiz-option" data-choice="1">Inside any synchronous function</button>
+            <button class="quiz-option" data-choice="2">Only inside a class constructor</button>
+          </div>
+          <div class="quiz-feedback">Correct. The containing function must be asynchronous.</div>
+        </div>
+
+        <div class="quiz" data-answer="2">
+          <h3>3. What does <code>await</code> pause?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Every program on the device</button>
+            <button class="quiz-option" data-choice="1">Every function in the program</button>
+            <button class="quiz-option" data-choice="2">The current async function until the future completes</button>
+          </div>
+          <div class="quiz-feedback">Correct. Other work can continue while the current async function waits.</div>
+        </div>
+
+        <div class="quiz" data-answer="1">
+          <h3>4. What is <code>finally</code> useful for?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Turning a stream into a future</button>
+            <button class="quiz-option" data-choice="1">Cleanup that must happen after success or failure</button>
+            <button class="quiz-option" data-choice="2">Making errors impossible</button>
+          </div>
+          <div class="quiz-feedback">Correct. A finally block runs after either path.</div>
+        </div>
+
+        <div class="quiz" data-answer="0">
+          <h3>5. When is <code>Future.wait</code> a good fit?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Several independent futures must all complete</button>
+            <button class="quiz-option" data-choice="1">A second call requires the first call's value</button>
+            <button class="quiz-option" data-choice="2">An endless stream emits UI events</button>
+          </div>
+          <div class="quiz-feedback">Correct. It combines independent future completions into one future.</div>
+        </div>
+
+        <div class="quiz" data-answer="2">
+          <h3>6. What does a <code>Stream&lt;int&gt;</code> provide?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Exactly one integer</button>
+            <button class="quiz-option" data-choice="1">A string available immediately</button>
+            <button class="quiz-option" data-choice="2">Several integer values over time</button>
+          </div>
+          <div class="quiz-feedback">Correct. A stream can provide several values, one after another.</div>
+        </div>
+
+        <div class="quiz" data-answer="2">
+          <h3>7. Which return type matches an <code>async*</code> function?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0"><code>void</code></button>
+            <button class="quiz-option" data-choice="1"><code>Future&lt;T&gt;</code></button>
+            <button class="quiz-option" data-choice="2"><code>Stream&lt;T&gt;</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. An asynchronous generator returns a stream.</div>
+        </div>
+
+        <div class="quiz" data-answer="1">
+          <h3>8. What does <code>yield</code> do?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Closes the stream immediately</button>
+            <button class="quiz-option" data-choice="1">Emits one event from a generator</button>
+            <button class="quiz-option" data-choice="2">Awaits every future in a list</button>
+          </div>
+          <div class="quiz-feedback">Correct. The generator emits one data event and can continue later.</div>
+        </div>
+
+        <div class="quiz" data-answer="0">
+          <h3>9. Which state should be shown before awaiting a network request?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Loading</button>
+            <button class="quiz-option" data-choice="1">Success</button>
+            <button class="quiz-option" data-choice="2">Done forever</button>
+          </div>
+          <div class="quiz-feedback">Correct. Loading gives the UI an honest state while it waits.</div>
+        </div>
+
+      </section>
+
+      <section class="step-view" data-step="13">
+        <header class="step-header">
+          <span class="step-kicker">STEP 14 · FINAL TASK</span>
+          <h1>Build an order tracker</h1>
+          <p class="lede">Finish with the same restaurant idea from Step 2. Build it one small function at a time.</p>
+        </header>
+        <div class="challenge">
+          <h3>BUILD IT · Restaurant order</h3>
+          <ol>
+            <li>Create <code>prepareOrder()</code>. Wait for one second, then return an order name.</li>
+            <li>In <code>main()</code>, print <code>Loading...</code> before awaiting the order.</li>
+            <li>Use <code>try</code>/<code>catch</code> and print either the order or an error.</li>
+            <li>Create <code>orderStatuses()</code> with <code>async*</code> and yield three status strings.</li>
+            <li>Use <code>await for</code> to print every status.</li>
+          </ol>
+          <p><strong>Success condition:</strong> the program prints a loading message, one completed order, and three status updates.</p>
+        </div>
+        <div class="panel yellow">
+          <strong>Suggested build order:</strong> make <code>prepareOrder()</code> work first. Add <code>try</code>/<code>catch</code>. Create the status stream last.
+        </div>
+        <details class="reveal">
+          <summary>Reveal one possible solution</summary>
+          <div>
+            <div class="code-wrap">
+              <button class="copy-btn" data-copy="Future<String> prepareOrder() async {
+  await Future.delayed(const Duration(seconds: 1));
+  return 'Veg burger';
+}
+
+Stream<String> orderStatuses() async* {
+  yield 'Preparing';
+  yield 'Cooking';
+  yield 'Ready';
+}
+
+Future<void> main() async {
+  print('Loading...');
+  try {
+    final order = await prepareOrder();
+    print('Order: $order');
+
+    await for (final status in orderStatuses()) {
+      print('Status: $status');
+    }
+  } catch (error) {
+    print('Error: $error');
+  }
+}">Copy</button>
+              <pre><code>Future&lt;String&gt; prepareOrder() async {
+  await Future.delayed(const Duration(seconds: 1));
+  return 'Veg burger';
+}
+
+Stream&lt;String&gt; orderStatuses() async* {
+  yield 'Preparing';
+  yield 'Cooking';
+  yield 'Ready';
+}
+
+Future&lt;void&gt; main() async {
+  print('Loading...');
+  try {
+    final order = await prepareOrder();
+    print('Order: $order');
+
+    await for (final status in orderStatuses()) {
+      print('Status: $status');
+    }
+  } catch (error) {
+    print('Error: $error');
+  }
+}</code></pre>
+            </div>
+          </div>
+        </details>
+        <div class="finish" id="finishBox">
+          <h2>Async foundation complete. ⚡</h2>
+          <p>You completed the Asynchronous Programming in Dart codelab. You can now wait for one result with a future and read several updates from a stream.</p>
+          <strong>Remember:</strong> use <code>async</code>/<code>await</code> for futures, <code>await for</code> for streams, and <code>try</code>/<code>catch</code> when work can fail.
+        </div>
+        <p class="footer-note">Dart Asynchronous Programming Codelab · Beginner foundation · Designed as a companion to the OOP in Dart Codelab.</p>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const steps = [...document.querySelectorAll('.step-view')];
+  const nav = document.getElementById('stepNav');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const progressTrack = document.querySelector('.progress-track');
+  const content = document.getElementById('content');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileTitle = document.getElementById('mobileTitle');
+  const titles = [
+    'Start: Why async?',
+    'Sync vs async',
+    'Future: one later value',
+    'Create your first Future',
+    'async & await',
+    'What if a Future fails?',
+    'Wait for two Futures',
+    'Stream: values over time',
+    'Listen to a Stream',
+    'Your first async* Stream',
+    'Loading, error & success',
+    'Practice: order updates',
+    'Quiz: knowledge check',
+    'Final task: order tracker'
+  ];
+
+  let current = 0;
+  const completed = new Set();
+
+  function buildNav() {
+    nav.innerHTML = titles.map((title, i) => `
+      <button class="step-link" data-step="${i}" aria-current="${i === 0 ? 'step' : 'false'}" type="button">
+        <span class="step-number">${String(i + 1).padStart(2, '0')}</span>
+        <span>${title}</span>
+        <span class="step-status" aria-hidden="true"></span>
+      </button>
+    `).join('');
+  }
+
+  function getHashStep() {
+    const match = location.hash.match(/^#step-(\d+)$/);
+    if (!match) return 0;
+    const value = Number(match[1]) - 1;
+    return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+  }
+
+  function updateNavButtons() {
+    const prev = document.getElementById('prevBtn');
+    const next = document.getElementById('nextBtn');
+    if (!prev || !next) return;
+    prev.disabled = current === 0;
+    next.disabled = current === steps.length - 1;
+    next.textContent = current === steps.length - 1 ? 'Complete' : 'Next →';
+  }
+
+  function render(updateHash = true) {
+    current = Math.max(0, Math.min(current, steps.length - 1));
+    steps.forEach((step, i) => {
+      step.classList.toggle('active', i === current);
+      step.setAttribute('aria-hidden', i === current ? 'false' : 'true');
+    });
+    document.querySelectorAll('.step-link').forEach((button, i) => {
+      const active = i === current;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-current', active ? 'step' : 'false');
+      button.querySelector('.step-status').textContent = completed.has(i) ? '✓' : '';
+    });
+
+    const percent = Math.round(((current + 1) / steps.length) * 100);
+    progressBar.style.width = `${percent}%`;
+    progressText.textContent = `${percent}%`;
+    progressTrack.setAttribute('aria-valuenow', String(percent));
+    mobileTitle.textContent = titles[current];
+
+    if (updateHash) history.pushState({step: current}, '', `#step-${current + 1}`);
+    window.scrollTo({top: 0, behavior: 'auto'});
+
+    if (current === steps.length - 1) {
+      document.getElementById('finishBox').classList.toggle('show', completed.size >= steps.length - 1);
+    }
+    document.title = `${titles[current]} — Dart Async Codelab`;
+
+    if (window.innerWidth <= 850) {
+      sidebar.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    }
+    updateNavButtons();
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= steps.length) return;
+    completed.add(current);
+    current = index;
+    render();
+  }
+
+  buildNav();
+  current = getHashStep();
+  render(false);
+
+  nav.addEventListener('click', e => {
+    const button = e.target.closest('.step-link');
+    if (button) goTo(Number(button.dataset.step));
+  });
+
+  document.addEventListener('click', async e => {
+    const copy = e.target.closest('.copy-btn');
+    if (copy) {
+      try {
+        await navigator.clipboard.writeText(copy.dataset.copy);
+        const old = copy.textContent;
+        copy.textContent = 'Copied!';
+        setTimeout(() => copy.textContent = old, 1100);
+      } catch {
+        copy.textContent = 'Select & copy';
+        setTimeout(() => copy.textContent = 'Copy', 1200);
+      }
+      return;
+    }
+
+    const option = e.target.closest('.quiz-option');
+    if (option) {
+      const quiz = option.closest('.quiz');
+      if (quiz.dataset.answered === 'true') return;
+      const answer = Number(quiz.dataset.answer);
+      const choice = Number(option.dataset.choice);
+      quiz.dataset.answered = 'true';
+      quiz.querySelectorAll('.quiz-option').forEach(btn => {
+        btn.classList.remove('correct', 'wrong');
+        btn.disabled = true;
+      });
+      option.classList.add(choice === answer ? 'correct' : 'wrong');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      feedback.classList.add('show');
+      if (choice !== answer) {
+        feedback.textContent = `Not quite. The correct answer is option ${answer + 1}.`;
+      }
+    }
+  });
+
+  const navRow = document.createElement('div');
+  navRow.className = 'nav-row';
+  navRow.innerHTML = `
+    <button class="nav-btn" id="prevBtn" type="button">← Previous</button>
+    <button class="nav-btn primary" id="nextBtn" type="button">Next →</button>
+  `;
+  content.appendChild(navRow);
+  updateNavButtons();
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if (current < steps.length - 1) goTo(current + 1);
+  });
+
+  menuBtn.addEventListener('click', () => {
+    const open = sidebar.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+    if (open) sidebar.querySelector('.step-link.active')?.focus();
+  });
+
+  window.addEventListener('hashchange', () => {
+    current = getHashStep();
+    render(false);
+  });
+
+  window.addEventListener('popstate', () => {
+    current = getHashStep();
+    render(false);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const tag = document.activeElement?.tagName;
+    if (['INPUT','TEXTAREA','SELECT'].includes(tag)) return;
+    if (e.key === 'ArrowRight' && current < steps.length - 1) {
+      e.preventDefault();
+      goTo(current + 1);
+    }
+    if (e.key === 'ArrowLeft' && current > 0) {
+      e.preventDefault();
+      goTo(current - 1);
+    }
+  });
+})();
+</script>
+</body>
+</html>
