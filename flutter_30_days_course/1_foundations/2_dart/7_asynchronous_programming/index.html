@@ -159,6 +159,21 @@ void main() {
 }</code></pre>
           <div class="output"><strong>Expected Output</strong><br>1. Take order<br>2. Prepare order<br>3. Serve order<br>4. Take next order</div>
         </div>
+        <h2>Before the async example: create a delay</h2>
+        <p>The next example uses two Dart tools to represent cooking time. Learn these pieces first, then the complete example will be easier to read.</p>
+        <div class="grid-2">
+          <div class="concept"><strong><code>Duration</code></strong><p>Describes an amount of time. It does not pause anything by itself. For example, <code>Duration(seconds: 1)</code> represents one second.</p></div>
+          <div class="concept"><strong><code>Future.delayed()</code></strong><p>Creates a future that completes after the supplied duration. For now, think of a future as a receipt for work that will finish later.</p></div>
+        </div>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="const cookingTime = Duration(seconds: 1);
+final waiting = Future<void>.delayed(cookingTime);">Copy</button>
+          <pre><code>const cookingTime = Duration(seconds: 1);
+final waiting = Future&lt;void&gt;.delayed(cookingTime);</code></pre>
+        </div>
+        <div class="panel mint">
+          <strong>Read it in plain language:</strong> <code>cookingTime</code> describes a one-second period. <code>Future.delayed(cookingTime)</code> starts that timer and gives us <code>waiting</code>, which completes after one second. In the next example, <code>await</code> pauses <em>that function</em> until this future completes.
+        </div>
         <h2>Asynchronous: start, continue, complete</h2>
         <div class="code-wrap">
           <button class="copy-btn" data-copy="Future<void> prepareOrder() async {
