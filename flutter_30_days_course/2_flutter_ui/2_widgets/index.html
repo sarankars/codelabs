@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flutter Widgets &amp; the Widget Tree — Interactive Codelab</title>
+  <meta name="description" content="A beginner-friendly interactive Flutter codelab about widgets, the widget tree, Text, Icon, Image, Container, Card, AppBar, and BottomNavigationBar.">
+  <meta name="theme-color" content="#1769ff">
+  <meta property="og:title" content="Flutter Widgets &amp; the Widget Tree">
+  <meta property="og:description" content="Learn Flutter's core UI idea with small examples, visual demos, and quick quizzes.">
+  <meta property="og:type" content="article">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Flutter Widgets and the Widget Tree","learningResourceType":"Tutorial","educationalLevel":"Beginner","about":"Flutter widgets","inLanguage":"en"}</script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root{--blue:#1769ff;--blue-dark:#0b43b7;--blue-light:#dce9ff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:290px;--radius:4px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:var(--blue);border-right:var(--border);padding:22px 18px;z-index:20;overflow:auto}.brand{background:#fff;border:var(--border);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:20px}.eyebrow,.progress-meta,.step-number,.step-kicker,.tiny{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.45rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{color:#fff;margin:0 2px 20px}.progress-meta{display:flex;justify-content:space-between;gap:10px;font-size:.72rem;font-weight:500;margin-bottom:7px}.progress-track{height:16px;background:#fff;border:var(--border);padding:2px}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:9px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;text-align:left;color:#fff;background:transparent;border:3px solid transparent;padding:9px 8px;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{font-size:1rem;text-align:center}.mobile-bar{display:none;position:sticky;top:0;z-index:30;background:var(--blue);border-bottom:var(--border);padding:10px;align-items:center;gap:10px}.mobile-bar strong{color:#fff}.menu-btn,.mobile-title{border:var(--border);background:#fff;box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{padding:8px 10px;flex:1;font-weight:800}
+    main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}.step-header{border:var(--border);background:#fff;box-shadow:var(--shadow);padding:28px;margin-bottom:24px}.step-kicker{display:inline-block;background:var(--blue);color:#fff;border:2px solid var(--ink);padding:5px 9px;font-size:.72rem;font-weight:500;margin-bottom:13px}h1,h2,h3{line-height:1.08}h1{font-size:clamp(2rem,5vw,3.7rem);margin:0 0 12px;letter-spacing:-.045em}h2{font-size:clamp(1.55rem,3vw,2.25rem);margin:30px 0 12px}h3{font-size:1.15rem;margin:24px 0 9px}.lede{font-size:1.08rem;max-width:760px;margin:0}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.yellow{background:var(--yellow)}.panel.coral{background:var(--pink)}.grid-2,.grid-3{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.concept{border:var(--border);padding:18px;background:#fff;box-shadow:var(--shadow-sm)}.concept strong{font-size:1.05rem}.callout{border:var(--border);box-shadow:var(--shadow-sm);padding:16px 18px;margin:20px 0;background:#fff}.callout .label{display:inline-block;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;border:2px solid var(--ink);background:var(--ink);color:#fff;padding:3px 7px;margin-bottom:8px}.callout p:last-child,.concept p:last-child,.panel p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;background:#111;color:#f7f7f7;border:var(--border);box-shadow:var(--shadow-sm);padding:20px;overflow:auto;font-family:"DM Mono",ui-monospace,monospace;font-size:.88rem;line-height:1.65;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:5px 9px;font-size:.75rem;font-weight:800;z-index:2}code:not(pre code){background:#e8edf7;border:1px solid #9da9bb;padding:1px 5px;font-family:"DM Mono",monospace;font-size:.88em}.code-note{border:var(--border);border-top:0;background:#e9edf4;padding:13px 16px;font-family:"DM Mono",monospace;font-size:.83rem}.code-note strong{font-family:"Space Grotesk",sans-serif}.token-widget{color:var(--mint)}.token-property{color:#9ed8ff}.token-value{color:var(--yellow)}ul,ol{padding-left:1.35rem}li{margin:7px 0}
+    .quiz{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;border:2px solid var(--ink);background:#fff;padding:11px 13px;font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;font-weight:800;background:var(--blue-light)}.reveal>div{padding:15px 16px}.nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:12px 18px;font-weight:900;min-width:130px}.nav-btn.primary{background:var(--blue);color:#fff}.nav-btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:3px 3px 0 #777}.finish{display:none;background:var(--mint);border:var(--border);box-shadow:var(--shadow);padding:20px;margin-top:24px}.finish.show{display:block}
+    .anatomy{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.anatomy-code{background:#111;color:#f7f7f7;border:var(--border);box-shadow:var(--shadow-sm);padding:18px;font:500 .9rem/2 "DM Mono",monospace}.anatomy-list{display:grid;gap:10px}.anatomy-item{border:2px solid var(--ink);background:#fff;padding:11px}.number-dot{display:inline-grid;place-items:center;width:25px;height:25px;border:2px solid var(--ink);background:var(--yellow);color:var(--ink);font-family:"Space Grotesk",sans-serif;font-weight:900;margin-right:7px}
+    .tree-lab{display:grid;grid-template-columns:minmax(260px,.9fr) 1.1fr;gap:18px}.tree{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:18px}.tree ul{list-style:none;margin:8px 0 0;padding-left:22px;border-left:2px dashed #9da9bb}.tree>ul{padding:0;border:0}.tree li{margin:8px 0}.tree-node{border:2px solid var(--ink);background:#fff;padding:7px 10px;font-weight:800}.tree-node:hover{background:var(--blue-light)}.tree-node[aria-pressed="true"]{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}.tree-preview{min-height:360px;border:var(--border);box-shadow:var(--shadow-sm);background:#e9edf4;padding:22px;display:grid;place-items:center}.phone{width:min(270px,100%);height:330px;background:#fff;border:3px solid var(--ink);border-radius:var(--radius);overflow:hidden;box-shadow:6px 6px 0 var(--ink);display:grid;grid-template-rows:52px 1fr 58px}.phone-appbar{background:var(--blue);color:#fff;padding:14px 16px;font-weight:800}.phone-body{display:grid;place-items:center;padding:18px}.profile-card{width:100%;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:18px;text-align:center}.avatar{width:74px;height:74px;margin:auto;display:grid;place-items:center;border-radius:50%;background:var(--yellow);border:2px solid var(--ink);font-size:2rem}.phone-nav{display:grid;grid-template-columns:repeat(2,1fr);border-top:2px solid var(--ink);background:#fff}.phone-nav span{display:grid;place-items:center;font-size:.78rem}.phone-nav .selected{background:var(--blue-light);font-weight:800}.dim{opacity:.18;filter:grayscale(1)}.highlight{outline:5px solid var(--yellow);outline-offset:-5px}
+    .widget-explorer{display:grid;grid-template-columns:250px 1fr;gap:18px}.widget-controls{display:grid;gap:9px;align-content:start}.widget-tab{text-align:left;border:2px solid var(--ink);background:#fff;padding:11px 13px;font-weight:800}.widget-tab:hover{background:var(--blue-light)}.widget-tab.active{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}.widget-stage{border:var(--border);box-shadow:var(--shadow-sm);background:var(--blue-light);min-height:275px;padding:22px;display:grid;place-items:center}.sample-text{font-size:2rem;font-weight:800;color:var(--blue-dark)}.sample-icon{font-size:4rem;color:var(--blue)}.sample-image{width:190px;height:125px;object-fit:cover;border:3px solid var(--ink);background:#edf2ff}.sample-container{background:var(--yellow);border:3px solid var(--ink);padding:28px;border-radius:var(--radius)}.sample-card{background:#fff;border:var(--border);box-shadow:var(--shadow-sm);padding:22px;max-width:260px}.sample-appbar{align-self:start;width:100%;background:var(--blue);color:#fff;border:2px solid var(--ink);padding:16px;font-weight:800;box-shadow:var(--shadow-sm)}.sample-bottom{align-self:end;width:100%;display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border:2px solid var(--ink);padding:10px;text-align:center;font-size:.8rem}.widget-info{margin-top:15px;border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:12px}.legend{display:flex;flex-wrap:wrap;gap:4px;margin:12px 0}.pill{display:inline-block;border:2px solid var(--ink);background:#fff;padding:4px 8px;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;margin:2px}.checklist{list-style:none;padding:0}.checklist li{padding:10px 12px;border:2px solid var(--ink);background:#fff;margin:8px 0}.checklist li::before{content:"✓";font-weight:900;margin-right:9px;color:var(--blue-dark)}
+    @media(prefers-reduced-motion:reduce){.step-view.active{animation:none}.progress-bar{transition:none}}@media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease;box-shadow:10px 0 0 rgba(16,16,16,.18)}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}@media(max-width:600px){.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.grid-2,.grid-3,.anatomy,.tree-lab,.widget-explorer{grid-template-columns:1fr}.widget-controls{grid-template-columns:repeat(2,1fr)}.nav-row{position:sticky;bottom:0;background:var(--paper);padding:12px 0;margin-left:-2px;margin-right:-2px;z-index:10}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{font-size:.78rem;padding:16px 12px}.copy-btn{position:static;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1;align-self:flex-end}.code-wrap .code-note{order:3}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter UI · Lesson 2</div><h2>Widgets &amp; Trees</h2><p>Build your UI vocabulary.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">Widgets</div></div>
+  <main><div class="content" id="content">
+
+    <section class="step-view" data-title="Meet widgets">
+      <header class="step-header"><span class="step-kicker">STEP 1 · THE BIG IDEA</span><h1>Everything on screen starts with a widget</h1><p class="lede">A Flutter widget is a small description of part of the user interface. A word, an icon, a picture, and even the top bar can each be a widget.</p><div class="objective"><strong>By the end:</strong> You can name common widgets, read simple widget code, explain parent and child widgets, and trace a small widget tree.</div></header>
+      <h2>Think of widgets as building pieces</h2>
+      <div class="grid-3"><div class="concept"><strong>Widgets describe</strong><p>A widget tells Flutter what a part of the screen should look like.</p></div><div class="concept"><strong>Widgets have settings</strong><p>Settings such as text, color, or icon shape are called <em>properties</em>.</p></div><div class="concept"><strong>Widgets fit together</strong><p>One widget can contain another. This creates a widget tree.</p></div></div>
+      <div class="panel yellow"><strong>A widget is not the picture itself.</strong><p>It is a description Flutter uses to draw the picture. When the description changes, Flutter updates the screen.</p></div>
+      <h2>Spot the widgets</h2><p>Imagine a simple profile screen. It could contain these pieces:</p>
+      <div class="grid-2"><div class="concept"><strong>“Maya”</strong><p>A <code>Text</code> widget shows the name.</p></div><div class="concept"><strong>★</strong><p>An <code>Icon</code> widget shows a symbol.</p></div><div class="concept"><strong>Profile photo</strong><p>An <code>Image</code> widget shows a picture.</p></div><div class="concept"><strong>Top bar</strong><p>An <code>AppBar</code> widget gives the screen a heading.</p></div></div>
+      <div class="quiz" data-answer="2" data-correct="Yes. A widget describes a part of the user interface."><h3>Quick check</h3><p>What does a Flutter widget do?</p><div class="quiz-options"><button class="quiz-option">It stores the whole project</button><button class="quiz-option">It installs Flutter</button><button class="quiz-option">It describes part of the user interface</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Read a widget">
+      <header class="step-header"><span class="step-kicker">STEP 2 · WIDGET ANATOMY</span><h1>Read one widget at a time</h1><p class="lede">Flutter code becomes easier when you first find the widget name, then read its properties.</p></header>
+      <h2>A tiny example</h2>
+      <div class="anatomy"><div class="anatomy-code"><span class="number-dot">1</span><span class="token-widget">Text</span>(<br>&nbsp;&nbsp;<span class="number-dot">2</span><span class="token-value">'Hello, Flutter!'</span>,<br>&nbsp;&nbsp;<span class="number-dot">3</span><span class="token-property">textAlign:</span> TextAlign.center,<br>)</div><div class="anatomy-list"><div class="anatomy-item"><span class="number-dot">1</span><strong>Widget name</strong><br><code>Text</code> says which widget to create.</div><div class="anatomy-item"><span class="number-dot">2</span><strong>Main value</strong><br>The words inside quotes will appear.</div><div class="anatomy-item"><span class="number-dot">3</span><strong>Named property</strong><br><code>textAlign</code> changes how the words line up.</div></div></div>
+      <div class="callout"><span class="label">READING TIP</span><p>Start at the outside: <strong>“This is a Text widget.”</strong> Then read each property: <strong>“It shows these words and centers them.”</strong></p></div>
+      <h2>Punctuation has a job</h2><div class="grid-2"><div class="concept"><strong>Parentheses <code>( )</code></strong><p>Hold the values and properties given to the widget.</p></div><div class="concept"><strong>Comma <code>,</code></strong><p>Separates values. A trailing comma also helps Flutter format the code clearly.</p></div><div class="concept"><strong>Colon <code>:</code></strong><p>Separates a named property from its value.</p></div><div class="concept"><strong>Quotes <code>' '</code></strong><p>Mark text values, also called strings.</p></div></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. Text is the widget name. textAlign is a property."><h3>Which part is the widget name?</h3><div class="quiz-options"><button class="quiz-option"><code>Text</code></button><button class="quiz-option"><code>textAlign</code></button><button class="quiz-option"><code>center</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="The widget tree">
+      <header class="step-header"><span class="step-kicker">STEP 3 · PARENTS AND CHILDREN</span><h1>Widgets form a tree</h1><p class="lede">When one widget contains another widget, Flutter code has a parent-and-child shape. A whole screen becomes a widget tree.</p></header>
+      <div class="grid-2"><div class="panel mint"><strong>Parent widget</strong><p>A widget that contains another widget. A <code>Card</code> can be the parent of <code>Text</code>.</p></div><div class="panel blue"><strong>Child widget</strong><p>A widget placed inside a parent. The property is often named <code>child</code>.</p></div></div>
+      <div class="code-wrap"><button class="copy-btn" data-copy="Card(\n  child: Text('My first card'),\n)">Copy</button><pre><code><span class="token-widget">Card</span>(
+  <span class="token-property">child:</span> <span class="token-widget">Text</span>(<span class="token-value">'My first card'</span>),
+)</code></pre><div class="code-note"><strong>Say it aloud:</strong> “A Card has one child. Its child is Text.”</div></div>
+      <h2>Explore a tree</h2><p>Select a widget name. The matching part of the preview will stay bright.</p>
+      <div class="tree-lab"><div class="tree"><ul><li><button class="tree-node" data-part="scaffold">Scaffold</button><ul><li><button class="tree-node" data-part="appbar">AppBar</button></li><li><button class="tree-node" data-part="card">Card</button><ul><li><button class="tree-node" data-part="icon">Icon</button></li><li><button class="tree-node" data-part="text">Text</button></li></ul></li><li><button class="tree-node" data-part="nav">BottomNavigationBar</button></li></ul></li></ul></div><div class="tree-preview"><div class="phone" id="treePhone"><div class="phone-appbar" data-preview="appbar">My Profile</div><div class="phone-body"><div class="profile-card" data-preview="card"><div class="avatar" data-preview="icon">★</div><h3 data-preview="text">Maya</h3></div></div><div class="phone-nav" data-preview="nav"><span class="selected">⌂ Home</span><span>♙ Profile</span></div></div></div></div>
+      <div class="callout"><span class="label">IMPORTANT</span><p>A widget tree is a way to understand nesting. It is not a folder tree, and it does not show your files.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Right. Card contains Text, so Card is the parent."><h3>In <code>Card(child: Text('Hi'))</code>, which widget is the parent?</h3><div class="quiz-options"><button class="quiz-option">Text</button><button class="quiz-option">Card</button><button class="quiz-option">Neither</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Text and Icon">
+      <header class="step-header"><span class="step-kicker">STEP 4 · WORDS AND SYMBOLS</span><h1>Show meaning with Text and Icon</h1><p class="lede">Start with two small, visible widgets. Each does one clear job.</p></header>
+      <h2>Text shows words</h2><div class="code-wrap"><button class="copy-btn" data-copy="Text(\n  'Welcome!',\n  style: TextStyle(\n    fontSize: 28,\n    fontWeight: FontWeight.bold,\n  ),\n)">Copy</button><pre><code><span class="token-widget">Text</span>(
+  <span class="token-value">'Welcome!'</span>,
+  <span class="token-property">style:</span> <span class="token-widget">TextStyle</span>(
+    <span class="token-property">fontSize:</span> 28,
+    <span class="token-property">fontWeight:</span> FontWeight.bold,
+  ),
+)</code></pre></div>
+      <div class="grid-2"><div class="concept"><strong><code>'Welcome!'</code></strong><p>The words to show.</p></div><div class="concept"><strong><code>style</code></strong><p>Controls the look of the words. Here they are larger and bold.</p></div></div>
+      <h2>Icon shows a Material symbol</h2><div class="code-wrap"><button class="copy-btn" data-copy="Icon(\n  Icons.favorite,\n  color: Colors.red,\n  size: 32,\n)">Copy</button><pre><code><span class="token-widget">Icon</span>(
+  Icons.favorite,
+  <span class="token-property">color:</span> Colors.red,
+  <span class="token-property">size:</span> 32,
+)</code></pre></div>
+      <div class="callout"><span class="label">ACCESSIBILITY</span><p>Icons should have clear meaning. If an icon could be confusing, place helpful text near it. For an interactive icon, also provide a semantic label.</p></div>
+      <div class="quiz" data-answer="2" data-correct="Exactly. Icon is best for a simple symbol from Flutter's icon set."><h3>You need a small heart symbol. Which widget is the clearest choice?</h3><div class="quiz-options"><button class="quiz-option">Card</button><button class="quiz-option">Text</button><button class="quiz-option">Icon</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Image">
+      <header class="step-header"><span class="step-kicker">STEP 5 · PICTURES</span><h1>Show pictures with Image</h1><p class="lede">An <code>Image</code> widget can load a picture from your project or from the internet.</p></header>
+      <h2>A picture from your project</h2><div class="code-wrap"><button class="copy-btn" data-copy="Image.asset(\n  'assets/images/profile.png',\n  width: 160,\n  height: 160,\n  fit: BoxFit.cover,\n)">Copy</button><pre><code><span class="token-widget">Image.asset</span>(
+  <span class="token-value">'assets/images/profile.png'</span>,
+  <span class="token-property">width:</span> 160,
+  <span class="token-property">height:</span> 160,
+  <span class="token-property">fit:</span> BoxFit.cover,
+)</code></pre></div>
+      <div class="grid-2"><div class="concept"><strong><code>Image.asset</code></strong><p>Loads a picture included in your project. The asset must also be listed correctly in <code>pubspec.yaml</code>.</p></div><div class="concept"><strong><code>Image.network</code></strong><p>Loads a picture from a web address. It needs a network connection.</p></div></div>
+      <h2>Size and fit</h2><div class="panel blue"><p><code>width</code> and <code>height</code> set the image area. <code>BoxFit.cover</code> fills that area. Some edges may be cropped so the picture does not look stretched.</p></div>
+      <details class="reveal"><summary>Why might an asset image not appear?</summary><div><ul><li>The file path or letter case is wrong.</li><li>The asset was not declared in <code>pubspec.yaml</code>.</li><li>The YAML indentation is wrong.</li></ul><p>Check the path carefully, then restart the app if needed.</p></div></details>
+      <div class="quiz" data-answer="0" data-correct="Correct. Image.asset reads a picture packaged with the app."><h3>Which choice loads a picture stored inside your project?</h3><div class="quiz-options"><button class="quiz-option"><code>Image.asset</code></button><button class="quiz-option"><code>Image.network</code></button><button class="quiz-option"><code>Icon</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Container and Card">
+      <header class="step-header"><span class="step-kicker">STEP 6 · SURFACES</span><h1>Give content a surface</h1><p class="lede"><code>Container</code> and <code>Card</code> can both hold a child, but they communicate different ideas.</p></header>
+      <div class="grid-2"><div class="panel yellow"><strong>Container</strong><p>A flexible box for size, space, color, borders, and decoration. Use it when you need to control the box around one child.</p></div><div class="panel mint"><strong>Card</strong><p>A Material surface that groups related information. It looks like one meaningful item.</p></div></div>
+      <h2>Container example</h2><div class="code-wrap"><button class="copy-btn" data-copy="Container(\n  padding: const EdgeInsets.all(16),\n  color: Colors.amber,\n  child: Text('Important note'),\n)">Copy</button><pre><code><span class="token-widget">Container</span>(
+  <span class="token-property">padding:</span> const EdgeInsets.all(16),
+  <span class="token-property">color:</span> Colors.amber,
+  <span class="token-property">child:</span> <span class="token-widget">Text</span>(<span class="token-value">'Important note'</span>),
+)</code></pre></div>
+      <h2>Card example</h2><div class="code-wrap"><button class="copy-btn" data-copy="Card(\n  elevation: 3,\n  child: Padding(\n    padding: const EdgeInsets.all(16),\n    child: Text('Flutter Study Group'),\n  ),\n)">Copy</button><pre><code><span class="token-widget">Card</span>(
+  <span class="token-property">elevation:</span> 3,
+  <span class="token-property">child:</span> Padding(
+    <span class="token-property">padding:</span> const EdgeInsets.all(16),
+    <span class="token-property">child:</span> <span class="token-widget">Text</span>(<span class="token-value">'Flutter Study Group'</span>),
+  ),
+)</code></pre><div class="code-note">You do not need to learn <code>Padding</code> yet. Here it simply adds breathing room inside the card.</div></div>
+      <div class="callout"><span class="label">DO NOT MEMORIZE</span><p>Focus on the shape: <strong>Card → child → Text</strong>. You can look up property names when you need them.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Yes. A Card groups related content as one Material surface."><h3>You want a profile summary to look like one grouped item. What is the clearest choice?</h3><div class="quiz-options"><button class="quiz-option">Icon</button><button class="quiz-option">Card</button><button class="quiz-option">Image.network</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="App shell widgets">
+      <header class="step-header"><span class="step-kicker">STEP 7 · APP SHELL</span><h1>Frame a screen with app-shell widgets</h1><p class="lede">Some widgets describe the screen around your content. They help people know where they are and move to main areas.</p></header>
+      <div class="grid-2"><div class="concept"><strong>AppBar</strong><p>The bar at the top of a screen. It often contains a title and screen actions.</p></div><div class="concept"><strong>BottomNavigationBar</strong><p>The navigation area at the bottom. It switches between a few main destinations.</p></div></div>
+      <h2>They go into Scaffold</h2><p><code>Scaffold</code> gives a Material screen its basic slots. For now, only notice where each widget goes.</p>
+      <div class="code-wrap"><button class="copy-btn" data-copy="Scaffold(\n  appBar: AppBar(\n    title: Text('Library'),\n  ),\n  body: Card(\n    child: Text('Book of the day'),\n  ),\n  bottomNavigationBar: BottomNavigationBar(\n    items: const [\n      BottomNavigationBarItem(\n        icon: Icon(Icons.home),\n        label: 'Home',\n      ),\n      BottomNavigationBarItem(\n        icon: Icon(Icons.person),\n        label: 'Profile',\n      ),\n    ],\n  ),\n)">Copy</button><pre><code><span class="token-widget">Scaffold</span>(
+  <span class="token-property">appBar:</span> <span class="token-widget">AppBar</span>(
+    <span class="token-property">title:</span> <span class="token-widget">Text</span>(<span class="token-value">'Library'</span>),
+  ),
+  <span class="token-property">body:</span> <span class="token-widget">Card</span>(
+    <span class="token-property">child:</span> <span class="token-widget">Text</span>(<span class="token-value">'Book of the day'</span>),
+  ),
+  <span class="token-property">bottomNavigationBar:</span> <span class="token-widget">BottomNavigationBar</span>(
+    <span class="token-property">items:</span> const [
+      BottomNavigationBarItem(
+        <span class="token-property">icon:</span> Icon(Icons.home), <span class="token-property">label:</span> <span class="token-value">'Home'</span>,
+      ),
+      BottomNavigationBarItem(
+        <span class="token-property">icon:</span> Icon(Icons.person), <span class="token-property">label:</span> <span class="token-value">'Profile'</span>,
+      ),
+    ],
+  ),
+)</code></pre></div>
+      <div class="callout"><span class="label">NOTICE</span><p>This example shows nesting, not a layout lesson. You will learn how to arrange several body widgets in the next codelabs.</p></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. AppBar is placed in Scaffold's appBar property."><h3>Which Scaffold property holds the top app bar?</h3><div class="quiz-options"><button class="quiz-option"><code>appBar</code></button><button class="quiz-option"><code>body</code></button><button class="quiz-option"><code>bottomNavigationBar</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Widget explorer">
+      <header class="step-header"><span class="step-kicker">STEP 8 · CONNECT THE IDEAS</span><h1>Choose a widget by its job</h1><p class="lede">Do not start by asking, “Which widget do I remember?” Start by asking, “What job must this part of the screen do?”</p></header>
+      <div class="widget-explorer"><div class="widget-controls" role="tablist" aria-label="Widget explorer"><button class="widget-tab active" data-widget="text">Text</button><button class="widget-tab" data-widget="icon">Icon</button><button class="widget-tab" data-widget="image">Image</button><button class="widget-tab" data-widget="container">Container</button><button class="widget-tab" data-widget="card">Card</button><button class="widget-tab" data-widget="appbar">AppBar</button><button class="widget-tab" data-widget="bottom">Bottom nav</button></div><div><div class="widget-stage" id="widgetStage"></div><div class="widget-info" id="widgetInfo" aria-live="polite"></div></div></div>
+      <h2>Job → widget</h2><div class="legend"><span class="pill">words → Text</span><span class="pill">symbol → Icon</span><span class="pill">picture → Image</span><span class="pill">styled box → Container</span><span class="pill">grouped item → Card</span><span class="pill">screen title → AppBar</span><span class="pill">main destinations → BottomNavigationBar</span></div>
+      <div class="quiz" data-answer="2" data-correct="Well done. Image shows the photo, Card groups the profile, and AppBar titles the screen."><h3>Which sequence best fits a profile screen?</h3><div class="quiz-options"><button class="quiz-option">Icon for photo, Image for title, Text for the shell</button><button class="quiz-option">Container for every part because it can do anything</button><button class="quiz-option">Image for photo, Card for profile summary, AppBar for screen title</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Practice and review">
+      <header class="step-header"><span class="step-kicker">STEP 9 · PRACTICE</span><h1>Read a small screen from outside in</h1><p class="lede">You now know enough to trace a simple widget tree. Work from the outer widget toward the inner widget.</p></header>
+      <h2>Try it</h2><div class="panel yellow"><p>A screen needs:</p><ul><li>a top title that says “My Badge”,</li><li>a card in the body,</li><li>a gold star inside the card, and</li><li>bottom navigation for Home and Profile.</li></ul><p><strong>Before opening the answer:</strong> name the widgets and decide which widget is the parent of the star.</p></div>
+      <details class="reveal"><summary>Show one possible widget tree</summary><div><pre><code>Scaffold
+├── AppBar
+│   └── Text("My Badge")
+├── Card
+│   └── Icon(Icons.star)
+└── BottomNavigationBar
+    ├── BottomNavigationBarItem("Home")
+    └── BottomNavigationBarItem("Profile")</code></pre><p>The <code>Card</code> is the parent of the star <code>Icon</code>. The <code>Scaffold</code> is the outer widget for the screen.</p></div></details>
+      <h2>Your widget checklist</h2><ul class="checklist"><li>I can explain a widget in one sentence.</li><li>I can find the widget name and its properties.</li><li>I can identify a parent and child.</li><li>I can choose Text, Icon, Image, Container, or Card by its job.</li><li>I know where AppBar and BottomNavigationBar appear.</li><li>I can read a small widget tree from outside in.</li></ul>
+      <div class="quiz" data-answer="1" data-correct="Correct. A widget tree shows which widgets contain other widgets."><h3>Final check: what does a widget tree show?</h3><div class="quiz-options"><button class="quiz-option">Which project folders are largest</button><button class="quiz-option">How widgets are nested inside other widgets</button><button class="quiz-option">Which Dart packages are installed</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+      <div class="finish" id="finishBox"><h2>You finished lesson 2! 🎉</h2><p>You can now talk about Flutter UI using the words <strong>widget</strong>, <strong>property</strong>, <strong>parent</strong>, <strong>child</strong>, and <strong>widget tree</strong>. Next, you are ready to learn how layout widgets arrange these pieces on a screen.</p></div>
+    </section>
+
+  </div></main>
+</div>
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+  nav.innerHTML=titles.map((title,i)=>`<button class="step-link" data-step="${i}" type="button"><span class="step-number">${String(i+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const n=match?Number(match[1])-1:0;return Number.isInteger(n)&&n>=0&&n<steps.length?n:0};
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,i)=>{step.classList.toggle('active',i===current);step.setAttribute('aria-hidden',String(i!==current))});
+    document.querySelectorAll('.step-link').forEach((button,i)=>{button.classList.toggle('active',i===current);button.setAttribute('aria-current',i===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(i)?'✓':''});
+    const percent=Math.round(((current+1)/steps.length)*100);document.getElementById('progressBar').style.width=`${percent}%`;document.getElementById('progressText').textContent=`${percent}%`;document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;document.getElementById('nextBtn').disabled=current===steps.length-1;document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+    if(current===steps.length-1)document.getElementById('finishBox').classList.add('show');
+    document.title=`${titles[current]} — Flutter Widgets Codelab`;if(updateHash)history.pushState({step:current},'',`#step-${current+1}`);window.scrollTo({top:0,behavior:'auto'});sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');
+  }
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render()}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));nav.addEventListener('click',e=>{const button=e.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});
+  menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+  document.addEventListener('click',async e=>{
+    const copy=e.target.closest('.copy-btn');if(copy){try{await navigator.clipboard.writeText(copy.dataset.copy);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1200);return}
+    const option=e.target.closest('.quiz-option');if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show')}
+  });
+  document.querySelectorAll('.tree-node').forEach(button=>button.addEventListener('click',()=>{const part=button.dataset.part;document.querySelectorAll('.tree-node').forEach(node=>node.setAttribute('aria-pressed',String(node===button)));const phone=document.getElementById('treePhone');const previewParts=[...phone.querySelectorAll('[data-preview]')];phone.classList.toggle('highlight',part==='scaffold');phone.classList.toggle('dim',false);previewParts.forEach(item=>{item.classList.toggle('dim',part!=='scaffold'&&item.dataset.preview!==part);item.classList.toggle('highlight',item.dataset.preview===part)})}));
+  const widgets={
+    text:{html:'<div class="sample-text">Hello, Flutter!</div>',info:'<strong>Text</strong> shows words. Its main value is the text to display.'},
+    icon:{html:'<div class="sample-icon" aria-label="favorite">♥</div>',info:'<strong>Icon</strong> shows a simple symbol. Choose an icon that people can understand.'},
+    image:{html:'<div class="sample-image" role="img" aria-label="abstract mountain picture">⛰️<br><span class="tiny">IMAGE AREA</span></div>',info:'<strong>Image</strong> shows a picture from an asset or network address.'},
+    container:{html:'<div class="sample-container">A styled box</div>',info:'<strong>Container</strong> controls the box around one child: size, space, color, border, and more.'},
+    card:{html:'<div class="sample-card"><strong>Study group</strong><p>Saturday · 10:00 AM</p></div>',info:'<strong>Card</strong> groups related information as one meaningful Material surface.'},
+    appbar:{html:'<div class="sample-appbar">My Profile</div>',info:'<strong>AppBar</strong> sits at the top and usually names the screen.'},
+    bottom:{html:'<div class="sample-bottom"><span>⌂<br>Home</span><span>♡<br>Saved</span><span>♙<br>Profile</span></div>',info:'<strong>BottomNavigationBar</strong> sits at the bottom and links to main app destinations.'}
+  };
+  function showWidget(name){document.querySelectorAll('.widget-tab').forEach(tab=>{const active=tab.dataset.widget===name;tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active))});document.getElementById('widgetStage').innerHTML=widgets[name].html;document.getElementById('widgetInfo').innerHTML=widgets[name].info}
+  document.querySelectorAll('.widget-tab').forEach(tab=>tab.addEventListener('click',()=>showWidget(tab.dataset.widget)));showWidget('text');
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+  document.addEventListener('keydown',e=>{if(e.altKey||e.ctrlKey||e.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.key==='ArrowRight')goTo(current+1);if(e.key==='ArrowLeft')goTo(current-1)});
+  current=getHashStep();render(false);
+})();
+</script>
+</body>
+</html>
