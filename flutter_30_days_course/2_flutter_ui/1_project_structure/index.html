@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flutter Basics Codelab — Learn Flutter Project Structure &amp; Core Widgets</title>
+  <meta name="description" content="An interactive beginner-friendly Flutter codelab covering project creation, directory structure, pubspec.yaml, assets, Stateless & Stateful Widgets, MaterialApp, Scaffold, and running your app.">
+  <meta name="keywords" content="Flutter codelab, Flutter project structure, pubspec.yaml, Flutter widgets, StatelessWidget, StatefulWidget, MaterialApp, Scaffold, Flutter beginner">
+  <meta name="theme-color" content="#1769ff">
+  <meta property="og:title" content="Flutter Project Structure & Core Widgets Codelab">
+  <meta property="og:description" content="Learn Flutter project organization and essential UI building blocks through an interactive codelab.">
+  <meta property="og:type" content="article">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"LearningResource",
+    "name":"Flutter Project Structure & Core Widgets Codelab",
+    "description":"An interactive beginner-friendly tutorial covering project creation, pubspec.yaml, lib, assets, widgets, MaterialApp, and Scaffold in Flutter.",
+    "learningResourceType":"Tutorial",
+    "educationalLevel":"Beginner",
+    "about":"Flutter Development",
+    "inLanguage":"en"
+  }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root{
+      --blue:#1769ff;--blue-dark:#0b43b7;--blue-light:#dce9ff;--ink:#101010;
+      --paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;
+      --border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);
+      --sidebar:290px;--radius:4px
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:auto}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}
+    button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:var(--blue);border-right:var(--border);padding:22px 18px;z-index:20;overflow:auto}
+    .brand{background:#fff;border:var(--border);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:20px}
+    .eyebrow,.progress-meta,.step-number,.step-kicker,.footer-note{font-family:"DM Mono",monospace}
+    .eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+    .brand h2{margin:5px 0 3px;font-size:1.45rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}
+    .progress-wrap{color:#fff;margin:0 2px 20px}.progress-meta{display:flex;justify-content:space-between;gap:10px;font-size:.72rem;font-weight:500;margin-bottom:7px}
+    .progress-track{height:16px;background:#fff;border:var(--border);padding:2px}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}
+    .steps{display:grid;gap:9px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;text-align:left;color:#fff;background:transparent;border:3px solid transparent;padding:9px 8px;font-weight:700;line-height:1.15}
+    .step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}
+    .step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{font-size:1rem;text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;background:var(--blue);border-bottom:var(--border);padding:10px;align-items:center;gap:10px}
+    .mobile-bar strong{color:#fff}.menu-btn,.mobile-title{border:var(--border);background:#fff;box-shadow:var(--shadow-sm)}
+    .menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{padding:8px 10px;flex:1;font-weight:800}
+    main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}
+    .step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}.step-view[data-step="11"]{display:none!important}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    @media(prefers-reduced-motion:reduce){.step-view.active{animation:none}.progress-bar{transition:none}}
+    .step-header{border:var(--border);background:#fff;box-shadow:var(--shadow);padding:28px;margin-bottom:24px}
+    .step-kicker{display:inline-block;background:var(--blue);color:#fff;border:2px solid var(--ink);padding:5px 9px;font-size:.72rem;font-weight:500;margin-bottom:13px}
+    h1,h2,h3{line-height:1.08}h1{font-size:clamp(2rem,5vw,3.7rem);margin:0 0 12px;letter-spacing:-.045em}
+    h2{font-size:clamp(1.55rem,3vw,2.25rem);margin:30px 0 12px}h3{font-size:1.15rem;margin:24px 0 9px}
+    .lede{font-size:1.08rem;max-width:760px;margin:0}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}
+    .callout{border:var(--border);box-shadow:var(--shadow-sm);padding:16px 18px;margin:20px 0;background:#fff}.callout .label{display:inline-block;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;border:2px solid var(--ink);background:var(--ink);color:#fff;padding:3px 7px;margin-bottom:8px}.callout p:last-child{margin-bottom:0}
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.concept{border:var(--border);padding:18px;background:#fff;box-shadow:var(--shadow-sm)}.concept strong{font-size:1.05rem}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;background:#111;color:#f7f7f7;border:var(--border);box-shadow:var(--shadow-sm);padding:20px;overflow:auto;font-family:"DM Mono",ui-monospace,monospace;font-size:.88rem;line-height:1.65;tab-size:2}
+    .copy-btn{position:absolute;top:8px;right:8px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:5px 9px;font-size:.75rem;font-weight:800;z-index:2}
+    .output{border:var(--border);border-top:0;background:#e9edf4;padding:13px 16px;font-family:"DM Mono",monospace;font-size:.83rem}.output strong{font-family:"Space Grotesk",sans-serif}
+    code:not(pre code){background:#e8edf7;border:1px solid #9da9bb;padding:1px 5px;font-family:"DM Mono",monospace;font-size:.88em}
+    ul,ol{padding-left:1.35rem}li{margin:7px 0}.syntax{background:#edf2ff;border:var(--border);padding:14px;font-family:"DM Mono",monospace;overflow:auto}
+    .quiz{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}
+    .quiz-option{text-align:left;border:2px solid var(--ink);background:#fff;padding:11px 13px;font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}
+    .quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}
+    .reveal{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;font-weight:800;background:var(--blue-light)}.reveal>div{padding:15px 16px}
+    .challenge{background:var(--ink);color:#fff;border:var(--border);box-shadow:var(--shadow);padding:22px;margin:24px 0}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:12px 18px;font-weight:900;min-width:130px}
+    .nav-btn.primary{background:var(--blue);color:#fff}.nav-btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:3px 3px 0 #777}
+    .finish{display:none;background:var(--mint);border:var(--border);box-shadow:var(--shadow);padding:20px;margin-top:24px}.finish.show{display:block}
+    .pill{display:inline-block;border:2px solid var(--ink);background:#fff;padding:4px 8px;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;margin:2px}.footer-note{margin-top:30px;font-size:.8rem;color:#555}
+    .comparison{width:100%;border-collapse:collapse;margin:18px 0;background:#fff;border:var(--border)}.comparison th,.comparison td{border:2px solid var(--ink);padding:11px;text-align:left;vertical-align:top}.comparison th{background:var(--blue);color:#fff}
+    .success{font-weight:800}.small{font-size:.92rem}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease;box-shadow:10px 0 0 rgba(16,16,16,.18)}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:600px){.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.grid-2{grid-template-columns:1fr}.nav-row{position:sticky;bottom:0;background:var(--paper);padding:12px 0;margin-left:-2px;margin-right:-2px;z-index:10}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{font-size:.78rem;padding:16px 12px}.copy-btn{position:static;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1;align-self:flex-end}.comparison{display:block;overflow-x:auto;white-space:normal}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand">
+      <div class="eyebrow">Flutter Codelab</div>
+      <h2>Flutter Basics</h2>
+      <p>Structure, Widgets &amp; Building Apps.</p>
+    </div>
+    <div class="progress-wrap" aria-label="Lesson progress">
+      <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+      <div class="progress-track" role="progressbar" aria-label="Codelab progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+
+  <div class="mobile-bar">
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button>
+    <div class="mobile-title" id="mobileTitle">Flutter Structure</div>
+  </div>
+
+  <main>
+    <div class="content" id="content">
+
+      <section class="step-view" data-step="0">
+        <header class="step-header">
+          <span class="step-kicker">STEP 1 · START HERE</span>
+          <h1>Flutter Project Structure &amp; Core Widgets</h1>
+          <p class="lede">Flutter lets you build apps for several platforms with one Dart codebase. Before building screens, learn where each part of a Flutter project lives and how widgets create the user interface.</p>
+          <div class="objective"><strong>By the end:</strong> You can create a Flutter app, find the important files, add packages and images in <code>pubspec.yaml</code>, use Stateless and Stateful widgets, build a basic app with <code>MaterialApp</code> and <code>Scaffold</code>, and run it on a device or emulator.</div>
+        </header>
+        <div class="panel blue">
+          <h2>Why Project Structure Matters</h2>
+          <p>A Flutter project has a standard set of folders and files. Once you know what each one does, it is much easier to find your code, images, settings, and packages.</p>
+          <div class="grid-2">
+          <div class="concept"><strong>Your Dart code</strong><p>Put screens, widgets, and app logic in the <code>lib/</code> folder.</p></div>
+          <div class="concept"><strong>Packages</strong><p>Add outside libraries and set project details in <code>pubspec.yaml</code>.</p></div>
+          <div class="concept"><strong>Images and files</strong><p>Keep images, fonts, and data files in an <code>assets/</code> folder.</p></div>
+          <div class="concept"><strong>Widget tree</strong><p>Build the screen by putting small widgets inside larger widgets.</p></div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="panel mint"><strong>Before you start</strong><p>You should know basic variables, functions, and classes, and have Flutter installed.</p></div>
+          <div class="panel yellow"><strong>A helpful idea</strong><p>In Flutter, everything you see is a widget. Your screen is a tree of widgets inside other widgets.</p></div>
+        </div>
+        <div class="callout"><span class="label">CORE IDEA</span><p>Flutter builds the screen from the current state: <code>UI = f(state)</code>. When the state changes, Flutter updates the parts of the screen that need to change.</p></div>
+        <div class="callout"><span class="label">BEGINNER NOTE</span><p>Do not worry about <code>android/</code> or <code>ios/</code> yet. Most of your early work happens in <code>lib/</code> and <code>pubspec.yaml</code>.</p></div>
+      </section>
+
+      <section class="step-view" data-step="1">
+        <header class="step-header">
+          <span class="step-kicker">STEP 2 · CREATION</span>
+          <h1>Creating Your First Flutter Project</h1>
+          <p class="lede">Flutter can create a ready-to-use project for you, including a small sample app.</p>
+        </header>
+        <h2>Command Line Project Generation</h2>
+        <p>Open a terminal, go to the folder where you keep projects, and run this command to create an app named <code>my_first_app</code>:</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="flutter create my_first_app
+cd my_first_app">Copy</button>
+          <pre><code>flutter create my_first_app
+cd my_first_app</code></pre>
+          <div class="output"><strong>Terminal Output</strong><br>Creating project my_first_app...<br>Wrote 129 files.<br>All done! Created my_first_app.</div>
+        </div>
+        <h2>Project Naming Rules</h2>
+        <div class="grid-2">
+          <div class="concept"><strong>Use snake_case</strong><p>Use lowercase letters and underscores, such as <code>my_first_app</code>. Do not use capital letters or hyphens.</p></div>
+          <div class="concept"><strong>App identifier</strong><p>Flutter gives the app an identifier such as <code>com.example.my_first_app</code>. You can change its first part with <code>--org</code>.</p></div>
+        </div>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="flutter create --org com.mycompany my_first_app">Copy</button>
+          <pre><code>flutter create --org com.mycompany my_first_app</code></pre>
+        </div>
+        <div class="panel mint">
+          <strong>In plain language:</strong> <code>flutter create</code> makes the starter files your app needs for Android, iOS, web, desktop, and Dart.
+        </div>
+        <div class="quiz" data-answer="1">
+          <h3>Quick check</h3>
+          <p>Which of the following is a valid project name for a Flutter app?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">MyFlutterApp</button>
+            <button class="quiz-option" data-choice="1">my_flutter_app</button>
+            <button class="quiz-option" data-choice="2">my-flutter-app</button>
+          </div>
+          <div class="quiz-feedback">Correct. Flutter project identifiers must be valid Dart identifiers using lowercase snake_case syntax.</div>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="2">
+        <header class="step-header">
+          <span class="step-kicker">STEP 3 · DIRECTORY STRUCTURE</span>
+          <h1>Understanding Key Project Components</h1>
+          <p class="lede">A new Flutter project has a few main files and folders. Each one has a job.</p>
+        </header>
+        <h2>The Project File Tree</h2>
+        <div class="syntax">
+my_first_app/<br>
+├── android/          → Native Android platform wrapper &amp; Gradle scripts<br>
+├── ios/              → Native iOS platform wrapper &amp; Xcode setup<br>
+├── web/              → Web platform entry point &amp; index.html<br>
+├── lib/              → Main Dart source code folder (main.dart)<br>
+├── assets/           → User-created folder for images, fonts, and data files<br>
+├── test/             → Unit and widget testing scripts<br>
+├── pubspec.yaml      → Package dependencies, metadata &amp; asset declarations<br>
+└── pubspec.lock      → Auto-generated lockfile recording exact dependency versions
+        </div>
+        <h2>Component Breakdown</h2>
+        <table class="comparison">
+          <thead><tr><th>Directory / File</th><th>Purpose</th><th>Developer Activity</th></tr></thead>
+          <tbody>
+            <tr><td><code>lib/</code></td><td>Your Dart code lives here. The app normally starts in <code>lib/main.dart</code>.</td><td>Often</td></tr>
+            <tr><td><code>pubspec.yaml</code></td><td>Lists packages, Flutter settings, images, fonts, and project information.</td><td>When adding packages or assets</td></tr>
+            <tr><td><code>android/ &amp; ios/</code></td><td>Platform-specific files that let the Flutter app run on Android and iOS.</td><td>Occasionally</td></tr>
+            <tr><td><code>assets/</code></td><td>Put images, SVG files, and local data here.</td><td>When adding assets</td></tr>
+          </tbody>
+        </table>
+        <div class="callout"><span class="label">COMMON MISTAKE</span><p>Never edit files inside <code>pubspec.lock</code> manually. It is managed automatically by the <code>flutter pub get</code> tooling command.</p></div>
+      </section>
+
+      <section class="step-view" data-step="3">
+        <header class="step-header">
+          <span class="step-kicker">STEP 4 · CONFIGURATION</span>
+          <h1>Mastering pubspec.yaml &amp; Assets</h1>
+          <p class="lede"><code>pubspec.yaml</code> is the settings file for your Flutter app. It uses YAML, so the spaces at the start of a line matter.</p>
+        </header>
+        <h2>Anatomy of pubspec.yaml</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="name: my_first_app
+description: A new Flutter project.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/logo.png
+    - assets/data/config.json">Copy</button>
+          <pre><code>name: my_first_app
+description: A new Flutter project.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '&gt;=3.0.0 &lt;4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/logo.png
+    - assets/data/config.json</code></pre>
+        </div>
+        <div class="panel blue">
+          <strong>Key YAML Sections Explained:</strong>
+          <ol>
+            <li><code>dependencies:</code> Packages your app needs when it runs.</li>
+            <li><code>dev_dependencies:</code> Tools used only while building and testing the app.</li>
+            <li><code>flutter:</code> Flutter-specific settings, including Material icons, fonts, and assets.</li>
+          </ol>
+        </div>
+        <h2>Adding Static Assets</h2>
+        <p>To show an image from your project, do these two things:</p>
+        <div class="panel mint">
+          <strong>Step 1:</strong> Make an <code>assets/images/</code> folder in your project and put an image there, for example <code>logo.png</code>.<br><br>
+          <strong>Step 2:</strong> Add the image path under <code>flutter:</code> in <code>pubspec.yaml</code>. Keep the indentation exactly as shown.
+        </div>
+        <div class="quiz" data-answer="2">
+          <h3>Quick check</h3>
+          <p>Why might Flutter fail to load an asset even though the image file exists on disk?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Assets can only be loaded from web URLs</button>
+            <button class="quiz-option" data-choice="1">Image filenames must be capitalized</button>
+            <button class="quiz-option" data-choice="2">The asset path was not registered under the `flutter:` block in pubspec.yaml</button>
+          </div>
+          <div class="quiz-feedback">Correct. Flutter requires all local static assets to be explicitly declared inside pubspec.yaml.</div>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="4">
+        <header class="step-header">
+          <span class="step-kicker">STEP 5 · CORE CONCEPTS</span>
+          <h1>What is a Widget?</h1>
+          <p class="lede">A widget is a small piece of your app's screen or behavior. Text, buttons, spacing, and entire pages are all widgets.</p>
+        </header>
+        <div class="grid-2">
+          <div class="concept"><strong>Layout widgets</strong><p>Put other widgets in the right place, such as <code>Row</code>, <code>Column</code>, <code>Container</code>, and <code>Stack</code>.</p></div>
+          <div class="concept"><strong>Visible widgets</strong><p>Show something on screen, such as <code>Text</code>, <code>Image</code>, and <code>Icon</code>.</p></div>
+          <div class="concept"><strong>Interactive widgets</strong><p>React when the user taps or gestures, such as <code>ElevatedButton</code> and <code>GestureDetector</code>.</p></div>
+          <div class="concept"><strong>Helper widgets</strong><p>Control things like theme and spacing, such as <code>Theme</code>, <code>Padding</code>, and <code>MediaQuery</code>.</p></div>
+        </div>
+        <h2>The Immutable Widget Concept</h2>
+        <p>Widgets are descriptions, not objects that Flutter edits in place. When something changes, Flutter runs <code>build()</code> again to describe the updated part of the screen.</p>
+        <div class="syntax">Widget build(BuildContext context) { ... }</div>
+        <div class="callout"><span class="label">REMEMBER</span><p>A widget's <code>build()</code> method returns the widgets that should appear on screen.</p></div>
+      </section>
+
+      <section class="step-view" data-step="5">
+        <header class="step-header">
+          <span class="step-kicker">STEP 6 · STATELESS WIDGETS</span>
+          <h1>StatelessWidget: Static UI Components</h1>
+          <p class="lede">Use a <code>StatelessWidget</code> when the widget does not need to change by itself. It shows the information it receives.</p>
+        </header>
+        <h2>A Small First Example</h2>
+        <p>Start with one simple job: show some text. This widget never changes, so it can be a <code>StatelessWidget</code>.</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="class HelloMessage extends StatelessWidget {
+  const HelloMessage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('Hello, Flutter!');
+  }
+}">Copy</button>
+          <pre><code>class HelloMessage extends StatelessWidget {
+  const HelloMessage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('Hello, Flutter!');
+  }
+}</code></pre>
+        </div>
+        <div class="panel blue">
+          <strong>What this means:</strong>
+          <ul>
+            <li><code>extends StatelessWidget</code>: This widget does not keep changing data.</li>
+            <li><code>build()</code>: This tells Flutter what to show.</li>
+            <li><code>Text</code>: This is another widget. Here, it displays “Hello, Flutter!”.</li>
+          </ul>
+        </div>
+        <div class="quiz" data-answer="0">
+          <h3>Quick check</h3>
+          <p>When should you use a StatelessWidget?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">When the widget shows information that does not need to change</button>
+            <button class="quiz-option" data-choice="1">When the widget needs to track a changing value, such as a counter</button>
+            <button class="quiz-option" data-choice="2">Only when you are building an animation</button>
+          </div>
+          <div class="quiz-feedback">Correct. Use a StatelessWidget for a part of the screen that does not need its own changing data.</div>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="6">
+        <header class="step-header">
+          <span class="step-kicker">STEP 7 · STATEFUL WIDGETS</span>
+          <h1>StatefulWidget: Dynamic UI &amp; State</h1>
+          <p class="lede">Use a <code>StatefulWidget</code> when something on the screen can change, such as a counter, form, or switch. Call <code>setState()</code> after changing its data so Flutter redraws it.</p>
+        </header>
+        <h2>A Small First Example</h2>
+        <p>This example keeps one piece of state: a number named <code>count</code>. Each tap adds one and then asks Flutter to rebuild the screen.</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="import 'package:flutter/material.dart';
+
+class TapCounter extends StatefulWidget {
+  const TapCounter({super.key});
+
+  @override
+  State<TapCounter> createState() => _TapCounterState();
+}
+
+class _TapCounterState extends State<TapCounter> {
+  int count = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          count++;
+        });
+      },
+      child: Text('Taps: $count'),
+    );
+  }
+}">Copy</button>
+          <pre><code>import 'package:flutter/material.dart';
+
+class TapCounter extends StatefulWidget {
+  const TapCounter({super.key});
+
+  @override
+  State&lt;TapCounter&gt; createState() =&gt; _TapCounterState();
+}
+
+class _TapCounterState extends State&lt;TapCounter&gt; {
+  int count = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          count++;
+        });
+      },
+      child: Text('Taps: $count'),
+    );
+  }
+}</code></pre>
+        </div>
+        <div class="panel blue">
+          <strong>What changes here:</strong>
+          <ul>
+            <li><code>count</code> starts at <code>0</code>. This is the widget's state.</li>
+            <li>When you tap the button, <code>count++</code> adds one.</li>
+            <li><code>setState()</code> tells Flutter to show the new number.</li>
+          </ul>
+        </div>
+        <table class="comparison">
+          <thead><tr><th>Widget Type</th><th>State Storage</th><th>Rebuild Trigger</th><th>Typical Use Case</th></tr></thead>
+          <tbody>
+            <tr><td><code>StatelessWidget</code></td><td>No changing value of its own</td><td>Its parent gives it new information</td><td>A label or a simple message</td></tr>
+            <tr><td><code>StatefulWidget</code></td><td>Keeps a value that can change</td><td>You call <code>setState()</code></td><td>A counter, checkbox, or form</td></tr>
+          </tbody>
+        </table>
+        <div class="callout"><span class="label">IMPORTANT</span><p>Change state inside <code>setState(() { ... })</code>. If you change the value outside <code>setState</code>, Flutter may not update the screen.</p></div>
+      </section>
+
+      <section class="step-view" data-step="7">
+        <header class="step-header">
+          <span class="step-kicker">STEP 8 · APPLICATION SHELL</span>
+          <h1>MaterialApp &amp; Scaffold Essentials</h1>
+          <p class="lede">Most Flutter apps start with two useful widgets: <code>MaterialApp</code> and <code>Scaffold</code>.</p>
+        </header>
+        <div class="grid-2">
+          <div class="concept"><strong><code>MaterialApp</code></strong><p>The outer widget for your app. It sets things such as the theme and the first screen.</p></div>
+          <div class="concept"><strong><code>Scaffold</code></strong><p>A ready-made page layout. It can hold an app bar, page body, drawer, floating button, and snack bars.</p></div>
+        </div>
+        <h2>MaterialApp and Scaffold Integration</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="import 'package:flutter/material.dart';
+
+Widget buildAppShell() {
+  return MaterialApp(
+    title: 'Flutter Demo',
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(
+      primarySwatch: Colors.blue,
+      useMaterial3: true,
+    ),
+    home: Scaffold(
+      appBar: AppBar(
+        title: const Text('Home Screen'),
+      ),
+      body: const Center(
+        child: Text('Hello, Flutter!'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: const Icon(Icons.add),
+      ),
+    ),
+  );
+}">Copy</button>
+          <pre><code>import 'package:flutter/material.dart';
+
+Widget buildAppShell() {
+  return MaterialApp(
+    title: 'Flutter Demo',
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(
+      primarySwatch: Colors.blue,
+      useMaterial3: true,
+    ),
+    home: Scaffold(
+      appBar: AppBar(
+        title: const Text('Home Screen'),
+      ),
+      body: const Center(
+        child: Text('Hello, Flutter!'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: const Icon(Icons.add),
+      ),
+    ),
+  );
+}</code></pre>
+        </div>
+        <div class="panel blue">
+          <strong>Read it step by step:</strong>
+          <ol>
+            <li><code>MaterialApp</code> sets up the overall app and its theme.</li>
+            <li><code>Scaffold</code> gives one screen an app bar, body, and floating button.</li>
+            <li><code>Center</code> puts its child in the middle of the available space.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="8">
+        <header class="step-header">
+          <span class="step-kicker">STEP 9 · EXECUTION</span>
+          <h1>Running the Flutter Application</h1>
+          <p class="lede">Now run your app on a phone, emulator, or web browser.</p>
+        </header>
+        <h2>Checking Connected Devices</h2>
+        <p>First, check which phones, emulators, and browsers Flutter can use:</p>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="flutter devices">Copy</button>
+          <pre><code>flutter devices</code></pre>
+          <div class="output"><strong>Terminal Output Example</strong><br>2 connected devices:<br>Chrome (web) • chrome • web-javascript<br>Pixel 6 Emulator (mobile) • emulator-5554 • android-x86</div>
+        </div>
+        <h2>Launching the App</h2>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="flutter run">Copy</button>
+          <pre><code>flutter run</code></pre>
+        </div>
+        <div class="grid-2">
+          <div class="concept"><strong>Hot Reload (press <code>r</code>)</strong><p>Shows many code changes quickly and keeps the current screen state.</p></div>
+          <div class="concept"><strong>Hot Restart (press <code>R</code>)</strong><p>Starts the app again and resets its state.</p></div>
+        </div>
+        <div class="callout"><span class="label">TIP</span><p>Use Hot Reload for small UI changes such as colors and layout. Use Hot Restart after changing app startup code, global values, or <code>initState()</code>.</p></div>
+      </section>
+
+      <section class="step-view" data-step="9">
+        <header class="step-header">
+          <span class="step-kicker">STEP 10 · COMPLETE CODE</span>
+          <h1>Putting It All Together: Complete App Code</h1>
+          <p class="lede">Here is a complete beginner-friendly app in one file. Replace the contents of <code>lib/main.dart</code> with this code to try it.</p>
+        </header>
+        <div class="code-wrap">
+          <button class="copy-btn" data-copy="import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyFlutterApp());
+}
+
+/// The root application widget configuring themes and initial screens.
+class MyFlutterApp extends StatelessWidget {
+  const MyFlutterApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Essentials',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const DashboardScreen(),
+    );
+  }
+}
+
+/// Main dashboard widget providing Scaffold shell and state interaction.
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  int _counter = 0;
+
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
+  }
+
+  void _resetCounter() {
+    setState(() {
+      _counter = 0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Flutter Structure Demo'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _resetCounter,
+            tooltip: 'Reset Counter',
+          )
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const ProfileCard(
+              title: 'Developer Portal',
+              subtitle: 'Flutter Basics Codelab',
+            ),
+            const SizedBox(height: 32),
+            Center(
+              child: Text(
+                'Button Taps Count:',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            Center(
+              child: Text(
+                '$_counter',
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+/// Reusable StatelessWidget displaying static information card UI.
+class ProfileCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const ProfileCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const Icon(Icons.flutter_dash, size: 48, color: Colors.deepPurple),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              subtitle,
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}">Copy</button>
+          <pre><code>import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyFlutterApp());
+}
+
+/// The root application widget configuring themes and initial screens.
+class MyFlutterApp extends StatelessWidget {
+  const MyFlutterApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Essentials',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const DashboardScreen(),
+    );
+  }
+}
+
+/// Main dashboard widget providing Scaffold shell and state interaction.
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
+
+  @override
+  State&lt;DashboardScreen&gt; createState() =&gt; _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State&lt;DashboardScreen&gt; {
+  int _counter = 0;
+
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
+  }
+
+  void _resetCounter() {
+    setState(() {
+      _counter = 0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Flutter Structure Demo'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _resetCounter,
+            tooltip: 'Reset Counter',
+          )
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const ProfileCard(
+              title: 'Developer Portal',
+              subtitle: 'Flutter Basics Codelab',
+            ),
+            const SizedBox(height: 32),
+            Center(
+              child: Text(
+                'Button Taps Count:',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            Center(
+              child: Text(
+                '$_counter',
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+/// Reusable StatelessWidget displaying static information card UI.
+class ProfileCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const ProfileCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const Icon(Icons.flutter_dash, size: 48, color: Colors.deepPurple),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              subtitle,
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+          <div class="output"><strong>What you should see</strong><br>A purple app with a profile card and a counter. Tap the floating plus button to increase the count. Tap refresh in the app bar to set it back to 0.</div>
+        </div>
+      </section>
+
+      <section class="step-view" data-step="10">
+        <header class="step-header">
+          <span class="step-kicker">STEP 11 · FINAL CHECK</span>
+          <h1>Knowledge Verification Quiz</h1>
+          <p class="lede">Check what you learned about project files, widgets, and running an app.</p>
+        </header>
+        <div class="panel blue">
+          <h2>The Flutter Architecture Checklist</h2>
+          <p>
+            <span class="pill">lib/main.dart</span><span class="pill">pubspec.yaml</span><span class="pill">assets/</span>
+            <span class="pill">StatelessWidget</span><span class="pill">StatefulWidget</span><span class="pill">setState()</span>
+            <span class="pill">MaterialApp</span><span class="pill">Scaffold</span><span class="pill">flutter run</span>
+          </p>
+        </div>
+
+        <div class="quiz" data-answer="1">
+          <h3>1. Which directory contains your main application Dart code?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0"><code>android/</code></button>
+            <button class="quiz-option" data-choice="1"><code>lib/</code></button>
+            <button class="quiz-option" data-choice="2"><code>assets/</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. All primary application Dart logic and widget code reside inside `lib/`.</div>
+        </div>
+
+        <div class="quiz" data-answer="0">
+          <h3>2. Where must package dependencies and static images be declared?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0"><code>pubspec.yaml</code></button>
+            <button class="quiz-option" data-choice="1"><code>pubspec.lock</code></button>
+            <button class="quiz-option" data-choice="2"><code>index.html</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. pubspec.yaml manages all external libraries, SDK constraints, and asset declarations.</div>
+        </div>
+
+        <div class="quiz" data-answer="2">
+          <h3>3. What method must be invoked to trigger a UI re-render in a StatefulWidget?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0"><code>reloadUI()</code></button>
+            <button class="quiz-option" data-choice="1"><code>updateState()</code></button>
+            <button class="quiz-option" data-choice="2"><code>setState()</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. Calling setState() notifies Flutter that internal state has changed, causing build() to run again.</div>
+        </div>
+
+        <div class="quiz" data-answer="1">
+          <h3>4. Which widget provides basic Material visual layout structure like AppBars and FloatingActionButtons?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0"><code>MaterialApp</code></button>
+            <button class="quiz-option" data-choice="1"><code>Scaffold</code></button>
+            <button class="quiz-option" data-choice="2"><code>Container</code></button>
+          </div>
+          <div class="quiz-feedback">Correct. Scaffold acts as a visual layout canvas supporting AppBars, Drawers, FABs, and SnackBars.</div>
+        </div>
+
+        <div class="quiz" data-answer="0">
+          <h3>5. What is the key difference between Hot Reload and Hot Restart?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-choice="0">Hot Reload updates UI code while preserving app state; Hot Restart resets app state entirely</button>
+            <button class="quiz-option" data-choice="1">Hot Reload cleans build caches; Hot Restart installs new plugins</button>
+            <button class="quiz-option" data-choice="2">Hot Reload only works on Web browsers</button>
+          </div>
+          <div class="quiz-feedback">Correct. Hot Reload injects code changes instantly without wiping current app state memory.</div>
+        </div>
+        <div class="quiz" data-answer="0"><h3>6. Where do you usually start writing app code?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0"><code>lib/main.dart</code></button><button class="quiz-option" data-choice="1"><code>android/</code></button><button class="quiz-option" data-choice="2"><code>pubspec.lock</code></button></div><div class="quiz-feedback">Correct. Flutter apps normally start in <code>lib/main.dart</code>.</div></div>
+        <div class="quiz" data-answer="1"><h3>7. What can go in the <code>assets/</code> folder?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0">Only Dart files</button><button class="quiz-option" data-choice="1">Images, fonts, and local data files</button><button class="quiz-option" data-choice="2">Only Android settings</button></div><div class="quiz-feedback">Correct. Assets are files your app uses, such as images and fonts.</div></div>
+        <div class="quiz" data-answer="2"><h3>8. Why do spaces matter in <code>pubspec.yaml</code>?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0">They change app colors</button><button class="quiz-option" data-choice="1">They make Flutter run faster</button><button class="quiz-option" data-choice="2">YAML uses indentation to understand the structure</button></div><div class="quiz-feedback">Correct. Keep the indentation in YAML exactly as shown.</div></div>
+        <div class="quiz" data-answer="0"><h3>9. What does the <code>build()</code> method do?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0">Describes what should appear on screen</button><button class="quiz-option" data-choice="1">Downloads packages</button><button class="quiz-option" data-choice="2">Creates an Android folder</button></div><div class="quiz-feedback">Correct. <code>build()</code> returns the widgets to show.</div></div>
+        <div class="quiz" data-answer="1"><h3>10. Which is a visible widget?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0"><code>Column</code></button><button class="quiz-option" data-choice="1"><code>Text</code></button><button class="quiz-option" data-choice="2"><code>Padding</code></button></div><div class="quiz-feedback">Correct. <code>Text</code> displays words on screen.</div></div>
+        <div class="quiz" data-answer="2"><h3>11. When is a StatelessWidget a good choice?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0">When its number must change after a tap</button><button class="quiz-option" data-choice="1">When it runs a timer</button><button class="quiz-option" data-choice="2">When it only shows information that does not change</button></div><div class="quiz-feedback">Correct. A StatelessWidget has no changing state of its own.</div></div>
+        <div class="quiz" data-answer="0"><h3>12. In the tap counter, what is the state?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0">The <code>count</code> number</button><button class="quiz-option" data-choice="1">The button color</button><button class="quiz-option" data-choice="2">The import line</button></div><div class="quiz-feedback">Correct. The changing <code>count</code> value is state.</div></div>
+        <div class="quiz" data-answer="1"><h3>13. What happens after <code>setState()</code>?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0">Flutter closes the app</button><button class="quiz-option" data-choice="1">Flutter rebuilds the widget to show the new state</button><button class="quiz-option" data-choice="2">Flutter deletes the value</button></div><div class="quiz-feedback">Correct. It tells Flutter to redraw using the updated state.</div></div>
+        <div class="quiz" data-answer="2"><h3>14. What does <code>MaterialApp</code> set up?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0">One image file</button><button class="quiz-option" data-choice="1">Only a button</button><button class="quiz-option" data-choice="2">The overall app, including its theme and first screen</button></div><div class="quiz-feedback">Correct. MaterialApp is the outer setup for a Material-style app.</div></div>
+        <div class="quiz" data-answer="0"><h3>15. What does <code>Scaffold</code> provide?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0">A basic page layout</button><button class="quiz-option" data-choice="1">A package download</button><button class="quiz-option" data-choice="2">A new Dart version</button></div><div class="quiz-feedback">Correct. Scaffold can provide an app bar, body, and floating button.</div></div>
+        <div class="quiz" data-answer="1"><h3>16. Which command shows available devices?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0"><code>flutter build</code></button><button class="quiz-option" data-choice="1"><code>flutter devices</code></button><button class="quiz-option" data-choice="2"><code>flutter clean</code></button></div><div class="quiz-feedback">Correct. Use <code>flutter devices</code> to list available targets.</div></div>
+        <div class="quiz" data-answer="2"><h3>17. Which command starts the app?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0"><code>flutter start</code></button><button class="quiz-option" data-choice="1"><code>flutter open</code></button><button class="quiz-option" data-choice="2"><code>flutter run</code></button></div><div class="quiz-feedback">Correct. Run <code>flutter run</code> from the project folder.</div></div>
+        <div class="quiz" data-answer="0"><h3>18. What does Hot Reload usually keep?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0">The current app state</button><button class="quiz-option" data-choice="1">Only the Android folder</button><button class="quiz-option" data-choice="2">Nothing; it always starts over</button></div><div class="quiz-feedback">Correct. Hot Reload keeps the current state in many common changes.</div></div>
+        <div class="quiz" data-answer="1"><h3>19. When might you use Hot Restart?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0">To keep all state exactly as it is</button><button class="quiz-option" data-choice="1">After changing app startup code or initialization</button><button class="quiz-option" data-choice="2">To add an image to assets</button></div><div class="quiz-feedback">Correct. Hot Restart resets the app and is useful for some startup changes.</div></div>
+        <div class="quiz" data-answer="2"><h3>20. Which project file should you not edit by hand?</h3><div class="quiz-options"><button class="quiz-option" data-choice="0"><code>main.dart</code></button><button class="quiz-option" data-choice="1"><code>pubspec.yaml</code></button><button class="quiz-option" data-choice="2"><code>pubspec.lock</code></button></div><div class="quiz-feedback">Correct. Flutter manages <code>pubspec.lock</code> for you.</div></div>
+      </section>
+
+      <section class="step-view" data-step="11">
+        <header class="step-header">
+          <span class="step-kicker">STEP 12 · FINAL TASK</span>
+          <h1>Build an Interactive Profile Card</h1>
+          <p class="lede">Use what you learned to build a profile page with a button that changes.</p>
+        </header>
+        <div class="challenge">
+          <h3>BUILD IT · Interactive Profile Screen</h3>
+          <ol>
+            <li>Make a <code>StatefulWidget</code> named <code>UserProfileApp</code>, using <code>MaterialApp</code> and <code>Scaffold</code>.</li>
+            <li>Add a <code>StatelessWidget</code> header that shows an avatar and user details.</li>
+            <li>Create a true-or-false variable named <code>_isFollowing</code>.</li>
+            <li>Add an <code>ElevatedButton</code>. Inside <code>setState()</code>, use it to switch <code>_isFollowing</code> between <code>true</code> and <code>false</code>.</li>
+            <li>Show “Following” in green or “Follow User” in blue based on the value.</li>
+          </ol>
+          <p><strong>Done when:</strong> Tapping the button changes its text by using <code>setState()</code>.</p>
+        </div>
+        <div class="panel yellow">
+          <strong>Suggested order:</strong> Build the static parts first. Then add the changing follow button with a StatefulWidget.
+        </div>
+        <details class="reveal">
+          <summary>Reveal one possible solution</summary>
+          <div>
+            <div class="code-wrap">
+              <button class="copy-btn" data-copy="import 'package:flutter/material.dart';
+
+void main() => runApp(const UserProfileApp());
+
+class UserProfileApp extends StatelessWidget {
+  const UserProfileApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: ProfileScreen(),
+    );
+  }
+}
+
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  bool _isFollowing = false;
+
+  void _toggleFollow() {
+    setState(() {
+      _isFollowing = !_isFollowing;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('User Profile')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 40,
+                child: Icon(Icons.person, size: 40),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Jane Doe',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const Text('Flutter Developer'),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _toggleFollow,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isFollowing ? Colors.green : Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(_isFollowing ? 'Following' : 'Follow User'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }">Copy</button>
+              <pre><code>import 'package:flutter/material.dart';
+
+void main() =&gt; runApp(const UserProfileApp());
+
+class UserProfileApp extends StatelessWidget {
+  const UserProfileApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: ProfileScreen(),
+    );
+  }
+}
+
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State&lt;ProfileScreen&gt; createState() =&gt; _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State&lt;ProfileScreen&gt; {
+  bool _isFollowing = false;
+
+  void _toggleFollow() {
+    setState(() {
+      _isFollowing = !_isFollowing;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('User Profile')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 40,
+                child: Icon(Icons.person, size: 40),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Jane Doe',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const Text('Flutter Developer'),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _toggleFollow,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isFollowing ? Colors.green : Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(_isFollowing ? 'Following' : 'Follow User'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+            </div>
+          </div>
+        </details>
+        <div class="finish" id="finishBox">
+          <h2>Flutter Foundation Complete! 🚀</h2>
+          <p>You have mastered Flutter project layout structure, pubspec configuration, widget trees, state management basics, and execution workflows.</p>
+          <strong>Remember:</strong> Use <code>StatelessWidget</code> for static visuals, <code>StatefulWidget</code> with <code>setState()</code> for dynamic elements, and keep your <code>pubspec.yaml</code> clean!
+        </div>
+        <p class="footer-note">Flutter Project Structure &amp; Core Widgets Codelab · Beginner Level Foundation · Ready for Production Apps.</p>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const steps = [...document.querySelectorAll('.step-view:not([data-step="11"])')];
+  const nav = document.getElementById('stepNav');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const progressTrack = document.querySelector('.progress-track');
+  const content = document.getElementById('content');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileTitle = document.getElementById('mobileTitle');
+  const titles = [
+    'Start: Flutter Overview',
+    'Create Flutter Project',
+    'Directory Structure',
+    'pubspec.yaml & Assets',
+    'What is a Widget?',
+    'StatelessWidget',
+    'StatefulWidget & State',
+    'MaterialApp & Scaffold',
+    'Running the App',
+    'Complete Application Code',
+    'Quiz: Knowledge Check'
+  ];
+
+  let current = 0;
+  const completed = new Set();
+
+  function buildNav() {
+    nav.innerHTML = titles.map((title, i) => `
+      <button class="step-link" data-step="${i}" aria-current="${i === 0 ? 'step' : 'false'}" type="button">
+        <span class="step-number">${String(i + 1).padStart(2, '0')}</span>
+        <span>${title}</span>
+        <span class="step-status" aria-hidden="true"></span>
+      </button>
+    `).join('');
+  }
+
+  function getHashStep() {
+    const match = location.hash.match(/^#step-(\d+)$/);
+    if (!match) return 0;
+    const value = Number(match[1]) - 1;
+    return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+  }
+
+  function updateNavButtons() {
+    const prev = document.getElementById('prevBtn');
+    const next = document.getElementById('nextBtn');
+    if (!prev || !next) return;
+    prev.disabled = current === 0;
+    next.disabled = current === steps.length - 1;
+    next.textContent = current === steps.length - 1 ? 'Complete' : 'Next →';
+  }
+
+  function render(updateHash = true) {
+    current = Math.max(0, Math.min(current, steps.length - 1));
+    steps.forEach((step, i) => {
+      step.classList.toggle('active', i === current);
+      step.setAttribute('aria-hidden', i === current ? 'false' : 'true');
+    });
+    document.querySelectorAll('.step-link').forEach((button, i) => {
+      const active = i === current;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-current', active ? 'step' : 'false');
+      button.querySelector('.step-status').textContent = completed.has(i) ? '✓' : '';
+    });
+
+    const percent = Math.round(((current + 1) / steps.length) * 100);
+    progressBar.style.width = `${percent}%`;
+    progressText.textContent = `${percent}%`;
+    progressTrack.setAttribute('aria-valuenow', String(percent));
+    mobileTitle.textContent = titles[current];
+
+    if (updateHash) history.pushState({step: current}, '', `#step-${current + 1}`);
+    window.scrollTo({top: 0, behavior: 'auto'});
+
+    if (current === steps.length - 1) {
+      document.getElementById('finishBox').classList.toggle('show', completed.size >= steps.length - 1);
+    }
+    document.title = `${titles[current]} — Flutter Basics Codelab`;
+
+    if (window.innerWidth <= 850) {
+      sidebar.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    }
+    updateNavButtons();
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= steps.length) return;
+    completed.add(current);
+    current = index;
+    render();
+  }
+
+  buildNav();
+  current = getHashStep();
+  render(false);
+
+  nav.addEventListener('click', e => {
+    const button = e.target.closest('.step-link');
+    if (button) goTo(Number(button.dataset.step));
+  });
+
+  document.addEventListener('click', async e => {
+    const copy = e.target.closest('.copy-btn');
+    if (copy) {
+      try {
+        await navigator.clipboard.writeText(copy.dataset.copy);
+        const old = copy.textContent;
+        copy.textContent = 'Copied!';
+        setTimeout(() => copy.textContent = old, 1100);
+      } catch {
+        copy.textContent = 'Select & copy';
+        setTimeout(() => copy.textContent = 'Copy', 1200);
+      }
+      return;
+    }
+
+    const option = e.target.closest('.quiz-option');
+    if (option) {
+      const quiz = option.closest('.quiz');
+      if (quiz.dataset.answered === 'true') return;
+      const answer = Number(quiz.dataset.answer);
+      const choice = Number(option.dataset.choice);
+      quiz.dataset.answered = 'true';
+      quiz.querySelectorAll('.quiz-option').forEach(btn => {
+        btn.classList.remove('correct', 'wrong');
+        btn.disabled = true;
+      });
+      option.classList.add(choice === answer ? 'correct' : 'wrong');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      feedback.classList.add('show');
+      if (choice !== answer) {
+        feedback.textContent = `Not quite. The correct answer is option ${answer + 1}.`;
+      }
+    }
+  });
+
+  const navRow = document.createElement('div');
+  navRow.className = 'nav-row';
+  navRow.innerHTML = `
+    <button class="nav-btn" id="prevBtn" type="button">← Previous</button>
+    <button class="nav-btn primary" id="nextBtn" type="button">Next →</button>
+  `;
+  content.appendChild(navRow);
+  updateNavButtons();
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if (current < steps.length - 1) goTo(current + 1);
+  });
+
+  menuBtn.addEventListener('click', () => {
+    const open = sidebar.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+    if (open) sidebar.querySelector('.step-link.active')?.focus();
+  });
+
+  window.addEventListener('hashchange', () => {
+    current = getHashStep();
+    render(false);
+  });
+
+  window.addEventListener('popstate', () => {
+    current = getHashStep();
+    render(false);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const tag = document.activeElement?.tagName;
+    if (['INPUT','TEXTAREA','SELECT'].includes(tag)) return;
+    if (e.key === 'ArrowRight' && current < steps.length - 1) {
+      e.preventDefault();
+      goTo(current + 1);
+    }
+    if (e.key === 'ArrowLeft' && current > 0) {
+      e.preventDefault();
+      goTo(current - 1);
+    }
+  });
+})();
+</script>
+</body>
+</html>
