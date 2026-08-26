@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Widget Layouts — Interactive Flutter Codelab</title>
+  <meta name="description" content="A beginner-friendly interactive Flutter codelab covering layout constraints, single-child and multi-child layouts, flex, scrolling, grids, sizing, and responsive UI.">
+  <meta name="theme-color" content="#1769ff">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root{--blue:#1769ff;--blue-dark:#0b43b7;--blue-light:#dce9ff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:290px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:var(--blue);border-right:var(--border);padding:22px 18px;z-index:20;overflow:auto}.brand{background:#fff;border:var(--border);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:20px}.eyebrow,.progress-meta,.step-number,.step-kicker,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.45rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}
+    .progress-wrap{color:#fff;margin:0 2px 20px}.progress-meta{display:flex;justify-content:space-between;gap:10px;font-size:.72rem;font-weight:500;margin-bottom:7px}.progress-track{height:16px;background:#fff;border:var(--border);padding:2px}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:9px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;text-align:left;color:#fff;background:transparent;border:3px solid transparent;padding:9px 8px;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;background:var(--blue);border-bottom:var(--border);padding:10px;align-items:center;gap:10px}.menu-btn,.mobile-title{border:var(--border);background:#fff;box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{padding:8px 10px;flex:1;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{border:var(--border);background:#fff;box-shadow:var(--shadow);padding:28px;margin-bottom:24px}.step-kicker{display:inline-block;background:var(--blue);color:#fff;border:2px solid var(--ink);padding:5px 9px;font-size:.72rem;font-weight:500;margin-bottom:13px}h1,h2,h3{line-height:1.08}h1{font-size:clamp(2rem,5vw,3.7rem);margin:0 0 12px;letter-spacing:-.045em}h2{font-size:clamp(1.55rem,3vw,2.25rem);margin:30px 0 12px}h3{font-size:1.15rem;margin:24px 0 9px}.lede{font-size:1.08rem;max-width:780px;margin:0}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.callout{border:var(--border);box-shadow:var(--shadow-sm);padding:16px 18px;margin:20px 0;background:#fff}.callout .label{display:inline-block;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;border:2px solid var(--ink);background:var(--ink);color:#fff;padding:3px 7px;margin-bottom:8px}.callout p:last-child{margin-bottom:0}.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.concept{border:var(--border);padding:18px;background:#fff;box-shadow:var(--shadow-sm)}.concept strong{font-size:1.05rem}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;background:#111;color:#f7f7f7;border:var(--border);box-shadow:var(--shadow-sm);padding:20px;overflow:auto;font-family:"DM Mono",ui-monospace,monospace;font-size:.85rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:5px 9px;font-size:.75rem;font-weight:800;z-index:2}code:not(pre code){background:#e8edf7;border:1px solid #9da9bb;padding:1px 5px;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.syntax{background:#edf2ff;border:var(--border);padding:14px;font-family:"DM Mono",monospace;overflow:auto}.comparison{width:100%;border-collapse:collapse;margin:18px 0;background:#fff;border:var(--border)}.comparison th,.comparison td{border:2px solid var(--ink);padding:11px;text-align:left;vertical-align:top}.comparison th{background:var(--blue);color:#fff}
+    .quiz{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;border:2px solid var(--ink);background:#fff;padding:11px 13px;font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;font-weight:800;background:var(--blue-light)}.reveal>div{padding:15px 16px}.challenge{background:var(--ink);color:#fff;border:var(--border);box-shadow:var(--shadow);padding:22px;margin:24px 0}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:12px 18px;font-weight:900;min-width:130px}.nav-btn.primary{background:var(--blue);color:#fff}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{background:var(--mint);border:var(--border);box-shadow:var(--shadow);padding:20px;margin-top:24px}.footer-note{margin-top:30px;font-size:.8rem;color:#555}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:600px){.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.grid-2{grid-template-columns:1fr}.nav-row{position:sticky;bottom:0;background:var(--paper);padding:12px 0;z-index:10}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{font-size:.77rem;padding:16px 12px}.copy-btn{position:static;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1;align-self:flex-end}.comparison{display:block;overflow-x:auto}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter Codelab</div><h2>Widget Layouts</h2><p>Arrange, size, scroll &amp; adapt.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">Widget Layouts</div></div>
+  <main><div class="content" id="content">
+
+    <section class="step-view" data-step="0">
+      <header class="step-header"><span class="step-kicker">STEP 1 · START HERE</span><h1>Understanding Flutter's Layout System</h1><p class="lede">Flutter interfaces are widget trees. Layout widgets decide how their children are sized, arranged, aligned, layered, and scrolled.</p><div class="objective"><strong>By the end:</strong> You can choose an appropriate layout widget, explain Flutter's constraint flow, build nested layouts, fix common overflows, and adapt a screen to different widths.</div></header>
+      <div class="panel blue"><h2>The rule behind every layout</h2><div class="grid-2"><div class="concept"><strong>1. Constraints go down</strong><p>A parent tells each child the minimum and maximum size it may use.</p></div><div class="concept"><strong>2. Sizes go up</strong><p>Each child selects a permitted size and reports it back.</p></div><div class="concept"><strong>3. Parents position children</strong><p>The parent decides where each child appears inside its own space.</p></div><div class="concept"><strong>4. The tree repeats the process</strong><p>Every child can become a parent to another widget.</p></div></div></div>
+      <div class="callout"><span class="label">CORE IDEA</span><p>A widget cannot usually choose any size it wants. Its final size must satisfy the constraints received from its parent.</p></div>
+      <h2>Start with the screen shell</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>MaterialApp(
+  home: Scaffold(
+    appBar: AppBar(title: const Text('Widget Layouts')),
+    body: const SafeArea(
+      child: Text('Safe screen content'),
+    ),
+  ),
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Widget</th><th>Responsibility</th></tr></thead><tbody><tr><td><code>MaterialApp</code></td><td>Provides the Material application environment.</td></tr><tr><td><code>Scaffold</code></td><td>Creates a standard screen structure.</td></tr><tr><td><code>SafeArea</code></td><td>Keeps content away from system intrusions.</td></tr><tr><td><code>Text</code>, <code>Icon</code>, <code>Image</code>, <code>Card</code>, <code>Divider</code></td><td>Provide visible content for the layout.</td></tr></tbody></table>
+      <div class="quiz" data-answer="0"><h3>Quick check</h3><p>Who normally decides where a child is positioned?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">The parent</button><button class="quiz-option" data-choice="1">The child</button><button class="quiz-option" data-choice="2">The Dart compiler</button></div><div class="quiz-feedback">Correct. The parent positions the child after the child reports a permitted size.</div></div>
+    </section>
+
+    <section class="step-view" data-step="1">
+      <header class="step-header"><span class="step-kicker">STEP 2 · ONE CHILD</span><h1>Single-Child Layout Widgets</h1><p class="lede">Begin with widgets that receive one child. They make sizing, spacing, and positioning easy to see.</p></header>
+      <div class="grid-2"><div class="concept"><strong>Container</strong><p>Size, decorate, space, and align one child.</p></div><div class="concept"><strong>Center</strong><p>Place one child in the middle of the available area.</p></div><div class="concept"><strong>Padding</strong><p>Add empty space around one child.</p></div><div class="concept"><strong>SizedBox</strong><p>Create a fixed-size box or an intentional gap.</p></div><div class="concept"><strong>Align</strong><p>Place one child at a selected position.</p></div></div>
+
+      <h2>1. Container</h2>
+      <p><code>Container</code> is a convenience widget. It combines common sizing, spacing, alignment, decoration, and transformation features around one child.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Common value</th></tr></thead><tbody><tr><td><code>child</code></td><td>The widget inside the container.</td><td><code>Text(...)</code></td></tr><tr><td><code>width</code> / <code>height</code></td><td>Request a specific size.</td><td><code>width: 240</code></td></tr><tr><td><code>padding</code></td><td>Space between the boundary and child.</td><td><code>EdgeInsets.all(16)</code></td></tr><tr><td><code>margin</code></td><td>Space outside the container.</td><td><code>EdgeInsets.symmetric(...)</code></td></tr><tr><td><code>alignment</code></td><td>Position the child inside the container.</td><td><code>Alignment.center</code></td></tr><tr><td><code>color</code></td><td>Set a simple background color.</td><td><code>Colors.blue</code></td></tr><tr><td><code>decoration</code></td><td>Add color, border, radius, gradient, or shadow.</td><td><code>BoxDecoration(...)</code></td></tr><tr><td><code>constraints</code></td><td>Add minimum or maximum size rules.</td><td><code>BoxConstraints(...)</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Container(
+  width: 260,
+  height: 120,
+  margin: const EdgeInsets.all(16),
+  padding: const EdgeInsets.symmetric(
+    horizontal: 20,
+    vertical: 12,
+  ),
+  alignment: Alignment.center,
+  decoration: BoxDecoration(
+    color: Colors.blue.shade100,
+    border: Border.all(color: Colors.blue, width: 2),
+    borderRadius: BorderRadius.circular(16),
+    boxShadow: const [
+      BoxShadow(
+        color: Colors.black26,
+        blurRadius: 8,
+        offset: Offset(0, 4),
+      ),
+    ],
+  ),
+  child: const Text('Flutter Course'),
+)</code></pre></div>
+      <div class="callout"><span class="label">IMPORTANT</span><p>Do not provide both <code>color</code> and <code>decoration</code>. When using <code>BoxDecoration</code>, put the background color inside the decoration.</p></div>
+
+      <h2>2. Center</h2>
+      <p><code>Center</code> positions its child at the center of the space its parent provides.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>child</code></td><td>The widget to center.</td></tr><tr><td><code>widthFactor</code></td><td>Makes Center's width a multiple of the child's width when possible.</td></tr><tr><td><code>heightFactor</code></td><td>Makes Center's height a multiple of the child's height when possible.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Container(
+  width: 280,
+  height: 140,
+  color: Colors.blue.shade50,
+  child: const Center(
+    child: Text(
+      'Centered message',
+      style: TextStyle(fontSize: 20),
+    ),
+  ),
+)</code></pre></div>
+      <div class="panel blue"><strong>Most common usage:</strong> Students will usually set only <code>child</code>. Introduce <code>widthFactor</code> and <code>heightFactor</code> as optional sizing controls, not mandatory settings.</div>
+
+      <h2>3. Padding</h2>
+      <p><code>Padding</code> inserts empty space around its child. Unlike margin, this is an explicit layout widget in the widget tree.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>padding</code></td><td>The amount of space to insert.</td></tr><tr><td><code>child</code></td><td>The widget placed inside that space.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Padding(
+  padding: EdgeInsets.only(
+    left: 24,
+    top: 16,
+    right: 24,
+    bottom: 8,
+  ),
+  child: Text('Content with breathing room'),
+)</code></pre></div>
+      <div class="grid-2"><div class="concept"><strong>All sides</strong><p><code>EdgeInsets.all(16)</code></p></div><div class="concept"><strong>Horizontal and vertical</strong><p><code>EdgeInsets.symmetric(horizontal: 24, vertical: 12)</code></p></div><div class="concept"><strong>Selected sides</strong><p><code>EdgeInsets.only(left: 16, top: 8)</code></p></div><div class="concept"><strong>Different value per side</strong><p><code>EdgeInsets.fromLTRB(16, 8, 24, 12)</code></p></div></div>
+
+      <h2>4. SizedBox</h2>
+      <p><code>SizedBox</code> can give its child a requested size or create an empty, predictable gap between widgets.</p>
+      <table class="comparison"><thead><tr><th>Property / constructor</th><th>Purpose</th></tr></thead><tbody><tr><td><code>width</code></td><td>Request a fixed width.</td></tr><tr><td><code>height</code></td><td>Request a fixed height.</td></tr><tr><td><code>child</code></td><td>Optionally constrain one child.</td></tr><tr><td><code>SizedBox.expand</code></td><td>Fill all permitted width and height.</td></tr><tr><td><code>SizedBox.shrink</code></td><td>Request the smallest permitted size.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Column(
+  children: [
+    const Text('Course title'),
+
+    // Empty vertical gap
+    const SizedBox(height: 16),
+
+    // A child with a requested size
+    SizedBox(
+      width: 220,
+      height: 56,
+      child: ElevatedButton(
+        onPressed: () {},
+        child: const Text('Start course'),
+      ),
+    ),
+  ],
+)</code></pre></div>
+      <div class="callout"><span class="label">LAYOUT NOTE</span><p>A <code>SizedBox</code> still obeys its parent's constraints. If a parent does not permit 220 pixels of width, Flutter cannot guarantee that requested width.</p></div>
+
+      <h2>5. Align</h2>
+      <p><code>Align</code> places its child at a selected point inside the available space. Use it when centering alone is not enough.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Common value</th></tr></thead><tbody><tr><td><code>alignment</code></td><td>Select the child's position.</td><td><code>Alignment.bottomRight</code></td></tr><tr><td><code>child</code></td><td>The widget to position.</td><td><code>Icon(...)</code></td></tr><tr><td><code>widthFactor</code></td><td>Size Align's width relative to its child.</td><td><code>2</code></td></tr><tr><td><code>heightFactor</code></td><td>Size Align's height relative to its child.</td><td><code>2</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Container(
+  width: 280,
+  height: 140,
+  color: Colors.orange.shade100,
+  child: const Align(
+    alignment: Alignment.bottomRight,
+    child: Padding(
+      padding: EdgeInsets.all(12),
+      child: Icon(Icons.settings, size: 32),
+    ),
+  ),
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Common alignment values</th><th>Position</th></tr></thead><tbody><tr><td><code>Alignment.topLeft</code></td><td>Upper-left corner</td></tr><tr><td><code>Alignment.topCenter</code></td><td>Middle of the top edge</td></tr><tr><td><code>Alignment.center</code></td><td>Center</td></tr><tr><td><code>Alignment.centerRight</code></td><td>Middle of the right edge</td></tr><tr><td><code>Alignment.bottomRight</code></td><td>Lower-right corner</td></tr></tbody></table>
+      <div class="callout"><span class="label">REMEMBER</span><p>Choose the smallest widget that clearly expresses the intent: <code>Padding</code> for spacing, <code>Center</code> for centering, <code>Align</code> for positioning, <code>SizedBox</code> for size or gaps, and <code>Container</code> when several concerns must be combined.</p></div>
+    </section>
+
+    <section class="step-view" data-step="2">
+      <header class="step-header"><span class="step-kicker">STEP 3 · MULTIPLE CHILDREN</span><h1>Row, Column &amp; the Two Axes</h1><p class="lede"><code>Row</code> arranges children horizontally. <code>Column</code> arranges them vertically. Both use a main axis and a cross axis.</p></header>
+      <table class="comparison"><thead><tr><th>Widget</th><th>Main axis</th><th>Cross axis</th></tr></thead><tbody><tr><td><code>Row</code></td><td>Horizontal</td><td>Vertical</td></tr><tr><td><code>Column</code></td><td>Vertical</td><td>Horizontal</td></tr></tbody></table>
+
+      <h2>1. Row</h2>
+      <p><code>Row</code> lays out multiple children from left to right by default. Its main axis is horizontal, so main-axis properties control horizontal placement.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Common value</th></tr></thead><tbody><tr><td><code>children</code></td><td>The widgets arranged horizontally.</td><td><code>[Icon(...), Text(...)]</code></td></tr><tr><td><code>mainAxisAlignment</code></td><td>Distributes children horizontally.</td><td><code>MainAxisAlignment.spaceBetween</code></td></tr><tr><td><code>crossAxisAlignment</code></td><td>Aligns children vertically.</td><td><code>CrossAxisAlignment.center</code></td></tr><tr><td><code>mainAxisSize</code></td><td>Chooses whether the Row uses maximum or minimum horizontal space.</td><td><code>MainAxisSize.max</code></td></tr><tr><td><code>textDirection</code></td><td>Controls the horizontal start direction.</td><td><code>TextDirection.ltr</code></td></tr><tr><td><code>verticalDirection</code></td><td>Controls which vertical side is treated as the start.</td><td><code>VerticalDirection.down</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Container(
+  height: 72,
+  padding: const EdgeInsets.symmetric(horizontal: 16),
+  color: Colors.blue.shade50,
+  child: const Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Icon(Icons.menu),
+      Text(
+        'Student Dashboard',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      Icon(Icons.notifications),
+    ],
+  ),
+)</code></pre></div>
+      <div class="callout"><span class="label">OVERFLOW</span><p>A <code>Row</code> keeps its children on one horizontal line. Long or wide children can overflow. Later, use <code>Expanded</code>, <code>Flexible</code>, or <code>Wrap</code> according to the intended design.</p></div>
+
+      <h2>2. Column</h2>
+      <p><code>Column</code> lays out multiple children from top to bottom by default. Its main axis is vertical, so main-axis properties control vertical placement.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Common value</th></tr></thead><tbody><tr><td><code>children</code></td><td>The widgets arranged vertically.</td><td><code>[Text(...), Text(...)]</code></td></tr><tr><td><code>mainAxisAlignment</code></td><td>Distributes children vertically.</td><td><code>MainAxisAlignment.center</code></td></tr><tr><td><code>crossAxisAlignment</code></td><td>Aligns children horizontally.</td><td><code>CrossAxisAlignment.start</code></td></tr><tr><td><code>mainAxisSize</code></td><td>Chooses whether the Column uses maximum or minimum vertical space.</td><td><code>MainAxisSize.min</code></td></tr><tr><td><code>textDirection</code></td><td>Helps determine horizontal start and end.</td><td>Usually inherited</td></tr><tr><td><code>verticalDirection</code></td><td>Controls whether children begin at the top or bottom.</td><td><code>VerticalDirection.down</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Container(
+  width: 280,
+  padding: const EdgeInsets.all(16),
+  color: Colors.orange.shade50,
+  child: const Column(
+    mainAxisSize: MainAxisSize.min,
+    mainAxisAlignment: MainAxisAlignment.center,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        'Flutter 30 Days',
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      SizedBox(height: 8),
+      Text('Week 2 · Widget Layouts'),
+      SizedBox(height: 4),
+      Text('Progress: 35%'),
+    ],
+  ),
+)</code></pre></div>
+      <div class="callout"><span class="label">SCROLLING</span><p>A <code>Column</code> does not scroll. If its content is taller than the available height, choose a suitable scrolling layout such as <code>SingleChildScrollView</code> or <code>ListView</code>.</p></div>
+
+      <h2>Properties shared by Row and Column</h2>
+      <table class="comparison"><thead><tr><th>Property</th><th>Useful values</th><th>What changes?</th></tr></thead><tbody><tr><td><code>mainAxisAlignment</code></td><td><code>start</code>, <code>center</code>, <code>end</code>, <code>spaceBetween</code>, <code>spaceAround</code>, <code>spaceEvenly</code></td><td>Placement and distribution along the main axis.</td></tr><tr><td><code>crossAxisAlignment</code></td><td><code>start</code>, <code>center</code>, <code>end</code>, <code>stretch</code>, <code>baseline</code></td><td>Alignment along the cross axis.</td></tr><tr><td><code>mainAxisSize</code></td><td><code>max</code>, <code>min</code></td><td>Whether the layout claims all available main-axis space or hugs its children.</td></tr></tbody></table>
+      <div class="panel yellow"><strong>Baseline note:</strong> <code>CrossAxisAlignment.baseline</code> is mainly useful in a <code>Row</code> containing text of different sizes. It also requires an appropriate <code>textBaseline</code>.</div>
+
+      <h2>3. Nest Row and Column</h2>
+      <p>Real screens usually combine both widgets. In this profile header, the outer <code>Row</code> arranges the avatar and information horizontally, while the inner <code>Column</code> arranges the two text widgets vertically.</p>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Row(
+  crossAxisAlignment: CrossAxisAlignment.center,
+  children: [
+    CircleAvatar(
+      radius: 28,
+      child: Icon(Icons.person),
+    ),
+    SizedBox(width: 12),
+    Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Aarav Sharma',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text('Flutter Student'),
+      ],
+    ),
+  ],
+)</code></pre></div>
+      <div class="panel mint"><strong>Experiment:</strong> Change one alignment property at a time. Before running the app, ask whether it affects the horizontal or vertical axis for that particular widget.</div>
+      <div class="quiz" data-answer="1"><h3>Quick check</h3><p>What does <code>crossAxisAlignment</code> control in a <code>Row</code>?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">Horizontal placement</button><button class="quiz-option" data-choice="1">Vertical placement</button><button class="quiz-option" data-choice="2">Scrolling direction</button></div><div class="quiz-feedback">Correct. A Row's cross axis is vertical.</div></div>
+    </section>
+
+    <section class="step-view" data-step="3">
+      <header class="step-header"><span class="step-kicker">STEP 4 · FLEX SPACE</span><h1>Expanded, Flexible &amp; Spacer</h1><p class="lede">Flex widgets decide how unused space in a <code>Row</code> or <code>Column</code> is distributed.</p></header>
+      <h2>1. Expanded</h2>
+      <p><code>Expanded</code> gives a child a share of the remaining main-axis space and forces the child to fill that share.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Default</th></tr></thead><tbody><tr><td><code>child</code></td><td>The widget that must fill its allocation.</td><td>Required</td></tr><tr><td><code>flex</code></td><td>Sets this child's share relative to other flex children.</td><td><code>1</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Row(
+  children: [
+    Expanded(
+      flex: 2,
+      child: Container(
+        height: 80,
+        color: Colors.blue,
+        child: const Center(child: Text('2 shares')),
+      ),
+    ),
+    const SizedBox(width: 8),
+    Expanded(
+      child: Container(
+        height: 80,
+        color: Colors.orange,
+        child: const Center(child: Text('1 share')),
+      ),
+    ),
+  ],
+)</code></pre></div>
+      <div class="callout"><span class="label">REMEMBER</span><p><code>flex: 2</code> does not mean 200 pixels. It means twice the share of a sibling using <code>flex: 1</code>.</p></div>
+
+      <h2>2. Flexible</h2>
+      <p><code>Flexible</code> gives a child permission to use flexible space, but its <code>fit</code> decides whether the child must fill that allocation.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Default</th></tr></thead><tbody><tr><td><code>child</code></td><td>The widget allowed to flex.</td><td>Required</td></tr><tr><td><code>flex</code></td><td>Sets its relative share of remaining space.</td><td><code>1</code></td></tr><tr><td><code>fit</code></td><td><code>loose</code> permits a smaller child; <code>tight</code> forces it to fill.</td><td><code>FlexFit.loose</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Row(
+  children: [
+    Flexible(
+      fit: FlexFit.loose,
+      child: Text(
+        'A long course title that should wrap instead of overflowing',
+      ),
+    ),
+    SizedBox(width: 8),
+    Icon(Icons.arrow_forward),
+  ],
+)</code></pre></div>
+      <div class="panel blue"><strong>Expanded versus Flexible:</strong> <code>Expanded</code> behaves like a <code>Flexible</code> with <code>FlexFit.tight</code>. The common <code>Flexible</code> case uses a loose fit.</div>
+
+      <h2>3. Spacer</h2>
+      <p><code>Spacer</code> inserts flexible empty space between children. It is useful for pushing widgets apart without hard-coded gaps.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Default</th></tr></thead><tbody><tr><td><code>flex</code></td><td>Sets the empty space's share relative to other flex widgets.</td><td><code>1</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Row(
+  children: [
+    Icon(Icons.book),
+    SizedBox(width: 8),
+    Text('Widget Layouts'),
+    Spacer(),
+    Text('35%'),
+    SizedBox(width: 8),
+    Icon(Icons.arrow_forward),
+  ],
+)</code></pre></div>
+      <div class="callout"><span class="label">COMMON ERROR</span><p>All three widgets are designed for a <code>Row</code>, <code>Column</code>, or another <code>Flex</code>. Do not place them directly inside a <code>Stack</code>, <code>ListView</code>, or ordinary <code>Container</code>.</p></div>
+      <div class="quiz" data-answer="0"><h3>Quick check</h3><p>Which widget forces its child to fill the allocated flex space?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">Expanded</button><button class="quiz-option" data-choice="1">Flexible with a loose fit</button><button class="quiz-option" data-choice="2">SizedBox</button></div><div class="quiz-feedback">Correct. Expanded uses a tight fit and forces its child to fill its allocation.</div></div>
+    </section>
+
+    <section class="step-view" data-step="4">
+      <header class="step-header"><span class="step-kicker">STEP 5 · CONTENT FLOW</span><h1>Wrap Content Without Overflow</h1><p class="lede"><code>Wrap</code> places children on another run when the current row or column runs out of room.</p></header>
+      <h2>1. Wrap</h2>
+      <p><code>Wrap</code> arranges children sequentially and creates a new run whenever the current run lacks space.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Common value</th></tr></thead><tbody><tr><td><code>children</code></td><td>The widgets to arrange.</td><td>A list of <code>Chip</code> widgets</td></tr><tr><td><code>direction</code></td><td>Sets the main direction of each run.</td><td><code>Axis.horizontal</code></td></tr><tr><td><code>alignment</code></td><td>Aligns children within a run.</td><td><code>WrapAlignment.start</code></td></tr><tr><td><code>spacing</code></td><td>Gap between children in one run.</td><td><code>8</code></td></tr><tr><td><code>runAlignment</code></td><td>Aligns the collection of runs.</td><td><code>WrapAlignment.start</code></td></tr><tr><td><code>runSpacing</code></td><td>Gap between runs.</td><td><code>8</code></td></tr><tr><td><code>crossAxisAlignment</code></td><td>Aligns children across each run.</td><td><code>WrapCrossAlignment.center</code></td></tr><tr><td><code>verticalDirection</code></td><td>Controls the vertical run direction.</td><td><code>VerticalDirection.down</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Wrap(
+  alignment: WrapAlignment.start,
+  spacing: 8,
+  runSpacing: 8,
+  crossAxisAlignment: WrapCrossAlignment.center,
+  children: [
+    Chip(label: Text('Flutter')),
+    Chip(label: Text('Dart')),
+    Chip(label: Text('Firebase')),
+    Chip(label: Text('REST API')),
+  ],
+)</code></pre></div>
+      <div class="grid-2"><div class="panel pink"><strong>Row</strong><p>Keeps children on one horizontal line. It can overflow when they do not fit.</p></div><div class="panel mint"><strong>Wrap</strong><p>Starts another run and exposes <code>spacing</code> and <code>runSpacing</code>.</p></div></div>
+      <div class="challenge"><h3>Try it</h3><p>Replace the <code>Wrap</code> with a <code>Row</code>, add more chips, and observe the overflow warning. Restore <code>Wrap</code> to fix the layout.</p></div>
+      <div class="quiz" data-answer="2"><h3>Quick check</h3><p>Which property controls the gap between separate lines of wrapped children?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">spacing</button><button class="quiz-option" data-choice="1">alignment</button><button class="quiz-option" data-choice="2">runSpacing</button></div><div class="quiz-feedback">Correct. runSpacing controls the gap between runs; spacing controls the gap within one run.</div></div>
+    </section>
+
+    <section class="step-view" data-step="5">
+      <header class="step-header"><span class="step-kicker">STEP 6 · LAYERS</span><h1>Stack, Positioned &amp; IndexedStack</h1><p class="lede">Linear layouts place widgets beside one another. A <code>Stack</code> lets widgets overlap.</p></header>
+      <h2>1. Stack</h2>
+      <p><code>Stack</code> layers children from back to front. The first child is painted at the back and the last child appears on top.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Common value</th></tr></thead><tbody><tr><td><code>children</code></td><td>The widgets to layer.</td><td>Background followed by overlays</td></tr><tr><td><code>alignment</code></td><td>Positions non-positioned children.</td><td><code>Alignment.center</code></td></tr><tr><td><code>fit</code></td><td>Controls how non-positioned children use the Stack's size.</td><td><code>StackFit.loose</code></td></tr><tr><td><code>clipBehavior</code></td><td>Decides whether overflowing paint is clipped.</td><td><code>Clip.hardEdge</code></td></tr><tr><td><code>textDirection</code></td><td>Helps resolve directional alignment.</td><td>Usually inherited</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>SizedBox(
+  width: 300,
+  height: 170,
+  child: Stack(
+    alignment: Alignment.center,
+    children: [
+      Container(color: Colors.blue.shade700),
+      const Icon(Icons.school, size: 72, color: Colors.white24),
+      const Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Text(
+            'Flutter Course',
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ),
+      ),
+    ],
+  ),
+)</code></pre></div>
+
+      <h2>2. Positioned</h2>
+      <p><code>Positioned</code> gives a child explicit offsets or dimensions inside its nearest <code>Stack</code>.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>child</code></td><td>The widget to place.</td></tr><tr><td><code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code></td><td>Set offsets from the Stack's edges.</td></tr><tr><td><code>width</code>, <code>height</code></td><td>Request explicit dimensions when the corresponding edges do not already determine them.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Stack(
+  clipBehavior: Clip.none,
+  children: [
+    const Icon(Icons.notifications, size: 42),
+    Positioned(
+      top: -2,
+      right: -2,
+      child: Container(
+        width: 14,
+        height: 14,
+        decoration: const BoxDecoration(
+          color: Colors.red,
+          shape: BoxShape.circle,
+        ),
+      ),
+    ),
+  ],
+)</code></pre></div>
+      <div class="callout"><span class="label">COMMON ERROR</span><p><code>Positioned</code> is a parent-data widget intended for a <code>Stack</code>. Do not place another layout widget between <code>Positioned</code> and its Stack.</p></div>
+
+      <h2>3. IndexedStack</h2>
+      <p><code>IndexedStack</code> keeps multiple children in the tree but paints only the child selected by <code>index</code>.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Common value</th></tr></thead><tbody><tr><td><code>index</code></td><td>Selects the visible child.</td><td><code>0</code></td></tr><tr><td><code>children</code></td><td>The pages or states to preserve.</td><td>A list of screen widgets</td></tr><tr><td><code>alignment</code></td><td>Aligns children inside the stack.</td><td><code>AlignmentDirectional.topStart</code></td></tr><tr><td><code>sizing</code></td><td>Determines how the stack's size is calculated.</td><td><code>StackFit.loose</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const IndexedStack(
+  index: 1,
+  children: [
+    Center(child: Text('Home page')),
+    Center(child: Text('Courses page')),
+    Center(child: Text('Profile page')),
+  ],
+)</code></pre></div>
+      <div class="panel blue"><strong>Stack versus IndexedStack:</strong> <code>Stack</code> paints its children as layers. <code>IndexedStack</code> paints only one indexed child while preserving the others.</div>
+    </section>
+
+    <section class="step-view" data-step="6">
+      <header class="step-header"><span class="step-kicker">STEP 7 · SCROLLING</span><h1>SingleChildScrollView &amp; ListView</h1><p class="lede">When content can exceed the viewport, choose a scrolling widget based on whether the content is a screen composition or a repeated sequence.</p></header>
+      <table class="comparison"><thead><tr><th>Widget</th><th>Use it for</th></tr></thead><tbody><tr><td><code>Column</code></td><td>A small vertical layout that fits.</td></tr><tr><td><code>SingleChildScrollView + Column</code></td><td>A screen made from different sections that scroll together.</td></tr><tr><td><code>ListView</code></td><td>A scrollable sequence of known children.</td></tr><tr><td><code>ListView.builder</code></td><td>A long or data-driven sequence built lazily.</td></tr></tbody></table>
+
+      <h2>1. SingleChildScrollView</h2>
+      <p><code>SingleChildScrollView</code> makes one child scrollable. It is a good fit for a screen composed from a limited number of different sections.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Common value</th></tr></thead><tbody><tr><td><code>child</code></td><td>The single widget that becomes scrollable.</td><td>A <code>Column</code></td></tr><tr><td><code>scrollDirection</code></td><td>Sets vertical or horizontal scrolling.</td><td><code>Axis.vertical</code></td></tr><tr><td><code>padding</code></td><td>Adds space around the scrollable content.</td><td><code>EdgeInsets.all(16)</code></td></tr><tr><td><code>reverse</code></td><td>Reverses the scrolling direction.</td><td><code>false</code></td></tr><tr><td><code>physics</code></td><td>Customizes scroll behavior.</td><td>Platform default</td></tr><tr><td><code>controller</code></td><td>Reads or changes the scroll position.</td><td>A <code>ScrollController</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>SingleChildScrollView(
+  padding: const EdgeInsets.all(16),
+  child: Column(
+    children: [
+      const ProfileHeader(),
+      const SizedBox(height: 16),
+      const CourseSummary(),
+      const SizedBox(height: 16),
+      ...List.generate(6, (_) =&gt; const CourseCard()),
+    ],
+  ),
+)</code></pre></div>
+      <div class="callout"><span class="label">PERFORMANCE</span><p>This widget builds its entire child. For a long or unknown number of repeated items, use a lazy list instead.</p></div>
+
+      <h2>2. ListView</h2>
+      <p><code>ListView</code> is a scrollable linear layout. Its default constructor is convenient when the number of children is small and known.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Common value</th></tr></thead><tbody><tr><td><code>children</code></td><td>The fixed list of child widgets.</td><td>A short list</td></tr><tr><td><code>padding</code></td><td>Insets the list content.</td><td><code>EdgeInsets.all(16)</code></td></tr><tr><td><code>scrollDirection</code></td><td>Sets vertical or horizontal layout.</td><td><code>Axis.vertical</code></td></tr><tr><td><code>reverse</code></td><td>Reverses item and scroll direction.</td><td><code>false</code></td></tr><tr><td><code>physics</code></td><td>Controls scrolling behavior.</td><td>Platform default</td></tr><tr><td><code>shrinkWrap</code></td><td>Sizes the list from its content rather than maximum scroll-axis space.</td><td><code>false</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>ListView(
+  padding: const EdgeInsets.all(16),
+  children: const [
+    ListTile(leading: Icon(Icons.code), title: Text('Dart')),
+    ListTile(leading: Icon(Icons.widgets), title: Text('Widgets')),
+    ListTile(leading: Icon(Icons.view_quilt), title: Text('Layouts')),
+  ],
+)</code></pre></div>
+
+      <h2>3. ListTile</h2>
+      <p><code>ListTile</code> supplies a familiar leading-title-subtitle-trailing structure for one list row.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>leading</code></td><td>Places a widget before the title.</td></tr><tr><td><code>title</code></td><td>Displays the primary content.</td></tr><tr><td><code>subtitle</code></td><td>Displays secondary content below the title.</td></tr><tr><td><code>trailing</code></td><td>Places a widget at the end.</td></tr><tr><td><code>contentPadding</code></td><td>Controls internal horizontal and vertical space.</td></tr><tr><td><code>onTap</code></td><td>Handles a tap on the row.</td></tr><tr><td><code>selected</code></td><td>Displays a selected visual state.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>ListTile(
+  leading: const CircleAvatar(child: Icon(Icons.code)),
+  title: const Text('Widget Layouts'),
+  subtitle: const Text('Day 8 · Flutter UI'),
+  trailing: const Icon(Icons.chevron_right),
+  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+  onTap: () {
+    debugPrint('Open lesson');
+  },
+)</code></pre></div>
+
+      <h2>4. ListView.builder</h2>
+      <p><code>ListView.builder</code> creates visible children on demand. Use it when items come from a collection or the list may become long.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>itemCount</code></td><td>States how many items the list contains.</td></tr><tr><td><code>itemBuilder</code></td><td>Builds the widget for a requested index.</td></tr><tr><td><code>itemExtent</code></td><td>Optionally gives every item a fixed scroll-axis size.</td></tr><tr><td><code>padding</code></td><td>Adds space around the generated content.</td></tr><tr><td><code>scrollDirection</code></td><td>Sets vertical or horizontal generation.</td></tr><tr><td><code>physics</code></td><td>Customizes scrolling behavior.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>final courses = ['Dart', 'Widgets', 'Layouts'];
+
+ListView.builder(
+  padding: const EdgeInsets.all(16),
+  itemCount: courses.length,
+  itemBuilder: (context, index) {
+    return ListTile(
+      leading: CircleAvatar(child: Text('${index + 1}')),
+      title: Text(courses[index]),
+    );
+  },
+)</code></pre></div>
+      <div class="callout"><span class="label">COMMON ERROR</span><p>A vertical <code>ListView</code> placed directly inside a <code>Column</code> needs a bounded height. Wrap it with <code>Expanded</code> or provide an explicit height.</p></div>
+      <div class="panel mint"><strong>Need separators?</strong> Use <code>ListView.separated</code> with both an <code>itemBuilder</code> and a <code>separatorBuilder</code>.</div>
+    </section>
+
+    <section class="step-view" data-step="7">
+      <header class="step-header"><span class="step-kicker">STEP 8 · GRIDS</span><h1>GridView &amp; GridView.builder</h1><p class="lede">A grid arranges scrollable items in rows and columns. Use a builder when the items come from data.</p></header>
+      <h2>1. GridView.count</h2>
+      <p><code>GridView.count</code> is convenient when you know the column count and have a small, fixed collection of children.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Common value</th></tr></thead><tbody><tr><td><code>crossAxisCount</code></td><td>Sets the number of columns in a vertical grid.</td><td><code>2</code></td></tr><tr><td><code>children</code></td><td>The fixed widgets displayed in the grid.</td><td>A short list of cards</td></tr><tr><td><code>crossAxisSpacing</code></td><td>Sets horizontal space between columns.</td><td><code>12</code></td></tr><tr><td><code>mainAxisSpacing</code></td><td>Sets vertical space between rows.</td><td><code>12</code></td></tr><tr><td><code>childAspectRatio</code></td><td>Sets each tile's cross-axis to main-axis ratio.</td><td><code>1</code></td></tr><tr><td><code>padding</code></td><td>Adds space around the complete grid.</td><td><code>EdgeInsets.all(16)</code></td></tr><tr><td><code>scrollDirection</code></td><td>Sets vertical or horizontal scrolling.</td><td><code>Axis.vertical</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>GridView.count(
+  padding: const EdgeInsets.all(16),
+  crossAxisCount: 2,
+  crossAxisSpacing: 12,
+  mainAxisSpacing: 12,
+  childAspectRatio: 1.2,
+  children: const [
+    Card(child: Center(child: Text('Dart'))),
+    Card(child: Center(child: Text('Widgets'))),
+    Card(child: Center(child: Text('Layouts'))),
+    Card(child: Center(child: Text('Forms'))),
+  ],
+)</code></pre></div>
+
+      <h2>2. GridView.builder</h2>
+      <p><code>GridView.builder</code> creates grid tiles lazily from data. A grid delegate describes the column and sizing strategy.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>itemCount</code></td><td>Sets the number of items.</td></tr><tr><td><code>itemBuilder</code></td><td>Builds the tile for a requested index.</td></tr><tr><td><code>gridDelegate</code></td><td>Defines the column count or maximum tile width and spacing.</td></tr><tr><td><code>padding</code></td><td>Adds space around the grid content.</td></tr><tr><td><code>scrollDirection</code></td><td>Sets vertical or horizontal scrolling.</td></tr><tr><td><code>physics</code></td><td>Customizes scroll behavior.</td></tr><tr><td><code>shrinkWrap</code></td><td>Sizes the grid from its content when necessary.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>GridView.builder(
+  padding: const EdgeInsets.all(16),
+  itemCount: courses.length,
+  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,
+    crossAxisSpacing: 12,
+    mainAxisSpacing: 12,
+    childAspectRatio: 1.2,
+  ),
+  itemBuilder: (context, index) {
+    return Card(child: Center(child: Text(courses[index])));
+  },
+)</code></pre></div>
+      <h2>3. Choose a grid delegate</h2>
+      <table class="comparison"><thead><tr><th>Delegate</th><th>Use it when</th></tr></thead><tbody><tr><td><code>SliverGridDelegateWithFixedCrossAxisCount</code></td><td>You want an exact number of columns.</td></tr><tr><td><code>SliverGridDelegateWithMaxCrossAxisExtent</code></td><td>You want as many columns as fit while limiting each tile's maximum width.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const SliverGridDelegateWithMaxCrossAxisExtent(
+  maxCrossAxisExtent: 220,
+  crossAxisSpacing: 12,
+  mainAxisSpacing: 12,
+  childAspectRatio: 1.2,
+)</code></pre></div>
+      <div class="callout"><span class="label">NESTING</span><p>A <code>GridView</code> is already scrollable. When placing it inside another scrolling widget, first consider whether the design should use one scrollable parent. <code>shrinkWrap</code> can help in limited cases but costs extra layout work.</p></div>
+    </section>
+
+    <section class="step-view" data-step="8">
+      <header class="step-header"><span class="step-kicker">STEP 9 · SIZE RULES</span><h1>Constraints &amp; Sizing Widgets</h1><p class="lede">These widgets express minimums, maximums, proportions, and scaling behavior.</p></header>
+      <div class="grid-2"><div class="concept"><strong>ConstrainedBox</strong><p>Adds minimum or maximum width and height rules.</p></div><div class="concept"><strong>AspectRatio</strong><p>Preserves a width-to-height ratio such as 16:9.</p></div><div class="concept"><strong>FractionallySizedBox</strong><p>Uses a fraction of the available parent size.</p></div><div class="concept"><strong>FittedBox</strong><p>Scales its child to fit a box.</p></div></div>
+
+      <h2>1. ConstrainedBox</h2>
+      <p><code>ConstrainedBox</code> adds minimum and maximum size rules to the constraints passed to its child.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>constraints</code></td><td>A <code>BoxConstraints</code> object containing minimum and maximum width and height.</td></tr><tr><td><code>child</code></td><td>The widget that receives the additional constraints.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>ConstrainedBox(
+  constraints: const BoxConstraints(
+    minWidth: 200,
+    minHeight: 80,
+    maxWidth: 360,
+  ),
+  child: const ColoredBox(
+    color: Colors.blue,
+    child: Center(
+      child: Text('At least 200 × 80 when permitted'),
+    ),
+  ),
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>BoxConstraints value</th><th>Meaning</th></tr></thead><tbody><tr><td><code>minWidth</code> / <code>minHeight</code></td><td>The child cannot be smaller when the incoming constraints permit it.</td></tr><tr><td><code>maxWidth</code> / <code>maxHeight</code></td><td>The child cannot be larger than these limits.</td></tr><tr><td><code>BoxConstraints.tightFor(...)</code></td><td>Requests exact dimensions.</td></tr><tr><td><code>BoxConstraints.expand()</code></td><td>Uses the maximum permitted size.</td></tr></tbody></table>
+
+      <h2>2. AspectRatio</h2>
+      <p><code>AspectRatio</code> tries to size its child using a width-to-height ratio while still satisfying the parent's constraints.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>aspectRatio</code></td><td>The desired width divided by height.</td></tr><tr><td><code>child</code></td><td>The widget sized using that ratio.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>AspectRatio(
+  aspectRatio: 16 / 9,
+  child: Container(
+    color: Colors.black,
+    child: const Center(
+      child: Icon(Icons.play_arrow, color: Colors.white, size: 48),
+    ),
+  ),
+)</code></pre></div>
+      <div class="panel blue"><strong>Common ratios:</strong> <code>16 / 9</code> for video, <code>4 / 3</code> for traditional media, and <code>1</code> for a square.</div>
+
+      <h2>3. FractionallySizedBox</h2>
+      <p><code>FractionallySizedBox</code> sizes its child as a fraction of the available parent size.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Example</th></tr></thead><tbody><tr><td><code>widthFactor</code></td><td>Multiplies the available width.</td><td><code>0.8</code> means 80%</td></tr><tr><td><code>heightFactor</code></td><td>Multiplies the available height.</td><td><code>0.5</code> means 50%</td></tr><tr><td><code>alignment</code></td><td>Positions the child inside the available area.</td><td><code>Alignment.center</code></td></tr><tr><td><code>child</code></td><td>The widget receiving the fractional size.</td><td>A button or progress panel</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>FractionallySizedBox(
+  widthFactor: 0.8,
+  alignment: Alignment.center,
+  child: Container(
+    height: 56,
+    color: Colors.blue,
+    child: const Center(child: Text('80% of available width')),
+  ),
+)</code></pre></div>
+
+      <h2>4. FittedBox</h2>
+      <p><code>FittedBox</code> scales and positions its child inside the space it receives.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Common value</th></tr></thead><tbody><tr><td><code>fit</code></td><td>Chooses how the child is scaled.</td><td><code>BoxFit.contain</code></td></tr><tr><td><code>alignment</code></td><td>Positions the scaled child.</td><td><code>Alignment.center</code></td></tr><tr><td><code>clipBehavior</code></td><td>Controls clipping when content exceeds the box.</td><td><code>Clip.none</code></td></tr><tr><td><code>child</code></td><td>The widget to scale.</td><td>Text, logo, or illustration</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const SizedBox(
+  width: 180,
+  height: 50,
+  child: FittedBox(
+    fit: BoxFit.scaleDown,
+    alignment: Alignment.centerLeft,
+    child: Text('Flutter Development Course'),
+  ),
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Common BoxFit</th><th>Behavior</th></tr></thead><tbody><tr><td><code>contain</code></td><td>Shows the complete child inside the box.</td></tr><tr><td><code>cover</code></td><td>Fills the box and may crop part of the child.</td></tr><tr><td><code>fitWidth</code> / <code>fitHeight</code></td><td>Fits one dimension.</td></tr><tr><td><code>scaleDown</code></td><td>Only makes the child smaller when necessary.</td></tr></tbody></table>
+      <div class="callout"><span class="label">KEY LESSON</span><p>Writing <code>width: 500</code> is a request, not an unconditional command. The parent constraints still determine what size is permitted.</p></div>
+    </section>
+
+    <section class="step-view" data-step="9">
+      <header class="step-header"><span class="step-kicker">STEP 10 · RESPONSIVE UI</span><h1>MediaQuery, LayoutBuilder &amp; OrientationBuilder</h1><p class="lede">Responsive layouts react to their environment instead of assuming every device has the same width.</p></header>
+      <table class="comparison"><thead><tr><th>Tool</th><th>Question it answers</th></tr></thead><tbody><tr><td><code>MediaQuery</code></td><td>What are the window, system padding, text scale, and keyboard conditions?</td></tr><tr><td><code>LayoutBuilder</code></td><td>How much space did this parent give this part of the UI?</td></tr><tr><td><code>OrientationBuilder</code></td><td>Is the available area portrait or landscape?</td></tr></tbody></table>
+
+      <h2>1. MediaQuery</h2>
+      <p><code>MediaQuery</code> exposes information about the current window and system environment. Prefer the focused <code>...Of(context)</code> methods when you only need one value.</p>
+      <table class="comparison"><thead><tr><th>Common access</th><th>Information returned</th></tr></thead><tbody><tr><td><code>MediaQuery.sizeOf(context)</code></td><td>The current logical window width and height.</td></tr><tr><td><code>MediaQuery.orientationOf(context)</code></td><td>Portrait or landscape orientation.</td></tr><tr><td><code>MediaQuery.paddingOf(context)</code></td><td>Safe-area padding caused by system UI.</td></tr><tr><td><code>MediaQuery.viewInsetsOf(context)</code></td><td>Fully obscured areas, commonly the on-screen keyboard.</td></tr><tr><td><code>MediaQuery.textScalerOf(context)</code></td><td>The user's preferred text scaling behavior.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>final size = MediaQuery.sizeOf(context);
+final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
+final isTabletWidth = size.width &gt;= 600;
+
+return Padding(
+  padding: EdgeInsets.only(bottom: keyboardHeight),
+  child: Text(
+    isTabletWidth ? 'Wide layout' : 'Compact layout',
+  ),
+);</code></pre></div>
+      <div class="callout"><span class="label">DO NOT OVERUSE</span><p>A reusable card should not always make decisions from the full screen width. If it depends on the space its parent allocated, use <code>LayoutBuilder</code>.</p></div>
+
+      <h2>2. LayoutBuilder</h2>
+      <p><code>LayoutBuilder</code> runs its builder with the <code>BoxConstraints</code> supplied by the parent. It is ideal for responsive components.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>builder</code></td><td>Receives <code>BuildContext</code> and the parent's <code>BoxConstraints</code>, then returns the appropriate widget tree.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>LayoutBuilder(
+  builder: (context, constraints) {
+    final isWide = constraints.maxWidth &gt;= 600;
+
+    return isWide
+        ? const Row(
+            children: [
+              Expanded(child: CourseCard()),
+              SizedBox(width: 16),
+              Expanded(child: CourseCard()),
+            ],
+          )
+        : const Column(
+            children: [
+              CourseCard(),
+              SizedBox(height: 16),
+              CourseCard(),
+            ],
+          );
+  },
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Constraint value</th><th>Meaning</th></tr></thead><tbody><tr><td><code>maxWidth</code></td><td>Maximum width this component may use.</td></tr><tr><td><code>maxHeight</code></td><td>Maximum height this component may use.</td></tr><tr><td><code>minWidth</code> / <code>minHeight</code></td><td>The component cannot be smaller than these values.</td></tr><tr><td><code>hasBoundedWidth</code> / <code>hasBoundedHeight</code></td><td>Whether a finite maximum exists on that axis.</td></tr></tbody></table>
+
+      <h2>3. OrientationBuilder</h2>
+      <p><code>OrientationBuilder</code> rebuilds according to whether its available area is wider than it is tall.</p>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>builder</code></td><td>Receives <code>BuildContext</code> and an <code>Orientation</code>, then returns the chosen layout.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>OrientationBuilder(
+  builder: (context, orientation) {
+    if (orientation == Orientation.landscape) {
+      return const Row(
+        children: [
+          Expanded(child: CourseCard()),
+          Expanded(child: CourseCard()),
+        ],
+      );
+    }
+
+    return const Column(
+      children: [CourseCard(), CourseCard()],
+    );
+  },
+)</code></pre></div>
+      <div class="panel yellow"><strong>Important:</strong> Orientation alone does not describe all available space. A small landscape area can still be narrow. Width-based decisions with <code>LayoutBuilder</code> are often more precise.</div>
+      <div class="callout"><span class="label">RULE OF THUMB</span><p>Prefer <code>LayoutBuilder</code> when a component depends on its allocated space. Use <code>MediaQuery</code> when you genuinely need information about the window or system environment.</p></div>
+    </section>
+
+    <section class="step-view" data-step="10">
+      <header class="step-header"><span class="step-kicker">STEP 11 · PUT IT TOGETHER</span><h1>Build a Responsive Student Dashboard</h1><p class="lede">Combine the layout families in one screen. The goal is to explain every parent-child decision—not merely to make the screen look correct.</p></header>
+      <div class="syntax">SafeArea<br>└── ListView<br>&nbsp;&nbsp;&nbsp;&nbsp;├── Row: profile avatar + Expanded student details + notification Stack<br>&nbsp;&nbsp;&nbsp;&nbsp;├── Wrap: skill chips<br>&nbsp;&nbsp;&nbsp;&nbsp;├── AspectRatio: course banner<br>&nbsp;&nbsp;&nbsp;&nbsp;└── LayoutBuilder<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── wide → Row of Expanded cards<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── narrow → Column of cards</div>
+      <div class="challenge"><h3>Your challenge</h3><ol><li>Create the widget tree shown above.</li><li>Use consistent <code>Padding</code> and <code>SizedBox</code> spacing.</li><li>Display at least four skills with <code>Wrap</code>.</li><li>Create a notification badge with <code>Stack</code> and <code>Positioned</code>.</li><li>Show two cards in a <code>Row</code> above 600 px and a <code>Column</code> below it.</li><li>Test portrait, landscape, and a narrow resized window.</li></ol></div>
+      <h2>Final knowledge check</h2>
+      <div class="quiz" data-answer="2"><h3>Question 1</h3><p>Which widget is the best starting point for a long list generated from data?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">Column</button><button class="quiz-option" data-choice="1">Stack</button><button class="quiz-option" data-choice="2">ListView.builder</button></div><div class="quiz-feedback">Correct. ListView.builder lazily creates a scrollable sequence from data.</div></div>
+      <div class="quiz" data-answer="1"><h3>Question 2</h3><p>Which widget should react to the width provided by its immediate parent?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">MediaQuery</button><button class="quiz-option" data-choice="1">LayoutBuilder</button><button class="quiz-option" data-choice="2">Positioned</button></div><div class="quiz-feedback">Correct. LayoutBuilder exposes the constraints provided by its parent.</div></div>
+      <details class="reveal"><summary>What comes after this codelab?</summary><div><p>Later topics can introduce <code>Table</code>, <code>CustomScrollView</code>, slivers, intrinsic sizing, overflow and unconstrained boxes, <code>Flow</code>, and custom layout delegates. They are not prerequisites for ordinary application screens.</p></div></details>
+      <div class="finish"><h2>Widget Layouts complete! 🚀</h2><p>You can now reason about constraints, compose single-child and multi-child layouts, distribute flex space, layer widgets, build scrollable lists and grids, and adapt components to available width.</p></div>
+      <p class="footer-note">Widget Layouts Codelab · Flutter UI · Beginner-to-Intermediate Foundation</p>
+    </section>
+  </div></main>
+</div>
+<script>
+(() => {
+  'use strict';
+  const steps = [...document.querySelectorAll('.step-view')];
+  const titles = ['Layout System','Single-Child Layouts','Row & Column','Flexible Space','Wrap','Stack & Positioned','Scrolling & Lists','Grid Layouts','Constraints & Sizing','Responsive Layouts','Dashboard Challenge'];
+  const nav = document.getElementById('stepNav');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const progressTrack = document.querySelector('.progress-track');
+  const content = document.getElementById('content');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileTitle = document.getElementById('mobileTitle');
+  let current = 0;
+  const completed = new Set();
+
+  nav.innerHTML = titles.map((title, i) => `<button class="step-link" data-step="${i}" aria-current="${i === 0 ? 'step' : 'false'}" type="button"><span class="step-number">${String(i + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep = () => { const match = location.hash.match(/^#step-(\d+)$/); const value = match ? Number(match[1]) - 1 : 0; return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0; };
+  function render(updateHash = true) {
+    steps.forEach((step, i) => { step.classList.toggle('active', i === current); step.setAttribute('aria-hidden', i === current ? 'false' : 'true'); });
+    document.querySelectorAll('.step-link').forEach((button, i) => { const active = i === current; button.classList.toggle('active', active); button.setAttribute('aria-current', active ? 'step' : 'false'); button.querySelector('.step-status').textContent = completed.has(i) ? '✓' : ''; });
+    const percent = Math.round(((current + 1) / steps.length) * 100); progressBar.style.width = `${percent}%`; progressText.textContent = `${percent}%`; progressTrack.setAttribute('aria-valuenow', String(percent)); mobileTitle.textContent = titles[current];
+    if (updateHash) history.pushState({step: current}, '', `#step-${current + 1}`); window.scrollTo({top:0,behavior:'auto'}); document.title = `${titles[current]} — Widget Layouts Codelab`;
+    document.getElementById('prevBtn').disabled = current === 0; const next = document.getElementById('nextBtn'); next.disabled = current === steps.length - 1; next.textContent = current === steps.length - 1 ? 'Complete' : 'Next →';
+    if (window.innerWidth <= 850) { sidebar.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); }
+  }
+  function goTo(index) { if (index < 0 || index >= steps.length) return; completed.add(current); current = index; render(); }
+  const navRow = document.createElement('div'); navRow.className = 'nav-row'; navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>'; content.appendChild(navRow);
+  nav.addEventListener('click', e => { const button = e.target.closest('.step-link'); if (button) goTo(Number(button.dataset.step)); });
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1)); document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+  document.addEventListener('click', async e => {
+    const copy = e.target.closest('.copy-btn'); if (copy) { const code = copy.parentElement.querySelector('code')?.textContent || ''; try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!'; } catch { copy.textContent = 'Select & copy'; } setTimeout(() => copy.textContent = 'Copy', 1100); return; }
+    const option = e.target.closest('.quiz-option'); if (option) { const quiz = option.closest('.quiz'); if (quiz.dataset.answered === 'true') return; const answer = Number(quiz.dataset.answer); const choice = Number(option.dataset.choice); quiz.dataset.answered = 'true'; quiz.querySelectorAll('.quiz-option').forEach(btn => { btn.disabled = true; btn.classList.remove('correct','wrong'); }); option.classList.add(choice === answer ? 'correct' : 'wrong'); const feedback = quiz.querySelector('.quiz-feedback'); feedback.classList.add('show'); if (choice !== answer) feedback.textContent = `Not quite. The correct answer is option ${answer + 1}.`; }
+  });
+  menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)); });
+  window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+  document.addEventListener('keydown', e => { if (e.altKey || e.ctrlKey || e.metaKey || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return; if (e.key === 'ArrowRight') goTo(current + 1); if (e.key === 'ArrowLeft') goTo(current - 1); });
+  current = getHashStep(); render(false);
+})();
+</script>
+</body>
+</html>
