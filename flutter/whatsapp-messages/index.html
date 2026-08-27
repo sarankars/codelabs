@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Build a Messages Screen — Flutter Codelab</title>
+  <meta name="description" content="Build a Messenger-style Flutter screen step by step with SingleChildScrollView, Column, ListTile, CircleAvatar, Faker, ListView, and lazy lists.">
+  <meta name="theme-color" content="#087f5b">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root{--green:#087f5b;--green-dark:#075c44;--green-light:#d8f5e9;--ink:#101010;--paper:#f5f7f4;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--blue:#b9d8ff;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:var(--green);border-right:var(--border);padding:22px 18px;z-index:20;overflow:auto}.brand{background:#fff;border:var(--border);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:20px}.eyebrow,.progress-meta,.step-number,.step-kicker,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}
+    .progress-wrap{color:#fff;margin:0 2px 20px}.progress-meta{display:flex;justify-content:space-between;gap:10px;font-size:.72rem;font-weight:500;margin-bottom:7px}.progress-track{height:16px;background:#fff;border:var(--border);padding:2px}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:9px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;text-align:left;color:#fff;background:transparent;border:3px solid transparent;padding:9px 8px;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;background:var(--green);border-bottom:var(--border);padding:10px;align-items:center;gap:10px}.menu-btn,.mobile-title{border:var(--border);background:#fff;box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{padding:8px 10px;flex:1;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{border:var(--border);background:#fff;box-shadow:var(--shadow);padding:28px;margin-bottom:24px}.step-kicker{display:inline-block;background:var(--green);color:#fff;border:2px solid var(--ink);padding:5px 9px;font-size:.72rem;font-weight:500;margin-bottom:13px}h1,h2,h3{line-height:1.08}h1{font-size:clamp(2rem,5vw,3.7rem);margin:0 0 12px;letter-spacing:-.045em}h2{font-size:clamp(1.55rem,3vw,2.25rem);margin:30px 0 12px}h3{font-size:1.15rem;margin:24px 0 9px}.lede{font-size:1.08rem;max-width:780px;margin:0}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:22px;margin:20px 0}.panel.green{background:var(--green-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.blue{background:var(--blue)}.callout{border:var(--border);box-shadow:var(--shadow-sm);padding:16px 18px;margin:20px 0;background:#fff}.callout .label{display:inline-block;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;border:2px solid var(--ink);background:var(--ink);color:#fff;padding:3px 7px;margin-bottom:8px}.callout p:last-child{margin-bottom:0}.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.concept{border:var(--border);padding:18px;background:#fff;box-shadow:var(--shadow-sm)}.concept strong{font-size:1.05rem}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;background:#111;color:#f7f7f7;border:var(--border);box-shadow:var(--shadow-sm);padding:20px;overflow:auto;font-family:"DM Mono",ui-monospace,monospace;font-size:.85rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:5px 9px;font-size:.75rem;font-weight:800;z-index:2}code:not(pre code){background:#e7eee9;border:1px solid #91a39a;padding:1px 5px;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.syntax{background:#e7fff5;border:var(--border);padding:14px;font-family:"DM Mono",monospace;overflow:auto}.comparison{width:100%;border-collapse:collapse;margin:18px 0;background:#fff;border:var(--border)}.comparison th,.comparison td{border:2px solid var(--ink);padding:11px;text-align:left;vertical-align:top}.comparison th{background:var(--green);color:#fff}
+    .quiz{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;border:2px solid var(--ink);background:#fff;padding:11px 13px;font-weight:700}.quiz-option:hover{background:var(--green-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;font-weight:800;background:var(--green-light)}.reveal>div{padding:15px 16px}.challenge{background:var(--ink);color:#fff;border:var(--border);box-shadow:var(--shadow);padding:22px;margin:24px 0}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .target{display:grid;grid-template-columns:minmax(250px,340px) 1fr;gap:26px;align-items:center;margin:24px 0}.phone{width:100%;max-width:340px;margin:auto;background:#eef2f0;border:4px solid var(--ink);border-radius:28px;box-shadow:var(--shadow);padding:13px}.phone-screen{height:540px;background:#fff;border:2px solid var(--ink);border-radius:17px;overflow:hidden}.phone-bar{height:64px;background:#f4f7f5;border-bottom:2px solid #c9d0cc;display:flex;align-items:center;gap:15px;padding:0 17px;font-weight:800;font-size:1.15rem}.phone-row{height:78px;display:grid;grid-template-columns:50px 1fr;gap:12px;align-items:center;padding:9px 14px;border-bottom:1px solid #d9dfdc}.avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:900;border:2px solid var(--ink)}.avatar.a{background:#714dd2}.avatar.b{background:#e15b64}.avatar.c{background:#178b79}.avatar.d{background:#d68a19}.message-name{font-weight:800}.message-copy{font-size:.78rem;color:#67706b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.flow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:18px 0}.flow span{border:2px solid var(--ink);background:#fff;padding:9px;font-family:"DM Mono",monospace;font-size:.8rem;font-weight:500}.flow b{font-size:1.25rem}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:12px 18px;font-weight:900;min-width:130px}.nav-btn.primary{background:var(--green);color:#fff}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{background:var(--mint);border:var(--border);box-shadow:var(--shadow);padding:20px;margin-top:24px}.footer-note{margin-top:30px;font-size:.8rem;color:#555}.references a{color:var(--green-dark);font-weight:700}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:700px){.target{grid-template-columns:1fr}.phone{max-width:310px}}
+    @media(max-width:600px){.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.grid-2{grid-template-columns:1fr}.nav-row{position:sticky;bottom:0;background:var(--paper);padding:12px 0;z-index:10}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{font-size:.77rem;padding:16px 12px}.copy-btn{position:static;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1;align-self:flex-end}.comparison{display:block;overflow-x:auto}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter Project Codelab</div><h2>Messages Screen</h2><p>Build, scroll, then optimize.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">Messages Screen</div></div>
+  <main><div class="content" id="content">
+
+    <section class="step-view" data-step="0">
+      <header class="step-header"><span class="step-kicker">STEP 1 · PROJECT GOAL</span><h1>Build a Scrollable Messages Screen</h1><p class="lede">Create a Messenger-style inbox with an app bar, avatars, names, message previews, and dividers. First build it with <code>SingleChildScrollView</code>, then learn when a lazy list is the better tool.</p><div class="objective"><strong>By the end:</strong> You can explain the widget tree, generate demo content with Faker, make a <code>Column</code> scroll, and choose between <code>SingleChildScrollView</code>, <code>ListView</code>, and lazy list constructors.</div></header>
+      <div class="target">
+        <div class="phone" aria-label="Preview of the completed messages screen"><div class="phone-screen"><div class="phone-bar"><span>☰</span><span>Messenger</span></div><div class="phone-row"><span class="avatar a">AS</span><span><span class="message-name">Aarav Sharma</span><br><span class="message-copy">Are we still meeting after class today?</span></span></div><div class="phone-row"><span class="avatar b">MK</span><span><span class="message-name">Maya Kapoor</span><br><span class="message-copy">I finished the Flutter exercise!</span></span></div><div class="phone-row"><span class="avatar c">RN</span><span><span class="message-name">Rohan Nair</span><br><span class="message-copy">Can you share the project link?</span></span></div><div class="phone-row"><span class="avatar d">ZI</span><span><span class="message-name">Zoya Iyer</span><br><span class="message-copy">The new layout looks great.</span></span></div><div class="phone-row"><span class="avatar a">KS</span><span><span class="message-name">Kabir Singh</span><br><span class="message-copy">Let's debug it together tomorrow.</span></span></div></div></div>
+        <div><h2>What you will assemble</h2><div class="flow"><span>MaterialApp</span><b>→</b><span>Scaffold</span><b>→</b><span>SingleChildScrollView</span><b>→</b><span>Column</span><b>→</b><span>Message rows</span></div><p>Each row combines <code>ListTile</code>, <code>CircleAvatar</code>, two <code>Text</code> widgets, and a <code>Divider</code>.</p></div>
+      </div>
+      <div class="callout"><span class="label">LEARNING PATH</span><p>The requested 100-row implementation is useful for seeing how <code>SingleChildScrollView</code> works, but it eagerly builds every row. The last step replaces it with an efficient lazy list.</p></div>
+    </section>
+
+    <section class="step-view" data-step="1">
+      <header class="step-header"><span class="step-kicker">STEP 2 · SETUP</span><h1>Add Faker &amp; Start the App</h1><p class="lede">The <code>faker</code> package generates placeholder names, sentences, and image URLs so we can concentrate on the layout.</p></header>
+      <h2>1. Create or open a Flutter project</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>flutter create messages_app
+cd messages_app
+flutter pub add faker</code></pre></div>
+      <h2>2. Replace <code>lib/main.dart</code></h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>import 'package:faker/faker.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}</code></pre></div>
+      <table class="comparison"><thead><tr><th>Import</th><th>What it provides</th></tr></thead><tbody><tr><td><code>faker.dart</code></td><td>Fake people, sentences, images, and other demo data.</td></tr><tr><td><code>material.dart</code></td><td><code>MaterialApp</code>, <code>Scaffold</code>, <code>AppBar</code>, <code>ListTile</code>, and the remaining UI widgets.</td></tr></tbody></table>
+      <div class="panel yellow"><strong>Small cleanup:</strong> The supplied source imports <code>cupertino.dart</code>, but this screen does not use a Cupertino widget. Leave that import out to avoid an unused-import warning.</div>
+      <div class="callout"><span class="label">DEMO DATA ONLY</span><p>Faker is excellent for prototypes and lessons. A real messages app should load stable user and message records from application data, not generate them during every build.</p></div>
+    </section>
+
+    <section class="step-view" data-step="2">
+      <header class="step-header"><span class="step-kicker">STEP 3 · APP SHELL</span><h1>Create MyApp &amp; Scaffold</h1><p class="lede">Use a stateful widget so the <code>Faker</code> object belongs to the screen state instead of being recreated as a local variable on every build.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State&lt;MyApp&gt; createState() => _MyAppState();
+}
+
+class _MyAppState extends State&lt;MyApp&gt; {
+  final Faker faker = Faker();
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(),
+    );
+  }
+}</code></pre></div>
+      <div class="grid-2"><div class="concept"><strong>MaterialApp</strong><p>Creates the Material application environment and sets the first screen with <code>home</code>.</p></div><div class="concept"><strong>Scaffold</strong><p>Provides the familiar visual screen structure: app bar, body, drawers, buttons, and more.</p></div><div class="concept"><strong>StatefulWidget</strong><p>Splits immutable widget configuration from mutable screen state.</p></div><div class="concept"><strong>Faker field</strong><p>Makes one generator available to the state object.</p></div></div>
+      <div class="panel green"><strong>Try it:</strong> Run the app now. A blank screen is correct—the application shell works, and we will fill it next.</div>
+    </section>
+
+    <section class="step-view" data-step="3">
+      <header class="step-header"><span class="step-kicker">STEP 4 · TOP BAR</span><h1>Build the Messenger AppBar</h1><p class="lede">Add navigation affordance and a clear screen title before building the scrolling body.</p></header>
+      <p>Replace the empty <code>Scaffold</code> with this one. Because the screen now uses the non-constant <code>faker</code> field later, also remove <code>const</code> before <code>MaterialApp</code>.</p>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>return MaterialApp(
+  debugShowCheckedModeBanner: false,
+  home: Scaffold(
+    appBar: AppBar(
+      leading: const Icon(Icons.menu),
+      titleSpacing: 0,
+      title: const Text('Messenger'),
+      centerTitle: false,
+    ),
+    body: const SizedBox(),
+  ),
+);</code></pre></div>
+      <table class="comparison"><thead><tr><th>Property</th><th>Result</th></tr></thead><tbody><tr><td><code>leading</code></td><td>Places the menu icon at the start of the app bar.</td></tr><tr><td><code>titleSpacing: 0</code></td><td>Removes the default gap before the title.</td></tr><tr><td><code>title</code></td><td>Displays “Messenger.”</td></tr><tr><td><code>centerTitle: false</code></td><td>Keeps the title aligned toward the start across platforms.</td></tr></tbody></table>
+      <div class="callout"><span class="label">SEMANTICS</span><p>If the menu icon will open a drawer, use an <code>IconButton</code> with an <code>onPressed</code> callback instead of a decorative <code>Icon</code>.</p></div>
+    </section>
+
+    <section class="step-view" data-step="4">
+      <header class="step-header"><span class="step-kicker">STEP 5 · SCROLLING CONCEPT</span><h1>What Is SingleChildScrollView?</h1><p class="lede"><code>SingleChildScrollView</code> is a box that gives one child the ability to move through a viewport when that child is larger than the available space.</p></header>
+      <div class="grid-2"><div class="concept"><strong>Single child</strong><p>It accepts one <code>child</code>. To scroll several widgets together, wrap them in one <code>Column</code> or <code>Row</code>.</p></div><div class="concept"><strong>Default direction</strong><p>It scrolls vertically unless <code>scrollDirection: Axis.horizontal</code> is supplied.</p></div><div class="concept"><strong>Eager layout</strong><p>The complete child is built and laid out—even content far beyond the visible screen.</p></div><div class="concept"><strong>Best fit</strong><p>A normally small screen made of different sections that may overflow on compact devices.</p></div></div>
+      <h2>Make one Column scroll</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>body: SingleChildScrollView(
+  child: Column(
+    children: const [
+      ListTile(title: Text('Message 1')),
+      ListTile(title: Text('Message 2')),
+      ListTile(title: Text('Message 3')),
+    ],
+  ),
+),</code></pre></div>
+      <div class="syntax">Scaffold body (finite viewport)<br>└── SingleChildScrollView (scroll owner)<br>&nbsp;&nbsp;&nbsp;&nbsp;└── Column (the one child)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Message row<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Message row<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Message row</div>
+      <div class="callout"><span class="label">DO NOT ADD EXPANDED</span><p>A vertical scroll view gives its child unbounded height in the scrolling direction. An <code>Expanded</code> inside that <code>Column</code> cannot calculate a finite share of the remaining height.</p></div>
+      <div class="quiz" data-answer="1"><h3>Quick check</h3><p>How can SingleChildScrollView scroll several message rows?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">Give it several child properties</button><button class="quiz-option" data-choice="1">Give it one Column containing all rows</button><button class="quiz-option" data-choice="2">Wrap every row in a separate MaterialApp</button></div><div class="quiz-feedback" data-correct="Correct. The Column is the single child and owns the collection of rows."></div></div>
+    </section>
+
+    <section class="step-view" data-step="5">
+      <header class="step-header"><span class="step-kicker">STEP 6 · REPEAT ROWS</span><h1>Generate 100 Message Entries</h1><p class="lede">A collection <code>for</code> inside <code>children</code> inserts one widget for every loop iteration.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>body: SingleChildScrollView(
+  child: Column(
+    children: [
+      for (int i = 0; i &lt; 100; i++)
+        ListTile(
+          title: Text('Person ${i + 1}'),
+          subtitle: const Text('Message preview'),
+        ),
+    ],
+  ),
+),</code></pre></div>
+      <h2>How the collection for works</h2>
+      <table class="comparison"><thead><tr><th>Part</th><th>Meaning</th></tr></thead><tbody><tr><td><code>int i = 0</code></td><td>Start with index zero.</td></tr><tr><td><code>i &lt; 100</code></td><td>Continue while the index is below 100.</td></tr><tr><td><code>i++</code></td><td>Increase the index after each row.</td></tr><tr><td><code>ListTile(...)</code></td><td>Insert one tile into the <code>children</code> list per iteration.</td></tr></tbody></table>
+      <div class="panel pink"><strong>Performance observation:</strong> Before the first frame can display, Flutter creates all 100 <code>ListTile</code> widgets because they are part of the Column's complete child list. This is the limitation we will solve with lazy building.</div>
+    </section>
+
+    <section class="step-view" data-step="6">
+      <header class="step-header"><span class="step-kicker">STEP 7 · MESSAGE DESIGN</span><h1>Add Avatars, Names &amp; Previews</h1><p class="lede"><code>ListTile</code> already understands the leading–title–subtitle pattern needed by a messages inbox.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>ListTile(
+  onTap: () {},
+  leading: CircleAvatar(
+    backgroundImage: NetworkImage(
+      faker.image.loremPicsum(
+        random: 0,
+        seed: faker.randomGenerator.string(100),
+      ),
+    ),
+  ),
+  title: Text(
+    faker.person.name(),
+    style: const TextStyle(
+      fontWeight: FontWeight.bold,
+    ),
+  ),
+  subtitle: Text(
+    faker.lorem.sentence(),
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+  ),
+),</code></pre></div>
+      <table class="comparison"><thead><tr><th>Widget or call</th><th>Responsibility</th></tr></thead><tbody><tr><td><code>CircleAvatar</code></td><td>Crops the network image into a circular profile image.</td></tr><tr><td><code>NetworkImage</code></td><td>Loads an image from the URL returned by Faker.</td></tr><tr><td><code>faker.person.name()</code></td><td>Produces a placeholder contact name.</td></tr><tr><td><code>faker.lorem.sentence()</code></td><td>Produces placeholder message text.</td></tr><tr><td><code>maxLines: 1</code></td><td>Keeps each preview on one line.</td></tr><tr><td><code>TextOverflow.ellipsis</code></td><td>Shows an ellipsis when the preview does not fit.</td></tr></tbody></table>
+      <div class="callout"><span class="label">NETWORK NOTE</span><p>The avatars depend on Lorem Picsum and require network access. Add an error fallback in a production prototype, and never depend on placeholder image services for real user profiles.</p></div>
+      <div class="panel yellow"><strong>Rebuild behavior:</strong> Because Faker is called while the widget tree is built, a rebuild can generate different people and messages. That mirrors the supplied exercise, but stable demo records should be generated once and stored in state.</div>
+    </section>
+
+    <section class="step-view" data-step="7">
+      <header class="step-header"><span class="step-kicker">STEP 8 · COMPLETE VERSION</span><h1>Add Dividers &amp; Run the Screen</h1><p class="lede">Wrap each tile and divider in an inner <code>Column</code>, then run the completed SingleChildScrollView version.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>import 'package:faker/faker.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State&lt;MyApp&gt; createState() => _MyAppState();
+}
+
+class _MyAppState extends State&lt;MyApp&gt; {
+  final Faker faker = Faker();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          leading: const Icon(Icons.menu),
+          titleSpacing: 0,
+          title: const Text('Messenger'),
+          centerTitle: false,
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              for (int i = 0; i &lt; 100; i++)
+                Column(
+                  children: [
+                    ListTile(
+                      onTap: () {},
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(
+                          faker.image.loremPicsum(
+                            random: 0,
+                            seed: faker.randomGenerator.string(100),
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        faker.person.name(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                        faker.lorem.sentence(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const Divider(height: 0),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre></div>
+      <h2>Verify the result</h2>
+      <ol><li>The app bar stays at the top while the body scrolls.</li><li>Each row displays a circular image, bold name, and one-line preview.</li><li>A divider separates adjacent conversations.</li><li>The final row remains reachable by scrolling.</li></ol>
+      <div class="challenge"><h3>Small improvements</h3><ol><li>Replace the leading <code>Icon</code> with an <code>IconButton</code>.</li><li>Add <code>trailing: const Text('10:30')</code> to each tile.</li><li>Change the message count from 100 to 10 and compare startup behavior.</li><li>Use your theme to give the app bar a recognizable color.</li></ol></div>
+    </section>
+
+    <section class="step-view" data-step="8">
+      <header class="step-header"><span class="step-kicker">STEP 9 · CHOOSE THE RIGHT LIST</span><h1>ListView, Lazy Lists &amp; When to Use Them</h1><p class="lede">This screen is a long, repeated sequence, so a lazy <code>ListView</code> is a better final implementation than <code>SingleChildScrollView + Column</code>.</p></header>
+      <table class="comparison"><thead><tr><th>Approach</th><th>Build behavior</th><th>Use it when</th></tr></thead><tbody><tr><td><code>SingleChildScrollView + Column</code></td><td>Builds the complete Column and every message row.</td><td>A small page has different sections that should scroll together and normally fits.</td></tr><tr><td><code>ListView(children: ...)</code></td><td>Also receives an explicit, eagerly created list of widgets.</td><td>The list is short and the children are already known.</td></tr><tr><td><code>ListView.builder</code></td><td>Calls <code>itemBuilder</code> for rows as they are needed near the viewport.</td><td>A long, data-driven sequence without special separators.</td></tr><tr><td><code>ListView.separated</code></td><td>Lazily builds both rows and the separators between them.</td><td>A long, finite list like this inbox where every row needs a divider.</td></tr></tbody></table>
+      <div class="panel green"><strong>Terminology:</strong> “Lazy list” is a behavior, not the name of another Flutter widget. <code>ListView.builder</code> and <code>ListView.separated</code> are lazy constructors of <code>ListView</code>.</div>
+      <h2>Recommended replacement: ListView.separated</h2>
+      <p>Replace the complete <code>SingleChildScrollView</code> body with this code:</p>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>body: ListView.separated(
+  itemCount: 100,
+  itemBuilder: (context, index) {
+    return ListTile(
+      onTap: () {},
+      leading: CircleAvatar(
+        backgroundImage: NetworkImage(
+          faker.image.loremPicsum(
+            random: index,
+            seed: 'contact-$index',
+          ),
+        ),
+      ),
+      title: Text(
+        faker.person.name(),
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Text(
+        faker.lorem.sentence(),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  },
+  separatorBuilder: (context, index) =>
+      const Divider(height: 0),
+),</code></pre></div>
+      <div class="callout"><span class="label">ONE MORE PRODUCTION STEP</span><p>Generate or load the message data once outside <code>itemBuilder</code>, then make the builder read the record at <code>index</code>. Otherwise a row can receive a new random name when Flutter rebuilds it.</p></div>
+      <h2>If no divider is needed</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>body: ListView.builder(
+  itemCount: messages.length,
+  itemBuilder: (context, index) {
+    final message = messages[index];
+    return MessageTile(message: message);
+  },
+),</code></pre></div>
+      <h2>Decision rule</h2>
+      <div class="grid-2"><div class="concept"><strong>Different sections, limited content?</strong><p>Start with <code>SingleChildScrollView + Column</code>.</p></div><div class="concept"><strong>Repeated data that may grow?</strong><p>Start with <code>ListView.builder</code> or <code>ListView.separated</code>.</p></div></div>
+      <div class="quiz" data-answer="2"><h3>Final check</h3><p>Which approach best matches 100 data-driven conversations with a divider between rows?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">SingleChildScrollView + Column</button><button class="quiz-option" data-choice="1">ListView with an explicit children list</button><button class="quiz-option" data-choice="2">ListView.separated</button></div><div class="quiz-feedback" data-correct="Correct. ListView.separated lazily builds the messages and their dividers."></div></div>
+      <div class="panel references"><h3>Official references</h3><p>Continue with Flutter's API documentation for <a href="https://api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html">SingleChildScrollView</a> and <a href="https://api.flutter.dev/flutter/widgets/ListView-class.html">ListView</a>, plus the <a href="https://pub.dev/packages/faker">faker package page</a>.</p></div>
+      <div class="finish"><h2>Messages screen complete! 🚀</h2><p>You built the screen with SingleChildScrollView, understood its eager cost, and learned how to choose a lazy list for scalable message data.</p></div>
+      <p class="footer-note">Messages Screen Codelab · Flutter UI · Scrolling Project</p>
+    </section>
+  </div></main>
+</div>
+<script>
+(() => {
+  'use strict';
+  const steps = [...document.querySelectorAll('.step-view')];
+  const titles = ['Project Goal','Setup','App Shell','AppBar','SingleChildScrollView','Repeat Rows','Message Design','Complete App','ListView & Lazy Lists'];
+  const nav = document.getElementById('stepNav');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const progressTrack = document.querySelector('.progress-track');
+  const content = document.getElementById('content');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileTitle = document.getElementById('mobileTitle');
+  let current = 0;
+  const completed = new Set();
+
+  nav.innerHTML = titles.map((title, i) => `<button class="step-link" data-step="${i}" aria-current="${i === 0 ? 'step' : 'false'}" type="button"><span class="step-number">${String(i + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep = () => { const match = location.hash.match(/^#step-(\d+)$/); const value = match ? Number(match[1]) - 1 : 0; return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0; };
+  function render(updateHash = true) {
+    steps.forEach((step, i) => { step.classList.toggle('active', i === current); step.setAttribute('aria-hidden', i === current ? 'false' : 'true'); });
+    document.querySelectorAll('.step-link').forEach((button, i) => { const active = i === current; button.classList.toggle('active', active); button.setAttribute('aria-current', active ? 'step' : 'false'); button.querySelector('.step-status').textContent = completed.has(i) ? '✓' : ''; });
+    const percent = Math.round(((current + 1) / steps.length) * 100); progressBar.style.width = `${percent}%`; progressText.textContent = `${percent}%`; progressTrack.setAttribute('aria-valuenow', String(percent)); mobileTitle.textContent = titles[current];
+    if (updateHash) history.pushState({step: current}, '', `#step-${current + 1}`);
+    window.scrollTo({top:0,behavior:'auto'}); document.title = `${titles[current]} — Messages Screen Codelab`;
+    document.getElementById('prevBtn').disabled = current === 0; const next = document.getElementById('nextBtn'); next.disabled = current === steps.length - 1; next.textContent = current === steps.length - 1 ? 'Complete' : 'Next →';
+    if (window.innerWidth <= 850) { sidebar.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); }
+  }
+  function goTo(index) { if (index < 0 || index >= steps.length) return; completed.add(current); current = index; render(); }
+  const navRow = document.createElement('div'); navRow.className = 'nav-row'; navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>'; content.appendChild(navRow);
+  nav.addEventListener('click', event => { const button = event.target.closest('.step-link'); if (button) goTo(Number(button.dataset.step)); });
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1)); document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+  document.addEventListener('click', async event => {
+    const copy = event.target.closest('.copy-btn');
+    if (copy) { const code = copy.parentElement.querySelector('code')?.textContent || ''; try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!'; } catch { copy.textContent = 'Select & copy'; } setTimeout(() => copy.textContent = 'Copy', 1100); return; }
+    const option = event.target.closest('.quiz-option');
+    if (option) { const quiz = option.closest('.quiz'); if (quiz.dataset.answered === 'true') return; const answer = Number(quiz.dataset.answer); const choice = Number(option.dataset.choice); quiz.dataset.answered = 'true'; quiz.querySelectorAll('.quiz-option').forEach(button => { button.disabled = true; button.classList.remove('correct','wrong'); }); option.classList.add(choice === answer ? 'correct' : 'wrong'); const feedback = quiz.querySelector('.quiz-feedback'); feedback.textContent = choice === answer ? feedback.dataset.correct : `Not quite. The correct answer is option ${answer + 1}.`; feedback.classList.add('show'); }
+  });
+  menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)); });
+  window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+  document.addEventListener('keydown', event => { if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return; if (event.key === 'ArrowRight') goTo(current + 1); if (event.key === 'ArrowLeft') goTo(current - 1); });
+  current = getHashStep(); render(false);
+})();
+</script>
+</body>
+</html>
