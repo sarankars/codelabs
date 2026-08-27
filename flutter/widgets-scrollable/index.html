@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scrollable Widgets — Interactive Flutter Codelab</title>
+  <meta name="description" content="A beginner-friendly Flutter codelab covering SingleChildScrollView, ListView, lazy lists, horizontal scrolling, GridView, ScrollController, scroll physics, and common scrolling errors.">
+  <meta name="theme-color" content="#1769ff">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root{--blue:#1769ff;--blue-dark:#0b43b7;--blue-light:#dce9ff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:290px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:var(--blue);border-right:var(--border);padding:22px 18px;z-index:20;overflow:auto}.brand{background:#fff;border:var(--border);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:20px}.eyebrow,.progress-meta,.step-number,.step-kicker,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.45rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}
+    .progress-wrap{color:#fff;margin:0 2px 20px}.progress-meta{display:flex;justify-content:space-between;gap:10px;font-size:.72rem;font-weight:500;margin-bottom:7px}.progress-track{height:16px;background:#fff;border:var(--border);padding:2px}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:9px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;text-align:left;color:#fff;background:transparent;border:3px solid transparent;padding:9px 8px;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;background:var(--blue);border-bottom:var(--border);padding:10px;align-items:center;gap:10px}.menu-btn,.mobile-title{border:var(--border);background:#fff;box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{padding:8px 10px;flex:1;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{border:var(--border);background:#fff;box-shadow:var(--shadow);padding:28px;margin-bottom:24px}.step-kicker{display:inline-block;background:var(--blue);color:#fff;border:2px solid var(--ink);padding:5px 9px;font-size:.72rem;font-weight:500;margin-bottom:13px}h1,h2,h3{line-height:1.08}h1{font-size:clamp(2rem,5vw,3.7rem);margin:0 0 12px;letter-spacing:-.045em}h2{font-size:clamp(1.55rem,3vw,2.25rem);margin:30px 0 12px}h3{font-size:1.15rem;margin:24px 0 9px}.lede{font-size:1.08rem;max-width:780px;margin:0}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.callout{border:var(--border);box-shadow:var(--shadow-sm);padding:16px 18px;margin:20px 0;background:#fff}.callout .label{display:inline-block;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;border:2px solid var(--ink);background:var(--ink);color:#fff;padding:3px 7px;margin-bottom:8px}.callout p:last-child{margin-bottom:0}.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.concept{border:var(--border);padding:18px;background:#fff;box-shadow:var(--shadow-sm)}.concept strong{font-size:1.05rem}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;background:#111;color:#f7f7f7;border:var(--border);box-shadow:var(--shadow-sm);padding:20px;overflow:auto;font-family:"DM Mono",ui-monospace,monospace;font-size:.85rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:5px 9px;font-size:.75rem;font-weight:800;z-index:2}code:not(pre code){background:#e8edf7;border:1px solid #9da9bb;padding:1px 5px;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.syntax{background:#edf2ff;border:var(--border);padding:14px;font-family:"DM Mono",monospace;overflow:auto}.comparison{width:100%;border-collapse:collapse;margin:18px 0;background:#fff;border:var(--border)}.comparison th,.comparison td{border:2px solid var(--ink);padding:11px;text-align:left;vertical-align:top}.comparison th{background:var(--blue);color:#fff}
+    .quiz{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;border:2px solid var(--ink);background:#fff;padding:11px 13px;font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;font-weight:800;background:var(--blue-light)}.reveal>div{padding:15px 16px}.challenge{background:var(--ink);color:#fff;border:var(--border);box-shadow:var(--shadow);padding:22px;margin:24px 0}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:12px 18px;font-weight:900;min-width:130px}.nav-btn.primary{background:var(--blue);color:#fff}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{background:var(--mint);border:var(--border);box-shadow:var(--shadow);padding:20px;margin-top:24px}.footer-note{margin-top:30px;font-size:.8rem;color:#555}.references a{color:var(--blue-dark);font-weight:700}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:600px){.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.grid-2{grid-template-columns:1fr}.nav-row{position:sticky;bottom:0;background:var(--paper);padding:12px 0;z-index:10}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{font-size:.77rem;padding:16px 12px}.copy-btn{position:static;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1;align-self:flex-end}.comparison{display:block;overflow-x:auto}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter Codelab</div><h2>Scrollable Widgets</h2><p>Move through content efficiently.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">Scrollable Widgets</div></div>
+  <main><div class="content" id="content">
+
+    <section class="step-view" data-step="0">
+      <header class="step-header"><span class="step-kicker">STEP 1 · START HERE</span><h1>Choose the Right Scrollable</h1><p class="lede">Scrolling is not something you add after a layout overflows. It is a layout decision based on the shape, size, and behavior of your content.</p><div class="objective"><strong>By the end:</strong> You can build efficient vertical, horizontal, and grid-based scrolling interfaces; control their position; and fix the most common constraint errors.</div></header>
+      <h2>Start from the content</h2>
+      <table class="comparison"><thead><tr><th>Content</th><th>Good starting widget</th></tr></thead><tbody><tr><td>A small screen made of different sections</td><td><code>SingleChildScrollView</code> with one <code>Column</code></td></tr><tr><td>A short, known sequence</td><td><code>ListView</code></td></tr><tr><td>A long or data-driven sequence</td><td><code>ListView.builder</code> or <code>ListView.separated</code></td></tr><tr><td>Items arranged in rows and columns</td><td><code>GridView</code> or <code>GridView.builder</code></td></tr><tr><td>A list and grid sharing one advanced scroll effect</td><td><code>CustomScrollView</code> with slivers—a later topic</td></tr></tbody></table>
+      <div class="panel blue"><h2>Viewport + content + position</h2><div class="grid-2"><div class="concept"><strong>Viewport</strong><p>The visible window through which the user sees the content.</p></div><div class="concept"><strong>Scroll extent</strong><p>The full distance through which the content can move.</p></div><div class="concept"><strong>Offset</strong><p>The current distance from the beginning of the scrollable.</p></div><div class="concept"><strong>Axis</strong><p>The direction of movement: vertical or horizontal.</p></div></div></div>
+      <div class="callout"><span class="label">CORE IDEA</span><p>A <code>Column</code> lays out children but does not scroll. A <code>ListView</code> both lays out and scrolls its children.</p></div>
+      <div class="quiz" data-answer="2"><h3>Quick check</h3><p>You need to show 500 messages loaded from data. What is the best starting point?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">Column</button><button class="quiz-option" data-choice="1">SingleChildScrollView + Column</button><button class="quiz-option" data-choice="2">ListView.builder</button></div><div class="quiz-feedback" data-correct="Correct. ListView.builder creates children lazily as they are needed."></div></div>
+    </section>
+
+    <section class="step-view" data-step="1">
+      <header class="step-header"><span class="step-kicker">STEP 2 · ONE CHILD</span><h1>SingleChildScrollView</h1><p class="lede">Use <code>SingleChildScrollView</code> when one normally small composition must remain reachable on a short screen, in landscape, or when the keyboard appears.</p></header>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th><th>Typical value</th></tr></thead><tbody><tr><td><code>child</code></td><td>The one widget that scrolls.</td><td>A <code>Column</code></td></tr><tr><td><code>scrollDirection</code></td><td>Selects the scrolling axis.</td><td><code>Axis.vertical</code></td></tr><tr><td><code>padding</code></td><td>Adds space around the content.</td><td><code>EdgeInsets.all(16)</code></td></tr><tr><td><code>physics</code></td><td>Changes how the scrollable responds to gestures.</td><td>Usually the platform default</td></tr><tr><td><code>controller</code></td><td>Reads or changes the scroll position.</td><td>A <code>ScrollController</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Scaffold(
+  appBar: AppBar(title: const Text('Course details')),
+  body: SingleChildScrollView(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const CourseBanner(),
+        const SizedBox(height: 16),
+        Text(
+          'What you will learn',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 8),
+        const CourseOutline(),
+        const SizedBox(height: 24),
+        const EnrollButton(),
+      ],
+    ),
+  ),
+)</code></pre></div>
+      <div class="callout"><span class="label">EFFICIENCY</span><p>This widget builds its complete child. If the page contains many repeated items or is expected to be much taller than the viewport, prefer a lazy list.</p></div>
+      <h2>Do not use Expanded in an unbounded axis</h2>
+      <p>A vertical scroll view gives its child unlimited height in the scroll direction. An <code>Expanded</code> inside that child cannot calculate a finite share of “remaining height.”</p>
+      <div class="grid-2"><div class="concept"><strong>Avoid</strong><p><code>SingleChildScrollView → Column → Expanded</code></p></div><div class="concept"><strong>Prefer</strong><p>Let the <code>Column</code> size its children, or redesign the screen around a bounded <code>ListView</code>.</p></div></div>
+      <div class="quiz" data-answer="1"><h3>Quick check</h3><p>Why is SingleChildScrollView a poor fit for hundreds of repeated cards?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">It only scrolls horizontally</button><button class="quiz-option" data-choice="1">It builds the complete child instead of lazily building visible items</button><button class="quiz-option" data-choice="2">It cannot contain a Column</button></div><div class="quiz-feedback" data-correct="Correct. Use a lazy list for a long repeated sequence."></div></div>
+    </section>
+
+    <section class="step-view" data-step="2">
+      <header class="step-header"><span class="step-kicker">STEP 3 · LINEAR CONTENT</span><h1>ListView &amp; ListView.separated</h1><p class="lede"><code>ListView</code> arranges children one after another in the scroll direction. Choose its constructor based on how the items are produced.</p></header>
+      <h2>A small, fixed list</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>ListView(
+  padding: const EdgeInsets.all(16),
+  children: const [
+    ListTile(
+      leading: Icon(Icons.play_circle_outline),
+      title: Text('Introduction'),
+    ),
+    ListTile(
+      leading: Icon(Icons.widgets_outlined),
+      title: Text('Widgets'),
+    ),
+    ListTile(
+      leading: Icon(Icons.view_agenda_outlined),
+      title: Text('Layouts'),
+    ),
+  ],
+)</code></pre></div>
+      <h2>Add separators without manual indexes</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>final lessons = ['Introduction', 'Widgets', 'Layouts'];
+
+ListView.separated(
+  padding: const EdgeInsets.all(16),
+  itemCount: lessons.length,
+  itemBuilder: (context, index) {
+    return ListTile(
+      leading: CircleAvatar(child: Text('${index + 1}')),
+      title: Text(lessons[index]),
+    );
+  },
+  separatorBuilder: (context, index) => const Divider(),
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Constructor</th><th>Best use</th></tr></thead><tbody><tr><td><code>ListView(children: ...)</code></td><td>A small number of widgets already known in the code.</td></tr><tr><td><code>ListView.separated</code></td><td>A finite data-driven list that needs consistent gaps or dividers.</td></tr><tr><td><code>ListView.builder</code></td><td>A long data-driven list without a separate separator builder.</td></tr></tbody></table>
+      <div class="panel yellow"><strong>Safe-area note:</strong> A primary vertical <code>ListView</code> may apply padding from <code>MediaQuery</code> at its scrollable edges. Set an explicit <code>padding</code>, including <code>EdgeInsets.zero</code>, when you need to control it.</div>
+    </section>
+
+    <section class="step-view" data-step="3">
+      <header class="step-header"><span class="step-kicker">STEP 4 · LAZY BUILDING</span><h1>ListView.builder</h1><p class="lede">The builder constructor creates items on demand. It is the everyday choice for lists produced from application data.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>final courses = List.generate(
+  100,
+  (index) => 'Flutter lesson ${index + 1}',
+);
+
+ListView.builder(
+  padding: const EdgeInsets.all(16),
+  itemCount: courses.length,
+  itemBuilder: (context, index) {
+    final course = courses[index];
+
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.school_outlined),
+        title: Text(course),
+        subtitle: Text('Lesson ${index + 1} of ${courses.length}'),
+      ),
+    );
+  },
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Property</th><th>Why it matters</th></tr></thead><tbody><tr><td><code>itemCount</code></td><td>Gives the scroll view a known item count and prevents indexes beyond the collection.</td></tr><tr><td><code>itemBuilder</code></td><td>Builds the widget requested for an index.</td></tr><tr><td><code>itemExtent</code></td><td>Sets one fixed size in the scroll direction and can make layout more efficient.</td></tr><tr><td><code>prototypeItem</code></td><td>Measures a representative widget when every item has the same extent.</td></tr></tbody></table>
+      <div class="callout"><span class="label">IMPORTANT</span><p>Provide <code>itemCount</code> when the list is finite. It improves scroll metrics and keeps the builder from requesting invalid indexes.</p></div>
+      <details class="reveal"><summary>What happens to items away from the viewport?</summary><div><p>Lazy lists create visible children as needed. Children far outside the viewport can be destroyed and rebuilt later, so durable application state should live in your data model rather than only inside a list row.</p></div></details>
+      <div class="quiz" data-answer="0"><h3>Quick check</h3><p>Every row is exactly 72 logical pixels high. Which optional property can help the list calculate positions more efficiently?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">itemExtent: 72</button><button class="quiz-option" data-choice="1">shrinkWrap: true</button><button class="quiz-option" data-choice="2">reverse: true</button></div><div class="quiz-feedback" data-correct="Correct. A fixed itemExtent gives the scrolling machinery useful size information."></div></div>
+    </section>
+
+    <section class="step-view" data-step="4">
+      <header class="step-header"><span class="step-kicker">STEP 5 · SIDEWAYS</span><h1>Horizontal Scrolling</h1><p class="lede">Set <code>scrollDirection</code> to <code>Axis.horizontal</code> for carousels, category rails, and compact previews.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>SizedBox(
+  height: 180,
+  child: ListView.separated(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    scrollDirection: Axis.horizontal,
+    itemCount: courses.length,
+    separatorBuilder: (context, index) =>
+        const SizedBox(width: 12),
+    itemBuilder: (context, index) {
+      return SizedBox(
+        width: 240,
+        child: CourseCard(course: courses[index]),
+      );
+    },
+  ),
+)</code></pre></div>
+      <div class="callout"><span class="label">CONSTRAINTS</span><p>A horizontal list placed in a vertical layout needs a bounded height. Here, <code>SizedBox(height: 180)</code> defines the viewport height, while each card defines its width.</p></div>
+      <h2>Make the direction obvious</h2>
+      <ul><li>Show part of the next item when the design allows it.</li><li>Keep card widths consistent so the movement is predictable.</li><li>Add a heading such as “Popular courses” before the rail.</li><li>Do not hide essential actions in a carousel when users may not discover them.</li></ul>
+      <div class="panel blue"><strong>Page-by-page movement:</strong> Use <code>PageView</code> when each child should occupy a page-sized viewport. Use a horizontal <code>ListView</code> when multiple items may be visible at once.</div>
+    </section>
+
+    <section class="step-view" data-step="5">
+      <header class="step-header"><span class="step-kicker">STEP 6 · TWO DIMENSIONS</span><h1>GridView</h1><p class="lede"><code>GridView</code> is a scrollable two-dimensional arrangement. The grid delegate controls column count, width, spacing, and tile shape.</p></header>
+      <h2>A fixed number of columns</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>GridView.count(
+  padding: const EdgeInsets.all(16),
+  crossAxisCount: 2,
+  crossAxisSpacing: 12,
+  mainAxisSpacing: 12,
+  childAspectRatio: 1.2,
+  children: const [
+    CourseCard(title: 'Dart'),
+    CourseCard(title: 'Widgets'),
+    CourseCard(title: 'Layouts'),
+    CourseCard(title: 'Navigation'),
+  ],
+)</code></pre></div>
+      <h2>A lazy, width-aware grid</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>GridView.builder(
+  padding: const EdgeInsets.all(16),
+  itemCount: courses.length,
+  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+    maxCrossAxisExtent: 240,
+    crossAxisSpacing: 12,
+    mainAxisSpacing: 12,
+    childAspectRatio: 1.2,
+  ),
+  itemBuilder: (context, index) {
+    return CourseCard(course: courses[index]);
+  },
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Delegate</th><th>Choose it when</th></tr></thead><tbody><tr><td><code>SliverGridDelegateWithFixedCrossAxisCount</code></td><td>The design requires an exact column count.</td></tr><tr><td><code>SliverGridDelegateWithMaxCrossAxisExtent</code></td><td>Columns should adapt while each tile stays below a maximum width.</td></tr></tbody></table>
+      <div class="callout"><span class="label">ONE SCROLL OWNER</span><p>A <code>GridView</code> already scrolls. If a page needs a header, list, and grid to move together, learn <code>CustomScrollView</code> and slivers instead of nesting multiple full-size scroll views.</p></div>
+    </section>
+
+    <section class="step-view" data-step="6">
+      <header class="step-header"><span class="step-kicker">STEP 7 · CONTROL &amp; FEEDBACK</span><h1>Controllers, Physics &amp; Scrollbars</h1><p class="lede">Most scrollables work without configuration. Add control only when the product behavior needs it.</p></header>
+      <h2>Move to a known position</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>class CourseListState extends State&lt;CourseList&gt; {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _backToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: courses.length,
+      itemBuilder: (context, index) =>
+          CourseTile(course: courses[index]),
+    );
+  }
+}</code></pre></div>
+      <div class="callout"><span class="label">LIFECYCLE</span><p>Create a long-lived <code>ScrollController</code> in state when you need to reuse it, and dispose it when that state is removed.</p></div>
+      <h2>Common scroll behavior tools</h2>
+      <table class="comparison"><thead><tr><th>Tool</th><th>Purpose</th></tr></thead><tbody><tr><td><code>Scrollbar</code></td><td>Adds a visible position indicator, especially helpful on desktop and web.</td></tr><tr><td><code>RefreshIndicator</code></td><td>Runs an asynchronous refresh action after a downward overscroll gesture.</td></tr><tr><td><code>AlwaysScrollableScrollPhysics</code></td><td>Allows the scrollable to accept scrolling even when its content does not exceed the viewport; useful with pull-to-refresh.</td></tr><tr><td><code>NeverScrollableScrollPhysics</code></td><td>Prevents user-driven scrolling when another widget owns the gesture.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>RefreshIndicator(
+  onRefresh: loadCourses,
+  child: ListView.builder(
+    physics: const AlwaysScrollableScrollPhysics(),
+    itemCount: courses.length,
+    itemBuilder: (context, index) =>
+        CourseTile(course: courses[index]),
+  ),
+)</code></pre></div>
+      <div class="panel yellow"><strong>Platform behavior:</strong> The default physics already adapts to the platform. Do not replace it only to make every platform feel identical.</div>
+    </section>
+
+    <section class="step-view" data-step="7">
+      <header class="step-header"><span class="step-kicker">STEP 8 · DEBUG &amp; BUILD</span><h1>Fix Common Errors</h1><p class="lede">Most scrolling bugs come from choosing the wrong scroll owner or giving a scrollable an unbounded size on its cross axis.</p></header>
+      <table class="comparison"><thead><tr><th>Problem</th><th>Cause</th><th>Useful fix</th></tr></thead><tbody><tr><td>“Vertical viewport was given unbounded height”</td><td>A vertical scrollable is inside a <code>Column</code> without a height.</td><td>Wrap the scrollable with <code>Expanded</code> or give it a bounded height.</td></tr><tr><td><code>Expanded</code> fails inside a vertical scroll view</td><td>The scroll direction provides no finite remaining height.</td><td>Remove the flex child or redesign around one bounded scrollable.</td></tr><tr><td>The page feels slow</td><td>A long list uses <code>SingleChildScrollView + Column</code>.</td><td>Use a lazy builder.</td></tr><tr><td>Nested scrolling feels stuck</td><td>Two same-axis scrollables compete for gestures.</td><td>Choose one scroll owner; use slivers for mixed content.</td></tr><tr><td><code>shrinkWrap: true</code> is used everywhere</td><td>The inner scrollable is being measured from all its children.</td><td>Prefer proper constraints or one parent scrollable; reserve shrink-wrap for small, bounded cases.</td></tr></tbody></table>
+      <div class="syntax">Scaffold<br>└── SafeArea<br>&nbsp;&nbsp;&nbsp;&nbsp;└── CustomScrollView (stretch goal)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── SliverToBoxAdapter: page heading<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── SliverList: upcoming lessons<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── SliverGrid: course library</div>
+      <div class="challenge"><h3>Your challenge: Course Explorer</h3><ol><li>Create a screen with an app bar and one primary vertical scrollable.</li><li>Build at least 20 course rows lazily from a collection.</li><li>Add a horizontal “Featured” rail with a bounded height.</li><li>Add pull-to-refresh or a back-to-top button.</li><li>Show an empty state when the collection has no courses.</li><li>Test a narrow phone, landscape mode, and a wide desktop window.</li></ol></div>
+      <h2>Final knowledge check</h2>
+      <div class="quiz" data-answer="1"><h3>Question 1</h3><p>A ListView is the main body inside a Column below a heading. What normally gives it the remaining bounded height?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">Padding</button><button class="quiz-option" data-choice="1">Expanded</button><button class="quiz-option" data-choice="2">Center</button></div><div class="quiz-feedback" data-correct="Correct. Expanded gives the ListView a finite share of the Column's height."></div></div>
+      <div class="quiz" data-answer="0"><h3>Question 2</h3><p>Which grid delegate adapts the number of columns while limiting tile width?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">SliverGridDelegateWithMaxCrossAxisExtent</button><button class="quiz-option" data-choice="1">SliverGridDelegateWithFixedCrossAxisCount</button><button class="quiz-option" data-choice="2">ScrollController</button></div><div class="quiz-feedback" data-correct="Correct. It adds as many columns as fit while respecting maxCrossAxisExtent."></div></div>
+      <div class="panel references"><h3>Continue learning</h3><p>Use the official Flutter API references for <a href="https://api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html">SingleChildScrollView</a>, <a href="https://api.flutter.dev/flutter/widgets/ListView-class.html">ListView</a>, <a href="https://api.flutter.dev/flutter/widgets/GridView-class.html">GridView</a>, and <a href="https://api.flutter.dev/flutter/widgets/ScrollController-class.html">ScrollController</a>.</p></div>
+      <div class="finish"><h2>Scrollable Widgets complete! 🚀</h2><p>You can now choose an appropriate scrollable, build lists and grids efficiently, create horizontal rails, control scroll position, and diagnose common constraint mistakes.</p></div>
+      <p class="footer-note">Scrollable Widgets Codelab · Flutter UI · Beginner-to-Intermediate Foundation</p>
+    </section>
+  </div></main>
+</div>
+<script>
+(() => {
+  'use strict';
+  const steps = [...document.querySelectorAll('.step-view')];
+  const titles = ['Choose a Scrollable','SingleChildScrollView','ListView','Lazy Lists','Horizontal Scrolling','GridView','Control & Feedback','Debug & Build'];
+  const nav = document.getElementById('stepNav');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const progressTrack = document.querySelector('.progress-track');
+  const content = document.getElementById('content');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileTitle = document.getElementById('mobileTitle');
+  let current = 0;
+  const completed = new Set();
+
+  nav.innerHTML = titles.map((title, i) => `<button class="step-link" data-step="${i}" aria-current="${i === 0 ? 'step' : 'false'}" type="button"><span class="step-number">${String(i + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep = () => { const match = location.hash.match(/^#step-(\d+)$/); const value = match ? Number(match[1]) - 1 : 0; return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0; };
+  function render(updateHash = true) {
+    steps.forEach((step, i) => { step.classList.toggle('active', i === current); step.setAttribute('aria-hidden', i === current ? 'false' : 'true'); });
+    document.querySelectorAll('.step-link').forEach((button, i) => { const active = i === current; button.classList.toggle('active', active); button.setAttribute('aria-current', active ? 'step' : 'false'); button.querySelector('.step-status').textContent = completed.has(i) ? '✓' : ''; });
+    const percent = Math.round(((current + 1) / steps.length) * 100); progressBar.style.width = `${percent}%`; progressText.textContent = `${percent}%`; progressTrack.setAttribute('aria-valuenow', String(percent)); mobileTitle.textContent = titles[current];
+    if (updateHash) history.pushState({step: current}, '', `#step-${current + 1}`);
+    window.scrollTo({top:0, behavior:'auto'}); document.title = `${titles[current]} — Scrollable Widgets Codelab`;
+    document.getElementById('prevBtn').disabled = current === 0; const next = document.getElementById('nextBtn'); next.disabled = current === steps.length - 1; next.textContent = current === steps.length - 1 ? 'Complete' : 'Next →';
+    if (window.innerWidth <= 850) { sidebar.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); }
+  }
+  function goTo(index) { if (index < 0 || index >= steps.length) return; completed.add(current); current = index; render(); }
+  const navRow = document.createElement('div'); navRow.className = 'nav-row'; navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>'; content.appendChild(navRow);
+  nav.addEventListener('click', event => { const button = event.target.closest('.step-link'); if (button) goTo(Number(button.dataset.step)); });
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1)); document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+  document.addEventListener('click', async event => {
+    const copy = event.target.closest('.copy-btn');
+    if (copy) { const code = copy.parentElement.querySelector('code')?.textContent || ''; try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!'; } catch { copy.textContent = 'Select & copy'; } setTimeout(() => copy.textContent = 'Copy', 1100); return; }
+    const option = event.target.closest('.quiz-option');
+    if (option) { const quiz = option.closest('.quiz'); if (quiz.dataset.answered === 'true') return; const answer = Number(quiz.dataset.answer); const choice = Number(option.dataset.choice); quiz.dataset.answered = 'true'; quiz.querySelectorAll('.quiz-option').forEach(button => { button.disabled = true; button.classList.remove('correct','wrong'); }); option.classList.add(choice === answer ? 'correct' : 'wrong'); const feedback = quiz.querySelector('.quiz-feedback'); feedback.textContent = choice === answer ? feedback.dataset.correct : `Not quite. The correct answer is option ${answer + 1}.`; feedback.classList.add('show'); }
+  });
+  menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)); });
+  window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+  document.addEventListener('keydown', event => { if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return; if (event.key === 'ArrowRight') goTo(current + 1); if (event.key === 'ArrowLeft') goTo(current - 1); });
+  current = getHashStep(); render(false);
+})();
+</script>
+</body>
+</html>
