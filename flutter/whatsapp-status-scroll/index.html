@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horizontal Status Scrolling — Flutter Codelab</title>
+  <meta name="description" content="Build a Messenger-style horizontal status rail in Flutter using SizedBox, ListView, Axis.horizontal, CircleAvatar, Faker, and a scalable CustomScrollView alternative.">
+  <meta name="theme-color" content="#087f5b">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root{--green:#087f5b;--green-dark:#075c44;--green-light:#d8f5e9;--ink:#101010;--paper:#f5f7f4;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--blue:#b9d8ff;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:var(--green);border-right:var(--border);padding:22px 18px;z-index:20;overflow:auto}.brand{background:#fff;border:var(--border);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:20px}.eyebrow,.progress-meta,.step-number,.step-kicker,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}
+    .progress-wrap{color:#fff;margin:0 2px 20px}.progress-meta{display:flex;justify-content:space-between;gap:10px;font-size:.72rem;font-weight:500;margin-bottom:7px}.progress-track{height:16px;background:#fff;border:var(--border);padding:2px}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:9px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;text-align:left;color:#fff;background:transparent;border:3px solid transparent;padding:9px 8px;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;background:var(--green);border-bottom:var(--border);padding:10px;align-items:center;gap:10px}.menu-btn,.mobile-title{border:var(--border);background:#fff;box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{padding:8px 10px;flex:1;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{border:var(--border);background:#fff;box-shadow:var(--shadow);padding:28px;margin-bottom:24px}.step-kicker{display:inline-block;background:var(--green);color:#fff;border:2px solid var(--ink);padding:5px 9px;font-size:.72rem;font-weight:500;margin-bottom:13px}h1,h2,h3{line-height:1.08}h1{font-size:clamp(2rem,5vw,3.7rem);margin:0 0 12px;letter-spacing:-.045em}h2{font-size:clamp(1.55rem,3vw,2.25rem);margin:30px 0 12px}h3{font-size:1.15rem;margin:24px 0 9px}.lede{font-size:1.08rem;max-width:780px;margin:0}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:22px;margin:20px 0}.panel.green{background:var(--green-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.blue{background:var(--blue)}.callout{border:var(--border);box-shadow:var(--shadow-sm);padding:16px 18px;margin:20px 0;background:#fff}.callout .label{display:inline-block;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;border:2px solid var(--ink);background:var(--ink);color:#fff;padding:3px 7px;margin-bottom:8px}.callout p:last-child{margin-bottom:0}.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.concept{border:var(--border);padding:18px;background:#fff;box-shadow:var(--shadow-sm)}.concept strong{font-size:1.05rem}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;background:#111;color:#f7f7f7;border:var(--border);box-shadow:var(--shadow-sm);padding:20px;overflow:auto;font-family:"DM Mono",ui-monospace,monospace;font-size:.85rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:5px 9px;font-size:.75rem;font-weight:800;z-index:2}code:not(pre code){background:#e7eee9;border:1px solid #91a39a;padding:1px 5px;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.syntax{background:#e7fff5;border:var(--border);padding:14px;font-family:"DM Mono",monospace;overflow:auto}.comparison{width:100%;border-collapse:collapse;margin:18px 0;background:#fff;border:var(--border)}.comparison th,.comparison td{border:2px solid var(--ink);padding:11px;text-align:left;vertical-align:top}.comparison th{background:var(--green);color:#fff}
+    .quiz{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;border:2px solid var(--ink);background:#fff;padding:11px 13px;font-weight:700}.quiz-option:hover{background:var(--green-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;font-weight:800;background:var(--green-light)}.reveal>div{padding:15px 16px}.challenge{background:var(--ink);color:#fff;border:var(--border);box-shadow:var(--shadow);padding:22px;margin:24px 0}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .target{display:grid;grid-template-columns:minmax(270px,360px) 1fr;gap:26px;align-items:center;margin:24px 0}.phone{width:100%;max-width:360px;margin:auto;background:#eef2f0;border:4px solid var(--ink);border-radius:28px;box-shadow:var(--shadow);padding:13px}.phone-screen{height:560px;background:#fff;border:2px solid var(--ink);border-radius:17px;overflow:hidden}.phone-bar{height:62px;background:#f4f7f5;border-bottom:2px solid #c9d0cc;display:flex;align-items:center;gap:15px;padding:0 17px;font-weight:800;font-size:1.15rem}.status-preview{height:121px;display:flex;gap:12px;align-items:flex-start;padding:11px 10px 7px;overflow:hidden;border-bottom:2px solid #d9dfdc}.story{min-width:67px;text-align:center;font-size:.7rem;font-weight:700}.story-ring{width:62px;height:62px;margin:0 auto 4px;border:3px solid #15936d;border-radius:50%;padding:3px}.story-face{height:100%;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:900;border:1px solid var(--ink)}.face-a{background:#714dd2}.face-b{background:#e15b64}.face-c{background:#178b79}.face-d{background:#d68a19}.phone-row{height:75px;display:grid;grid-template-columns:47px 1fr;gap:12px;align-items:center;padding:8px 14px;border-bottom:1px solid #d9dfdc}.row-avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:900}.message-name{font-weight:800}.message-copy{font-size:.76rem;color:#67706b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.axis-demo{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}.axis-card{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:18px}.axis-line{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--green-light);border:2px solid var(--ink);min-height:75px;font-family:"DM Mono",monospace;font-weight:500}.axis-line.vertical{flex-direction:column}.flow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:18px 0}.flow span{border:2px solid var(--ink);background:#fff;padding:9px;font-family:"DM Mono",monospace;font-size:.8rem;font-weight:500}.flow b{font-size:1.25rem}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:12px 18px;font-weight:900;min-width:130px}.nav-btn.primary{background:var(--green);color:#fff}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{background:var(--mint);border:var(--border);box-shadow:var(--shadow);padding:20px;margin-top:24px}.footer-note{margin-top:30px;font-size:.8rem;color:#555}.references a{color:var(--green-dark);font-weight:700}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:700px){.target{grid-template-columns:1fr}.phone{max-width:320px}.axis-demo{grid-template-columns:1fr}}
+    @media(max-width:600px){.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.grid-2{grid-template-columns:1fr}.nav-row{position:sticky;bottom:0;background:var(--paper);padding:12px 0;z-index:10}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{font-size:.77rem;padding:16px 12px}.copy-btn{position:static;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1;align-self:flex-end}.comparison{display:block;overflow-x:auto}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter Project Codelab</div><h2>Status Scroll</h2><p>Add a horizontal story rail.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">Status Scroll</div></div>
+  <main><div class="content" id="content">
+
+    <section class="step-view" data-step="0">
+      <header class="step-header"><span class="step-kicker">STEP 1 · PROJECT GOAL</span><h1>Add a Horizontal Status Rail</h1><p class="lede">Extend the messages screen with a row of circular status avatars that moves left and right while the complete page still moves vertically.</p><div class="objective"><strong>By the end:</strong> You can change a ListView's axis, constrain a horizontal viewport, style status rings, combine different scrolling directions, and choose a lazy structure for larger feeds.</div></header>
+      <div class="target">
+        <div class="phone" aria-label="Preview of the completed status and messages screen"><div class="phone-screen"><div class="phone-bar"><span>☰</span><span>Messenger</span></div><div class="status-preview"><div class="story"><div class="story-ring"><div class="story-face face-a">AS</div></div>Aarav</div><div class="story"><div class="story-ring"><div class="story-face face-b">MK</div></div>Maya</div><div class="story"><div class="story-ring"><div class="story-face face-c">RN</div></div>Rohan</div><div class="story"><div class="story-ring"><div class="story-face face-d">ZI</div></div>Zoya</div><div class="story"><div class="story-ring"><div class="story-face face-a">KS</div></div>Kabir</div></div><div class="phone-row"><span class="row-avatar face-a">AS</span><span><span class="message-name">Aarav Sharma</span><br><span class="message-copy">Are we still meeting after class?</span></span></div><div class="phone-row"><span class="row-avatar face-b">MK</span><span><span class="message-name">Maya Kapoor</span><br><span class="message-copy">I finished the Flutter exercise!</span></span></div><div class="phone-row"><span class="row-avatar face-c">RN</span><span><span class="message-name">Rohan Nair</span><br><span class="message-copy">Can you share the project link?</span></span></div><div class="phone-row"><span class="row-avatar face-d">ZI</span><span><span class="message-name">Zoya Iyer</span><br><span class="message-copy">The new layout looks great.</span></span></div></div></div>
+        <div><h2>Two scroll directions</h2><div class="flow"><span>Vertical page</span><b>+</b><span>Horizontal status rail</span><b>+</b><span>Message rows</span></div><p>The two scrollables do not fight for the same drag gesture because their axes differ.</p></div>
+      </div>
+      <div class="callout"><span class="label">PREREQUISITE</span><p>This lesson extends the <code>whatsapp-messages</code> codelab. You can also follow it independently by starting with the supplied messages code.</p></div>
+    </section>
+
+    <section class="step-view" data-step="1">
+      <header class="step-header"><span class="step-kicker">STEP 2 · AXES</span><h1>Understand Horizontal Scrolling</h1><p class="lede"><code>ListView</code> is vertical by default. Set <code>scrollDirection: Axis.horizontal</code> to lay out and move its children from side to side.</p></header>
+      <div class="axis-demo"><div class="axis-card"><h3>Axis.vertical</h3><div class="axis-line vertical"><span>Item 1</span><span>↓</span><span>Item 2</span></div><p>The scroll extent grows from top to bottom.</p></div><div class="axis-card"><h3>Axis.horizontal</h3><div class="axis-line"><span>Item 1</span><span>→</span><span>Item 2</span></div><p>The scroll extent grows from left to right.</p></div></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>ListView(
+  scrollDirection: Axis.horizontal,
+  children: const [
+    Text('Status 1'),
+    Text('Status 2'),
+    Text('Status 3'),
+  ],
+)</code></pre></div>
+      <div class="callout"><span class="label">CONSTRAINT RULE</span><p>A horizontal ListView expands in its cross axis—the vertical direction. When it sits inside a <code>Column</code>, give it a finite height.</p></div>
+      <div class="quiz" data-answer="0"><h3>Quick check</h3><p>Which property changes a ListView from vertical to horizontal?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">scrollDirection: Axis.horizontal</button><button class="quiz-option" data-choice="1">mainAxisAlignment: horizontal</button><button class="quiz-option" data-choice="2">shrinkWrap: horizontal</button></div><div class="quiz-feedback" data-correct="Correct. scrollDirection selects the ListView's scrolling and layout axis."></div></div>
+    </section>
+
+    <section class="step-view" data-step="2">
+      <header class="step-header"><span class="step-kicker">STEP 3 · VIEWPORT</span><h1>Give the Status Rail a Height</h1><p class="lede"><code>SizedBox</code> defines the 120-pixel-tall viewport through which the horizontal content will be visible.</p></header>
+      <p>Place this as the first child of the outer <code>Column</code>, before the message rows:</p>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>SizedBox(
+  height: 120,
+  child: ListView(
+    scrollDirection: Axis.horizontal,
+    children: const [
+      SizedBox(width: 80, child: Center(child: Text('One'))),
+      SizedBox(width: 80, child: Center(child: Text('Two'))),
+      SizedBox(width: 80, child: Center(child: Text('Three'))),
+    ],
+  ),
+),</code></pre></div>
+      <div class="grid-2"><div class="concept"><strong>SizedBox height</strong><p>Bounds the ListView's cross axis so Flutter knows how tall its viewport is.</p></div><div class="concept"><strong>Child widths</strong><p>Determine how much horizontal space each status entry occupies.</p></div></div>
+      <div class="panel yellow"><strong>About shrinkWrap:</strong> Do not add <code>shrinkWrap: true</code> here. The ListView already receives finite width from the screen and finite height from the SizedBox. Shrink-wrapping the scrolling axis is unnecessary and requires extra measurement.</div>
+    </section>
+
+    <section class="step-view" data-step="3">
+      <header class="step-header"><span class="step-kicker">STEP 4 · REPEAT STORIES</span><h1>Generate Ten Status Items</h1><p class="lede">Use a collection <code>for</code> to insert ten padded status widgets into the horizontal list.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>SizedBox(
+  height: 120,
+  child: ListView(
+    scrollDirection: Axis.horizontal,
+    children: [
+      for (int i = 0; i &lt; 10; i++)
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            children: const [
+              CircleAvatar(radius: 30),
+              SizedBox(height: 5),
+              Text('Person', style: TextStyle(fontSize: 12)),
+            ],
+          ),
+        ),
+    ],
+  ),
+),</code></pre></div>
+      <table class="comparison"><thead><tr><th>Widget</th><th>Job</th></tr></thead><tbody><tr><td><code>Padding</code></td><td>Creates touch-friendly space around each status.</td></tr><tr><td>Inner <code>Column</code></td><td>Places the avatar above the first name.</td></tr><tr><td><code>CircleAvatar</code></td><td>Displays a circular profile image.</td></tr><tr><td><code>SizedBox(height: 5)</code></td><td>Adds a predictable gap before the name.</td></tr></tbody></table>
+      <div class="callout"><span class="label">WHY IT OVERFLOWS SIDEWAYS</span><p>Ten items are wider than the phone viewport. ListView keeps them in one horizontal sequence and lets the user reveal the off-screen items by dragging.</p></div>
+    </section>
+
+    <section class="step-view" data-step="4">
+      <header class="step-header"><span class="step-kicker">STEP 5 · STATUS RING</span><h1>Style the Avatar Border</h1><p class="lede">Wrap the avatar in a circular <code>Container</code> to create the green status ring.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Container(
+  decoration: BoxDecoration(
+    shape: BoxShape.circle,
+    border: Border.all(
+      color: Colors.green.shade600,
+      width: 2,
+    ),
+  ),
+  padding: const EdgeInsets.all(2),
+  child: CircleAvatar(
+    radius: 30,
+    backgroundImage: NetworkImage(
+      faker.image.loremPicsum(
+        random: 0,
+        seed: faker.randomGenerator.string(100),
+      ),
+    ),
+  ),
+),</code></pre></div>
+      <div class="grid-2"><div class="concept"><strong>BoxShape.circle</strong><p>Makes the Container's decoration circular.</p></div><div class="concept"><strong>Border.all</strong><p>Draws the green outline around the circle.</p></div><div class="concept"><strong>Padding</strong><p>Creates a narrow gap between the ring and avatar.</p></div><div class="concept"><strong>NetworkImage</strong><p>Loads the placeholder image URL generated by Faker.</p></div></div>
+      <div class="panel green"><strong>Design experiment:</strong> Change the border to gray to represent a viewed status, or use a gradient decoration for an unread status style.</div>
+    </section>
+
+    <section class="step-view" data-step="5">
+      <header class="step-header"><span class="step-kicker">STEP 6 · LABELS</span><h1>Add Generated First Names</h1><p class="lede">Use a short first name beneath the avatar so every status remains compact.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Column(
+  children: [
+    // The circular status Container goes here.
+    const SizedBox(height: 5),
+    SizedBox(
+      width: 68,
+      child: Text(
+        faker.person.firstName(),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 12),
+      ),
+    ),
+  ],
+),</code></pre></div>
+      <div class="callout"><span class="label">ROBUST LABEL</span><p>The supplied code displays the Text at its natural width. A small bounded width plus <code>TextOverflow.ellipsis</code> keeps longer generated names from changing the spacing between status items.</p></div>
+      <div class="panel yellow"><strong>Generated data:</strong> Faker calls inside <code>build</code> can return new people when the widget rebuilds. This matches the exercise, but stable demo contacts should be generated once and stored in state.</div>
+    </section>
+
+    <section class="step-view" data-step="6">
+      <header class="step-header"><span class="step-kicker">STEP 7 · TWO SCROLLABLES</span><h1>Combine Statuses and Messages</h1><p class="lede">The outer <code>SingleChildScrollView</code> owns vertical movement. The inner <code>ListView</code> owns horizontal movement and has a bounded height.</p></header>
+      <div class="syntax">SingleChildScrollView · vertical<br>└── Column<br>&nbsp;&nbsp;&nbsp;&nbsp;├── SizedBox(height: 120)<br>&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── ListView · horizontal<br>&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── 10 status items<br>&nbsp;&nbsp;&nbsp;&nbsp;└── 100 message rows</div>
+      <table class="comparison"><thead><tr><th>Gesture</th><th>Widget that responds</th></tr></thead><tbody><tr><td>Mostly horizontal drag over the status rail</td><td>The inner horizontal <code>ListView</code>.</td></tr><tr><td>Vertical drag through the page</td><td>The outer <code>SingleChildScrollView</code>.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>body: SingleChildScrollView(
+  child: Column(
+    children: [
+      SizedBox(
+        height: 120,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            for (int i = 0; i &lt; 10; i++)
+              buildStatusItem(),
+          ],
+        ),
+      ),
+      for (int i = 0; i &lt; 100; i++)
+        buildMessageItem(),
+    ],
+  ),
+),</code></pre></div>
+      <div class="callout"><span class="label">SAFE NESTING</span><p>Nested scrolling is simplest when the axes differ and the inner scrollable has a clear size. Two unbounded vertical scrollables would create constraint and gesture problems.</p></div>
+      <div class="quiz" data-answer="2"><h3>Quick check</h3><p>Why does the horizontal ListView need the surrounding SizedBox?</p><div class="quiz-options"><button class="quiz-option" data-choice="0">To make every image circular</button><button class="quiz-option" data-choice="1">To generate ten children</button><button class="quiz-option" data-choice="2">To give the horizontal viewport a bounded height</button></div><div class="quiz-feedback" data-correct="Correct. The SizedBox supplies a finite cross-axis height."></div></div>
+    </section>
+
+    <section class="step-view" data-step="7">
+      <header class="step-header"><span class="step-kicker">STEP 8 · COMPLETE VERSION</span><h1>Run the Finished Screen</h1><p class="lede">This complete learning version follows the supplied structure while removing the unused Cupertino import and unnecessary <code>shrinkWrap</code>.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>import 'package:faker/faker.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State&lt;MyApp&gt; createState() => _MyAppState();
+}
+
+class _MyAppState extends State&lt;MyApp&gt; {
+  final Faker faker = Faker();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          leading: const Icon(Icons.menu),
+          titleSpacing: 0,
+          title: const Text('Messenger'),
+          centerTitle: false,
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(
+                height: 120,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    for (int i = 0; i &lt; 10; i++)
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.green.shade600,
+                                  width: 2,
+                                ),
+                              ),
+                              padding: const EdgeInsets.all(2),
+                              child: CircleAvatar(
+                                radius: 30,
+                                backgroundImage: NetworkImage(
+                                  faker.image.loremPicsum(
+                                    random: 0,
+                                    seed: faker.randomGenerator.string(100),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            SizedBox(
+                              width: 68,
+                              child: Text(
+                                faker.person.firstName(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              for (int i = 0; i &lt; 100; i++)
+                Column(
+                  children: [
+                    ListTile(
+                      onTap: () {},
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(
+                          faker.image.loremPicsum(
+                            random: 0,
+                            seed: faker.randomGenerator.string(100),
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        faker.person.name(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        faker.lorem.sentence(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const Divider(height: 0),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre></div>
+      <div class="challenge"><h3>Test the interaction</h3><ol><li>Drag the status rail left and right without moving the page vertically.</li><li>Drag upward to move the statuses and messages off screen together.</li><li>Increase the statuses from 10 to 20.</li><li>Test a narrow device and a landscape device.</li></ol></div>
+    </section>
+
+    <section class="step-view" data-step="8">
+      <header class="step-header"><span class="step-kicker">STEP 9 · SCALE IT</span><h1>Make Both Collections Lazy</h1><p class="lede">Ten statuses are small, but the 100-message Column is eager. Use builders for the repeated children and a <code>CustomScrollView</code> when the status rail should scroll away with the message feed.</p></header>
+      <h2>Lazy horizontal statuses</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>SizedBox(
+  height: 120,
+  child: ListView.builder(
+    scrollDirection: Axis.horizontal,
+    itemCount: statuses.length,
+    itemBuilder: (context, index) {
+      return StatusItem(status: statuses[index]);
+    },
+  ),
+)</code></pre></div>
+      <h2>One lazy vertical scroll owner</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>body: CustomScrollView(
+  slivers: [
+    SliverToBoxAdapter(
+      child: SizedBox(
+        height: 120,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: statuses.length,
+          itemBuilder: (context, index) {
+            return StatusItem(status: statuses[index]);
+          },
+        ),
+      ),
+    ),
+    SliverList.builder(
+      itemCount: messages.length,
+      itemBuilder: (context, index) {
+        return Column(
+          children: [
+            MessageTile(message: messages[index]),
+            const Divider(height: 0),
+          ],
+        );
+      },
+    ),
+  ],
+),</code></pre></div>
+      <table class="comparison"><thead><tr><th>Structure</th><th>Behavior</th></tr></thead><tbody><tr><td><code>SingleChildScrollView + Column</code></td><td>Easy to learn, but eagerly builds all 100 messages.</td></tr><tr><td><code>Column + status rail + Expanded(ListView.builder)</code></td><td>Messages are lazy, but the status rail remains fixed above them.</td></tr><tr><td><code>CustomScrollView + SliverToBoxAdapter + SliverList</code></td><td>Status rail scrolls away with one lazy vertical message feed.</td></tr></tbody></table>
+      <div class="callout"><span class="label">DATA FIRST</span><p>Load or generate stable status and message records once, then let each builder read the record at its index. Avoid generating a new person inside a lazy builder because rows may rebuild while scrolling.</p></div>
+      <div class="panel references"><h3>Continue learning</h3><p>Read the official Flutter references for <a href="https://api.flutter.dev/flutter/widgets/ListView-class.html">ListView</a>, <a href="https://api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html">SingleChildScrollView</a>, and <a href="https://api.flutter.dev/flutter/widgets/CustomScrollView-class.html">CustomScrollView</a>.</p></div>
+      <div class="finish"><h2>Horizontal status scrolling complete! 🚀</h2><p>You can now constrain a horizontal viewport, combine perpendicular scrolling axes, style status items, and upgrade repeated content to lazy builders.</p></div>
+      <p class="footer-note">Horizontal Status Scrolling Codelab · Flutter UI · Scrolling Project</p>
+    </section>
+  </div></main>
+</div>
+<script>
+(() => {
+  'use strict';
+  const steps = [...document.querySelectorAll('.step-view')];
+  const titles = ['Project Goal','Scrolling Axes','Bound the Viewport','Repeat Stories','Status Ring','Status Labels','Combine Scrollables','Complete App','Lazy Upgrade'];
+  const nav = document.getElementById('stepNav');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const progressTrack = document.querySelector('.progress-track');
+  const content = document.getElementById('content');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileTitle = document.getElementById('mobileTitle');
+  let current = 0;
+  const completed = new Set();
+  nav.innerHTML = titles.map((title, i) => `<button class="step-link" data-step="${i}" aria-current="${i === 0 ? 'step' : 'false'}" type="button"><span class="step-number">${String(i + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep = () => { const match = location.hash.match(/^#step-(\d+)$/); const value = match ? Number(match[1]) - 1 : 0; return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0; };
+  function render(updateHash = true) {
+    steps.forEach((step, i) => { step.classList.toggle('active', i === current); step.setAttribute('aria-hidden', i === current ? 'false' : 'true'); });
+    document.querySelectorAll('.step-link').forEach((button, i) => { const active = i === current; button.classList.toggle('active', active); button.setAttribute('aria-current', active ? 'step' : 'false'); button.querySelector('.step-status').textContent = completed.has(i) ? '✓' : ''; });
+    const percent = Math.round(((current + 1) / steps.length) * 100); progressBar.style.width = `${percent}%`; progressText.textContent = `${percent}%`; progressTrack.setAttribute('aria-valuenow', String(percent)); mobileTitle.textContent = titles[current];
+    if (updateHash) history.pushState({step: current}, '', `#step-${current + 1}`);
+    window.scrollTo({top:0,behavior:'auto'}); document.title = `${titles[current]} — Horizontal Status Scrolling Codelab`;
+    document.getElementById('prevBtn').disabled = current === 0; const next = document.getElementById('nextBtn'); next.disabled = current === steps.length - 1; next.textContent = current === steps.length - 1 ? 'Complete' : 'Next →';
+    if (window.innerWidth <= 850) { sidebar.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); }
+  }
+  function goTo(index) { if (index < 0 || index >= steps.length) return; completed.add(current); current = index; render(); }
+  const navRow = document.createElement('div'); navRow.className = 'nav-row'; navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>'; content.appendChild(navRow);
+  nav.addEventListener('click', event => { const button = event.target.closest('.step-link'); if (button) goTo(Number(button.dataset.step)); });
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1)); document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+  document.addEventListener('click', async event => {
+    const copy = event.target.closest('.copy-btn');
+    if (copy) { const code = copy.parentElement.querySelector('code')?.textContent || ''; try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!'; } catch { copy.textContent = 'Select & copy'; } setTimeout(() => copy.textContent = 'Copy', 1100); return; }
+    const option = event.target.closest('.quiz-option');
+    if (option) { const quiz = option.closest('.quiz'); if (quiz.dataset.answered === 'true') return; const answer = Number(quiz.dataset.answer); const choice = Number(option.dataset.choice); quiz.dataset.answered = 'true'; quiz.querySelectorAll('.quiz-option').forEach(button => { button.disabled = true; button.classList.remove('correct','wrong'); }); option.classList.add(choice === answer ? 'correct' : 'wrong'); const feedback = quiz.querySelector('.quiz-feedback'); feedback.textContent = choice === answer ? feedback.dataset.correct : `Not quite. The correct answer is option ${answer + 1}.`; feedback.classList.add('show'); }
+  });
+  menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)); });
+  window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+  document.addEventListener('keydown', event => { if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return; if (event.key === 'ArrowRight') goTo(current + 1); if (event.key === 'ArrowLeft') goTo(current - 1); });
+  current = getHashStep(); render(false);
+})();
+</script>
+</body>
+</html>
