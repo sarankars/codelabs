@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found — Sarankar Codelabs</title>
+  <meta name="description" content="The requested Sarankar Codelabs page could not be found.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#087f5b">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+    :root {
+      --green: #087f5b;
+      --green-light: #d8f5e9;
+      --ink: #101010;
+      --paper: #f5f7f4;
+      --white: #ffffff;
+      --yellow: #ffd83d;
+      --border: 3px solid var(--ink);
+      --shadow: 7px 7px 0 var(--ink);
+      --shadow-small: 4px 4px 0 var(--ink);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(rgba(16, 16, 16, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 16, 16, 0.05) 1px, transparent 1px),
+        var(--paper);
+      background-size: 28px 28px;
+      color: var(--ink);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      line-height: 1.5;
+    }
+
+    a {
+      font: inherit;
+    }
+
+    a:focus-visible {
+      outline: 4px solid var(--yellow);
+      outline-offset: 4px;
+    }
+
+    .page {
+      width: min(1080px, calc(100% - 36px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 36px 0;
+      display: grid;
+      align-content: center;
+      gap: 24px;
+    }
+
+    .brand {
+      width: fit-content;
+      padding: 9px 13px;
+      border: var(--border);
+      background: var(--white);
+      box-shadow: var(--shadow-small);
+      font-family: "DM Mono", monospace;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .error-card {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(28px, 6vw, 64px);
+      border: var(--border);
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .error-code {
+      position: absolute;
+      top: -35px;
+      right: clamp(-18px, 2vw, 24px);
+      color: var(--green-light);
+      font-family: "DM Mono", monospace;
+      font-size: clamp(8rem, 24vw, 18rem);
+      font-weight: 500;
+      line-height: 1;
+      letter-spacing: -0.1em;
+      user-select: none;
+    }
+
+    .content {
+      position: relative;
+      max-width: 720px;
+    }
+
+    .kicker {
+      display: inline-block;
+      margin-bottom: 16px;
+      padding: 5px 9px;
+      border: 2px solid var(--ink);
+      background: var(--green);
+      color: var(--white);
+      font-family: "DM Mono", monospace;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(2.6rem, 8vw, 5.6rem);
+      line-height: 0.94;
+      letter-spacing: -0.06em;
+    }
+
+    .lede {
+      max-width: 610px;
+      margin: 0;
+      font-size: clamp(1.05rem, 2vw, 1.25rem);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 18px;
+      border: var(--border);
+      background: var(--yellow);
+      box-shadow: var(--shadow-small);
+      color: var(--ink);
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .button:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100% - 22px, 1080px);
+        padding: 18px 0 28px;
+        align-content: start;
+      }
+
+      .error-card {
+        padding: 28px 20px;
+      }
+
+      .error-code {
+        top: -10px;
+        right: -12px;
+        font-size: 9rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="brand">Sarankar Codelabs</div>
+
+    <section class="error-card" aria-labelledby="error-title">
+      <div class="error-code" aria-hidden="true">404</div>
+      <div class="content">
+        <span class="kicker">Page not found</span>
+        <h1 id="error-title">This page wandered off.</h1>
+        <p class="lede">The address may be incorrect, or the page may have moved.</p>
+        <div class="actions">
+          <a class="button" href="https://lms.sarankar.com">Visit the home page</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
