@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Design — Flutter Codelab</title>
+  <meta name="description" content="Learn responsive Flutter design with MediaQuery, LayoutBuilder, OrientationBuilder, practical breakpoints, adaptive navigation, flexible grids, readable content widths, and accessibility-aware layouts.">
+  <meta name="theme-color" content="#087f78">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--teal:#087f78;--teal-dark:#045a56;--teal-light:#d7f5f1;--ink:#101010;--paper:#f5faf9;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--blue:#b9d8ff;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}.app{min-height:100vh}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--teal);border-right:var(--border);overflow-y:auto;overflow-x:hidden;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px minmax(0,1fr) 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link span:nth-child(2){min-width:0;overflow-wrap:anywhere}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--teal);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--teal);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal,.demo{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.teal{background:var(--teal-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.panel.blue{background:var(--blue)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.callout p:last-child{margin-bottom:0}.grid-2,.grid-3{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e3f2f0;border:1px solid #80aaa6;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.syntax,.tree{padding:14px;overflow:auto;background:#def4f1;border:var(--border);font-family:"DM Mono",monospace}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--teal)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--teal-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--teal-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .demo{padding:20px;margin:20px 0}.demo-controls{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px}.demo-btn{padding:8px 12px;background:#fff;border:2px solid var(--ink);font-weight:800}.demo-btn.active{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}.demo-readout{margin:14px 0 0;padding:10px 12px;background:#fff;border:2px solid var(--ink);font-family:"DM Mono",monospace;font-size:.82rem}
+    .device-shell{width:330px;max-width:100%;min-height:310px;margin:auto;padding:12px;background:#e0f4f1;border:4px solid var(--ink);transition:width .2s ease}.device-shell.medium{width:620px}.device-shell.expanded{width:850px}.device-layout{display:grid;gap:10px}.device-nav{display:flex;justify-content:space-around;padding:8px;background:var(--teal);color:#fff;border:2px solid var(--ink);font-weight:800}.device-main{display:grid;gap:10px}.device-card{min-height:70px;padding:12px;background:#fff;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-weight:800}.device-shell.medium .device-main{grid-template-columns:repeat(2,1fr)}.device-shell.expanded .device-layout{grid-template-columns:150px 1fr}.device-shell.expanded .device-nav{flex-direction:column;justify-content:flex-start;gap:18px}.device-shell.expanded .device-main{grid-template-columns:repeat(3,1fr)}
+    .local-shell{width:100%;padding:16px;background:#e0f4f1;border:3px solid var(--ink)}.local-box{width:280px;max-width:100%;min-height:190px;margin:auto;padding:12px;background:#fff;border:3px solid var(--ink);transition:width .2s ease}.local-box.wide{width:620px}.local-content{display:flex;flex-direction:column;gap:10px}.local-box.wide .local-content{flex-direction:row}.local-pane{flex:1;min-height:70px;padding:12px;background:var(--mint);border:2px solid var(--ink);font-weight:800}.local-pane:last-child{background:var(--orange)}
+    .orientation-stage{width:290px;height:440px;max-width:100%;margin:auto;padding:16px;background:var(--teal-light);border:4px solid var(--ink);transition:width .2s,height .2s}.orientation-stage.landscape{width:620px;height:280px}.orientation-grid{height:100%;display:grid;grid-template-columns:1fr;gap:12px}.orientation-stage.landscape .orientation-grid{grid-template-columns:1fr 1fr}.orientation-pane{display:grid;place-items:center;padding:18px;background:#fff;border:3px solid var(--ink);font-weight:900}.orientation-pane:last-child{background:var(--yellow)}
+    .breakpoint-line{position:relative;height:82px;margin:26px 0 18px;background:linear-gradient(90deg,var(--mint) 0 37.5%,var(--yellow) 37.5% 64%,var(--orange) 64% 100%);border:3px solid var(--ink)}.breakpoint-line span{position:absolute;bottom:8px;font-weight:900}.breakpoint-line .b1{left:8px}.breakpoint-line .b2{left:39%}.breakpoint-line .b3{left:66%}
+    .checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.references a{color:var(--teal-dark);font-weight:700}.nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--teal)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.footer-note{margin-top:30px;color:#555;font-size:.8rem}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2,.grid-3{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz,.demo{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}.breakpoint-line{font-size:.8rem}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}.step-view.active{animation:none}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter Layout Codelab</div><h2>Responsive Design</h2><p>Adapt to the available space.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">Responsive Design</div></div>
+  <main><div class="content" id="content">
+
+    <section class="step-view" data-title="Responsive mindset">
+      <header class="step-header"><span class="step-kicker">STEP 1 · START WITH SPACE</span><h1>Design for Windows, Not Device Names</h1><p class="lede">A phone can rotate, a tablet can use split screen, and a desktop window can be narrow. Responsive Flutter layouts react to the space they actually receive.</p><div class="objective"><strong>By the end:</strong> You will build a course dashboard that changes its navigation, content width, and grid as the available window grows.</div></header>
+      <div class="demo"><h2>Resize the same interface</h2><div class="demo-controls"><button class="demo-btn active" type="button" data-device="compact">Compact</button><button class="demo-btn" type="button" data-device="medium">Medium</button><button class="demo-btn" type="button" data-device="expanded">Expanded</button></div><div class="device-shell" id="deviceShell"><div class="device-layout"><div class="device-nav"><span>Home</span><span>Learn</span><span>Profile</span></div><div class="device-main"><div class="device-card">Continue learning</div><div class="device-card">Weekly progress</div><div class="device-card">Recommended course</div></div></div></div><p class="demo-readout" id="deviceReadout">Compact: bottom navigation and one content column.</p></div>
+      <div class="grid-3"><div class="concept"><strong>Responsive</strong><p>Reflows and resizes content as space changes.</p></div><div class="concept"><strong>Adaptive</strong><p>Chooses a better interaction or component for the context.</p></div><div class="concept"><strong>Accessible</strong><p>Survives large text, keyboard insets, and different input methods.</p></div></div>
+      <div class="callout"><span class="label">RULE OF THUMB</span><p>Measure the available window or parent constraints. Do not branch on labels such as “phone” and “tablet” when width is the information your layout needs.</p></div>
+      <div class="quiz" data-answer="2" data-correct="Correct. The current app window can change independently of the physical device."><h3>Why is “tablet layout” an unreliable condition?</h3><div class="quiz-options"><button class="quiz-option">Tablets cannot rotate</button><button class="quiz-option">Flutter cannot detect devices</button><button class="quiz-option">The app may occupy a narrow window on a large device</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="MediaQuery">
+      <header class="step-header"><span class="step-kicker">STEP 2 · MEASURE THE WINDOW</span><h1>Read Window Information with MediaQuery</h1><p class="lede"><code>MediaQuery</code> provides the app window size and environment information such as system padding, keyboard insets, and text scaling.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Widget build(BuildContext context) {
+  final size = MediaQuery.sizeOf(context);
+  final safePadding = MediaQuery.paddingOf(context);
+  final keyboardInsets = MediaQuery.viewInsetsOf(context);
+  final textScaler = MediaQuery.textScalerOf(context);
+
+  return Text(
+    '${size.width} × ${size.height}',
+    textScaler: textScaler,
+  );
+}</code></pre></div>
+      <table class="comparison"><thead><tr><th>Query</th><th>Use it for</th></tr></thead><tbody><tr><td><code>MediaQuery.sizeOf(context)</code></td><td>The size of the current app window in logical pixels.</td></tr><tr><td><code>paddingOf(context)</code></td><td>System areas that are fully obscured, such as notches and status bars.</td></tr><tr><td><code>viewInsetsOf(context)</code></td><td>Areas completely covered by system UI, commonly the on-screen keyboard.</td></tr><tr><td><code>textScalerOf(context)</code></td><td>The user's current text scaling preference.</td></tr><tr><td><code>orientationOf(context)</code></td><td>The window's current portrait or landscape orientation.</td></tr></tbody></table>
+      <div class="panel teal"><strong>Prefer focused queries:</strong> If you only need the size, use <code>MediaQuery.sizeOf</code> instead of reading the complete <code>MediaQueryData</code>. The widget then depends only on the property it uses.</div>
+      <div class="quiz" data-answer="0" data-correct="Correct. MediaQuery.sizeOf measures the whole current app window."><h3>You need to switch the page navigation based on the app window width. What should you read?</h3><div class="quiz-options"><button class="quiz-option"><code>MediaQuery.sizeOf(context).width</code></button><button class="quiz-option"><code>Theme.of(context)</code></button><button class="quiz-option"><code>constraints.minHeight</code> without a LayoutBuilder</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="LayoutBuilder">
+      <header class="step-header"><span class="step-kicker">STEP 3 · MEASURE LOCALLY</span><h1>Use LayoutBuilder for Parent Constraints</h1><p class="lede"><code>LayoutBuilder</code> runs at layout time and gives you the constraints passed to that exact location in the widget tree.</p></header>
+      <div class="demo"><h2>Change only the component width</h2><div class="demo-controls"><button class="demo-btn active" type="button" data-local="narrow">Narrow parent</button><button class="demo-btn" type="button" data-local="wide">Wide parent</button></div><div class="local-shell"><div class="local-box" id="localBox"><div class="local-content"><div class="local-pane">Course details</div><div class="local-pane">Progress chart</div></div></div></div><p class="demo-readout" id="localReadout">280 px parent: the component stacks its sections.</p></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>LayoutBuilder(
+  builder: (context, constraints) {
+    final isWide = constraints.maxWidth >= 560;
+
+    if (isWide) {
+      return Row(
+        children: const [
+          Expanded(child: CourseDetails()),
+          SizedBox(width: 16),
+          Expanded(child: ProgressChart()),
+        ],
+      );
+    }
+
+    return const Column(
+      children: [
+        CourseDetails(),
+        SizedBox(height: 16),
+        ProgressChart(),
+      ],
+    );
+  },
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Choose</th><th>When</th></tr></thead><tbody><tr><td><code>MediaQuery.sizeOf</code></td><td>The decision belongs to the whole app window or full screen.</td></tr><tr><td><code>LayoutBuilder</code></td><td>A reusable component should respond to the space its parent gives it.</td></tr></tbody></table>
+      <div class="quiz" data-answer="1" data-correct="Correct. LayoutBuilder reports the constraints at the component's location."><h3>A reusable card behaves differently in a sidebar and in the page body. What should it measure?</h3><div class="quiz-options"><button class="quiz-option">The physical display size</button><button class="quiz-option">Its parent constraints with LayoutBuilder</button><button class="quiz-option">The operating system name</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Breakpoints">
+      <header class="step-header"><span class="step-kicker">STEP 4 · BRANCH DELIBERATELY</span><h1>Create Practical, Content-Based Breakpoints</h1><p class="lede">A breakpoint is the width at which the current composition stops working well and another composition becomes clearer.</p></header>
+      <div class="breakpoint-line"><span class="b1">Compact</span><span class="b2">Medium</span><span class="b3">Expanded</span></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>enum WindowClass { compact, medium, expanded }
+
+WindowClass windowClassFor(double width) {
+  if (width < 600) return WindowClass.compact;
+  if (width < 1024) return WindowClass.medium;
+  return WindowClass.expanded;
+}</code></pre></div>
+      <table class="comparison"><thead><tr><th>Example range</th><th>Possible composition</th></tr></thead><tbody><tr><td>Compact: below 600</td><td>One column, bottom navigation, full-width actions.</td></tr><tr><td>Medium: 600–1023</td><td>Two columns or a compact navigation rail.</td></tr><tr><td>Expanded: 1024 and above</td><td>Persistent rail, multi-column content, capped reading width.</td></tr></tbody></table>
+      <div class="callout"><span class="label">NOT UNIVERSAL CONSTANTS</span><p>These numbers are useful starting points, not a law. Resize your real content, include large text, and place the breakpoint where the design needs to change.</p></div>
+      <div class="panel orange"><strong>Avoid dozens of width checks.</strong> Classify the width once, then pass the chosen window class or shared layout values to the parts that need them.</div>
+      <div class="quiz" data-answer="2" data-correct="Correct. Break when the content or interaction needs a different composition."><h3>Where should a custom breakpoint be placed?</h3><div class="quiz-options"><button class="quiz-option">At every 100 logical pixels</button><button class="quiz-option">Only at the physical device width</button><button class="quiz-option">Where the existing composition stops working comfortably</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Flexible foundations">
+      <header class="step-header"><span class="step-kicker">STEP 5 · LET CONTENT REFLOW</span><h1>Use Flexible Layouts Before Branching</h1><p class="lede">Not every size change needs a completely different widget tree. Many layouts can adapt naturally with flexible sizing, wrapping, and sensible limits.</p></header>
+      <div class="grid-2"><div class="concept"><strong>Expanded and Flexible</strong><p>Share remaining space without hard-coded widths.</p></div><div class="concept"><strong>Wrap</strong><p>Move chips, buttons, or tags onto another run.</p></div><div class="concept"><strong>ConstrainedBox</strong><p>Cap widths so reading lines and forms do not stretch endlessly.</p></div><div class="concept"><strong>FractionallySizedBox</strong><p>Size a child as a fraction of the available space.</p></div><div class="concept"><strong>AspectRatio</strong><p>Preserve a deliberate shape while dimensions change.</p></div><div class="concept"><strong>FittedBox</strong><p>Scale bounded visual content when scaling is actually appropriate.</p></div></div>
+      <h2>Keep readable content centered</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Center(
+  child: ConstrainedBox(
+    constraints: const BoxConstraints(maxWidth: 720),
+    child: ListView(
+      padding: const EdgeInsets.all(24),
+      children: const [
+        CourseHeader(),
+        SizedBox(height: 24),
+        LessonContent(),
+      ],
+    ),
+  ),
+)</code></pre></div>
+      <div class="callout"><span class="label">LARGE-SCREEN HABIT</span><p>Use extra space to improve composition, not merely to stretch every element. Long paragraphs, forms, and primary actions usually benefit from a maximum width.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. ConstrainedBox can cap the width while Center uses the extra space around it."><h3>A form becomes difficult to read across a wide desktop window. What is a good first fix?</h3><div class="quiz-options"><button class="quiz-option">Increase every field to the full width</button><button class="quiz-option">Center it inside a ConstrainedBox with a maximum width</button><button class="quiz-option">Detect Windows and hide half the fields</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Orientation">
+      <header class="step-header"><span class="step-kicker">STEP 6 · WIDTH AND HEIGHT</span><h1>Respond to Orientation When Shape Matters</h1><p class="lede"><code>OrientationBuilder</code> compares the available width and height. Use it when the relationship between those dimensions changes the composition.</p></header>
+      <div class="demo"><h2>Rotate the available area</h2><div class="demo-controls"><button class="demo-btn active" type="button" data-orientation="portrait">Portrait</button><button class="demo-btn" type="button" data-orientation="landscape">Landscape</button></div><div class="orientation-stage" id="orientationStage"><div class="orientation-grid"><div class="orientation-pane">Lesson video</div><div class="orientation-pane">Lesson outline</div></div></div><p class="demo-readout" id="orientationReadout">Portrait: video and outline stack vertically.</p></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>OrientationBuilder(
+  builder: (context, orientation) {
+    final landscape = orientation == Orientation.landscape;
+
+    return Flex(
+      direction: landscape ? Axis.horizontal : Axis.vertical,
+      children: const [
+        Expanded(child: LessonVideo()),
+        Expanded(child: LessonOutline()),
+      ],
+    );
+  },
+)</code></pre></div>
+      <div class="callout"><span class="label">DO NOT ASSUME</span><p>Landscape does not automatically mean “large,” and portrait does not mean “phone.” A narrow split-screen region may still need the compact composition.</p></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. The available width is often the direct condition behind the layout decision."><h3>Your navigation switches because horizontal space is limited. Which condition is usually more direct?</h3><div class="quiz-options"><button class="quiz-option">Available width</button><button class="quiz-option">Portrait versus landscape only</button><button class="quiz-option">Device brand</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Adaptive navigation">
+      <header class="step-header"><span class="step-kicker">STEP 7 · CHANGE THE COMPOSITION</span><h1>Adapt Navigation to Available Width</h1><p class="lede">Compact layouts commonly use bottom navigation. Wider layouts can keep destinations visible in a navigation rail without taking space from the bottom.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Widget build(BuildContext context) {
+  final wide = MediaQuery.sizeOf(context).width >= 600;
+
+  return Scaffold(
+    bottomNavigationBar: wide
+        ? null
+        : NavigationBar(
+            selectedIndex: selectedIndex,
+            onDestinationSelected: onDestinationSelected,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.school_outlined),
+                label: 'Learn',
+              ),
+            ],
+          ),
+    body: Row(
+      children: [
+        if (wide)
+          NavigationRail(
+            selectedIndex: selectedIndex,
+            onDestinationSelected: onDestinationSelected,
+            destinations: const [
+              NavigationRailDestination(
+                icon: Icon(Icons.home_outlined),
+                label: Text('Home'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.school_outlined),
+                label: Text('Learn'),
+              ),
+            ],
+          ),
+        Expanded(child: pages[selectedIndex]),
+      ],
+    ),
+  );
+}</code></pre></div>
+      <div class="panel teal"><strong>Share the model:</strong> Both navigation presentations should read and update the same selected index and the same destination definitions. Width changes should not reset the current destination.</div>
+      <table class="comparison"><thead><tr><th>Width</th><th>Navigation</th><th>Content</th></tr></thead><tbody><tr><td>Compact</td><td><code>NavigationBar</code></td><td>One primary pane.</td></tr><tr><td>Medium</td><td><code>NavigationRail</code></td><td>One pane with more breathing room.</td></tr><tr><td>Expanded</td><td>Extended rail or persistent sidebar.</td><td>Master-detail or multiple useful panes.</td></tr></tbody></table>
+      <div class="quiz" data-answer="2" data-correct="Correct. Keep selection outside the presentation so resizing does not change the user's place."><h3>Where should the selected destination state live?</h3><div class="quiz-options"><button class="quiz-option">Separately inside each navigation widget</button><button class="quiz-option">In a global variable that resets on rebuild</button><button class="quiz-option">In shared state used by both navigation presentations</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Responsive collections">
+      <header class="step-header"><span class="step-kicker">STEP 8 · SCALE COLLECTIONS</span><h1>Build Grids That Choose Their Column Count</h1><p class="lede">For collections, define the useful tile width and spacing. Let the grid determine how many columns fit instead of maintaining many manual column counts.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>GridView.builder(
+  padding: const EdgeInsets.all(24),
+  itemCount: courses.length,
+  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+    maxCrossAxisExtent: 320,
+    crossAxisSpacing: 16,
+    mainAxisSpacing: 16,
+    childAspectRatio: 1.35,
+  ),
+  itemBuilder: (context, index) {
+    return CourseCard(course: courses[index]);
+  },
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Delegate</th><th>Use when</th></tr></thead><tbody><tr><td><code>SliverGridDelegateWithFixedCrossAxisCount</code></td><td>The design requires an exact number of columns at the current window class.</td></tr><tr><td><code>SliverGridDelegateWithMaxCrossAxisExtent</code></td><td>Tiles should stay below a useful maximum width and the column count may adapt naturally.</td></tr></tbody></table>
+      <h2>Keep parent and scroll constraints clear</h2>
+      <ul><li>A grid already scrolls; avoid nesting it casually inside another same-axis scroll view.</li><li>Inside a <code>Column</code>, wrap the primary grid with <code>Expanded</code>.</li><li>For a header and grid moving together, use one scroll owner such as slivers.</li><li>Test zero items, one item, long titles, and many items at every width class.</li></ul>
+      <div class="quiz" data-answer="1" data-correct="Correct. A maximum cross-axis extent lets the grid fit as many appropriately sized tiles as the width permits."><h3>You want roughly 280-pixel cards and an automatic column count. Which delegate fits?</h3><div class="quiz-options"><button class="quiz-option"><code>SliverGridDelegateWithFixedCrossAxisCount</code></button><button class="quiz-option"><code>SliverGridDelegateWithMaxCrossAxisExtent</code></button><button class="quiz-option"><code>ScrollController</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Resilient UI">
+      <header class="step-header"><span class="step-kicker">STEP 9 · MORE THAN WIDTH</span><h1>Make Responsive UI Resilient</h1><p class="lede">A layout is not robust until it handles large text, safe areas, keyboards, different input methods, and content that does not match your sample data.</p></header>
+      <table class="comparison"><thead><tr><th>Test</th><th>What can fail</th><th>Useful response</th></tr></thead><tbody><tr><td>Large text scaling</td><td>Labels clip or fixed-height cards overflow.</td><td>Allow wrapping, avoid unnecessary fixed heights, and test accessibility sizes.</td></tr><tr><td>On-screen keyboard</td><td>Fields and submit actions become hidden.</td><td>Use scrolling and account for <code>viewInsetsOf</code> when needed.</td></tr><tr><td>Notches and system UI</td><td>Content becomes obscured near an edge.</td><td>Use <code>SafeArea</code> or appropriate system padding.</td></tr><tr><td>Mouse and keyboard</td><td>Hover, focus, and shortcuts are missing.</td><td>Keep visible focus, useful tooltips, and reachable actions.</td></tr><tr><td>Long or translated text</td><td>Rows overflow and buttons become unreadable.</td><td>Use flexible children and allow labels to wrap.</td></tr><tr><td>Very wide window</td><td>Reading lines stretch and hierarchy disappears.</td><td>Cap content width or introduce another useful pane.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>SafeArea(
+  child: LayoutBuilder(
+    builder: (context, constraints) {
+      return SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 24,
+          top: 24,
+          right: 24,
+          bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: const CourseForm(),
+        ),
+      );
+    },
+  ),
+)</code></pre></div>
+      <div class="challenge"><h3>Responsive testing matrix</h3><ol><li>Resize continuously from 320 to 1440 logical pixels.</li><li>Test portrait and landscape without locking orientation.</li><li>Increase the system text size.</li><li>Open the keyboard on the last form field.</li><li>Use long names and translated labels.</li><li>Navigate with keyboard focus on desktop or web.</li></ol></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. Fixed heights often fail when accessible text needs more vertical room."><h3>Text scaling makes a fixed-height card overflow. What should you reconsider first?</h3><div class="quiz-options"><button class="quiz-option">The unnecessary fixed height</button><button class="quiz-option">The user's accessibility preference</button><button class="quiz-option">Whether to hide the text</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Build the dashboard">
+      <header class="step-header"><span class="step-kicker">STEP 10 · GUIDED BUILD</span><h1>Build a Responsive Course Dashboard</h1><p class="lede">Combine window classes, adaptive navigation, a capped content region, and an automatically resizing course grid.</p></header>
+      <div class="syntax">Scaffold<br>├── compact: NavigationBar<br>└── Row<br>&nbsp;&nbsp;&nbsp;&nbsp;├── medium/expanded: NavigationRail<br>&nbsp;&nbsp;&nbsp;&nbsp;└── Expanded<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Center → ConstrainedBox<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── GridView.builder</div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>class ResponsiveCourseDashboard extends StatelessWidget {
+  const ResponsiveCourseDashboard({
+    super.key,
+    required this.courses,
+    required this.selectedIndex,
+    required this.onDestinationSelected,
+  });
+
+  final List&lt;Course&gt; courses;
+  final int selectedIndex;
+  final ValueChanged&lt;int&gt; onDestinationSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final windowClass = windowClassFor(constraints.maxWidth);
+        final compact = windowClass == WindowClass.compact;
+
+        return Scaffold(
+          bottomNavigationBar: compact
+              ? NavigationBar(
+                  selectedIndex: selectedIndex,
+                  onDestinationSelected: onDestinationSelected,
+                  destinations: const [
+                    NavigationDestination(
+                      icon: Icon(Icons.home_outlined),
+                      label: 'Home',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.school_outlined),
+                      label: 'Courses',
+                    ),
+                  ],
+                )
+              : null,
+          body: SafeArea(
+            child: Row(
+              children: [
+                if (!compact)
+                  NavigationRail(
+                    selectedIndex: selectedIndex,
+                    extended: windowClass == WindowClass.expanded,
+                    onDestinationSelected: onDestinationSelected,
+                    destinations: const [
+                      NavigationRailDestination(
+                        icon: Icon(Icons.home_outlined),
+                        label: Text('Home'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.school_outlined),
+                        label: Text('Courses'),
+                      ),
+                    ],
+                  ),
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      child: GridView.builder(
+                        padding: const EdgeInsets.all(24),
+                        itemCount: courses.length,
+                        gridDelegate: const
+                            SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 320,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 1.3,
+                        ),
+                        itemBuilder: (context, index) {
+                          return CourseCard(course: courses[index]);
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}</code></pre></div>
+      <div class="panel teal"><strong>Read the decisions:</strong> <code>LayoutBuilder</code> classifies the available width. Compact uses bottom navigation. Wider layouts show a rail. The grid chooses its own column count, while <code>ConstrainedBox</code> stops the dashboard from becoming excessively wide.</div>
+      <div class="challenge"><h3>Improve the dashboard</h3><ol><li>Add an empty state that remains centered at every width.</li><li>Show a details pane only in the expanded window class.</li><li>Keep the selected course when resizing.</li><li>Test course titles at large text scale.</li><li>Replace the example thresholds with values discovered from your real content.</li></ol></div>
+    </section>
+
+    <section class="step-view" data-title="Final challenge">
+      <header class="step-header"><span class="step-kicker">STEP 11 · APPLY THE IDEAS</span><h1>Make One Existing Screen Responsive</h1><p class="lede">Choose a screen you already built. Improve its composition without creating separate “phone” and “tablet” applications.</p></header>
+      <div class="challenge"><h3>Requirements</h3><ol><li>Use <code>MediaQuery.sizeOf</code> or <code>LayoutBuilder</code> for a clear reason.</li><li>Define compact, medium, and expanded behavior from content needs.</li><li>Use flexible layout widgets before adding extra branches.</li><li>Adapt at least one major component, such as navigation or a list-detail view.</li><li>Cap the width of reading or form content on large windows.</li><li>Handle large text, long labels, keyboard insets, and safe areas.</li><li>Resize continuously rather than checking only three fixed screenshots.</li></ol></div>
+      <h2>Completion checklist</h2>
+      <ul class="checklist"><li>I distinguish app-window size from physical device labels.</li><li>I know when to use MediaQuery and LayoutBuilder.</li><li>I can define and explain content-based breakpoints.</li><li>I use flexible sizing, wrapping, and maximum widths.</li><li>I can adapt navigation without losing selection state.</li><li>I can build a width-aware grid.</li><li>I do not confuse orientation with device size.</li><li>I test large text, keyboard insets, long content, and wide windows.</li></ul>
+      <div class="panel references"><h3>Continue learning</h3><p>Use the official Flutter references for the <a href="https://docs.flutter.dev/ui/adaptive-responsive/general">adaptive layout approach</a>, <a href="https://api.flutter.dev/flutter/widgets/MediaQuery-class.html">MediaQuery</a>, <a href="https://api.flutter.dev/flutter/widgets/LayoutBuilder-class.html">LayoutBuilder</a>, and <a href="https://api.flutter.dev/flutter/widgets/OrientationBuilder-class.html">OrientationBuilder</a>.</p></div>
+      <div class="finish" id="finishBox"><h2>Responsive Design complete! 🎉</h2><p>You can now measure available space, choose meaningful breakpoints, reflow content, adapt navigation and collections, and test layouts beyond a few familiar phone sizes.</p></div>
+      <p class="footer-note">Responsive Design Codelab · Flutter UI · Beginner-to-Intermediate Foundation</p>
+    </section>
+
+  </div></main>
+</div>
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+  function render(updateHash=true){current=Math.max(0,Math.min(current,steps.length-1));steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});const percent=Math.round(((current+1)/steps.length)*100);document.getElementById('progressBar').style.width=`${percent}%`;document.getElementById('progressText').textContent=`${percent}%`;document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));document.getElementById('mobileTitle').textContent=titles[current];document.getElementById('prevBtn').disabled=current===0;document.getElementById('nextBtn').disabled=current===steps.length-1;document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';document.title=`${titles[current]} — Responsive Design Codelab`;if(updateHash)history.pushState({step:current},'',`#step-${current+1}`);window.scrollTo({top:0,behavior:'auto'});sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false')}
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render()}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+  document.addEventListener('click',async event=>{const copy=event.target.closest('.copy-btn');if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1500);return}const option=event.target.closest('.quiz-option');if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show')}});
+  const deviceMessages={compact:'Compact: bottom navigation and one content column.',medium:'Medium: bottom navigation with a two-column content area.',expanded:'Expanded: persistent side navigation and three content columns.'};
+  document.querySelectorAll('[data-device]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-device]').forEach(item=>item.classList.toggle('active',item===button));const mode=button.dataset.device;const shell=document.getElementById('deviceShell');shell.classList.toggle('medium',mode==='medium');shell.classList.toggle('expanded',mode==='expanded');document.getElementById('deviceReadout').textContent=deviceMessages[mode]}));
+  document.querySelectorAll('[data-local]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-local]').forEach(item=>item.classList.toggle('active',item===button));const wide=button.dataset.local==='wide';document.getElementById('localBox').classList.toggle('wide',wide);document.getElementById('localReadout').textContent=wide?'620 px parent: the component places its sections side by side.':'280 px parent: the component stacks its sections.'}));
+  document.querySelectorAll('[data-orientation]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-orientation]').forEach(item=>item.classList.toggle('active',item===button));const landscape=button.dataset.orientation==='landscape';document.getElementById('orientationStage').classList.toggle('landscape',landscape);document.getElementById('orientationReadout').textContent=landscape?'Landscape: video and outline share a horizontal row.':'Portrait: video and outline stack vertically.'}));
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});current=getHashStep();render(false);
+})();
+</script>
+</body>
+</html>
