@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sizing and Spacing — Flutter Codelab</title>
+  <meta name="description" content="Learn Flutter sizing, spacing, alignment, constraints, aspect ratios, fitting, clipping, and safe areas through practical examples.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal,.demo{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.callout p:last-child{margin-bottom:0}.grid-2,.grid-3{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.syntax{padding:14px;overflow:auto;background:#edf2ff;border:var(--border);font-family:"DM Mono",monospace}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .demo{padding:20px;margin:20px 0}.demo-controls{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px}.demo-btn{padding:8px 12px;background:#fff;border:2px solid var(--ink);font-weight:800}.demo-btn.active{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}.constraint-stage{height:250px;display:grid;place-items:center;padding:24px;background:repeating-linear-gradient(45deg,#eef2ff,#eef2ff 12px,#e1e8ff 12px,#e1e8ff 24px);border:2px solid var(--ink)}.constraint-parent{width:100%;height:100%;display:grid;place-items:center;padding:14px;background:#fff;border:3px dashed var(--blue)}.constraint-child{display:grid;place-items:center;width:100px;height:70px;padding:8px;background:var(--mint);border:3px solid var(--ink);font-weight:800;text-align:center;transition:all .2s ease}.constraint-child.tight{width:100%;height:100%}.constraint-child.maximum{width:min(100%,280px);height:130px}.demo-readout{margin:14px 0 0;padding:10px 12px;background:#fff;border:2px solid var(--ink);font-family:"DM Mono",monospace;font-size:.82rem}
+    .spacing-visual{display:grid;place-items:center;min-height:230px;padding:28px;background:var(--pink);border:3px solid var(--ink)}.spacing-margin{padding:30px;background:var(--yellow);border:3px dashed var(--ink)}.spacing-padding{padding:26px;background:var(--blue-light);border:3px solid var(--ink)}.spacing-child{padding:13px;color:#fff;background:var(--blue);border:3px solid var(--ink);font-weight:800}.space-label{display:block;margin-bottom:6px;font-family:"DM Mono",monospace;font-size:.7rem;font-weight:700;text-transform:uppercase}
+    .alignment-stage{height:260px;display:grid;padding:18px;background:#eaf0ff;border:3px solid var(--ink)}.alignment-box{width:88px;height:64px;display:grid;place-items:center;justify-self:center;align-self:center;background:var(--orange);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);font-weight:900;transition:all .2s ease}
+    .fit-stage{height:260px;display:grid;place-items:center;background:#151515;border:3px solid var(--ink)}.fit-frame{width:320px;max-width:90%;height:190px;background:#fff;border:3px solid var(--yellow);overflow:hidden}.fit-image{width:100%;height:100%;object-fit:contain;display:block}.fit-note{margin-top:12px;font-weight:700}.tree{margin:20px 0;padding:16px;background:#fff;border:var(--border);font-family:"DM Mono",monospace;line-height:1.8;overflow:auto}.checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.references a{color:var(--blue-dark);font-weight:700}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.footer-note{margin-top:30px;color:#555;font-size:.8rem}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2,.grid-3{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz,.demo{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}.constraint-stage,.alignment-stage{height:220px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}.step-view.active{animation:none}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter Layout Codelab</div><h2>Sizing &amp; Spacing</h2><p>Control every box with confidence.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">Sizing &amp; Spacing</div></div>
+  <main><div class="content" id="content">
+
+    <section class="step-view" data-title="Project goal">
+      <header class="step-header"><span class="step-kicker">STEP 1 · START HERE</span><h1>Control the Space Around Every Widget</h1><p class="lede">Flutter screens are made from boxes. In this codelab, you will learn how those boxes receive a size, create space, position a child, preserve proportions, and stay inside safe screen areas.</p><div class="objective"><strong>By the end:</strong> You will build a Course Spotlight Card that stays readable on narrow and wide screens without using unnecessary containers.</div></header>
+      <div class="grid-2"><div class="concept"><strong>Size</strong><p>Choose a requested, minimum, maximum, or fractional size.</p></div><div class="concept"><strong>Space</strong><p>Add gaps outside a box or breathing room around its child.</p></div><div class="concept"><strong>Position</strong><p>Place one child at the center, an edge, or a corner.</p></div><div class="concept"><strong>Fit</strong><p>Preserve proportions and scale content without accidental overflow.</p></div></div>
+      <h2>The screen you will build</h2>
+      <div class="panel blue"><div style="max-width:520px;margin:auto;aspect-ratio:16/9;display:grid;align-items:end;padding:28px;color:white;background:#2856d8;border:3px solid #101010;border-radius:18px;box-shadow:6px 6px 0 #101010"><strong style="font-size:clamp(1.5rem,5vw,2.7rem);line-height:1">Flutter UI<br>Sizing &amp; Spacing</strong></div></div>
+      <div class="callout"><span class="label">PREREQUISITE</span><p>You should already recognize <code>MaterialApp</code>, <code>Scaffold</code>, <code>Text</code>, <code>Icon</code>, <code>Container</code>, and the parent-child structure of a widget tree.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. This lesson focuses on how one parent sizes and positions one child."><h3>What is the main focus of this codelab?</h3><div class="quiz-options"><button class="quiz-option">Loading data from an API</button><button class="quiz-option">Sizing, spacing, and positioning one child</button><button class="quiz-option">Managing application state</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Understand constraints">
+      <header class="step-header"><span class="step-kicker">STEP 2 · THE LAYOUT RULE</span><h1>Constraints Go Down. Sizes Go Up.</h1><p class="lede">A child cannot simply choose any size. Its parent first gives it an allowed size range, the child chooses a permitted size, and the parent decides where that child is placed.</p></header>
+      <div class="panel yellow"><h2>The rule to remember</h2><ol><li><strong>Constraints go down:</strong> the parent sends minimum and maximum dimensions.</li><li><strong>Sizes go up:</strong> the child reports a size inside that range.</li><li><strong>The parent sets the position:</strong> the parent places the child in its own space.</li></ol></div>
+      <div class="demo" id="constraintDemo"><h2>Try three parent constraints</h2><div class="demo-controls"><button class="demo-btn active" data-constraint="loose">Loose</button><button class="demo-btn" data-constraint="tight">Tight</button><button class="demo-btn" data-constraint="maximum">Maximum</button></div><div class="constraint-stage"><div class="constraint-parent"><div class="constraint-child" id="constraintChild">Child<br>100 × 70</div></div></div><p class="demo-readout" id="constraintReadout">The parent permits a range of sizes. The child can use its requested 100 × 70 size.</p></div>
+      <table class="comparison"><thead><tr><th>Constraint</th><th>Meaning</th><th>Typical result</th></tr></thead><tbody><tr><td>Tight</td><td>The minimum and maximum are equal.</td><td>The child must use that exact size.</td></tr><tr><td>Loose</td><td>The minimum is usually zero and a maximum is supplied.</td><td>The child may choose a smaller permitted size.</td></tr><tr><td>Bounded</td><td>A finite maximum exists.</td><td>Fractional and maximum sizes have a clear limit.</td></tr><tr><td>Unbounded</td><td>An axis has no finite maximum.</td><td>Some sizing widgets cannot calculate a useful result.</td></tr></tbody></table>
+      <h2>Why width can appear to be ignored</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Scaffold(
+  body: Container(
+    width: 100,
+    height: 100,
+    color: Colors.blue,
+  ),
+)</code></pre></div>
+      <p>The scaffold body can pass tight screen-sized constraints. The container must obey its parent even though it requests 100 × 100. Placing it inside <code>Center</code> gives it looser constraints, allowing the requested size.</p>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Scaffold(
+  body: Center(
+    child: Container(
+      width: 100,
+      height: 100,
+      color: Colors.blue,
+    ),
+  ),
+)</code></pre></div>
+      <div class="quiz" data-answer="2" data-correct="Exactly. A widget chooses its size only within the constraints received from its parent."><h3>Why might a requested width of 100 not produce a 100-pixel-wide widget?</h3><div class="quiz-options"><button class="quiz-option">Flutter rounds every width</button><button class="quiz-option">Width works only for images</button><button class="quiz-option">The parent may require a different size</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Choose the right box">
+      <header class="step-header"><span class="step-kicker">STEP 3 · BOX HELPERS</span><h1>Use Container When You Need Several Jobs</h1><p class="lede"><code>Container</code> is convenient because it can combine sizing, spacing, alignment, decoration, and a child. When you need only one job, a smaller widget usually communicates your intent more clearly.</p></header>
+      <table class="comparison"><thead><tr><th>Need</th><th>Prefer</th><th>Why</th></tr></thead><tbody><tr><td>A background color only</td><td><code>ColoredBox</code></td><td>Its purpose is immediately clear.</td></tr><tr><td>A border, gradient, radius, or shadow</td><td><code>DecoratedBox</code></td><td>It focuses on painting a decoration.</td></tr><tr><td>A fixed size or empty gap</td><td><code>SizedBox</code></td><td>It expresses size without extra behavior.</td></tr><tr><td>Padding only</td><td><code>Padding</code></td><td>It makes the spacing visible in the widget tree.</td></tr><tr><td>Several box features together</td><td><code>Container</code></td><td>Combining the features is convenient.</td></tr></tbody></table>
+      <h2>Container</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Container(
+  width: 280,
+  height: 140,
+  padding: const EdgeInsets.all(20),
+  alignment: Alignment.bottomLeft,
+  decoration: BoxDecoration(
+    color: Colors.blue.shade100,
+    borderRadius: BorderRadius.circular(16),
+  ),
+  child: const Text('Flutter Course'),
+)</code></pre></div>
+      <div class="callout"><span class="label">COMMON ERROR</span><p>Do not set both <code>color</code> and <code>decoration</code> on the same container. Put the color inside <code>BoxDecoration</code> when a decoration is present.</p></div>
+      <h2>Specialized alternatives</h2>
+      <div class="grid-2"><div><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const SizedBox(
+  width: 240,
+  height: 100,
+  child: ColoredBox(
+    color: Colors.amber,
+    child: Center(child: Text('Color only')),
+  ),
+)</code></pre></div></div><div><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>DecoratedBox(
+  decoration: BoxDecoration(
+    border: Border.all(width: 2),
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: const Padding(
+    padding: EdgeInsets.all(16),
+    child: Text('Decoration only'),
+  ),
+)</code></pre></div></div></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. SizedBox is the clearest widget for an intentional empty gap."><h3>You only need 16 pixels of empty vertical space. Which widget is clearest?</h3><div class="quiz-options"><button class="quiz-option"><code>SizedBox(height: 16)</code></button><button class="quiz-option"><code>Container(height: 16)</code></button><button class="quiz-option"><code>DecoratedBox(...)</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Create spacing">
+      <header class="step-header"><span class="step-kicker">STEP 4 · BREATHING ROOM</span><h1>Padding Is Inside. Margin Is Outside.</h1><p class="lede">Spacing communicates grouping and hierarchy. Flutter represents spacing with explicit boxes, so it helps to know exactly which boundary receives the empty space.</p></header>
+      <div class="spacing-visual"><div><span class="space-label">Pink: surrounding area</span><div class="spacing-margin"><span class="space-label">Yellow: margin outside</span><div class="spacing-padding"><span class="space-label">Blue: padding inside</span><div class="spacing-child">Child</div></div></div></div></div>
+      <table class="comparison"><thead><tr><th>Constructor</th><th>Use</th><th>Example</th></tr></thead><tbody><tr><td><code>EdgeInsets.all</code></td><td>Same value on every side</td><td><code>EdgeInsets.all(16)</code></td></tr><tr><td><code>EdgeInsets.symmetric</code></td><td>Horizontal and vertical values</td><td><code>EdgeInsets.symmetric(horizontal: 24, vertical: 12)</code></td></tr><tr><td><code>EdgeInsets.only</code></td><td>Selected sides</td><td><code>EdgeInsets.only(top: 8, left: 16)</code></td></tr><tr><td><code>EdgeInsets.fromLTRB</code></td><td>Different value for every side</td><td><code>EdgeInsets.fromLTRB(16, 8, 24, 12)</code></td></tr><tr><td><code>EdgeInsetsDirectional</code></td><td>Start and end based on reading direction</td><td><code>EdgeInsetsDirectional.only(start: 16)</code></td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Container(
+  margin: const EdgeInsets.all(24),       // Outside
+  color: Colors.blue.shade100,
+  child: const Padding(
+    padding: EdgeInsets.all(16),          // Inside
+    child: Text('Course description'),
+  ),
+)</code></pre></div>
+      <h2>SizedBox: size or gap</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Column(
+  children: [
+    const Text('Course title'),
+    const SizedBox(height: 12), // Intentional gap
+    SizedBox(
+      width: 220,
+      height: 48,
+      child: ElevatedButton(
+        onPressed: () {},
+        child: const Text('Start course'),
+      ),
+    ),
+  ],
+)</code></pre></div>
+      <p>The example uses <code>Column</code> only to make the gaps visible. The next codelab explains multi-child layout widgets in detail.</p>
+      <div class="challenge"><h3>Quick practice</h3><ol><li>Create a label with 12 pixels of vertical and 20 pixels of horizontal padding.</li><li>Add 24 pixels of space outside it.</li><li>Place a 16-pixel gap below it using <code>SizedBox</code>.</li><li>Replace left/right spacing with start/end spacing.</li></ol></div>
+    </section>
+
+    <section class="step-view" data-title="Center and align">
+      <header class="step-header"><span class="step-kicker">STEP 5 · POSITION ONE CHILD</span><h1>Center for the Middle. Align for Anywhere.</h1><p class="lede"><code>Center</code> is a specialized form of alignment. Use <code>Align</code> when the child belongs at an edge, a corner, or another intentional point.</p></header>
+      <div class="demo"><h2>Move the child</h2><div class="demo-controls" id="alignmentControls"><button class="demo-btn" data-align="topLeft">Top left</button><button class="demo-btn" data-align="topRight">Top right</button><button class="demo-btn active" data-align="center">Center</button><button class="demo-btn" data-align="bottomLeft">Bottom left</button><button class="demo-btn" data-align="bottomRight">Bottom right</button></div><div class="alignment-stage"><div class="alignment-box" id="alignmentBox">Child</div></div><p class="demo-readout" id="alignmentReadout">Alignment.center</p></div>
+      <div class="grid-2"><div><h2>Center</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Center(
+  child: Text('Exactly in the middle'),
+)</code></pre></div></div><div><h2>Align</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Align(
+  alignment: Alignment.bottomRight,
+  child: Icon(Icons.settings),
+)</code></pre></div></div></div>
+      <table class="comparison"><thead><tr><th>Property</th><th>Meaning</th></tr></thead><tbody><tr><td><code>alignment</code></td><td>The point where the child is positioned.</td></tr><tr><td><code>widthFactor</code></td><td>Makes the widget's width a multiple of its child's width when constraints permit.</td></tr><tr><td><code>heightFactor</code></td><td>Makes the widget's height a multiple of its child's height when constraints permit.</td></tr></tbody></table>
+      <div class="callout"><span class="label">DIRECTION-AWARE UI</span><p>Use <code>AlignmentDirectional.topStart</code> when the logical start should change between left-to-right and right-to-left languages.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. Align clearly expresses an intentional corner position."><h3>A settings icon must appear in the bottom-right corner of available space. What is the clearest choice?</h3><div class="quiz-options"><button class="quiz-option"><code>Center</code></button><button class="quiz-option"><code>Align</code></button><button class="quiz-option"><code>Divider</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Control size limits">
+      <header class="step-header"><span class="step-kicker">STEP 6 · SIZE RULES</span><h1>Set Minimums, Maximums, and Fractions</h1><p class="lede"><code>ConstrainedBox</code> adds size rules to those supplied by its parent. <code>FractionallySizedBox</code> chooses a fraction of the available bounded space.</p></header>
+      <h2>Minimum and maximum sizes</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>ConstrainedBox(
+  constraints: const BoxConstraints(
+    minWidth: 120,
+    minHeight: 48,
+    maxWidth: 320,
+  ),
+  child: ElevatedButton(
+    onPressed: () {},
+    child: const Text('Continue'),
+  ),
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Constructor</th><th>Purpose</th></tr></thead><tbody><tr><td><code>BoxConstraints(...)</code></td><td>Specify minimum and maximum dimensions.</td></tr><tr><td><code>BoxConstraints.tight(Size(...))</code></td><td>Require one exact width and height.</td></tr><tr><td><code>BoxConstraints.tightFor(...)</code></td><td>Require an exact supplied width, height, or both.</td></tr><tr><td><code>BoxConstraints.expand()</code></td><td>Fill all permitted space.</td></tr></tbody></table>
+      <div class="callout"><span class="label">IMPORTANT</span><p><code>ConstrainedBox</code> adds constraints; it does not erase the constraints from its parent. A maximum width cannot shrink a child when the parent already requires a larger exact width.</p></div>
+      <h2>Use a fraction of available space</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>FractionallySizedBox(
+  widthFactor: 0.8,
+  child: Container(
+    height: 80,
+    color: Colors.blue,
+    alignment: Alignment.center,
+    child: const Text('80% of available width'),
+  ),
+)</code></pre></div>
+      <p>A width factor of <code>0.8</code> means 80% of the available bounded width. The widget needs a finite maximum to calculate a useful fraction.</p>
+      <div class="grid-3"><div class="concept"><strong>Fixed request</strong><p><code>SizedBox(width: 240)</code></p></div><div class="concept"><strong>Allowed range</strong><p><code>ConstrainedBox</code></p></div><div class="concept"><strong>Parent fraction</strong><p><code>FractionallySizedBox</code></p></div></div>
+      <div class="quiz" data-answer="2" data-correct="Correct. ConstrainedBox is designed to add minimum and maximum size rules."><h3>A card must never become wider than 420 pixels. Which widget best expresses that rule?</h3><div class="quiz-options"><button class="quiz-option"><code>ColoredBox</code></button><button class="quiz-option"><code>SafeArea</code></button><button class="quiz-option"><code>ConstrainedBox</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Preserve and fit">
+      <header class="step-header"><span class="step-kicker">STEP 7 · PROPORTIONS</span><h1>Preserve Shape and Scale Content</h1><p class="lede"><code>AspectRatio</code> asks for a proportional box. <code>FittedBox</code> scales and positions its child inside the space it receives.</p></header>
+      <div class="grid-2"><div><h2>AspectRatio</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>AspectRatio(
+  aspectRatio: 16 / 9,
+  child: ColoredBox(
+    color: Colors.blue,
+    child: Center(child: Text('16:9 banner')),
+  ),
+)</code></pre></div></div><div><h2>FittedBox</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const SizedBox(
+  width: 240,
+  height: 120,
+  child: FittedBox(
+    fit: BoxFit.contain,
+    child: FlutterLogo(size: 200),
+  ),
+)</code></pre></div></div></div>
+      <div class="demo"><h2>Compare BoxFit values</h2><div class="demo-controls" id="fitControls"><button class="demo-btn active" data-fit="contain">contain</button><button class="demo-btn" data-fit="cover">cover</button><button class="demo-btn" data-fit="fill">fill</button><button class="demo-btn" data-fit="scale-down">scaleDown</button></div><div class="fit-stage"><div class="fit-frame"><img class="fit-image" id="fitImage" alt="Abstract landscape used to demonstrate fitting" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='260' viewBox='0 0 480 260'%3E%3Crect width='480' height='260' fill='%2375e6c5'/%3E%3Ccircle cx='390' cy='62' r='34' fill='%23ffd83d' stroke='%23101010' stroke-width='6'/%3E%3Cpath d='M0 242L130 94l76 84 55-62 131 126z' fill='%232856d8' stroke='%23101010' stroke-width='7'/%3E%3Cpath d='M210 242L335 88l145 154z' fill='%23ff9bb7' stroke='%23101010' stroke-width='7'/%3E%3C/svg%3E"></div></div><p class="fit-note" id="fitNote"><code>contain</code> shows the whole child and may leave empty space.</p></div>
+      <table class="comparison"><thead><tr><th>Fit</th><th>Behavior</th></tr></thead><tbody><tr><td><code>contain</code></td><td>Show all content without cropping.</td></tr><tr><td><code>cover</code></td><td>Fill the box and crop what does not fit.</td></tr><tr><td><code>fill</code></td><td>Fill width and height, possibly distorting content.</td></tr><tr><td><code>fitWidth</code> / <code>fitHeight</code></td><td>Fit one axis and allow the other to crop or leave space.</td></tr><tr><td><code>scaleDown</code></td><td>Keep the original size unless it must shrink.</td></tr></tbody></table>
+      <div class="quiz" data-answer="0" data-correct="Correct. AspectRatio expresses the width-to-height proportion of the box."><h3>Which widget asks for a 16:9 box?</h3><div class="quiz-options"><button class="quiz-option"><code>AspectRatio</code></button><button class="quiz-option"><code>Divider</code></button><button class="quiz-option"><code>SafeArea</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Surface and clip">
+      <header class="step-header"><span class="step-kicker">STEP 8 · VISUAL BOUNDARIES</span><h1>Group, Clip, and Separate Content</h1><p class="lede">Some common widgets make boundaries visible. A <code>Card</code> groups related content, clipping keeps children inside a shape, and dividers separate nearby sections.</p></header>
+      <h2>Card: a Material surface</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Card(
+  child: Padding(
+    padding: EdgeInsets.all(16),
+    child: Text('Flutter layout lesson'),
+  ),
+)</code></pre></div>
+      <h2>Rounded paint is not rounded clipping</h2>
+      <p>A rounded decoration paints a rounded background, but a child such as an image can still draw outside that shape. Use clipping when the child must stay inside the boundary.</p>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>ClipRRect(
+  borderRadius: BorderRadius.circular(16),
+  child: Image.asset(
+    'assets/course_banner.jpg',
+    width: 320,
+    height: 180,
+    fit: BoxFit.cover,
+  ),
+)</code></pre></div>
+      <div class="callout"><span class="label">CARD SHORTCUT</span><p>A <code>Card</code> can clip its child with <code>clipBehavior: Clip.antiAlias</code>. Use that when the card itself owns the rounded boundary.</p></div>
+      <h2>Divider and VerticalDivider</h2>
+      <div class="grid-2"><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Divider(
+  height: 24,
+  thickness: 1,
+  indent: 16,
+  endIndent: 16,
+)</code></pre></div><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const SizedBox(
+  height: 48,
+  child: VerticalDivider(
+    width: 24,
+    thickness: 1,
+  ),
+)</code></pre></div></div>
+      <p>A vertical divider needs a bounded height. Later, you will normally place it between children in a horizontal layout.</p>
+      <div class="quiz" data-answer="2" data-correct="Correct. ClipRRect clips the child to a rounded rectangle."><h3>An image must not draw beyond rounded corners. What should you use?</h3><div class="quiz-options"><button class="quiz-option"><code>Padding</code></button><button class="quiz-option"><code>Center</code></button><button class="quiz-option"><code>ClipRRect</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Respect safe areas">
+      <header class="step-header"><span class="step-kicker">STEP 9 · SCREEN EDGES</span><h1>Keep Content Away from System UI</h1><p class="lede">Phones can have status bars, camera cutouts, rounded corners, and gesture areas. <code>SafeArea</code> adds enough padding to keep important content visible.</p></header>
+      <div class="grid-2"><div class="concept"><strong>Place it near the screen boundary</strong><p>Usually wrap the main screen content instead of wrapping every small child.</p></div><div class="concept"><strong>Select protected sides</strong><p>Disable a side only when the design intentionally handles that system area.</p></div></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Scaffold(
+  body: SafeArea(
+    minimum: const EdgeInsets.all(16),
+    child: Center(
+      child: Text('Safe screen content'),
+    ),
+  ),
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>left</code>, <code>top</code>, <code>right</code>, <code>bottom</code></td><td>Choose which sides receive system-safe padding.</td></tr><tr><td><code>minimum</code></td><td>Keep at least your chosen amount of padding even when system padding is smaller.</td></tr><tr><td><code>maintainBottomViewPadding</code></td><td>Preserve bottom view padding in specialized keyboard layouts.</td></tr></tbody></table>
+      <div class="callout"><span class="label">DO NOT OVERUSE IT</span><p>Nested safe areas do not normally keep adding the same system padding, but wrapping every component still obscures the screen's layout intent. Prefer one clear screen-level boundary.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. SafeArea protects content from operating-system intrusions such as status bars and notches."><h3>What problem does SafeArea solve?</h3><div class="quiz-options"><button class="quiz-option">It downloads safe images</button><button class="quiz-option">It avoids system intrusions around screen edges</button><button class="quiz-option">It makes every widget responsive</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Specialized tools">
+      <header class="step-header"><span class="step-kicker">STEP 10 · RECOGNIZE, DON'T MEMORIZE</span><h1>Specialized Constraint Tools</h1><p class="lede">You will occasionally encounter widgets that remove limits, permit overflow, or measure children intrinsically. Know their purpose, but reach for them only when ordinary constraints cannot express the design.</p></header>
+      <table class="comparison"><thead><tr><th>Widget</th><th>What it does</th><th>Caution</th></tr></thead><tbody><tr><td><code>LimitedBox</code></td><td>Adds a maximum size only when the incoming constraint is unbounded.</td><td>It may appear to do nothing in a bounded parent.</td></tr><tr><td><code>UnconstrainedBox</code></td><td>Lets its child avoid some incoming constraints.</td><td>The child can overflow the available space.</td></tr><tr><td><code>OverflowBox</code></td><td>Allows a child to be larger than its parent.</td><td>Overflow can cover or hide nearby content.</td></tr><tr><td><code>IntrinsicWidth</code></td><td>Sizes a child using its intrinsic width.</td><td>It can require an extra layout pass.</td></tr><tr><td><code>IntrinsicHeight</code></td><td>Sizes a child using its intrinsic height.</td><td>It can be expensive in deep trees or lists.</td></tr></tbody></table>
+      <div class="panel orange"><strong>Practical rule:</strong> First try <code>SizedBox</code>, <code>ConstrainedBox</code>, normal parent constraints, or a better widget-tree structure. Use intrinsic and unconstrained widgets only when you can explain why the simpler choices do not work.</div>
+      <h2>A deliberate UnconstrainedBox</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>UnconstrainedBox(
+  child: Container(
+    width: 200,
+    height: 80,
+    color: Colors.orange,
+    alignment: Alignment.center,
+    child: const Text('I choose my requested size'),
+  ),
+)</code></pre></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. Intrinsic sizing can perform additional measurement and should not be the default choice."><h3>Why should IntrinsicWidth and IntrinsicHeight be used carefully?</h3><div class="quiz-options"><button class="quiz-option">They can require additional layout work</button><button class="quiz-option">They work only on iOS</button><button class="quiz-option">They permanently resize the screen</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Final challenge">
+      <header class="step-header"><span class="step-kicker">STEP 11 · PUT IT TOGETHER</span><h1>Build a Course Spotlight Card</h1><p class="lede">Combine the everyday sizing and spacing widgets in one screen. Every wrapper should have one clear responsibility.</p></header>
+      <div class="tree">Scaffold<br>└── SafeArea: protect screen edges<br>&nbsp;&nbsp;&nbsp;&nbsp;└── Center: position the card<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── ConstrainedBox: maximum width<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── FractionallySizedBox: use available width<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── AspectRatio: preserve 16:9<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Card: Material surface<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Padding → Align → FittedBox → Text</div>
+      <h2>One complete solution</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const CourseApp());
+}
+
+class CourseApp extends StatelessWidget {
+  const CourseApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: const Color(0xFFF1F4FF),
+        body: SafeArea(
+          minimum: const EdgeInsets.all(16),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: FractionallySizedBox(
+                widthFactor: 1,
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: ColoredBox(
+                      color: const Color(0xFF2856D8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Align(
+                          alignment: Alignment.bottomLeft,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Flutter UI\nSizing & Spacing',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 34,
+                                fontWeight: FontWeight.bold,
+                                height: 1,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre></div>
+      <div class="challenge"><h3>Your version</h3><ol><li>Change the maximum card width to 480.</li><li>Use a 4:3 aspect ratio and observe the difference.</li><li>Change the alignment to the top-right.</li><li>Replace the text with a <code>FlutterLogo</code> and compare <code>contain</code>, <code>cover</code>, and <code>scaleDown</code>.</li><li>Remove one wrapper at a time and explain what changes.</li></ol></div>
+      <h2>Completion checklist</h2>
+      <ul class="checklist"><li>I can explain constraints going down and sizes going up.</li><li>I can distinguish padding, margin, and an empty gap.</li><li>I can choose between Container and a specialized box widget.</li><li>I can apply minimum, maximum, and fractional sizes.</li><li>I can preserve an aspect ratio and choose a BoxFit value.</li><li>I can clip content to a rounded boundary.</li><li>I can keep important content inside safe screen areas.</li><li>I can identify specialized sizing widgets without using them by default.</li></ul>
+      <div class="panel references"><h3>Continue learning</h3><p>Use the official Flutter references for <a href="https://docs.flutter.dev/ui/layout/constraints">understanding constraints</a>, the <a href="https://docs.flutter.dev/ui/widgets/layout">layout widget catalog</a>, <a href="https://api.flutter.dev/flutter/widgets/FittedBox-class.html">FittedBox</a>, and <a href="https://api.flutter.dev/flutter/widgets/SafeArea-class.html">SafeArea</a>.</p></div>
+      <div class="finish" id="finishBox"><h2>Codelab complete! 🎉</h2><p>You can now control the size, space, alignment, proportions, and safe boundaries of one child. Next, learn how <code>Row</code>, <code>Column</code>, flex widgets, <code>Wrap</code>, and <code>Stack</code> arrange several children.</p></div>
+    </section>
+
+  </div></main>
+</div>
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});
+    document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+    if(current===steps.length-1)document.getElementById('finishBox').classList.add('show');
+    document.title=`${titles[current]} — Sizing and Spacing Codelab`;
+    if(updateHash)history.pushState({step:current},'',`#step-${current+1}`);
+    window.scrollTo({top:0,behavior:'auto'});
+    sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');
+  }
+
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render()}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+  nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});
+  menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+
+  document.addEventListener('click',async event=>{
+    const copy=event.target.closest('.copy-btn');
+    if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1200);return}
+    const option=event.target.closest('.quiz-option');
+    if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show')}
+  });
+
+  const constraintText={loose:'The parent permits a range of sizes. The child can use its requested 100 × 70 size.',tight:'The parent requires one exact size. The child must fill the parent.',maximum:'The parent supplies a finite maximum. The child grows only until that limit.'};
+  document.querySelectorAll('[data-constraint]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-constraint]').forEach(item=>item.classList.toggle('active',item===button));const mode=button.dataset.constraint;const child=document.getElementById('constraintChild');child.className=`constraint-child ${mode==='loose'?'':mode}`;child.innerHTML=mode==='tight'?'Child<br>exact size':mode==='maximum'?'Child<br>up to max':'Child<br>100 × 70';document.getElementById('constraintReadout').textContent=constraintText[mode]}));
+
+  const alignments={topLeft:['start','start','Alignment.topLeft'],topRight:['end','start','Alignment.topRight'],center:['center','center','Alignment.center'],bottomLeft:['start','end','Alignment.bottomLeft'],bottomRight:['end','end','Alignment.bottomRight']};
+  document.querySelectorAll('[data-align]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-align]').forEach(item=>item.classList.toggle('active',item===button));const [horizontal,vertical,label]=alignments[button.dataset.align];const box=document.getElementById('alignmentBox');box.style.justifySelf=horizontal;box.style.alignSelf=vertical;document.getElementById('alignmentReadout').textContent=label}));
+
+  const fitNotes={contain:'contain shows the whole child and may leave empty space.',cover:'cover fills the frame and crops the overflowing edges.',fill:'fill stretches the child to both dimensions and may distort it.','scale-down':'scaleDown keeps the original size unless the child must shrink.'};
+  document.querySelectorAll('[data-fit]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-fit]').forEach(item=>item.classList.toggle('active',item===button));const fit=button.dataset.fit;document.getElementById('fitImage').style.objectFit=fit;document.getElementById('fitNote').innerHTML=`<code>${fit==='scale-down'?'scaleDown':fit}</code> ${fitNotes[fit].split(' ').slice(1).join(' ')}`}));
+
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});
+  window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+  document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});
+  current=getHashStep();render(false);
+})();
+</script>
+</body>
+</html>
