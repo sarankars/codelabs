@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arranging Widgets — Flutter Codelab</title>
+  <meta name="description" content="Learn to arrange Flutter widgets with Row, Column, Expanded, Flexible, Spacer, Wrap, Stack, Positioned, and other practical multi-child layouts.">
+  <meta name="theme-color" content="#6d3fc0">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--purple:#6d3fc0;--purple-dark:#43257e;--purple-light:#eee6ff;--ink:#101010;--paper:#f8f5fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--blue:#b9d8ff;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}.app{min-height:100vh}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--purple);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--purple);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--purple);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal,.demo{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.purple{background:var(--purple-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.panel.blue{background:var(--blue)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.callout p:last-child{margin-bottom:0}.grid-2,.grid-3{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#eee8f7;border:1px solid #aa9cba;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.syntax,.tree{padding:14px;overflow:auto;background:#f3edff;border:var(--border);font-family:"DM Mono",monospace}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--purple)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--purple-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--purple-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .demo{padding:20px;margin:20px 0}.demo-controls{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px}.demo-btn{padding:8px 12px;background:#fff;border:2px solid var(--ink);font-weight:800}.demo-btn.active{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}.demo-readout{margin:14px 0 0;padding:10px 12px;background:#fff;border:2px solid var(--ink);font-family:"DM Mono",monospace;font-size:.82rem}
+    .axis-stage,.alignment-stage{min-height:230px;display:flex;gap:12px;padding:20px;background:repeating-linear-gradient(45deg,#f3edff,#f3edff 12px,#e8ddff 12px,#e8ddff 24px);border:3px solid var(--ink)}.axis-stage.column{flex-direction:column}.layout-child{min-width:72px;min-height:58px;display:grid;place-items:center;padding:10px;background:var(--mint);border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-weight:900}.layout-child:nth-child(2){background:var(--orange)}.layout-child:nth-child(3){background:var(--pink)}.alignment-stage{align-items:center;justify-content:flex-start}.alignment-stage[data-main="center"]{justify-content:center}.alignment-stage[data-main="end"]{justify-content:flex-end}.alignment-stage[data-main="spaceBetween"]{justify-content:space-between}.alignment-stage[data-main="spaceEvenly"]{justify-content:space-evenly}
+    .axis-diagram{display:grid;grid-template-columns:1fr 1fr;gap:16px}.axis-card{padding:18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.axis-line{height:8px;margin:18px 0;background:var(--purple);border:2px solid var(--ink)}.axis-line.vertical{width:8px;height:110px;margin:18px auto}.flex-stage{display:flex;gap:8px;min-height:170px;padding:18px;background:#eee6ff;border:3px solid var(--ink)}.flex-child{display:grid;place-items:center;min-width:0;background:var(--mint);border:3px solid var(--ink);font-weight:900;transition:flex .2s ease}.flex-child:nth-child(2){background:var(--orange)}.flex-child:nth-child(3){background:var(--pink)}
+    .overflow-demo{display:flex;width:min(100%,460px);padding:12px;background:#fff;border:3px solid var(--ink);overflow:hidden}.overflow-avatar{flex:0 0 54px;height:54px;display:grid;place-items:center;background:var(--purple);color:#fff;border:3px solid var(--ink);border-radius:50%;font-weight:900}.overflow-copy{min-width:0;padding-left:12px}.overflow-copy strong,.overflow-copy span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.error-stripe{height:20px;margin-top:10px;background:repeating-linear-gradient(135deg,#111 0 9px,#ffd83d 9px 18px);border:2px solid var(--ink)}
+    .wrap-shell{display:grid;place-items:center;min-height:250px;background:#eee6ff;border:3px solid var(--ink)}.wrap-stage{width:520px;max-width:90%;display:flex;flex-wrap:wrap;gap:10px;padding:18px;background:#fff;border:3px solid var(--ink);transition:width .2s ease}.wrap-stage.narrow{width:280px}.chip{padding:8px 12px;background:var(--mint);border:2px solid var(--ink);border-radius:999px;font-weight:800}.chip:nth-child(even){background:var(--yellow)}
+    .stack-stage{position:relative;width:260px;height:210px;margin:auto;background:#eee6ff;border:3px solid var(--ink);overflow:visible}.stack-photo{position:absolute;inset:28px;display:grid;place-items:center;background:var(--purple);color:#fff;border:3px solid var(--ink);font-size:2.4rem;font-weight:900}.stack-badge{position:absolute;top:12px;right:12px;width:52px;height:52px;display:grid;place-items:center;background:var(--yellow);border:3px solid var(--ink);border-radius:50%;box-shadow:3px 3px 0 var(--ink);font-weight:900;transition:all .2s ease}.preview-card{max-width:640px;margin:20px auto;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.preview-head{display:flex;align-items:center;gap:14px}.preview-avatar{position:relative;width:64px;height:64px;display:grid;place-items:center;background:var(--purple);color:#fff;border:3px solid var(--ink);border-radius:50%;font-size:1.5rem;font-weight:900}.preview-dot{position:absolute;right:-3px;top:-3px;width:18px;height:18px;background:var(--mint);border:3px solid var(--ink);border-radius:50%}.preview-copy{flex:1}.preview-copy strong,.preview-copy span{display:block}.preview-tags{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}.preview-actions{display:flex;gap:10px}.preview-action{flex:1;padding:10px;text-align:center;background:var(--yellow);border:2px solid var(--ink);font-weight:900}.preview-action:last-child{color:#fff;background:var(--purple)}
+    .checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.references a{color:var(--purple-dark);font-weight:700}.nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--purple)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.footer-note{margin-top:30px;color:#555;font-size:.8rem}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2,.grid-3,.axis-diagram{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz,.demo{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}.axis-stage,.alignment-stage{min-height:210px}.layout-child{min-width:54px}.preview-actions{flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}.step-view.active{animation:none}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter Layout Codelab</div><h2>Arranging Widgets</h2><p>Compose clear multi-child layouts.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">Arranging Widgets</div></div>
+  <main><div class="content" id="content">
+
+    <section class="step-view" data-title="Project goal">
+      <header class="step-header"><span class="step-kicker">STEP 1 · START HERE</span><h1>Arrange Several Widgets with Purpose</h1><p class="lede">A real screen combines text, icons, images, buttons, and badges. This codelab teaches you how to place those children in lines, flexible regions, wrapping groups, and overlapping layers.</p><div class="objective"><strong>By the end:</strong> You will build a Course Overview Card with a profile header, flexible text, status badge, skill chips, and balanced actions.</div></header>
+      <div class="preview-card"><div class="preview-head"><div class="preview-avatar">FS<span class="preview-dot"></span></div><div class="preview-copy"><strong>Flutter UI Foundations</strong><span>Week 2 · 4 lessons</span></div><strong>72%</strong></div><div class="preview-tags"><span class="chip">Layouts</span><span class="chip">Flex</span><span class="chip">Wrap</span><span class="chip">Stack</span></div><div class="preview-actions"><div class="preview-action">Review</div><div class="preview-action">Continue</div></div></div>
+      <div class="grid-2"><div class="concept"><strong>Linear layout</strong><p>Use <code>Row</code> and <code>Column</code> to place children along one axis.</p></div><div class="concept"><strong>Flexible space</strong><p>Use <code>Expanded</code>, <code>Flexible</code>, and <code>Spacer</code> to distribute room.</p></div><div class="concept"><strong>Content flow</strong><p>Use <code>Wrap</code> when items should continue on another run.</p></div><div class="concept"><strong>Layers</strong><p>Use <code>Stack</code> and <code>Positioned</code> when widgets intentionally overlap.</p></div></div>
+      <div class="callout"><span class="label">PREREQUISITE</span><p>You should understand widget trees, parent constraints, padding, sizing, and alignment from the previous codelabs.</p></div>
+      <div class="quiz" data-answer="2" data-correct="Correct. This lesson is about arranging several children inside multi-child layout widgets."><h3>What changes in this codelab?</h3><div class="quiz-options"><button class="quiz-option">We begin loading server data</button><button class="quiz-option">We create application themes</button><button class="quiz-option">We arrange multiple child widgets</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Row and Column">
+      <header class="step-header"><span class="step-kicker">STEP 2 · TWO DIRECTIONS</span><h1>Row Goes Across. Column Goes Down.</h1><p class="lede"><code>Row</code> arranges children horizontally. <code>Column</code> arranges children vertically. Both accept a <code>children</code> list and use the same flex layout rules.</p></header>
+      <div class="demo"><h2>Switch the direction</h2><div class="demo-controls"><button class="demo-btn active" data-axis="row">Row</button><button class="demo-btn" data-axis="column">Column</button></div><div class="axis-stage" id="axisStage"><div class="layout-child">1</div><div class="layout-child">2</div><div class="layout-child">3</div></div><p class="demo-readout" id="axisReadout">Row places children from start to end on a horizontal main axis.</p></div>
+      <div class="grid-2"><div><h2>Row</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Row(
+  children: [
+    Icon(Icons.person),
+    SizedBox(width: 12),
+    Text('Maya'),
+  ],
+)</code></pre></div></div><div><h2>Column</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Column(
+  children: [
+    Icon(Icons.person),
+    SizedBox(height: 8),
+    Text('Maya'),
+  ],
+)</code></pre></div></div></div>
+      <table class="comparison"><thead><tr><th>Widget</th><th>Main axis</th><th>Cross axis</th></tr></thead><tbody><tr><td><code>Row</code></td><td>Horizontal</td><td>Vertical</td></tr><tr><td><code>Column</code></td><td>Vertical</td><td>Horizontal</td></tr></tbody></table>
+      <div class="callout"><span class="label">CHILD VS CHILDREN</span><p>A single-child widget such as <code>Padding</code> uses <code>child</code>. A multi-child widget such as <code>Row</code>, <code>Column</code>, <code>Wrap</code>, or <code>Stack</code> uses <code>children</code>.</p></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. Column's main axis is vertical, so main-axis properties control vertical placement."><h3>Which axis is the main axis of a Column?</h3><div class="quiz-options"><button class="quiz-option">Vertical</button><button class="quiz-option">Horizontal</button><button class="quiz-option">Diagonal</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Align the axes">
+      <header class="step-header"><span class="step-kicker">STEP 3 · PLACE AND DISTRIBUTE</span><h1>Align Along the Main and Cross Axes</h1><p class="lede"><code>mainAxisAlignment</code> distributes children along the layout direction. <code>crossAxisAlignment</code> moves them across that direction.</p></header>
+      <div class="axis-diagram"><div class="axis-card"><strong>Row</strong><div class="axis-line"></div><p>Main axis: horizontal<br>Cross axis: vertical</p></div><div class="axis-card"><strong>Column</strong><div class="axis-line vertical"></div><p>Main axis: vertical<br>Cross axis: horizontal</p></div></div>
+      <div class="demo"><h2>Change MainAxisAlignment</h2><div class="demo-controls"><button class="demo-btn active" data-main="start">start</button><button class="demo-btn" data-main="center">center</button><button class="demo-btn" data-main="end">end</button><button class="demo-btn" data-main="spaceBetween">spaceBetween</button><button class="demo-btn" data-main="spaceEvenly">spaceEvenly</button></div><div class="alignment-stage" id="alignmentStage" data-main="start"><div class="layout-child">A</div><div class="layout-child">B</div><div class="layout-child">C</div></div><p class="demo-readout" id="alignmentReadout">MainAxisAlignment.start</p></div>
+      <table class="comparison"><thead><tr><th>Property</th><th>Common values</th><th>Controls</th></tr></thead><tbody><tr><td><code>mainAxisAlignment</code></td><td><code>start</code>, <code>center</code>, <code>end</code>, <code>spaceBetween</code>, <code>spaceAround</code>, <code>spaceEvenly</code></td><td>Distribution along the main axis.</td></tr><tr><td><code>crossAxisAlignment</code></td><td><code>start</code>, <code>center</code>, <code>end</code>, <code>stretch</code>, <code>baseline</code></td><td>Position across the main axis.</td></tr><tr><td><code>mainAxisSize</code></td><td><code>max</code>, <code>min</code></td><td>Whether the layout fills or hugs its main axis.</td></tr></tbody></table>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  crossAxisAlignment: CrossAxisAlignment.center,
+  children: [
+    Icon(Icons.menu),
+    Text('Courses'),
+    Icon(Icons.search),
+  ],
+)</code></pre></div>
+      <div class="callout"><span class="label">TEXT BASELINE</span><p><code>CrossAxisAlignment.baseline</code> is useful for a row containing text of different sizes. It also requires a suitable <code>textBaseline</code>.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. spaceBetween places the first and last children at the edges and divides the remaining space between children."><h3>Which value places the outer children at opposite edges?</h3><div class="quiz-options"><button class="quiz-option"><code>center</code></button><button class="quiz-option"><code>spaceBetween</code></button><button class="quiz-option"><code>stretch</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Nest layouts">
+      <header class="step-header"><span class="step-kicker">STEP 4 · COMPOSITION</span><h1>Nest Rows and Columns to Build Real UI</h1><p class="lede">Most screens are not one enormous row or column. Build small visual groups, then place those groups inside other layouts.</p></header>
+      <div class="tree">Row: profile header<br>├── CircleAvatar<br>├── SizedBox: horizontal gap<br>└── Column: profile text<br>&nbsp;&nbsp;&nbsp;&nbsp;├── Text: name<br>&nbsp;&nbsp;&nbsp;&nbsp;└── Text: role</div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Row(
+  crossAxisAlignment: CrossAxisAlignment.center,
+  children: [
+    CircleAvatar(
+      radius: 28,
+      child: Text('MS'),
+    ),
+    SizedBox(width: 12),
+    Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Maya Singh',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 4),
+        Text('Flutter learner'),
+      ],
+    ),
+  ],
+)</code></pre></div>
+      <h2>Keep nesting understandable</h2>
+      <div class="grid-2"><div class="concept"><strong>Group by meaning</strong><p>Think “profile text column,” not “another random column.”</p></div><div class="concept"><strong>Name complex pieces</strong><p>Move meaningful sections into variables, helper methods, and later reusable widgets.</p></div><div class="concept"><strong>Use start and end</strong><p>Let inherited text direction decide which physical side is the start.</p></div><div class="concept"><strong>Choose higher-level widgets</strong><p>A <code>ListTile</code> may express a standard leading-title-trailing row more clearly.</p></div></div>
+      <div class="panel yellow"><strong>Reading strategy:</strong> Start with the outer layout, name each group, and then move inward. Do not try to understand every nested property at once.</div>
+      <div class="quiz" data-answer="2" data-correct="Correct. The outer Row places the avatar beside a Column that groups the two text widgets."><h3>How should an avatar, name, and role usually be grouped?</h3><div class="quiz-options"><button class="quiz-option">One Stack containing everything</button><button class="quiz-option">Three unrelated Containers</button><button class="quiz-option">A Row containing an avatar and a text Column</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Use flex space">
+      <header class="step-header"><span class="step-kicker">STEP 5 · SHARE AVAILABLE ROOM</span><h1>Expanded Fills. Flexible May Use Less.</h1><p class="lede">Flex children divide the unused main-axis space in a <code>Row</code>, <code>Column</code>, or <code>Flex</code>. The <code>flex</code> value controls each child's share.</p></header>
+      <div class="demo"><h2>Change the flex ratio</h2><div class="demo-controls"><button class="demo-btn active" data-flex="1,1,1">1 : 1 : 1</button><button class="demo-btn" data-flex="1,2,1">1 : 2 : 1</button><button class="demo-btn" data-flex="1,3,2">1 : 3 : 2</button></div><div class="flex-stage"><div class="flex-child" style="flex:1">1</div><div class="flex-child" style="flex:1">1</div><div class="flex-child" style="flex:1">1</div></div><p class="demo-readout" id="flexReadout">Equal flex values divide the available width equally.</p></div>
+      <table class="comparison"><thead><tr><th>Widget</th><th>Behavior</th><th>Typical use</th></tr></thead><tbody><tr><td><code>Expanded</code></td><td>Uses a tight fit and fills its allocated share.</td><td>Text or panels that must take remaining space.</td></tr><tr><td><code>Flexible</code></td><td>Uses a loose fit by default and may be smaller than its share.</td><td>Content that can shrink without being forced to fill.</td></tr><tr><td><code>Spacer</code></td><td>An empty flexible region.</td><td>Push children apart without a visible box.</td></tr></tbody></table>
+      <h2>Protect long text in a Row</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Row(
+  children: [
+    const CircleAvatar(child: Text('MS')),
+    const SizedBox(width: 12),
+    Expanded(
+      child: Text(
+        'A long course title that must fit the remaining width',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    ),
+    const Icon(Icons.chevron_right),
+  ],
+)</code></pre></div>
+      <h2>Use Spacer for intentional empty flex space</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Row(
+  children: [
+    Text('Draft'),
+    Spacer(),
+    Icon(Icons.cloud_done),
+    SizedBox(width: 8),
+    Text('Saved'),
+  ],
+)</code></pre></div>
+      <div class="callout"><span class="label">PARENT RULE</span><p><code>Expanded</code>, <code>Flexible</code>, and <code>Spacer</code> must be descendants of a flex layout such as <code>Row</code>, <code>Column</code>, or <code>Flex</code>.</p></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. Expanded takes its allocated share with a tight fit."><h3>Which widget forces its child to fill the allocated flex space?</h3><div class="quiz-options"><button class="quiz-option"><code>Expanded</code></button><button class="quiz-option"><code>Wrap</code></button><button class="quiz-option"><code>Positioned</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Prevent overflow">
+      <header class="step-header"><span class="step-kicker">STEP 6 · DEBUG FLEX LAYOUTS</span><h1>Fix Overflow by Fixing Constraints</h1><p class="lede">A yellow-and-black stripe means a render object could not fit its child. Do not hide the stripe; determine which child needs a useful width or which layout should flow differently.</p></header>
+      <div class="overflow-demo"><div class="overflow-avatar">MS</div><div class="overflow-copy"><strong>A very long Flutter course title that cannot use unlimited width</strong><span>Use Expanded and a deliberate text overflow policy.</span></div></div><div class="error-stripe" aria-label="Illustration of Flutter's overflow warning stripe"></div>
+      <h2>Common Row overflow</h2>
+      <div class="grid-2"><div class="panel pink"><strong>Problem</strong><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Row(
+  children: [
+    const Icon(Icons.school),
+    Text(veryLongTitle),
+    const Icon(Icons.chevron_right),
+  ],
+)</code></pre></div></div><div class="panel mint"><strong>Fix</strong><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Row(
+  children: [
+    const Icon(Icons.school),
+    const SizedBox(width: 8),
+    Expanded(
+      child: Text(
+        veryLongTitle,
+        overflow: TextOverflow.ellipsis,
+      ),
+    ),
+    const Icon(Icons.chevron_right),
+  ],
+)</code></pre></div></div></div>
+      <h2>Common unbounded flex error</h2>
+      <p>A flex child cannot calculate “the remaining space” on an unbounded main axis. This often happens when an <code>Expanded</code> is placed in a vertical <code>Column</code> that is itself inside a vertical scroll view.</p>
+      <div class="panel orange"><strong>Ask these questions:</strong><ol><li>Which axis is overflowing?</li><li>Does the parent provide a finite maximum on that axis?</li><li>Should a child shrink with <code>Expanded</code> or <code>Flexible</code>?</li><li>Should items flow with <code>Wrap</code>?</li><li>Is the content actually a list that belongs in the scrolling codelab?</li></ol></div>
+      <div class="callout"><span class="label">DO NOT USE shrinkWrap AS A REFLEX</span><p>Changing a scrollable's <code>shrinkWrap</code> setting can affect performance and does not repair an unrelated flex constraint. Identify the actual parent-child constraint first.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. Expanded gives the text a finite share of the Row and lets ellipsis handle the remaining content."><h3>Long text overflows between a leading and trailing icon. What is the usual first fix?</h3><div class="quiz-options"><button class="quiz-option">Wrap the entire screen in OverflowBox</button><button class="quiz-option">Wrap the text in Expanded and choose a text overflow policy</button><button class="quiz-option">Remove the trailing icon</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Wrap content">
+      <header class="step-header"><span class="step-kicker">STEP 7 · FLOW TO ANOTHER RUN</span><h1>Use Wrap When a Row Should Continue</h1><p class="lede"><code>Row</code> keeps every child on one horizontal line. <code>Wrap</code> starts a new run when the current run has no more room.</p></header>
+      <div class="demo"><h2>Resize the chip group</h2><div class="demo-controls"><button class="demo-btn active" data-wrap="wide">Wide</button><button class="demo-btn" data-wrap="narrow">Narrow</button></div><div class="wrap-shell"><div class="wrap-stage" id="wrapStage"><span class="chip">Flutter</span><span class="chip">Dart</span><span class="chip">Layouts</span><span class="chip">Widgets</span><span class="chip">Responsive UI</span></div></div><p class="demo-readout" id="wrapReadout">The wide container fits more chips on each run.</p></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Wrap(
+  spacing: 8,
+  runSpacing: 8,
+  children: const [
+    Chip(label: Text('Flutter')),
+    Chip(label: Text('Dart')),
+    Chip(label: Text('Layouts')),
+    Chip(label: Text('Widgets')),
+  ],
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>direction</code></td><td>Choose horizontal or vertical runs.</td></tr><tr><td><code>spacing</code></td><td>Space between children in one run.</td></tr><tr><td><code>runSpacing</code></td><td>Space between separate runs.</td></tr><tr><td><code>alignment</code></td><td>Place children inside each run.</td></tr><tr><td><code>runAlignment</code></td><td>Place the runs in the cross axis.</td></tr><tr><td><code>crossAxisAlignment</code></td><td>Align children within a run.</td></tr></tbody></table>
+      <div class="grid-2"><div class="concept"><strong>Use Row</strong><p>When every child must stay on one line and flexible sizing can resolve the available width.</p></div><div class="concept"><strong>Use Wrap</strong><p>When a new line or column is an acceptable and intentional part of the design.</p></div></div>
+      <div class="quiz" data-answer="2" data-correct="Correct. Wrap lets chips continue onto another run when the current one is full."><h3>A changing list of skill chips must continue onto another line. What should you use?</h3><div class="quiz-options"><button class="quiz-option"><code>Expanded</code></button><button class="quiz-option"><code>IndexedStack</code></button><button class="quiz-option"><code>Wrap</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Layer with Stack">
+      <header class="step-header"><span class="step-kicker">STEP 8 · INTENTIONAL OVERLAP</span><h1>Stack Layers. Positioned Pins.</h1><p class="lede"><code>Stack</code> paints children on top of one another. Later children appear above earlier children. Use <code>Positioned</code> when a child should attach to selected edges.</p></header>
+      <div class="demo"><h2>Move the badge</h2><div class="demo-controls"><button class="demo-btn active" data-badge="topRight">Top right</button><button class="demo-btn" data-badge="topLeft">Top left</button><button class="demo-btn" data-badge="bottomRight">Bottom right</button><button class="demo-btn" data-badge="bottomLeft">Bottom left</button></div><div class="stack-stage"><div class="stack-photo">FS</div><div class="stack-badge" id="stackBadge">4</div></div><p class="demo-readout" id="stackReadout">Positioned(top: 12, right: 12)</p></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Stack(
+  clipBehavior: Clip.none,
+  children: [
+    const CircleAvatar(
+      radius: 32,
+      child: Text('MS'),
+    ),
+    Positioned(
+      top: -2,
+      right: -2,
+      child: Container(
+        width: 18,
+        height: 18,
+        decoration: const BoxDecoration(
+          color: Colors.green,
+          shape: BoxShape.circle,
+        ),
+      ),
+    ),
+  ],
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Tool</th><th>Use</th></tr></thead><tbody><tr><td><code>Stack.alignment</code></td><td>Default alignment for non-positioned children.</td></tr><tr><td><code>Positioned</code></td><td>Pin a child using <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>, <code>width</code>, or <code>height</code>.</td></tr><tr><td><code>Positioned.fill</code></td><td>Fill all four stack edges, optionally with insets.</td></tr><tr><td><code>PositionedDirectional</code></td><td>Use logical <code>start</code> and <code>end</code> edges.</td></tr><tr><td><code>clipBehavior</code></td><td>Choose whether children outside the stack are clipped.</td></tr></tbody></table>
+      <div class="callout"><span class="label">CONSTRAINT RULE</span><p>A positioned child must still satisfy the size implied by its chosen edges. Avoid specifying conflicting values such as <code>left</code>, <code>right</code>, and <code>width</code> together.</p></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. Positioned is designed to pin a Stack child to selected edges."><h3>Which widget pins a badge to the top-right of a Stack?</h3><div class="quiz-options"><button class="quiz-option"><code>Positioned</code></button><button class="quiz-option"><code>Spacer</code></button><button class="quiz-option"><code>Table</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Everyday alternatives">
+      <header class="step-header"><span class="step-kicker">STEP 9 · CHOOSE A CLEARER TOOL</span><h1>Know the Useful Alternatives</h1><p class="lede">Row, Column, Wrap, and Stack are flexible primitives. A more specialized widget can sometimes express the design with less code.</p></header>
+      <div class="grid-2"><div class="concept"><strong>ListTile</strong><p>A standard leading, title, subtitle, and trailing arrangement. Prefer it over rebuilding the same row repeatedly.</p></div><div class="concept"><strong>IndexedStack</strong><p>Shows one child by index while keeping the other children in the tree and preserving their state.</p></div><div class="concept"><strong>Table</strong><p>Aligns a small set of values into shared columns. It is not a replacement for a large scrolling data grid.</p></div><div class="concept"><strong>OverflowBar</strong><p>Arranges action buttons in a row and moves them vertically when they do not fit.</p></div><div class="concept"><strong>Flex</strong><p>The general form of Row and Column when the direction must be selected programmatically.</p></div><div class="concept"><strong>ButtonBar replacement</strong><p>Prefer <code>OverflowBar</code> for adaptable groups of actions in current Flutter code.</p></div></div>
+      <h2>IndexedStack</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>IndexedStack(
+  index: selectedIndex,
+  children: const [
+    CourseOverview(),
+    CourseLessons(),
+    CourseProgress(),
+  ],
+)</code></pre></div>
+      <h2>Table</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Table(
+  columnWidths: {
+    0: IntrinsicColumnWidth(),
+    1: FlexColumnWidth(),
+  },
+  children: [
+    TableRow(children: [Text('Duration'), Text('30 days')]),
+    TableRow(children: [Text('Level'), Text('Intermediate')]),
+  ],
+)</code></pre></div>
+      <div class="panel orange"><strong>Keep Table small:</strong> <code>IntrinsicColumnWidth</code> measures content and can be expensive when repeated many times. Use it for compact information, not hundreds of rows.</div>
+      <div class="quiz" data-answer="1" data-correct="Correct. IndexedStack displays one indexed child while keeping the others mounted in the tree."><h3>You need tab-like content that preserves each child's state. Which widget can help?</h3><div class="quiz-options"><button class="quiz-option"><code>Divider</code></button><button class="quiz-option"><code>IndexedStack</code></button><button class="quiz-option"><code>Spacer</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Build the card">
+      <header class="step-header"><span class="step-kicker">STEP 10 · GUIDED BUILD</span><h1>Build a Course Overview Card</h1><p class="lede">Combine linear layout, flex space, wrapping content, and an overlapping status indicator in one practical component.</p></header>
+      <div class="tree">Card<br>└── Padding<br>&nbsp;&nbsp;&nbsp;&nbsp;└── Column<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Row: Stack avatar + Expanded text + progress<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Divider<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Wrap: topic chips<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Row: two Expanded buttons</div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>class CourseOverviewCard extends StatelessWidget {
+  const CourseOverviewCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const CircleAvatar(
+                      radius: 30,
+                      child: Text('FS'),
+                    ),
+                    Positioned(
+                      top: -2,
+                      right: -2,
+                      child: Container(
+                        width: 18,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 14),
+                const Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Flutter UI Foundations',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 4),
+                      Text('Week 2 · 4 lessons'),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  '72%',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const Divider(height: 32),
+            const Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Chip(label: Text('Layouts')),
+                Chip(label: Text('Flex')),
+                Chip(label: Text('Wrap')),
+                Chip(label: Text('Stack')),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {},
+                    child: const Text('Review'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () {},
+                    child: const Text('Continue'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre></div>
+      <div class="panel purple"><strong>Read it outside in:</strong> The column creates vertical sections. Each row solves one horizontal section. Expanded protects flexible content, Wrap lets chips flow, and Stack owns the deliberate overlap.</div>
+      <div class="challenge"><h3>Run these layout experiments</h3><ol><li>Change the title to a much longer value and confirm it does not overflow.</li><li>Give the Continue button <code>flex: 2</code>.</li><li>Add three more chips and narrow the window.</li><li>Move the status dot to the bottom-right.</li><li>Set the outer column's <code>crossAxisAlignment</code> to center and explain every visual change.</li></ol></div>
+    </section>
+
+    <section class="step-view" data-title="Final challenge">
+      <header class="step-header"><span class="step-kicker">STEP 11 · APPLY THE IDEAS</span><h1>Recreate a Layout from Requirements</h1><p class="lede">Build a student dashboard card without copying the guided solution. Choose every layout widget by the relationship between its children.</p></header>
+      <div class="challenge"><h3>Student dashboard requirements</h3><ol><li>Place an avatar, student details, and notification count in one header.</li><li>Let the student details use the remaining width and truncate a long email.</li><li>Show a green online badge overlapping the avatar.</li><li>Display a changing list of skill chips that wraps on narrow screens.</li><li>Place a secondary and primary action on one line with a 1:2 flex ratio.</li><li>Keep the card compact with <code>MainAxisSize.min</code>.</li><li>Test with long text, five additional chips, and a narrow phone width.</li></ol></div>
+      <h2>Before writing code, sketch the tree</h2>
+      <div class="syntax">Card<br>└── ? vertical parent<br>&nbsp;&nbsp;&nbsp;&nbsp;├── ? horizontal header<br>&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── ? overlapping avatar + badge<br>&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── ? flexible student details<br>&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── notification count<br>&nbsp;&nbsp;&nbsp;&nbsp;├── ? flowing skills<br>&nbsp;&nbsp;&nbsp;&nbsp;└── ? flexible actions</div>
+      <details class="reveal"><summary>Show the suggested widget choices</summary><div><p>Use <code>Column</code> for the card sections, <code>Row</code> for the header and actions, <code>Stack</code> with <code>Positioned</code> for the avatar badge, <code>Expanded</code> for the details and buttons, and <code>Wrap</code> for the changing skills.</p></div></details>
+      <h2>Completion checklist</h2>
+      <ul class="checklist"><li>I can identify the main and cross axes of Row and Column.</li><li>I can choose and explain main-axis and cross-axis alignment.</li><li>I can nest layouts while keeping each group meaningful.</li><li>I understand Expanded, Flexible, Spacer, and flex ratios.</li><li>I can diagnose common RenderFlex overflow.</li><li>I know when Wrap is more appropriate than Row.</li><li>I can layer children with Stack and position a child deliberately.</li><li>I recognize ListTile, IndexedStack, Table, OverflowBar, and Flex.</li></ul>
+      <div class="panel references"><h3>Continue learning</h3><p>Use the official Flutter references for <a href="https://docs.flutter.dev/ui/layout">layouts</a>, <a href="https://api.flutter.dev/flutter/widgets/Row-class.html">Row</a>, <a href="https://api.flutter.dev/flutter/widgets/Expanded-class.html">Expanded</a>, <a href="https://api.flutter.dev/flutter/widgets/Wrap-class.html">Wrap</a>, and <a href="https://api.flutter.dev/flutter/widgets/Stack-class.html">Stack</a>.</p></div>
+      <div class="finish" id="finishBox"><h2>Codelab complete! 🎉</h2><p>You can now arrange several widgets along axes, distribute available space, wrap changing content, layer visual elements, and diagnose common overflow. Next, learn how lists, grids, pages, and controllers make large interfaces scroll.</p></div>
+    </section>
+
+  </div></main>
+</div>
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+  function render(updateHash=true){current=Math.max(0,Math.min(current,steps.length-1));steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});const percent=Math.round(((current+1)/steps.length)*100);document.getElementById('progressBar').style.width=`${percent}%`;document.getElementById('progressText').textContent=`${percent}%`;document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));document.getElementById('mobileTitle').textContent=titles[current];document.getElementById('prevBtn').disabled=current===0;document.getElementById('nextBtn').disabled=current===steps.length-1;document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';if(current===steps.length-1)document.getElementById('finishBox').classList.add('show');document.title=`${titles[current]} — Arranging Widgets Codelab`;if(updateHash)history.pushState({step:current},'',`#step-${current+1}`);window.scrollTo({top:0,behavior:'auto'});sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false')}
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render()}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+  document.addEventListener('click',async event=>{const copy=event.target.closest('.copy-btn');if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1200);return}const option=event.target.closest('.quiz-option');if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show')}});
+  document.querySelectorAll('[data-axis]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-axis]').forEach(item=>item.classList.toggle('active',item===button));const column=button.dataset.axis==='column';document.getElementById('axisStage').classList.toggle('column',column);document.getElementById('axisReadout').textContent=column?'Column places children from top to bottom on a vertical main axis.':'Row places children from start to end on a horizontal main axis.'}));
+  document.querySelectorAll('[data-main]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-main]').forEach(item=>item.classList.toggle('active',item===button));const value=button.dataset.main;document.getElementById('alignmentStage').dataset.main=value;document.getElementById('alignmentReadout').textContent=`MainAxisAlignment.${value}`}));
+  const flexMessages={'1,1,1':'Equal flex values divide the available width equally.','1,2,1':'The middle child receives twice the share of either outer child.','1,3,2':'The children divide width into six shares: one, three, and two.'};
+  document.querySelectorAll('[data-flex]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-flex]').forEach(item=>item.classList.toggle('active',item===button));const values=button.dataset.flex.split(',');document.querySelectorAll('.flex-child').forEach((child,index)=>{child.style.flex=values[index];child.textContent=values[index]});document.getElementById('flexReadout').textContent=flexMessages[button.dataset.flex]}));
+  document.querySelectorAll('[data-wrap]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-wrap]').forEach(item=>item.classList.toggle('active',item===button));const narrow=button.dataset.wrap==='narrow';document.getElementById('wrapStage').classList.toggle('narrow',narrow);document.getElementById('wrapReadout').textContent=narrow?'The narrow container creates more runs instead of overflowing.':'The wide container fits more chips on each run.'}));
+  const badgePositions={topRight:{top:'12px',right:'12px',bottom:'auto',left:'auto',label:'Positioned(top: 12, right: 12)'},topLeft:{top:'12px',right:'auto',bottom:'auto',left:'12px',label:'Positioned(top: 12, left: 12)'},bottomRight:{top:'auto',right:'12px',bottom:'12px',left:'auto',label:'Positioned(bottom: 12, right: 12)'},bottomLeft:{top:'auto',right:'auto',bottom:'12px',left:'12px',label:'Positioned(bottom: 12, left: 12)'}};
+  document.querySelectorAll('[data-badge]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-badge]').forEach(item=>item.classList.toggle('active',item===button));const position=badgePositions[button.dataset.badge];const badge=document.getElementById('stackBadge');Object.assign(badge.style,{top:position.top,right:position.right,bottom:position.bottom,left:position.left});document.getElementById('stackReadout').textContent=position.label}));
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});current=getHashStep();render(false);
+})();
+</script>
+</body>
+</html>
