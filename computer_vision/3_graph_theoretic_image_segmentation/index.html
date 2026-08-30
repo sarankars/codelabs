@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Interactive graph-theoretic image segmentation codelab using superpixels, region-adjacency graphs, and normalized cuts.">
+  <meta name="theme-color" content="#122238"><title>Graph-Theoretic Image Segmentation · Computer Vision Codelab</title>
+  <link rel="stylesheet" href="../module3.css">
+</head>
+<body data-steps='["Start here","Images as graphs","Superpixels & RAGs","Normalized cuts","Try the pipeline","Check & review"]'>
+  <aside class="sidebar" id="sidebar"><div class="brand"><small>Module 3 · Codelab</small><h2>Graph-Theoretic Segmentation</h2><p>Turn regions into nodes and boundaries into weighted edges.</p></div><div class="progress-meta"><span>PROGRESS</span><span id="progressText">0%</span></div><div class="track"><div class="bar" id="progressBar"></div></div><nav class="steps" id="stepNav" aria-label="Codelab steps"></nav></aside>
+  <div class="mobile-bar"><button id="menuButton" aria-label="Open lesson steps" aria-expanded="false">☰</button><strong id="mobileTitle">Start here</strong></div>
+  <main class="main"><div class="content">
+    <section class="view" data-step="0">
+      <header class="hero"><span class="eyebrow">Step 1 · A different representation</span><h1>What if an image were a network?</h1><p>Graph-theoretic segmentation represents visual pieces as nodes and their relationships as edges. Strongly related nodes stay together; weak connections are candidates for a cut.</p></header>
+      <div class="grid three"><article class="card"><span class="badge">Node</span><h3>A pixel or region</h3><p>One item that may receive a segment label.</p></article><article class="card"><span class="badge">Edge</span><h3>A relationship</h3><p>A connection between neighboring nodes.</p></article><article class="card"><span class="badge">Weight</span><h3>Similarity</h3><p>A number derived from color, texture, or boundary strength.</p></article></div>
+      <div class="callout blue"><strong>Why use a graph?</strong> K-means asks whether features are close in feature space. A graph can additionally insist that regions be spatial neighbors and explicitly represent their boundary.</div>
+      <h2>Learning outcomes</h2><ul><li>Build the vocabulary of nodes, edges, weights, and cuts.</li><li>Explain why superpixels reduce a pixel graph.</li><li>Construct a region-adjacency graph (RAG).</li><li>Interpret the normalized-cut objective and its parameters.</li></ul>
+    </section>
+
+    <section class="view" data-step="1">
+      <header class="hero"><span class="eyebrow">Step 2 · Pixels become nodes</span><h1>Neighbors exchange evidence</h1><p>Connect each pixel to its four or eight immediate neighbors. Similar colors get strong edges; a sharp visual boundary gets a weak edge.</p></header>
+      <div class="lab"><div class="lab-head"><strong>Explore · A tiny pixel graph</strong><span class="mono">select a view</span></div><div class="lab-body"><div class="toggle-row"><button class="toggle active" data-graph="pixels">Pixel values</button><button class="toggle" data-graph="edges">Show relationships</button><button class="toggle" data-graph="cut">Cut weak edges</button></div><div class="graph-canvas" id="graphCanvas" aria-label="Six by four image graph"></div><p class="graph-caption" id="graphCaption">Each circle is a pixel; color suggests its appearance.</p></div></div>
+      <h2>Choosing an edge weight</h2>
+      <div class="grid"><article class="card"><h3>Similarity weight</h3><p><code>w(i,j) = exp(−||cᵢ−cⱼ||² / σ)</code>. Similar neighboring colors create large weights.</p></article><article class="card"><h3>Boundary weight</h3><p>A strong image gradient can become a high cutting cost or a low similarity, depending on the graph definition.</p></article></div>
+      <div class="callout warn"><strong>Scale matters:</strong> if every pixel connects to every other pixel, memory and eigensolver cost grow quickly. Real workflows often reduce the graph first.</div>
+    </section>
+
+    <section class="view" data-step="2">
+      <header class="hero"><span class="eyebrow">Step 3 · Make the graph smaller</span><h1>Superpixels become region nodes</h1><p>SLIC groups nearby, similarly colored pixels into compact initial regions. A region-adjacency graph connects only superpixels that touch.</p></header>
+      <div class="pipeline"><div class="stage"><h3>Start with RGB</h3><p>The original image contains hundreds of thousands of pixels.</p></div><div class="stage"><h3>Run SLIC</h3><p>Produce a few hundred compact, connected superpixels.</p></div><div class="stage"><h3>Build the RAG</h3><p>One node per superpixel; edges only where regions meet.</p></div><div class="stage"><h3>Assign weights</h3><p>Compare mean colors across each neighboring pair.</p></div></div>
+      <h2>What the parameters mean</h2>
+      <div class="grid"><article class="card"><h3><code>n_segments</code></h3><p>The requested starting granularity. More superpixels retain detail but create a larger graph.</p></article><article class="card"><h3><code>compactness</code></h3><p>The trade-off between color similarity and spatially regular superpixel shapes.</p></article><article class="card"><h3><code>sigma</code></h3><p>How quickly graph similarity falls as mean colors differ.</p></article><article class="card"><h3>Connectivity</h3><p>Which touching patterns are allowed to form graph edges.</p></article></div>
+    </section>
+
+    <section class="view" data-step="3">
+      <header class="hero"><span class="eyebrow">Step 4 · Partition the graph</span><h1>Normalized cut balances separation and coherence</h1><p>A useful cut should remove weak connections between groups without isolating tiny nodes merely because they have few edges.</p></header>
+      <div class="grid"><article class="card"><span class="badge">Cut cost</span><h3>Separate dissimilar groups</h3><p>Add the weights of edges crossing from group A to group B. Lower cross-group similarity is easier to cut.</p></article><article class="card"><span class="badge">Association</span><h3>Keep coherent groups</h3><p>Normalize by each group’s connection to the whole graph so tiny fragments are not automatically preferred.</p></article></div>
+      <div class="callout blue"><strong>Normalized-cut idea:</strong> minimize the fraction of each group’s total association that must be broken. The algorithm recursively makes two-way cuts until no beneficial split remains.</div>
+      <div class="code-card"><div class="code-head"><strong>Current scikit-image workflow</strong><button class="copy-btn" data-copy="#ncutCode">Copy</button></div><pre id="ncutCode"><code>from skimage import color, data, graph, segmentation
+
+image = data.coffee()
+superpixels = segmentation.slic(
+    image, compactness=30, n_segments=400, start_label=1)
+rag = graph.rag_mean_color(image, superpixels, mode="similarity")
+segments = graph.cut_normalized(superpixels, rag)
+result = color.label2rgb(segments, image, kind="avg", bg_label=0)</code></pre></div>
+      <p>Reference: <a href="https://scikit-image.org/docs/stable/auto_examples/segmentation/plot_ncut.html">scikit-image Normalized Cut example</a>.</p>
+    </section>
+
+    <section class="view" data-step="4">
+      <header class="hero"><span class="eyebrow">Step 5 · Tune the model</span><h1>Predict what changes before moving a slider</h1><p>This simulation uses a fixed scene and illustrates the expected trade-off as the number of initial superpixels changes.</p></header>
+      <div class="lab"><div class="lab-head"><strong>Explore · Graph resolution</strong><span class="mono">drag the slider</span></div><div class="lab-body"><div class="control-row"><label for="segmentsSlider">Starting superpixels</label><input id="segmentsSlider" type="range" min="1" max="4" value="2"><span class="readout" id="segmentsReadout">100</span></div><div class="graph-canvas cut" id="resolutionCanvas" aria-label="Simulated segmented regions"></div><p class="graph-caption" id="resolutionCaption"></p></div></div>
+      <div class="grid three"><article class="card"><h3>Too few</h3><p>Small objects and narrow boundaries disappear in the starting partition.</p></article><article class="card"><h3>Useful range</h3><p>Objects contain several superpixels but the graph remains manageable.</p></article><article class="card"><h3>Too many</h3><p>Detail improves while graph construction and normalized cutting cost more.</p></article></div>
+      <h2>Read the result critically</h2><ul><li>Every output label should form a meaningful connected region.</li><li>Compare boundaries against visible changes, not just region count.</li><li>Try altered lighting and textured objects.</li><li>Remember that unsupervised segments do not automatically have semantic names.</li></ul>
+    </section>
+
+    <section class="view" data-step="5">
+      <header class="hero"><span class="eyebrow">Step 6 · Check & review</span><h1>Trace the complete data flow</h1><p>Image → superpixels → region-adjacency graph → weighted cut → output labels.</p></header>
+      <div class="quiz" data-answer="1"><h3>Why build a graph from superpixels instead of all pixels?</h3><div class="options"><button class="option">Superpixels assign semantic class names</button><button class="option">They greatly reduce the number of nodes while preserving local boundaries</button><button class="option">They remove the need for edge weights</button></div><p class="feedback">Superpixels compress many nearby pixels into a much smaller region graph.</p></div>
+      <div class="quiz" data-answer="2"><h3>What does a weak similarity edge suggest?</h3><div class="options"><button class="option">The regions must receive the same label</button><button class="option">The image file is corrupt</button><button class="option">The neighboring regions may lie on opposite sides of a useful cut</button></div><p class="feedback">Weak similarity is evidence that cutting between those neighbors may be inexpensive.</p></div>
+      <div class="callout good"><strong>Module mapping complete:</strong> this codelab covers “Segmentation by Graph-Theoretic Clustering.”</div>
+    </section>
+  </div></main>
+  <div class="bottom-nav"><button id="previous">← Previous</button><button class="next" id="next">Next →</button></div>
+  <script src="../module3.js"></script>
+  <script>
+    (() => {
+      function cells(target, count = 24) {
+        target.innerHTML = Array.from({length: count}, (_, i) => `<span class="node ${i % 6 > 3 ? 'b' : i > 16 ? 'c' : ''}">${i + 1}</span>`).join('');
+      }
+      const graphCanvas = document.querySelector('#graphCanvas'); cells(graphCanvas);
+      const graphCaptions = { pixels:'Each circle is a pixel; color suggests its appearance.', edges:'Edges connect immediate neighbors. Strong edges prefer to keep similar pixels together.', cut:'Weak cross-color relationships are removed, leaving three connected groups.' };
+      document.querySelectorAll('[data-graph]').forEach(button => button.addEventListener('click', () => {
+        document.querySelectorAll('[data-graph]').forEach(item => item.classList.toggle('active', item === button));
+        graphCanvas.className = `graph-canvas ${button.dataset.graph}`;
+        document.querySelector('#graphCaption').textContent = graphCaptions[button.dataset.graph];
+      }));
+      const resolution = document.querySelector('#resolutionCanvas');
+      const slider = document.querySelector('#segmentsSlider');
+      const values = [50,100,200,400];
+      function update() {
+        const index = Number(slider.value) - 1;
+        document.querySelector('#segmentsReadout').textContent = values[index];
+        cells(resolution, 12 + index * 6);
+        document.querySelector('#resolutionCaption').textContent = index === 0 ? 'Coarse: fast, but the narrow green region is poorly represented.' : index === 3 ? 'Fine: more boundary detail, with a larger graph to partition.' : 'Balanced: several nodes represent each visible area without an excessive graph.';
+      }
+      slider.addEventListener('input', update); update();
+    })();
+  </script>
+</body>
+</html>

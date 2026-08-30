@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Interactive codelab for shot-boundary detection and background subtraction with OpenCV.">
+  <meta name="theme-color" content="#122238">
+  <title>Video Segmentation Applications · Computer Vision Codelab</title>
+  <link rel="stylesheet" href="../module3.css">
+</head>
+<body data-steps='["Start here","Shot boundaries","Try a cut detector","Background subtraction","Failure modes","Check & review"]'>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><small>Module 3 · Codelab</small><h2>Video Segmentation Applications</h2><p>Find scene changes and moving foreground regions.</p></div>
+    <div class="progress-meta"><span>PROGRESS</span><span id="progressText">0%</span></div>
+    <div class="track"><div class="bar" id="progressBar"></div></div>
+    <nav class="steps" id="stepNav" aria-label="Codelab steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button id="menuButton" aria-label="Open lesson steps" aria-expanded="false">☰</button><strong id="mobileTitle">Start here</strong></div>
+  <main class="main"><div class="content">
+    <section class="view" data-step="0">
+      <header class="hero"><span class="eyebrow">Step 1 · Two video questions</span><h1>Where did the scene change—and what is moving?</h1><p>Video is a sequence of images. Comparing those images over time lets us divide a movie into shots or separate foreground motion from a learned background.</p></header>
+      <div class="grid">
+        <article class="card"><span class="badge">Application A</span><h3>Shot-boundary detection</h3><p>Find the frame where one camera shot ends and another begins. Editors, search systems, and video summarizers use these boundaries.</p></article>
+        <article class="card"><span class="badge">Application B</span><h3>Background subtraction</h3><p>Model the stable scene and label pixels that no longer fit it. Traffic monitoring and fixed security cameras use foreground masks.</p></article>
+      </div>
+      <h2>Learning outcomes</h2>
+      <ul><li>Compare neighboring frames using color histograms.</li><li>Turn a distance score into a hard-cut decision.</li><li>Explain how MOG2 learns a changing background.</li><li>Diagnose camera motion, shadows, and gradual transitions.</li></ul>
+      <div class="callout blue"><strong>Prerequisite:</strong> Complete Segmentation Fundamentals first. Here, the extra feature is <em>time</em>: the previous frames help interpret the current one.</div>
+    </section>
+
+    <section class="view" data-step="1">
+      <header class="hero"><span class="eyebrow">Step 2 · Divide a video</span><h1>A shot boundary is a large visual change</h1><p>A hard cut replaces one shot with another between two consecutive frames. We can compare compact color summaries instead of every pixel position.</p></header>
+      <div class="pipeline">
+        <div class="stage"><h3>Read frames</h3><p>Take frames <em>t−1</em> and <em>t</em>.</p></div>
+        <div class="stage"><h3>Make histograms</h3><p>Count HSV colors and normalize the counts.</p></div>
+        <div class="stage"><h3>Compare</h3><p>Use Bhattacharyya distance: 0 is similar, 1 is different.</p></div>
+        <div class="stage"><h3>Threshold</h3><p>Mark a cut when distance is above the chosen limit.</p></div>
+      </div>
+      <h2>Why HSV histograms?</h2>
+      <p>Hue and saturation summarize the color distribution while ignoring exact object positions. A beach and a dark indoor room usually have very different distributions even if objects move inside each shot.</p>
+      <div class="callout warn"><strong>Important:</strong> a score is evidence, not meaning. A camera flash can create a large score without a new shot; a dissolve may spread a smaller change over many frames.</div>
+      <div class="code-card"><div class="code-head"><strong>Core OpenCV operation</strong><button class="copy-btn" data-copy="#shotCode">Copy</button></div><pre id="shotCode"><code>hist = cv2.calcHist([hsv], [0, 1], None, [30, 32], [0, 180, 0, 256])
+cv2.normalize(hist, hist)
+distance = cv2.compareHist(previous_hist, hist, cv2.HISTCMP_BHATTACHARYYA)
+is_cut = distance &gt; threshold</code></pre></div>
+    </section>
+
+    <section class="view" data-step="2">
+      <header class="hero"><span class="eyebrow">Step 3 · Interactive timeline</span><h1>Choose a decision threshold</h1><p>Each bar is the distance between a frame and its predecessor. The known hard cut is at frame 7.</p></header>
+      <div class="lab"><div class="lab-head"><strong>Explore · Hard-cut scores</strong><span class="mono">drag the threshold</span></div><div class="lab-body">
+        <div class="control-row"><label for="cutThreshold">Cut threshold</label><input id="cutThreshold" type="range" min="20" max="90" value="58" aria-describedby="cutResult"><span class="readout" id="cutReadout">0.58</span></div>
+        <div class="timeline" id="timeline" aria-label="Histogram distance by frame"></div>
+        <p id="cutResult" class="graph-caption" aria-live="polite"></p>
+      </div></div>
+      <div class="grid three">
+        <article class="card"><h3>Too low</h3><p>Motion and lighting changes become false boundaries.</p></article>
+        <article class="card"><h3>Balanced</h3><p>The large spike becomes the only detected boundary.</p></article>
+        <article class="card"><h3>Too high</h3><p>Even the real cut can be missed.</p></article>
+      </div>
+    </section>
+
+    <section class="view" data-step="3">
+      <header class="hero"><span class="eyebrow">Step 4 · Learn the scene</span><h1>Background subtraction creates a foreground mask</h1><p>MOG2 keeps a statistical model for each pixel. A new value that does not fit the learned history is marked as foreground.</p></header>
+      <div class="grid">
+        <article class="card"><h3>Background model</h3><p>Several Gaussian distributions represent common values such as waving leaves, shadows, or an empty road.</p></article>
+        <article class="card"><h3>Foreground mask</h3><p>Pixels unlike the model become white. Morphological opening can remove isolated noise after subtraction.</p></article>
+      </div>
+      <div class="lab"><div class="lab-head"><strong>Explore · View the processing stage</strong><span class="mono">select a stage</span></div><div class="lab-body">
+        <div class="toggle-row" role="group" aria-label="Background subtraction stage"><button class="toggle active" data-mask="scene">Camera frame</button><button class="toggle" data-mask="noisy">Raw mask</button><button class="toggle" data-mask="clean">Clean mask</button></div>
+        <div class="mask-demo" id="maskDemo" role="img" aria-label="A pedestrian in a fixed-camera scene"></div>
+        <p class="graph-caption" id="maskCaption">The camera frame contains a stable scene and one moving person.</p>
+      </div></div>
+      <div class="code-card"><div class="code-head"><strong>MOG2 loop</strong><button class="copy-btn" data-copy="#mogCode">Copy</button></div><pre id="mogCode"><code>subtractor = cv2.createBackgroundSubtractorMOG2(
+    history=300, varThreshold=24, detectShadows=True)
+
+while True:
+    ok, frame = video.read()
+    if not ok:
+        break
+    foreground = subtractor.apply(frame)
+    clean = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, kernel)</code></pre></div>
+    </section>
+
+    <section class="view" data-step="4">
+      <header class="hero"><span class="eyebrow">Step 5 · Know the assumptions</span><h1>Both methods can fail for understandable reasons</h1><p>Diagnose the input and score before changing parameters.</p></header>
+      <div class="grid">
+        <article class="card"><span class="badge">Shot detection</span><h3>Gradual transition</h3><p>A fade or dissolve distributes change across several frames. Add a sliding-window accumulated score.</p></article>
+        <article class="card"><span class="badge">Shot detection</span><h3>Flash or fast motion</h3><p>A flash produces a temporary spike. Check whether the following frame returns to the earlier distribution.</p></article>
+        <article class="card"><span class="badge">Background</span><h3>Moving camera</h3><p>Nearly every pixel changes. Stabilize the video or use motion compensation before subtraction.</p></article>
+        <article class="card"><span class="badge">Background</span><h3>Shadows and stopped objects</h3><p>Shadows may enter the mask; an object that remains still long enough may be absorbed into the model.</p></article>
+      </div>
+      <h2>Safe media handling</h2>
+      <ul><li>Check that <code>VideoCapture</code> opened successfully.</li><li>Stop cleanly when a frame cannot be read.</li><li>Log the frame number, timestamp, score, and threshold for every boundary.</li><li>Test on a short annotated sequence before processing a long video.</li></ul>
+    </section>
+
+    <section class="view" data-step="5">
+      <header class="hero"><span class="eyebrow">Step 6 · Check & review</span><h1>Choose the right temporal comparison</h1><p>Complete the questions, then explain each pipeline without looking back.</p></header>
+      <div class="quiz" data-answer="1"><h3>Which event should create the largest neighboring-frame histogram distance?</h3><div class="options"><button class="option">A pedestrian takes one step</button><button class="option">A hard cut from a beach to a dark room</button><button class="option">A stationary camera records an empty road</button></div><p class="feedback">A hard cut replaces the complete visual distribution in a single step.</p></div>
+      <div class="quiz" data-answer="2"><h3>Why does camera motion damage background subtraction?</h3><div class="options"><button class="option">It reduces the video frame rate</button><button class="option">It removes all shadows</button><button class="option">The background shifts, so many stable pixels appear to change</button></div><p class="feedback">Background subtraction assumes a fixed or stabilized viewpoint.</p></div>
+      <div class="callout good"><strong>Module mapping complete:</strong> this codelab covers the syllabus applications “Shot Boundary Detection” and “Background Subtraction.”</div>
+      <p class="footer-note">Next topic: graph-theoretic segmentation models an image as connected regions rather than a time sequence.</p>
+    </section>
+  </div></main>
+  <div class="bottom-nav"><button id="previous">← Previous</button><button class="next" id="next">Next →</button></div>
+  <script src="../module3.js"></script>
+  <script>
+    (() => {
+      const scores = [.08,.12,.16,.22,.31,.18,.84,.14,.27,.19,.11,.17];
+      const timeline = document.querySelector('#timeline');
+      timeline.innerHTML = scores.map((score, index) => `<span class="frame-score" data-score="${score}" data-label="F${index + 1}" style="height:${Math.max(8, score * 120)}px" title="Frame ${index + 1}: ${score.toFixed(2)}"></span>`).join('');
+      const slider = document.querySelector('#cutThreshold');
+      function updateCuts() {
+        const threshold = Number(slider.value) / 100;
+        document.querySelector('#cutReadout').textContent = threshold.toFixed(2);
+        const cuts = [];
+        document.querySelectorAll('.frame-score').forEach((bar, index) => {
+          const isCut = Number(bar.dataset.score) > threshold;
+          bar.classList.toggle('cut', isCut);
+          if (isCut) cuts.push(index + 1);
+        });
+        document.querySelector('#cutResult').textContent = cuts.length ? `Detected boundaries: frame ${cuts.join(', frame ')}` : 'No boundaries detected.';
+      }
+      slider.addEventListener('input', updateCuts); updateCuts();
+      const demo = document.querySelector('#maskDemo');
+      const captions = { scene:'The camera frame contains a stable scene and one moving person.', noisy:'The raw mask contains the person plus isolated foreground noise.', clean:'Opening removes small dots while preserving the main foreground region.' };
+      document.querySelectorAll('[data-mask]').forEach(button => button.addEventListener('click', () => {
+        document.querySelectorAll('[data-mask]').forEach(item => item.classList.toggle('active', item === button));
+        demo.className = `mask-demo ${button.dataset.mask === 'scene' ? '' : 'masked'} ${button.dataset.mask === 'noisy' ? 'noisy' : ''}`;
+        document.querySelector('#maskCaption').textContent = captions[button.dataset.mask];
+      }));
+    })();
+  </script>
+</body>
+</html>
