@@ -1,0 +1,125 @@
+{
+  "title": "Computer Vision",
+  "slug": "computer-vision",
+  "description": "Study the foundations and practical methods of computer vision, from pinhole cameras, radiometry, shading, color, filtering, Fourier analysis, edge detection, texture, and segmentation to pattern classification, clustering, dimensionality reduction, motion analysis, optical flow, tracking, and background modeling. Apply these concepts through hands-on image and video programs using modern computer vision tools.",
+  "category": "Artificial Intelligence",
+  "level": "Advanced",
+  "status": "draft",
+  "isFree": false,
+  "createdAt": {
+    "$date": "2026-08-30T13:17:37.000Z"
+  },
+  "updatedAt": {
+    "$date": "2026-08-30T13:17:37.000Z"
+  },
+  "modules": [
+    {
+      "id": "module-cv-3-image-segmentation",
+      "title": "Segmentation by Clustering",
+      "description": "Learn what image segmentation is and how perceptual grouping becomes a computational process. Explore human vision and Gestalt principles, shot-boundary detection, background subtraction, pixel clustering, and graph-theoretic clustering, then apply related texture extraction and pedestrian detection techniques through practical programs.",
+      "order": 2,
+      "topics": [
+        {
+          "id": "topic-cv-3-1-segmentation-fundamentals",
+          "title": "Segmentation Fundamentals and Gestalt Grouping",
+          "description": "Learn how segmentation assigns labels to pixels and how masks represent meaningful regions. Compare classification, detection, semantic segmentation, instance segmentation, and panoptic segmentation; then explore thresholding, Gestalt grouping principles, K-means clustering, morphology, and connected components in a practical damage-inspection pipeline.",
+          "order": 0,
+          "resources": [
+            {
+              "id": "codelab-cv-3-1-segmentation-fundamentals",
+              "type": "codelab",
+              "title": "Segmentation Fundamentals and Gestalt Grouping",
+              "order": 0,
+              "description": "Build an intuitive understanding of pixels, labels, masks, thresholding, visual grouping, clustering, morphology, and region measurement through interactive examples and a factory-damage case study.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/computer_vision/1_segmentation_fundamentals_and_gestalt_grouping/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
+        },
+        {
+          "id": "topic-cv-3-2-video-segmentation",
+          "title": "Video Segmentation Applications",
+          "description": "Apply segmentation ideas across time. Detect hard shot boundaries by comparing normalized HSV histograms and extract moving foreground regions with MOG2 background subtraction, while learning how thresholds, camera motion, lighting changes, shadows, and gradual transitions affect results.",
+          "order": 1,
+          "resources": [
+            {
+              "id": "codelab-cv-3-2-video-segmentation",
+              "type": "codelab",
+              "title": "Video Segmentation Applications",
+              "order": 0,
+              "description": "Explore shot-boundary detection and background subtraction with interactive thresholds, foreground-mask cleanup, practical assumptions, and common failure modes.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/computer_vision/2_video_segmentation_applications/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
+        },
+        {
+          "id": "topic-cv-3-3-graph-theoretic-segmentation",
+          "title": "Graph-Theoretic Image Segmentation",
+          "description": "Represent an image as a weighted graph whose nodes are pixels or superpixels and whose edges encode similarity or boundary evidence. Build a region adjacency graph with SLIC superpixels and use normalized cuts to separate dissimilar groups while preserving coherent regions.",
+          "order": 2,
+          "resources": [
+            {
+              "id": "codelab-cv-3-3-graph-theoretic-segmentation",
+              "type": "codelab",
+              "title": "Graph-Theoretic Image Segmentation",
+              "order": 0,
+              "description": "Trace the full graph-based pipeline from RGB pixels to SLIC superpixels, a weighted region adjacency graph, and normalized-cut segmentation, then reason about the effect of important parameters.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/computer_vision/3_graph_theoretic_image_segmentation/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
+        },
+        {
+          "id": "topic-cv-3-4-texture-feature-extraction",
+          "title": "Texture Feature Extraction",
+          "description": "Describe spatial texture using gray-level co-occurrence matrices. Quantize grayscale images, count neighboring pixel pairs in multiple directions, and interpret contrast, dissimilarity, homogeneity, energy, and correlation for whole images and local patches.",
+          "order": 3,
+          "resources": [
+            {
+              "id": "codelab-cv-3-4-texture-feature-extraction",
+              "type": "codelab",
+              "title": "Program 7: Texture Feature Extraction",
+              "order": 0,
+              "description": "Run a Python program that extracts multi-directional GLCM features, exports repeatable CSV results, compares smooth and coarse patches, and explains how texture features support segmentation and classification.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/computer_vision/4_texture_feature_extraction/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
+        },
+        {
+          "id": "topic-cv-3-5-pedestrian-object-detection",
+          "title": "Pedestrian Object Detection",
+          "description": "Detect upright pedestrians in images and video using Histogram of Oriented Gradients features and a pretrained linear SVM. Learn image pyramids, sliding-window search, decision thresholds, overlapping-box grouping, and the trade-off between missed detections and false positives.",
+          "order": 4,
+          "resources": [
+            {
+              "id": "codelab-cv-3-5-pedestrian-object-detection",
+              "type": "codelab",
+              "title": "Program 8: Pedestrian Object Detection",
+              "order": 0,
+              "description": "Run and evaluate a classical OpenCV pedestrian detector for images and videos, tune its operating parameters, inspect expected failure modes, and distinguish object detection from image segmentation.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/computer_vision/5_pedestrian_object_detection/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

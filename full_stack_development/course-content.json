@@ -1,0 +1,125 @@
+{
+  "title": "Full Stack Development",
+  "slug": "full-stack-development",
+  "description": "Build modern full-stack web applications using frontend technologies, Java backend frameworks, relational and document databases, REST APIs, authentication, and deployment-oriented architecture. Apply the concepts through practical programs using React, Servlets, JSP, JDBC, Spring Boot, Hibernate, and MongoDB.",
+  "category": "Web Development",
+  "level": "Intermediate",
+  "status": "draft",
+  "isFree": true,
+  "createdAt": {
+    "$date": "2026-08-30T13:27:35.000Z"
+  },
+  "updatedAt": {
+    "$date": "2026-08-30T13:27:35.000Z"
+  },
+  "modules": [
+    {
+      "id": "module-fsd-3-java-backend-development",
+      "title": "Java Backend Development with Spring Boot",
+      "description": "Develop Java web backends from Servlet, JSP, and JDBC foundations through Spring Boot, Spring MVC, JSON REST APIs, Postman testing, Spring Security, JWT authentication, and introductory microservices with Spring Cloud.",
+      "order": 2,
+      "topics": [
+        {
+          "id": "topic-fsd-3-1-servlets-jsp-form-handling",
+          "title": "Servlets and JSP Form Handling",
+          "description": "Understand the Servlet lifecycle, deployment configuration, request and response handling, and the role of JSP in server-rendered Java applications. Apply these concepts by processing submitted form data and displaying the result on a new page.",
+          "order": 0,
+          "resources": [
+            {
+              "id": "codelab-fsd-3-1-servlets-jsp-form-handling",
+              "type": "codelab",
+              "title": "Program 6: Servlets and JSP Form Handling",
+              "order": 0,
+              "description": "In this two-hour codelab, configure a Java web application, trace the Servlet lifecycle, process a form containing a user's name and email, and render the submitted details using a Servlet and JSP view.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/full_stack_development/1_servlets_jsp_form_handling/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
+        },
+        {
+          "id": "topic-fsd-3-2-jdbc-data-access",
+          "title": "JDBC Data Access and Result Sets",
+          "description": "Connect Java applications to relational databases using JDBC drivers, connection configuration, statements, and result sets. Retrieve records safely and examine how scrollable and updatable result sets support data navigation and modification.",
+          "order": 1,
+          "resources": [
+            {
+              "id": "codelab-fsd-3-2-jdbc-data-access",
+              "type": "codelab",
+              "title": "Program 7: Retrieve and Display Data Using JDBC",
+              "order": 0,
+              "description": "In this two-hour codelab, configure a JDBC driver, connect to a database, execute a query, retrieve every record from a table, display the results in the console, and explore scrollable and updatable result-set behavior.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/full_stack_development/2_jdbc_data_access/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
+        },
+        {
+          "id": "topic-fsd-3-3-spring-boot-fundamentals",
+          "title": "Spring Boot Backend Fundamentals",
+          "description": "Compare monolithic and microservice web application architectures, then examine Spring Boot project structure, dependency injection, common annotations, request handling, and the operations involved in serving a backend endpoint.",
+          "order": 2,
+          "resources": [
+            {
+              "id": "codelab-fsd-3-3-spring-boot-fundamentals",
+              "type": "codelab",
+              "title": "Program 8: Build a Spring Boot Welcome API",
+              "order": 0,
+              "description": "In this two-hour codelab, create and run a Spring Boot backend, use controller and mapping annotations, and implement a /hello endpoint that returns a welcome message while relating the project to monolithic and microservice architectures.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/full_stack_development/3_spring_boot_backend_fundamentals/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
+        },
+        {
+          "id": "topic-fsd-3-4-spring-mvc-rest-postman",
+          "title": "Spring MVC REST APIs and Postman",
+          "description": "Build JSON-based REST APIs with Spring MVC controllers, request mappings, HTTP operations, typed request and response bodies, validation, and consistent error handling. Exercise and inspect the endpoints with Postman.",
+          "order": 3,
+          "resources": [
+            {
+              "id": "codelab-fsd-3-4-spring-mvc-rest-postman",
+              "type": "codelab",
+              "title": "Spring MVC REST APIs and Postman",
+              "order": 0,
+              "description": "In this two-hour codelab, extend a Spring Boot application with JSON REST endpoints, test common HTTP operations in Postman, inspect status codes and payloads, and handle invalid input and application errors cleanly.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/full_stack_development/4_spring_mvc_rest_api_postman/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
+        },
+        {
+          "id": "topic-fsd-3-5-spring-security-jwt-microservices",
+          "title": "Spring Security, JWT, and Microservices",
+          "description": "Distinguish authentication from authorization, trace the Spring Security request flow, issue and validate JSON Web Tokens, protect REST endpoints, and connect these security concepts to an introductory Spring Cloud microservices architecture.",
+          "order": 4,
+          "resources": [
+            {
+              "id": "codelab-fsd-3-5-spring-security-jwt-microservices",
+              "type": "codelab",
+              "title": "Spring Security, JWT, and Microservices",
+              "order": 0,
+              "description": "In this two-hour codelab, add Spring Security to a REST API, authenticate a user, create and validate JWTs, access a protected endpoint, and map the same authentication flow onto a simple Spring Cloud microservices design.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/full_stack_development/5_spring_security_jwt_microservices/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
