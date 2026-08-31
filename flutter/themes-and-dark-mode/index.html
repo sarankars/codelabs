@@ -1,0 +1,1517 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>App Themes and Dark Mode — Interactive Flutter Codelab</title>
+  <meta name="description"
+    content="Learn application-wide Flutter theming with Material 3, ThemeData, ColorScheme, TextTheme, component themes, custom fonts, ThemeMode, and reusable widgets.">
+  <meta name="theme-color" content="#1769ff">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+    :root {
+      --blue: #1769ff;
+      --blue-dark: #0b43b7;
+      --blue-light: #dce9ff;
+      --ink: #101010;
+      --paper: #f5f7fb;
+      --white: #fff;
+      --yellow: #ffd83d;
+      --mint: #75e6c5;
+      --pink: #ff9bb7;
+      --purple: #d8c5ff;
+      --orange: #ffbd70;
+      --teal: #9ce7e2;
+      --border: 3px solid var(--ink);
+      --shadow: 6px 6px 0 var(--ink);
+      --shadow-sm: 4px 4px 0 var(--ink);
+      --sidebar: 290px;
+      --radius: 4px
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: auto
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      line-height: 1.55
+    }
+
+    button,
+    a {
+      font: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    :focus-visible {
+      outline: 4px solid var(--yellow);
+      outline-offset: 3px
+    }
+
+    .app {
+      min-height: 100vh
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar);
+      background: var(--blue);
+      border-right: var(--border);
+      padding: 22px 18px;
+      z-index: 20;
+      overflow: auto
+    }
+
+    .brand {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 16px;
+      margin-bottom: 20px
+    }
+
+    .eyebrow,
+    .progress-meta,
+    .step-number,
+    .step-kicker,
+    .tiny {
+      font-family: "DM Mono", monospace
+    }
+
+    .eyebrow {
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase
+    }
+
+    .brand h2 {
+      margin: 5px 0 3px;
+      font-size: 1.42rem;
+      line-height: 1.05
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: .85rem;
+      font-weight: 600
+    }
+
+    .progress-wrap {
+      color: #fff;
+      margin: 0 2px 20px
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: .72rem;
+      font-weight: 500;
+      margin-bottom: 7px
+    }
+
+    .progress-track {
+      height: 16px;
+      background: #fff;
+      border: var(--border);
+      padding: 2px
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: var(--yellow);
+      transition: width .2s ease
+    }
+
+    .steps {
+      display: grid;
+      gap: 9px
+    }
+
+    .step-link {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 34px 1fr 18px;
+      align-items: center;
+      gap: 9px;
+      text-align: left;
+      color: #fff;
+      background: transparent;
+      border: 3px solid transparent;
+      padding: 9px 8px;
+      font-weight: 700;
+      line-height: 1.15
+    }
+
+    .step-link:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .step-link.active {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--ink);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .step-number {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 2px solid currentColor;
+      font-size: .78rem
+    }
+
+    .step-status {
+      text-align: center
+    }
+
+    .mobile-bar {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--blue);
+      border-bottom: var(--border);
+      padding: 10px;
+      align-items: center;
+      gap: 10px
+    }
+
+    .mobile-bar strong {
+      color: #fff
+    }
+
+    .menu-btn,
+    .mobile-title {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .menu-btn {
+      width: 46px;
+      height: 42px;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .mobile-title {
+      padding: 8px 10px;
+      flex: 1;
+      font-weight: 800
+    }
+
+    main {
+      margin-left: var(--sidebar);
+      min-height: 100vh
+    }
+
+    .content {
+      width: min(980px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 42px 0 28px
+    }
+
+    .step-view {
+      display: none
+    }
+
+    .step-view.active {
+      display: block;
+      animation: stepIn .18s ease-out
+    }
+
+    @keyframes stepIn {
+      from {
+        opacity: .35;
+        transform: translateY(5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .step-header {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-bottom: 24px
+    }
+
+    .step-kicker {
+      display: inline-block;
+      background: var(--blue);
+      color: #fff;
+      border: 2px solid var(--ink);
+      padding: 5px 9px;
+      font-size: .72rem;
+      font-weight: 500;
+      margin-bottom: 13px
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.08
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.7rem);
+      margin: 0 0 12px;
+      letter-spacing: -.045em
+    }
+
+    h2 {
+      font-size: clamp(1.55rem, 3vw, 2.25rem);
+      margin: 30px 0 12px
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      margin: 24px 0 9px
+    }
+
+    .lede {
+      font-size: 1.08rem;
+      max-width: 760px;
+      margin: 0
+    }
+
+    .objective {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700
+    }
+
+    .panel {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .panel.blue {
+      background: var(--blue-light)
+    }
+
+    .panel.mint {
+      background: var(--mint)
+    }
+
+    .panel.yellow {
+      background: var(--yellow)
+    }
+
+    .panel.pink {
+      background: var(--pink)
+    }
+
+    .panel.purple {
+      background: var(--purple)
+    }
+
+    .panel.teal {
+      background: var(--teal)
+    }
+
+    .grid-2,
+    .grid-3 {
+      display: grid;
+      gap: 16px
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .concept {
+      border: var(--border);
+      padding: 18px;
+      background: #fff;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .concept strong {
+      font-size: 1.05rem
+    }
+
+    .callout {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 16px 18px;
+      margin: 20px 0;
+      background: #fff
+    }
+
+    .callout .label {
+      display: inline-block;
+      font-family: "DM Mono", monospace;
+      font-size: .72rem;
+      font-weight: 500;
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: #fff;
+      padding: 3px 7px;
+      margin-bottom: 8px
+    }
+
+    .callout p:last-child,
+    .concept p:last-child,
+    .panel p:last-child {
+      margin-bottom: 0
+    }
+
+    .code-wrap {
+      position: relative;
+      margin: 18px 0
+    }
+
+    pre {
+      margin: 0;
+      background: #111;
+      color: #f7f7f7;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 20px;
+      overflow: auto;
+      font-family: "DM Mono", ui-monospace, monospace;
+      font-size: .85rem;
+      line-height: 1.65;
+      tab-size: 2
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      padding: 5px 9px;
+      font-size: .75rem;
+      font-weight: 800;
+      z-index: 2
+    }
+
+    code:not(pre code) {
+      background: #e8edf7;
+      border: 1px solid #9da9bb;
+      padding: 1px 5px;
+      font-family: "DM Mono", monospace;
+      font-size: .88em
+    }
+
+    .code-note {
+      border: var(--border);
+      border-top: 0;
+      background: #e9edf4;
+      padding: 13px 16px;
+      font-family: "DM Mono", monospace;
+      font-size: .83rem
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35rem
+    }
+
+    li {
+      margin: 7px 0
+    }
+
+    .quiz {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      background: #fff;
+      padding: 20px;
+      margin: 20px 0
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px
+    }
+
+    .quiz-option {
+      text-align: left;
+      border: 2px solid var(--ink);
+      background: #fff;
+      padding: 11px 13px;
+      font-weight: 700
+    }
+
+    .quiz-option:hover {
+      background: var(--blue-light)
+    }
+
+    .quiz-option.correct {
+      background: var(--mint)
+    }
+
+    .quiz-option.wrong {
+      background: var(--pink)
+    }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 13px;
+      padding: 10px;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-feedback.show {
+      display: block
+    }
+
+    .reveal {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      margin: 18px 0
+    }
+
+    .reveal summary {
+      padding: 13px 16px;
+      cursor: pointer;
+      font-weight: 800;
+      background: var(--blue-light)
+    }
+
+    .reveal>div {
+      padding: 15px 16px
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: var(--border)
+    }
+
+    .nav-btn {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      background: #fff;
+      padding: 12px 18px;
+      font-weight: 900;
+      min-width: 130px
+    }
+
+    .nav-btn.primary {
+      background: var(--blue);
+      color: #fff
+    }
+
+    .nav-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      box-shadow: 3px 3px 0 #777
+    }
+
+    .finish {
+      display: none;
+      background: var(--mint);
+      border: var(--border);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-top: 24px
+    }
+
+    .finish.show {
+      display: block
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0
+    }
+
+    .checklist li {
+      padding: 10px 12px;
+      border: 2px solid var(--ink);
+      background: #fff;
+      margin: 8px 0
+    }
+
+    .checklist li::before {
+      content: "✓";
+      font-weight: 900;
+      margin-right: 9px;
+      color: var(--blue-dark)
+    }
+
+    .footer-note {
+      text-align: center;
+      font-family: "DM Mono", monospace;
+      font-size: .78rem;
+      margin: 28px 0 0
+    }
+
+    .theme-lab {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 18px
+    }
+
+    .theme-controls {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+      align-content: start
+    }
+
+    .demo-btn {
+      border: 2px solid var(--ink);
+      background: #fff;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 800
+    }
+
+    .demo-btn:hover {
+      background: var(--blue-light)
+    }
+
+    .demo-btn.active {
+      background: var(--yellow);
+      box-shadow: 3px 3px 0 var(--ink)
+    }
+
+    .phone {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 12px;
+      background: #1a1a1a;
+      min-height: 460px
+    }
+
+    .phone-screen {
+      height: 100%;
+      border: 2px solid var(--ink);
+      padding: 18px;
+      transition: background .18s, color .18s
+    }
+
+    .phone-screen.light {
+      background: #fdf8ff;
+      color: #1d1b20
+    }
+
+    .phone-screen.dark {
+      background: #141218;
+      color: #e6e1e5
+    }
+
+    .phone-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px
+    }
+
+    .phone-card {
+      border-radius: 20px;
+      padding: 18px;
+      margin: 14px 0
+    }
+
+    .light .phone-card {
+      background: #eaddff
+    }
+
+    .dark .phone-card {
+      background: #4f378b
+    }
+
+    .phone-action {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 800
+    }
+
+    .light .phone-action {
+      background: #6750a4;
+      color: #fff
+    }
+
+    .dark .phone-action {
+      background: #d0bcff;
+      color: #381e72
+    }
+
+    .scheme-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px
+    }
+
+    .swatch {
+      border: 2px solid var(--ink);
+      min-height: 100px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      font-family: "DM Mono", monospace;
+      font-size: .72rem
+    }
+
+    .swatch strong {
+      font-family: "Space Grotesk"
+    }
+
+    .type-sample {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 20px
+    }
+
+    .type-line {
+      padding: 10px 0;
+      border-bottom: 2px solid #ddd
+    }
+
+    .type-line:last-child {
+      border-bottom: 0
+    }
+
+    .component-demo {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px
+    }
+
+    .component-card {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 16px
+    }
+
+    .mini-btn {
+      display: inline-block;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: #6750a4;
+      color: white;
+      font-weight: 800
+    }
+
+    .mini-field {
+      border: 2px solid #6750a4;
+      border-radius: 8px;
+      padding: 11px;
+      background: #fff
+    }
+
+    .mini-chip {
+      display: inline-block;
+      border: 2px solid #6750a4;
+      border-radius: 999px;
+      padding: 7px 10px
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 10px
+    }
+
+    .flow-box {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 16px
+    }
+
+    .flow-arrow {
+      font-size: 1.8rem;
+      font-weight: 900
+    }
+
+    .comparison {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      margin: 18px 0
+    }
+
+    .comparison th,
+    .comparison td {
+      border: 2px solid var(--ink);
+      padding: 11px;
+      text-align: left;
+      vertical-align: top
+    }
+
+    .comparison th {
+      background: var(--yellow)
+    }
+
+    .challenge {
+      border: var(--border);
+      background: var(--yellow);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .references a {
+      color: var(--blue-dark);
+      font-weight: 800
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      .step-view.active {
+        animation: none
+      }
+
+      .progress-bar {
+        transition: none
+      }
+    }
+
+    @media(max-width:850px) {
+      :root {
+        --sidebar: 270px;
+        --mobile-bar-height: 65px
+      }
+
+      .sidebar {
+        inset: var(--mobile-bar-height) auto 0 0;
+        transform: translateX(-100%);
+        transition: transform .2s ease;
+        box-shadow: 10px 0 0 rgba(16, 16, 16, .18)
+      }
+
+      .sidebar.open {
+        transform: none
+      }
+
+      .mobile-bar {
+        display: flex;
+        height: var(--mobile-bar-height)
+      }
+
+      main {
+        margin-left: 0
+      }
+
+      .content {
+        width: min(940px, calc(100% - 28px));
+        padding-top: 24px
+      }
+    }
+
+    @media(max-width:650px) {
+      .content {
+        width: calc(100% - 18px);
+        padding-top: 16px
+      }
+
+      .step-header {
+        padding: 20px 16px
+      }
+
+      .panel,
+      .concept,
+      .quiz {
+        padding: 16px
+      }
+
+      .grid-2,
+      .grid-3,
+      .theme-lab,
+      .component-demo,
+      .flow {
+        grid-template-columns: 1fr
+      }
+
+      .flow-arrow {
+        transform: rotate(90deg);
+        justify-self: center
+      }
+
+      .scheme-grid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .nav-row {
+        position: sticky;
+        bottom: 0;
+        background: var(--paper);
+        padding: 12px 0;
+        z-index: 10
+      }
+
+      .nav-btn {
+        min-width: 0;
+        flex: 1;
+        padding: 11px 10px
+      }
+
+      pre {
+        font-size: .76rem;
+        padding: 16px 12px
+      }
+
+      .copy-btn {
+        position: static;
+        margin-bottom: 6px
+      }
+
+      .code-wrap {
+        display: flex;
+        flex-direction: column
+      }
+
+      .code-wrap pre {
+        order: 2
+      }
+
+      .code-wrap .copy-btn {
+        order: 1;
+        align-self: flex-end
+      }
+
+      .code-wrap .code-note {
+        order: 3
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+      <div class="brand">
+        <div class="eyebrow">Flutter UI · Codelab</div>
+        <h2>App Themes & Dark Mode</h2>
+        <p>One design language, everywhere.</p>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+        <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+          aria-valuenow="0">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+      <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+    </aside>
+    <div class="mobile-bar"><button class="menu-btn" id="menuBtn" aria-label="Open lesson navigation"
+        aria-expanded="false">☰</button>
+      <div class="mobile-title" id="mobileTitle">App Themes & Dark Mode</div>
+    </div>
+    <main>
+      <div class="content" id="content">
+
+        <section class="step-view" data-title="Why themes matter">
+          <header class="step-header"><span class="step-kicker">STEP 1 · DESIGN ONCE</span>
+            <h1>Stop styling every widget by hand</h1>
+            <p class="lede">A theme is the application-wide design contract for colors, typography, component
+              appearance, and light/dark behavior. Reusable widgets read from that contract instead of carrying
+              scattered style values.</p>
+            <div class="objective"><strong>By the end:</strong> You can build Material 3 light and dark themes with
+              <code>ThemeData</code>, <code>ColorScheme</code>, <code>TextTheme</code>, component themes, custom fonts,
+              and <code>ThemeMode</code>—then use them cleanly inside reusable widgets.</div>
+          </header>
+          <div class="grid-3">
+            <div class="concept"><strong>Consistency</strong>
+              <p>A shared <code>ThemeData</code> keeps screens and components visually aligned.</p>
+            </div>
+            <div class="concept"><strong>Maintainability</strong>
+              <p>Change one theme definition instead of editing dozens of widgets.</p>
+            </div>
+            <div class="concept"><strong>Dark mode</strong>
+              <p>The same widgets adapt by reading semantic colors from the active theme.</p>
+            </div>
+          </div>
+          <div class="callout"><span class="label">MENTAL MODEL</span>
+            <p>Think of a theme as design data flowing down the widget tree. Material widgets automatically use it, and
+              your reusable widgets can access it with <code>Theme.of(context)</code>.</p>
+          </div>
+          <div class="quiz" data-answer="1"
+            data-correct="Correct. The strongest benefit is centralizing visual decisions so the whole app stays consistent.">
+            <h3>Why use an application theme?</h3>
+            <div class="quiz-options"><button class="quiz-option">To avoid using Material widgets</button><button
+                class="quiz-option">To centralize visual rules across the app</button><button class="quiz-option">To
+                make every widget stateful</button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Build ThemeData">
+          <header class="step-header"><span class="step-kicker">STEP 2 · THEME DATA</span>
+            <h1>Start with a complete ThemeData</h1>
+            <p class="lede"><code>ThemeData</code> is Flutter's configuration object for a Material app. Material 3 is
+              the default in current Flutter, and most visual behavior is driven by <code>colorScheme</code> and
+              <code>textTheme</code>.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+            <pre><code>final lightTheme = ThemeData(
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: const Color(0xFF6750A4),
+    brightness: Brightness.light,
+  ),
+  textTheme: const TextTheme(
+    headlineMedium: TextStyle(
+      fontSize: 30,
+      fontWeight: FontWeight.w700,
+    ),
+    bodyLarge: TextStyle(fontSize: 16),
+  ),
+);</code></pre>
+            <div class="code-note">Material 3 is enabled by default in modern Flutter. The <code>useMaterial3</code>
+              flag is mainly relevant when explicitly opting out of Material 3.</div>
+          </div>
+          <div class="panel blue"><strong>Two important inputs</strong>
+            <p><code>ColorScheme</code> gives the app semantic color roles. <code>TextTheme</code> defines the
+              typography hierarchy. Component themes then refine specific widget families such as buttons or cards.</p>
+          </div>
+          <div class="quiz" data-answer="0"
+            data-correct="Correct. ThemeData is the application-wide Material configuration that MaterialApp can provide.">
+            <h3>What does ThemeData represent?</h3>
+            <div class="quiz-options"><button class="quiz-option">The visual configuration for Material
+                widgets</button><button class="quiz-option">Only the app's background color</button><button
+                class="quiz-option">A replacement for BuildContext</button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Use ColorScheme">
+          <header class="step-header"><span class="step-kicker">STEP 3 · SEMANTIC COLORS</span>
+            <h1>Use roles, not random colors</h1>
+            <p class="lede"><code>ColorScheme</code> names colors by responsibility: primary actions, surfaces,
+              text-on-surface, error states, and more. This lets the same widget adapt correctly across light and dark
+              themes.</p>
+          </header>
+          <div class="scheme-grid">
+            <div class="swatch" style="background:#6750A4;color:white"><strong>primary</strong>#6750A4</div>
+            <div class="swatch" style="background:#EADDFF"><strong>primaryContainer</strong>#EADDFF</div>
+            <div class="swatch" style="background:#FFFBFE"><strong>surface</strong>#FFFBFE</div>
+            <div class="swatch" style="background:#1D1B20;color:white"><strong>onSurface</strong>#1D1B20</div>
+          </div>
+          <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+            <pre><code>Card(
+  color: Theme.of(context).colorScheme.surface,
+  child: Padding(
+    padding: const EdgeInsets.all(16),
+    child: Text(
+      'Welcome back',
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
+    ),
+  ),
+)</code></pre>
+          </div>
+          <div class="grid-2">
+            <div class="concept"><strong>Good</strong>
+              <p>Use <code>colorScheme.primary</code>, <code>surface</code>, <code>onSurface</code>, <code>error</code>,
+                and other semantic roles.</p>
+            </div>
+            <div class="concept"><strong>Avoid</strong>
+              <p>Hard-coding <code>Colors.black</code> and <code>Colors.white</code> inside reusable widgets unless that
+                exact color is intentionally part of the design.</p>
+            </div>
+          </div>
+          <div class="quiz" data-answer="2"
+            data-correct="Correct. Semantic roles let the active theme decide the actual color for each mode.">
+            <h3>What should a reusable card usually use for its text color?</h3>
+            <div class="quiz-options"><button class="quiz-option"><code>Colors.black</code></button><button
+                class="quiz-option">A random hex value inside the card</button><button
+                class="quiz-option"><code>Theme.of(context).colorScheme.onSurface</code></button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Create a TextTheme">
+          <header class="step-header"><span class="step-kicker">STEP 4 · TYPOGRAPHY SYSTEM</span>
+            <h1>Give text styles a hierarchy</h1>
+            <p class="lede">Instead of inventing font sizes per screen, define typography roles once and consume them
+              through <code>Theme.of(context).textTheme</code>.</p>
+          </header>
+          <div class="type-sample">
+            <div class="type-line" style="font-size:38px;font-weight:700">displaySmall · Hero headings</div>
+            <div class="type-line" style="font-size:28px;font-weight:700">headlineMedium · Screen titles</div>
+            <div class="type-line" style="font-size:20px;font-weight:600">titleLarge · Card titles</div>
+            <div class="type-line" style="font-size:16px">bodyLarge · Primary body text</div>
+            <div class="type-line" style="font-size:14px">bodyMedium · Supporting text</div>
+          </div>
+          <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+            <pre><code>final baseTextTheme = ThemeData.light().textTheme;
+
+final appTextTheme = baseTextTheme.copyWith(
+  headlineMedium: baseTextTheme.headlineMedium?.copyWith(
+    fontWeight: FontWeight.w700,
+    letterSpacing: -0.5,
+  ),
+  titleLarge: baseTextTheme.titleLarge?.copyWith(
+    fontWeight: FontWeight.w600,
+  ),
+);</code></pre>
+          </div>
+          <div class="callout"><span class="label">REUSABLE WIDGET</span>
+            <p>Inside a component, prefer <code>Theme.of(context).textTheme.titleLarge</code> rather than creating
+              another <code>TextStyle(fontSize: ...)</code>. That keeps typography consistent and makes future redesigns
+              easier.</p>
+          </div>
+          <div class="quiz" data-answer="1"
+            data-correct="Correct. TextTheme defines named roles so screens and reusable widgets share the same hierarchy.">
+            <h3>What is the main purpose of TextTheme?</h3>
+            <div class="quiz-options"><button class="quiz-option">To replace every Text widget</button><button
+                class="quiz-option">To define reusable typography roles</button><button class="quiz-option">To control
+                only font color</button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Theme components">
+          <header class="step-header"><span class="step-kicker">STEP 5 · COMPONENT THEMES</span>
+            <h1>Style widget families once</h1>
+            <p class="lede">Component themes let you define consistent defaults for buttons, cards, inputs, chips, app
+              bars, navigation, and more without repeating style objects at every call site.</p>
+          </header>
+          <div class="component-demo">
+            <div class="component-card"><strong>FilledButton</strong>
+              <p><span class="mini-btn">Continue</span></p><small>Shape, padding, text style</small>
+            </div>
+            <div class="component-card"><strong>TextField</strong>
+              <p class="mini-field">Email address</p><small>Borders, fill, label style</small>
+            </div>
+            <div class="component-card"><strong>Chip</strong>
+              <p><span class="mini-chip">Flutter</span></p><small>Shape, background, label</small>
+            </div>
+          </div>
+          <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+            <pre><code>final theme = ThemeData(
+  colorScheme: scheme,
+  filledButtonTheme: FilledButtonThemeData(
+    style: FilledButton.styleFrom(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 14,
+      ),
+      textStyle: const TextStyle(
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+  ),
+  cardTheme: const CardThemeData(
+    margin: EdgeInsets.zero,
+  ),
+);</code></pre>
+          </div>
+          <div class="panel yellow"><strong>Local override still works.</strong>
+            <p>A component theme supplies defaults. A particular widget can still pass an explicit style when it has a
+              genuine one-off requirement.</p>
+          </div>
+          <div class="quiz" data-answer="0"
+            data-correct="Correct. A component theme centralizes defaults for one widget family while still allowing local overrides.">
+            <h3>Why use FilledButtonThemeData?</h3>
+            <div class="quiz-options"><button class="quiz-option">To configure default FilledButton styling across the
+                app</button><button class="quiz-option">To force every button to use identical text</button><button
+                class="quiz-option">To switch from dark to light mode</button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Add custom fonts">
+          <header class="step-header"><span class="step-kicker">STEP 6 · CUSTOM FONTS</span>
+            <h1>Make the font part of the theme</h1>
+            <p class="lede">A custom font should be configured once and then flow through the app. Keep font files in
+              the project, declare them in <code>pubspec.yaml</code>, and apply the family through the theme.</p>
+          </header>
+          <div class="grid-2">
+            <div>
+              <h2>pubspec.yaml</h2>
+              <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+                <pre><code>flutter:
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700</code></pre>
+              </div>
+            </div>
+            <div>
+              <h2>ThemeData</h2>
+              <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+                <pre><code>final theme = ThemeData(
+  fontFamily: 'Inter',
+  colorScheme: scheme,
+);</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="callout"><span class="label">IMPORTANT</span>
+            <p>The family name used in <code>ThemeData(fontFamily: ...)</code> must match the family declared in
+              <code>pubspec.yaml</code>. After changing assets or <code>pubspec.yaml</code>, restart the app if hot
+              reload does not pick up the change.</p>
+          </div>
+          <div class="quiz" data-answer="2"
+            data-correct="Correct. The font family becomes an app-wide default when it is configured on ThemeData.">
+            <h3>Where should an app-wide custom font usually be applied?</h3>
+            <div class="quiz-options"><button class="quiz-option">Individually in every Text widget</button><button
+                class="quiz-option">Only inside AppBar</button><button class="quiz-option">In ThemeData or a shared
+                TextTheme</button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Light and dark themes">
+          <header class="step-header"><span class="step-kicker">STEP 7 · TWO THEMES, ONE UI</span>
+            <h1>Build light and dark from the same design language</h1>
+            <p class="lede">Create two <code>ThemeData</code> objects with matching structure but different
+              brightness-aware color schemes. Then the same reusable widgets can render correctly in either mode.</p>
+          </header>
+          <div class="theme-lab">
+            <div class="theme-controls"><strong>Preview ThemeMode</strong><button class="demo-btn active" type="button"
+                data-mode="light">Light</button><button class="demo-btn" type="button" data-mode="dark">Dark</button>
+              <p id="themeReadout">Light theme active: bright surfaces, dark on-surface text.</p>
+            </div>
+            <div class="phone">
+              <div class="phone-screen light" id="phoneScreen">
+                <div class="phone-top"><strong>Course Hub</strong><span>☀</span></div>
+                <h2 style="margin-top:0">Welcome back</h2>
+                <p>Your reusable widgets are reading from the active theme.</p>
+                <div class="phone-card"><strong>Flutter UI</strong>
+                  <p>Theme-aware card surface</p><span class="phone-action">Continue</span>
+                </div>
+                <div class="phone-card"><strong>Dark Mode</strong>
+                  <p>No hard-coded white background needed.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+            <pre><code>ThemeData buildTheme(Brightness brightness) {
+  final scheme = ColorScheme.fromSeed(
+    seedColor: const Color(0xFF6750A4),
+    brightness: brightness,
+  );
+
+  return ThemeData(
+    colorScheme: scheme,
+    fontFamily: 'Inter',
+  );
+}
+
+final lightTheme = buildTheme(Brightness.light);
+final darkTheme = buildTheme(Brightness.dark);</code></pre>
+          </div>
+          <div class="quiz" data-answer="1"
+            data-correct="Correct. Reusable widgets should read semantic theme values, so they adapt when the active ThemeData changes.">
+            <h3>What makes one widget work in both themes?</h3>
+            <div class="quiz-options"><button class="quiz-option">Duplicating the widget for dark mode</button><button
+                class="quiz-option">Reading colors and text styles from the active theme</button><button
+                class="quiz-option">Changing every color with setState inside the widget</button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Use ThemeMode">
+          <header class="step-header"><span class="step-kicker">STEP 8 · MATERIALAPP</span>
+            <h1>Let ThemeMode choose the active theme</h1>
+            <p class="lede"><code>MaterialApp</code> accepts <code>theme</code>, <code>darkTheme</code>, and
+              <code>themeMode</code>. <code>ThemeMode.system</code> follows the device preference; light and dark force
+              a specific mode.</p>
+          </header>
+          <div class="flow">
+            <div class="flow-box"><strong>User / system choice</strong>
+              <p>Light, dark, or device setting</p>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><strong>ThemeMode</strong>
+              <p>Selects active ThemeData</p>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><strong>Widget tree</strong>
+              <p>Reads theme with context</p>
+            </div>
+          </div>
+          <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+            <pre><code>MaterialApp(
+  theme: lightTheme,
+  darkTheme: darkTheme,
+  themeMode: ThemeMode.system,
+  home: const HomeScreen(),
+)</code></pre>
+          </div>
+          <table class="comparison">
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Behavior</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>ThemeMode.system</code></td>
+                <td>Uses the platform's current light/dark preference.</td>
+              </tr>
+              <tr>
+                <td><code>ThemeMode.light</code></td>
+                <td>Always uses <code>theme</code>.</td>
+              </tr>
+              <tr>
+                <td><code>ThemeMode.dark</code></td>
+                <td>Uses <code>darkTheme</code> when provided.</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="panel mint"><strong>User-controlled dark mode</strong>
+            <p>Keep the selected <code>ThemeMode</code> in app-level state. When it changes, rebuild
+              <code>MaterialApp</code> with the new value. Persist the choice later if the product requires it.</p>
+          </div>
+          <div class="quiz" data-answer="0"
+            data-correct="Correct. ThemeMode.system follows the platform preference and chooses the corresponding theme.">
+            <h3>Which mode follows the device setting?</h3>
+            <div class="quiz-options"><button class="quiz-option"><code>ThemeMode.system</code></button><button
+                class="quiz-option"><code>ThemeMode.light</code></button><button
+                class="quiz-option"><code>ThemeMode.dark</code></button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Theme reusable widgets">
+          <header class="step-header"><span class="step-kicker">STEP 9 · CONSUME THE THEME</span>
+            <h1>Reusable widgets should ask the theme</h1>
+            <p class="lede">A good reusable widget owns structure and behavior, but delegates application styling to the
+              theme wherever possible.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+            <pre><code>class CourseCard extends StatelessWidget {
+  const CourseCard({
+    super.key,
+    required this.title,
+    required this.onPressed,
+  });
+
+  final String title;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: theme.textTheme.titleLarge,
+              ),
+            ),
+            FilledButton(
+              onPressed: onPressed,
+              child: const Text('Open'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+            <div class="code-note">The card does not specify its background color, button style, or exact title font.
+              The active theme already defines those rules.</div>
+          </div>
+          <div class="grid-3">
+            <div class="concept"><strong>Use Theme.of</strong>
+              <p>Read <code>colorScheme</code> and <code>textTheme</code> when your custom widget needs semantic values.
+              </p>
+            </div>
+            <div class="concept"><strong>Trust component themes</strong>
+              <p>Let Material components inherit configured defaults instead of restyling every instance.</p>
+            </div>
+            <div class="concept"><strong>Keep exceptions local</strong>
+              <p>Override a style only when that specific component intentionally differs from the system.</p>
+            </div>
+          </div>
+          <div class="quiz" data-answer="2"
+            data-correct="Correct. The reusable widget should consume the shared theme rather than recreate application styling internally.">
+            <h3>Which approach scales best?</h3>
+            <div class="quiz-options"><button class="quiz-option">Hard-code colors in every reusable
+                widget</button><button class="quiz-option">Duplicate a light and dark version of every
+                component</button><button class="quiz-option">Use ThemeData plus Theme.of(context)</button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Build the final theme">
+          <header class="step-header"><span class="step-kicker">STEP 10 · PUT IT TOGETHER</span>
+            <h1>Create one maintainable theme system</h1>
+            <p class="lede">Now combine the pieces into a small theme module and wire it into the app. The design system
+              becomes reusable just like your widgets.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+            <pre><code>import 'package:flutter/material.dart';
+
+class AppTheme {
+  static const seed = Color(0xFF6750A4);
+
+  static ThemeData light() => _build(Brightness.light);
+  static ThemeData dark() => _build(Brightness.dark);
+
+  static ThemeData _build(Brightness brightness) {
+    final scheme = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: brightness,
+    );
+
+    return ThemeData(
+      colorScheme: scheme,
+      fontFamily: 'Inter',
+      textTheme: const TextTheme(
+        headlineMedium: TextStyle(fontWeight: FontWeight.w700),
+        titleLarge: TextStyle(fontWeight: FontWeight.w600),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 14,
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+          <details class="reveal">
+            <summary>Show the MaterialApp wiring</summary>
+            <div>
+              <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+                <pre><code>class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.system,
+      home: const HomeScreen(),
+    );
+  }
+}</code></pre>
+              </div>
+            </div>
+          </details>
+          <div class="challenge">
+            <h3>Final challenge: add a user theme switcher</h3>
+            <ol>
+              <li>Move the current <code>ThemeMode</code> into app-level state.</li>
+              <li>Create three choices: System, Light, and Dark.</li>
+              <li>Pass the selected mode to <code>MaterialApp.themeMode</code>.</li>
+              <li>Build a reusable settings tile that reads text and colors from the theme.</li>
+              <li>Switch modes and verify every screen, card, button, input, and text style remains readable.</li>
+              <li>Remove any hard-coded colors that break one of the modes.</li>
+            </ol>
+          </div>
+          <h2>Completion checklist</h2>
+          <ul class="checklist">
+            <li>I understand ThemeData as the app-wide Material design configuration.</li>
+            <li>I use ColorScheme roles instead of scattered hard-coded colors.</li>
+            <li>I use TextTheme for shared typography hierarchy.</li>
+            <li>I use component themes for consistent Material widgets.</li>
+            <li>I can configure a custom font through pubspec.yaml and ThemeData.</li>
+            <li>I can build matching light and dark ThemeData objects.</li>
+            <li>I understand ThemeMode.system, light, and dark.</li>
+            <li>My reusable widgets consume Theme.of(context) instead of recreating the design system.</li>
+          </ul>
+          <div class="panel references">
+            <h3>Continue learning</h3>
+            <p>Use the official Flutter references for <a href="https://docs.flutter.dev/cookbook/design/themes">sharing
+                colors and font styles with themes</a>, <a
+                href="https://api.flutter.dev/flutter/material/ThemeData-class.html">ThemeData</a>, and <a
+                href="https://api.flutter.dev/flutter/material/ColorScheme-class.html">ColorScheme</a>.</p>
+          </div>
+          <div class="finish" id="finishBox">
+            <h2>Codelab complete! 🎉</h2>
+            <p>You can now create a Material 3 design system that stays consistent across screens, reusable widgets, and
+              both light and dark mode.</p>
+          </div>
+          <p class="footer-note">App Themes and Dark Mode · Flutter UI · Beginner Foundation</p>
+        </section>
+
+      </div>
+    </main>
+  </div>
+  <script>
+    (() => {
+      const steps = [...document.querySelectorAll('.step-view')];
+      const titles = steps.map(step => step.dataset.title);
+      const nav = document.getElementById('stepNav');
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.getElementById('menuBtn');
+      const content = document.getElementById('content');
+      const completed = new Set();
+      let current = 0;
+      nav.innerHTML = titles.map((title, index) => `<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+      const getHashStep = () => { const match = location.hash.match(/^#step-(\d+)$/); const value = match ? Number(match[1]) - 1 : 0; return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0 };
+      function render(updateHash = true) { current = Math.max(0, Math.min(current, steps.length - 1)); steps.forEach((step, index) => { const active = index === current; step.classList.toggle('active', active); step.setAttribute('aria-hidden', String(!active)) }); document.querySelectorAll('.step-link').forEach((button, index) => { button.classList.toggle('active', index === current); button.setAttribute('aria-current', index === current ? 'step' : 'false'); button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '' }); const percent = Math.round(((current + 1) / steps.length) * 100); document.getElementById('progressBar').style.width = `${percent}%`; document.getElementById('progressText').textContent = `${percent}%`; document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent)); document.getElementById('mobileTitle').textContent = titles[current]; document.getElementById('prevBtn').disabled = current === 0; document.getElementById('nextBtn').disabled = current === steps.length - 1; document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →'; document.getElementById('finishBox')?.classList.toggle('show', current === steps.length - 1); document.title = `${titles[current]} — App Themes and Dark Mode`; if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`); window.scrollTo({ top: 0, behavior: 'auto' }); sidebar.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false') }
+      function goTo(index) { if (index < 0 || index >= steps.length) return; completed.add(current); current = index; render() }
+      const navRow = document.createElement('div'); navRow.className = 'nav-row'; navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>'; content.appendChild(navRow);
+      document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1)); document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1)); nav.addEventListener('click', event => { const button = event.target.closest('.step-link'); if (button) goTo(Number(button.dataset.step)) }); menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)) });
+      document.addEventListener('click', async event => { const copy = event.target.closest('.copy-btn'); if (copy) { const code = copy.parentElement.querySelector('pre code')?.textContent ?? ''; try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!' } catch { copy.textContent = 'Select & copy' } setTimeout(() => copy.textContent = 'Copy', 1500); return } const option = event.target.closest('.quiz-option'); if (option) { const quiz = option.closest('.quiz'); if (quiz.dataset.answered) return; const options = [...quiz.querySelectorAll('.quiz-option')]; const choice = options.indexOf(option); const answer = Number(quiz.dataset.answer); quiz.dataset.answered = 'true'; options.forEach(button => button.disabled = true); option.classList.add(choice === answer ? 'correct' : 'wrong'); if (choice !== answer) options[answer].classList.add('correct'); const feedback = quiz.querySelector('.quiz-feedback'); feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`; feedback.classList.add('show') } });
+      const phone = document.getElementById('phoneScreen'); const readout = document.getElementById('themeReadout'); document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => { document.querySelectorAll('[data-mode]').forEach(item => item.classList.toggle('active', item === button)); const mode = button.dataset.mode; phone.classList.toggle('light', mode === 'light'); phone.classList.toggle('dark', mode === 'dark'); phone.querySelector('.phone-top span').textContent = mode === 'light' ? '☀' : '☾'; readout.textContent = mode === 'light' ? 'Light theme active: bright surfaces, dark on-surface text.' : 'Dark theme active: dark surfaces, light on-surface text.' }));
+      window.addEventListener('popstate', () => { current = getHashStep(); render(false) }); window.addEventListener('hashchange', () => { current = getHashStep(); render(false) }); document.addEventListener('keydown', event => { if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return; if (event.key === 'ArrowRight') goTo(current + 1); if (event.key === 'ArrowLeft') goTo(current - 1) }); current = getHashStep(); render(false);
+    })();
+  </script>
+</body>
+
+</html>
