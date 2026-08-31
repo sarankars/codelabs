@@ -2,218 +2,104 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="A beginner-friendly two-hour codelab for building, deploying, and testing a Java Servlet and JSP form application with Maven and Tomcat.">
-  <meta name="theme-color" content="#111d32">
-  <title>Servlets and JSP Form Handling · Full Stack Development Codelab</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Build and run a beginner Servlet and JSP form project with Maven, Jetty, and VS Code.">
+  <title>Servlets and JSP Form Handling Codelab</title>
   <link rel="stylesheet" href="../module3.css">
 </head>
-<body data-steps='["Start here","How Java web apps work","Servlet lifecycle","Set up the tools","Project structure","Build the input form","Process the request","Display the result","Configure the app","Build and deploy","Test and troubleshoot","Check and extend"]'>
-  <aside class="sidebar" id="sidebar">
+<body data-steps='["See what you will build","Create the Maven webapp in VS Code","Prepare the generated project","Create the JSP form","Create the Servlet","Create the result JSP","Run and test before packaging","Build the WAR and review"]'>
+  <aside class="sidebar" id="sidebar" aria-label="Lesson steps">
     <div class="brand">
-      <small>Module III · Program 6</small>
+      <small>Full Stack Development · Module III</small>
       <h2>Servlets and JSP Form Handling</h2>
-      <p>Build a small Java web application from browser request to rendered response.</p>
+      <p>Beginner codelab · 2 hours</p>
     </div>
-    <div class="progress-meta"><span>PROGRESS</span><span id="progressText">0%</span></div>
-    <div class="track"><div class="bar" id="progressBar"></div></div>
-    <nav class="steps" id="stepNav" aria-label="Codelab steps"></nav>
+    <div class="progress-meta"><span>Progress</span><span id="progressText">13%</span></div>
+    <div class="track" aria-hidden="true"><div class="bar" id="progressBar"></div></div>
+    <nav class="steps" id="stepNav" aria-label="Codelab navigation"></nav>
   </aside>
 
   <div class="mobile-bar">
-    <button id="menuButton" type="button" aria-label="Open lesson steps" aria-expanded="false">☰</button>
-    <strong id="mobileTitle">Start here</strong>
+    <button id="menuButton" type="button" aria-label="Open lesson menu" aria-expanded="false">☰</button>
+    <strong id="mobileTitle">See what you will build</strong>
   </div>
 
-  <main class="main"><div class="content">
-    <section class="view">
-      <header class="hero">
-        <span class="eyebrow">Step 1 · 5 minutes</span>
-        <h1>Send a form to Java and show the answer</h1>
-        <p>You will build a real web application in which a browser sends a name and email, a Servlet checks the values, and a JSP page displays the result.</p>
-      </header>
+  <main class="main">
+    <div class="content">
+      <section class="view" id="step-1">
+        <header class="hero">
+          <span class="eyebrow">Step 1 · 5 minutes</span>
+          <h1>Build your first Servlet and JSP form</h1>
+          <p>You will create a small Java web application, run it immediately with Jetty, submit a name and email, and only then package it as a WAR file.</p>
+        </header>
 
-      <div class="grid">
-        <article class="card">
-          <span class="badge">You will understand</span>
-          <ul>
-            <li>What Tomcat, a Servlet, and a JSP page each do</li>
-            <li>How HTTP requests move through a Java web application</li>
-            <li>The Servlet lifecycle: <code>init</code>, request handling, and <code>destroy</code></li>
-            <li>Why request attributes are safer than Servlet fields</li>
-          </ul>
-        </article>
-        <article class="card">
-          <span class="badge">You will build</span>
-          <ul>
-            <li>A JSP form with accessible labels</li>
-            <li>A Servlet mapped to <code>/profile</code></li>
-            <li>Server-side validation and useful error messages</li>
-            <li>A Maven WAR that runs on Tomcat</li>
-          </ul>
-        </article>
-      </div>
-
-      <h2>Before you begin</h2>
-      <p>You should know basic HTML forms and beginner Java: classes, methods, strings, and <code>if</code> statements. You do not need previous Servlet or JSP experience.</p>
-      <ul class="checklist">
-        <li>Allow about two hours and complete the steps in order.</li>
-        <li>Use the supplied <a href="lab-app/pom.xml">Maven project</a>, or recreate each file while following the guide.</li>
-        <li>Keep a terminal open at the <code>lab-app</code> folder.</li>
-      </ul>
-
-      <h2>Your 120-minute route</h2>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Part</th><th>Time</th><th>Result</th></tr></thead>
-        <tbody>
-          <tr><td>Concepts and lifecycle</td><td>25 min</td><td>You can explain the request path and Servlet lifecycle.</td></tr>
-          <tr><td>Tools and project</td><td>25 min</td><td>Your Java, Maven, Tomcat, and folders are ready.</td></tr>
-          <tr><td>Form, Servlet, JSP, configuration</td><td>45 min</td><td>The application code is complete.</td></tr>
-          <tr><td>Build, deploy, test, review</td><td>25 min</td><td>The application runs and you can diagnose common errors.</td></tr>
-        </tbody>
-      </table></div>
-      <div class="callout blue"><strong>Modern package names:</strong> this lesson uses <code>jakarta.servlet</code> with Tomcat 10.1. Older tutorials may use <code>javax.servlet</code>; those imports are for Tomcat 9 and earlier and cannot simply be mixed into this project.</div>
-    </section>
-
-    <section class="view">
-      <header class="hero">
-        <span class="eyebrow">Step 2 · 10 minutes</span>
-        <h1>A Java web app is a request-and-response team</h1>
-        <p>The browser, Tomcat, Servlet, and JSP have different jobs. Understanding those jobs makes the code much easier to follow.</p>
-      </header>
-
-      <h2>Follow one form submission</h2>
-      <div class="pipeline">
-        <div class="stage"><h3>1. Browser</h3><p>Collects the name and email, then sends an HTTP POST request.</p></div>
-        <div class="stage"><h3>2. Tomcat</h3><p>Receives the request and finds the Servlet mapped to <code>/profile</code>.</p></div>
-        <div class="stage"><h3>3. Servlet</h3><p>Reads parameters, validates them, and adds request attributes.</p></div>
-        <div class="stage"><h3>4. JSP</h3><p>Turns the attributes into safe HTML.</p></div>
-        <div class="stage"><h3>5. Response</h3><p>Tomcat returns the generated HTML to the browser.</p></div>
-      </div>
-
-      <div class="grid">
-        <article class="card"><span class="badge">Controller</span><h3>The Servlet decides</h3><p>A Servlet is a Java class managed by Tomcat. It handles requests, validates data, and decides which view should render.</p></article>
-        <article class="card"><span class="badge">View</span><h3>The JSP presents</h3><p>A JSP is a server-side template. Tomcat translates it into Java behind the scenes, then runs it to produce HTML.</p></article>
-      </div>
-
-      <h2>POST instead of GET</h2>
-      <p>A GET request normally asks for a page and places parameters in the URL. A POST request sends form data in the request body. We use POST because the user is submitting information to the server.</p>
-      <div class="lab">
-        <div class="lab-head"><strong>Explore · Build the request</strong><span class="mono">type sample values</span></div>
-        <div class="lab-body">
-          <div class="grid">
-            <div><label for="requestName">Name</label><input id="requestName" value="Asha Rao"></div>
-            <div><label for="requestEmail">Email</label><input id="requestEmail" type="email" value="asha@example.com"></div>
-          </div>
-          <div class="request-preview mono" id="requestPreview" aria-live="polite"></div>
+        <div class="grid three">
+          <article class="card"><span class="badge">Input</span><h3>Form JSP</h3><p><code>index.jsp</code> collects a name and email.</p></article>
+          <article class="card"><span class="badge">Java</span><h3>Servlet</h3><p><code>FormServlet</code> receives the submitted values.</p></article>
+          <article class="card"><span class="badge">Output</span><h3>Result JSP</h3><p><code>result.jsp</code> shows the values in the browser.</p></article>
         </div>
-      </div>
-      <div class="callout good"><strong>Keep this picture in mind:</strong> the browser never runs the Servlet or JSP. Tomcat runs them on the server and sends only the resulting HTML to the browser.</div>
-    </section>
 
-    <section class="view">
-      <header class="hero">
-        <span class="eyebrow">Step 3 · 10 minutes</span>
-        <h1>Tomcat manages the Servlet lifecycle</h1>
-        <p>You create the Servlet class, but Tomcat creates and manages its object. The lifecycle describes what happens from startup to shutdown.</p>
-      </header>
-
-      <div class="lab">
-        <div class="lab-head"><strong>Explore · Lifecycle stages</strong><span class="mono">select a stage</span></div>
-        <div class="lab-body">
-          <div class="lifecycle-controls" role="group" aria-label="Servlet lifecycle stages">
-            <button class="lifecycle-button active" type="button" data-life="load">1. Load</button>
-            <button class="lifecycle-button" type="button" data-life="init">2. init()</button>
-            <button class="lifecycle-button" type="button" data-life="service">3. service()</button>
-            <button class="lifecycle-button" type="button" data-life="destroy">4. destroy()</button>
-          </div>
-          <div class="lifecycle-panel" id="lifecyclePanel" aria-live="polite"></div>
+        <h2>The complete request journey</h2>
+        <div class="pipeline" aria-label="Browser request flow">
+          <div class="stage"><strong>1. Browser</strong><p>The student fills in the form.</p></div>
+          <div class="stage"><strong>2. POST</strong><p>The browser sends the form to <code>/submit</code>.</p></div>
+          <div class="stage"><strong>3. Servlet</strong><p>Java reads the two parameters.</p></div>
+          <div class="stage"><strong>4. Forward</strong><p>The same request moves to <code>result.jsp</code>.</p></div>
+          <div class="stage"><strong>5. HTML</strong><p>The result appears in the browser.</p></div>
         </div>
-      </div>
 
-      <h2>How <code>HttpServlet</code> handles requests</h2>
-      <p>Tomcat calls <code>service()</code> for each HTTP request. The inherited <code>HttpServlet.service()</code> method looks at the HTTP method and calls a more specific method such as <code>doGet()</code> or <code>doPost()</code>. In this lab, we override <code>doPost()</code> to process the form.</p>
+        <div class="callout good"><p><strong>Your goal:</strong> open <code>http://localhost:8080/student-form/</code>, submit the form, and see both values on the result page.</p></div>
+        <h2>What you need</h2>
+        <ul class="checklist">
+          <li>Java Development Kit (JDK) 17 or newer</li>
+          <li>Visual Studio Code</li>
+          <li>Extension Pack for Java, including Maven for Java</li>
+          <li>About 120 minutes</li>
+        </ul>
+      </section>
 
-      <div class="callout coral">
-        <strong>Important concurrency rule:</strong> one Servlet object can serve several requests on different threads. Do not store a student's name or email in instance fields. Keep request-specific values in local variables and request attributes, as this project does.
-      </div>
-      <div class="quiz" data-answer="1">
-        <h3>Where should a submitted email be stored while one request is processed?</h3>
-        <div class="options">
-          <button class="option" type="button">In a mutable field on the Servlet object</button>
-          <button class="option" type="button">In a local variable or request attribute</button>
-          <button class="option" type="button">In the Servlet class name</button>
-        </div>
-        <p class="feedback">Correct. Local variables and request attributes belong to the current request, so simultaneous users do not overwrite one another.</p>
-      </div>
-    </section>
+      <section class="view" id="step-2">
+        <header class="hero"><span class="eyebrow">Step 2 · 15 minutes</span><h1>Create the Maven webapp in VS Code</h1><p>Let Maven generate the starting folders. You do not need to create the entire structure by hand.</p></header>
 
-    <section class="view">
-      <header class="hero">
-        <span class="eyebrow">Step 4 · 15 minutes</span>
-        <h1>Prepare Java, Maven, and Tomcat</h1>
-        <p>Java compiles the Servlet, Maven builds the project, and Tomcat runs the WAR as a web application.</p>
-      </header>
+        <h2>1. Check the tools</h2>
+        <p>Open a terminal and run these commands. A version number should appear for both.</p>
+        <div class="code-card"><div class="code-head"><span>Terminal</span><button class="copy-button" type="button" data-copy="#verify-tools">Copy</button></div><pre id="verify-tools"><code>java -version
+mvn -version</code></pre></div>
 
-      <h2>1. Verify Java 17 or later</h2>
-      <div class="code-card"><div class="code-head"><span>Terminal</span><button class="copy-button" data-copy="#verifyJava">Copy</button></div><pre id="verifyJava"><code>java -version
-javac -version</code></pre></div>
-      <p>Both commands should report version 17 or later. If the terminal cannot find Java, install a JDK—not only a JRE—and reopen the terminal.</p>
+        <h2>2. Generate the project</h2>
+        <ol>
+          <li>Install <strong>Extension Pack for Java</strong> from the VS Code Extensions view.</li>
+          <li>Open the Command Palette with <strong>Cmd+Shift+P</strong> on macOS or <strong>Ctrl+Shift+P</strong> on Windows/Linux.</li>
+          <li>Run <strong>Maven: Create Maven Project</strong>.</li>
+          <li>Choose <code>maven-archetype-webapp</code>, then version <code>1.4</code>.</li>
+          <li>Enter group ID <code>com.example.studentform</code>.</li>
+          <li>Enter artifact ID <code>student-form</code>.</li>
+          <li>Accept version <code>1.0-SNAPSHOT</code>; we will replace it shortly.</li>
+          <li>Select a parent folder and open the generated <code>student-form</code> folder in VS Code.</li>
+        </ol>
 
-      <h2>2. Verify Maven</h2>
-      <div class="code-card"><div class="code-head"><span>Terminal</span><button class="copy-button" data-copy="#verifyMaven">Copy</button></div><pre id="verifyMaven"><code>mvn -version</code></pre></div>
-      <p>Maven should report its version and the Java installation it is using. If Maven reports an older Java version, correct <code>JAVA_HOME</code> before continuing.</p>
+        <div class="callout blue"><p><strong>What you should see:</strong> <code>pom.xml</code>, <code>src/main/webapp/index.jsp</code>, and <code>src/main/webapp/WEB-INF/web.xml</code>.</p></div>
+        <div class="file-tree" aria-label="Generated project structure"><span class="folder">student-form/</span><br>├── pom.xml<br>└── <span class="folder">src/main/webapp/</span><br>&nbsp;&nbsp;&nbsp;&nbsp;├── index.jsp<br>&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="folder">WEB-INF/</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── web.xml</div>
+        <p>VS Code may display <code>src/main/webapp</code> on one line. That is only the <strong>Compact Folders</strong> view; the real folders are still nested correctly. A <code>target</code> folder may also appear after Maven runs. It contains generated output and should not be edited.</p>
+      </section>
 
-      <h2>3. Download Apache Tomcat 10.1</h2>
-      <ol>
-        <li>Open the official <a href="https://tomcat.apache.org/download-10.cgi">Tomcat 10 download page</a>.</li>
-        <li>Download the Core ZIP for Windows or the Core <code>tar.gz</code> for macOS/Linux.</li>
-        <li>Extract it to a simple folder, such as <code>C:\tools\apache-tomcat-10.1</code> or <code>~/tools/apache-tomcat-10.1</code>.</li>
-        <li>Treat that extracted folder as <code>CATALINA_HOME</code>.</li>
-      </ol>
-      <div class="callout warn"><strong>Version check:</strong> Tomcat 10.1 implements Servlet 6.0 and JSP 3.1. Do not deploy this Jakarta-based project to Tomcat 9.</div>
+      <section class="view" id="step-3">
+        <header class="hero"><span class="eyebrow">Step 3 · 20 minutes</span><h1>Prepare the generated project</h1><p>Add the Java source folder, then give Maven the exact libraries and plugins needed to compile, run, and package this application.</p></header>
 
-      <h2>IDE notes</h2>
-      <div class="grid three">
-        <article class="card"><h3>IntelliJ IDEA</h3><p>Open the <code>lab-app</code> folder as a Maven project. The free Community edition can still edit and build it from the terminal.</p></article>
-        <article class="card"><h3>Eclipse</h3><p>Use <strong>File → Import → Existing Maven Projects</strong>, then choose <code>lab-app</code>.</p></article>
-        <article class="card"><h3>VS Code</h3><p>Open <code>lab-app</code> and install the Extension Pack for Java if Java language support is missing.</p></article>
-      </div>
-    </section>
+        <h2>1. Create the Java package</h2>
+        <p>In the Explorer, create these nested folders under <code>src/main</code>:</p>
+        <div class="command">java/com/example/studentform</div>
+        <p>The completed structure will contain <code>src/main/java/com/example/studentform/FormServlet.java</code>.</p>
 
-    <section class="view">
-      <header class="hero">
-        <span class="eyebrow">Step 5 · 10 minutes</span>
-        <h1>Read the project before writing code</h1>
-        <p>Maven follows a standard folder structure. Each file has one clear responsibility.</p>
-      </header>
-
-      <div class="file-tree mono" aria-label="Project file tree">
-        <span class="folder">lab-app/</span><br>
-        ├── <span class="file">pom.xml</span><br>
-        └── <span class="folder">src/main/</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;├── <span class="folder">java/com/sarankar/codelabs/</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="file">ProfileServlet.java</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;└── <span class="folder">webapp/</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">index.jsp</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="folder">css/</span><span class="file">styles.css</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="folder">WEB-INF/</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">result.jsp</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="file">web.xml</span>
-      </div>
-
-      <h2>Why is the result JSP inside <code>WEB-INF</code>?</h2>
-      <p>A browser cannot request a file inside <code>WEB-INF</code> directly. Only server-side code can forward to it. This ensures the result page is reached through the Servlet, which supplies the required attributes.</p>
-
-      <h2>Maven configuration</h2>
-      <p>The POM declares WAR packaging, Java 17, the Servlet API, JSTL, and build plugins. The Servlet API has <code>provided</code> scope because Tomcat supplies it at runtime.</p>
-      <div class="code-card"><div class="code-head"><span>lab-app/pom.xml</span><button class="copy-button" data-copy="#pomCode">Copy</button></div><pre><code id="pomCode" data-source="lab-app/pom.xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+        <h2>2. Replace pom.xml</h2>
+        <p>The Servlet API lets the Java class compile. Jetty runs the source project while you develop. The WAR plugin creates the deployable file at the end.</p>
+        <div class="code-card"><div class="code-head"><span>pom.xml</span><button class="copy-button" type="button" data-copy="#pom-source">Copy</button></div><pre id="pom-source" data-source="lab-app/pom.xml"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
   &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
 
-  &lt;groupId&gt;com.sarankar.codelabs&lt;/groupId&gt;
+  &lt;groupId&gt;com.example.studentform&lt;/groupId&gt;
   &lt;artifactId&gt;student-form&lt;/artifactId&gt;
   &lt;version&gt;1.0.0&lt;/version&gt;
   &lt;packaging&gt;war&lt;/packaging&gt;
@@ -230,16 +116,6 @@ javac -version</code></pre></div>
       &lt;version&gt;6.0.0&lt;/version&gt;
       &lt;scope&gt;provided&lt;/scope&gt;
     &lt;/dependency&gt;
-    &lt;dependency&gt;
-      &lt;groupId&gt;jakarta.servlet.jsp.jstl&lt;/groupId&gt;
-      &lt;artifactId&gt;jakarta.servlet.jsp.jstl-api&lt;/artifactId&gt;
-      &lt;version&gt;3.0.2&lt;/version&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-      &lt;groupId&gt;org.glassfish.web&lt;/groupId&gt;
-      &lt;artifactId&gt;jakarta.servlet.jsp.jstl&lt;/artifactId&gt;
-      &lt;version&gt;3.0.1&lt;/version&gt;
-    &lt;/dependency&gt;
   &lt;/dependencies&gt;
 
   &lt;build&gt;
@@ -249,6 +125,17 @@ javac -version</code></pre></div>
         &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
         &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
         &lt;version&gt;3.15.0&lt;/version&gt;
+      &lt;/plugin&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.eclipse.jetty.ee10&lt;/groupId&gt;
+        &lt;artifactId&gt;jetty-ee10-maven-plugin&lt;/artifactId&gt;
+        &lt;version&gt;12.0.37&lt;/version&gt;
+        &lt;configuration&gt;
+          &lt;scan&gt;1&lt;/scan&gt;
+          &lt;webApp&gt;
+            &lt;contextPath&gt;/student-form&lt;/contextPath&gt;
+          &lt;/webApp&gt;
+        &lt;/configuration&gt;
       &lt;/plugin&gt;
       &lt;plugin&gt;
         &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
@@ -261,68 +148,66 @@ javac -version</code></pre></div>
     &lt;/plugins&gt;
   &lt;/build&gt;
 &lt;/project&gt;</code></pre></div>
-    </section>
 
-    <section class="view">
-      <header class="hero">
-        <span class="eyebrow">Step 6 · 10 minutes</span>
-        <h1>Build the JSP input form</h1>
-        <p>The first JSP produces the HTML form. It also displays validation errors when the Servlet forwards an invalid submission back to it.</p>
-      </header>
+        <h2>3. Replace WEB-INF/web.xml</h2>
+        <p>This minimal descriptor identifies the application as Jakarta Servlet 6.0. The Servlet URL itself will come from a Java annotation.</p>
+        <div class="code-card"><div class="code-head"><span>src/main/webapp/WEB-INF/web.xml</span><button class="copy-button" type="button" data-copy="#webxml-source">Copy</button></div><pre id="webxml-source" data-source="lab-app/src/main/webapp/WEB-INF/web.xml"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0"&gt;
+&lt;/web-app&gt;</code></pre></div>
+        <div class="callout warn"><p><strong>Use <code>jakarta.servlet</code>, not <code>javax.servlet</code>.</strong> This project targets modern Jakarta Servlet 6 and Tomcat 10.1.</p></div>
+      </section>
 
-      <h2>Understand the important lines</h2>
-      <ul>
-        <li>The page directive chooses UTF-8 so names from many languages display correctly.</li>
-        <li>The JSTL tag library gives us <code>&lt;c:if&gt;</code> and <code>&lt;c:out&gt;</code>.</li>
-        <li><code>${pageContext.request.contextPath}</code> keeps links correct even if the WAR context name changes.</li>
-        <li>The fields are named <code>name</code> and <code>email</code>; the Servlet uses those exact parameter names.</li>
-      </ul>
-
-      <div class="code-card"><div class="code-head"><span>src/main/webapp/index.jsp</span><button class="copy-button" data-copy="#indexJspCode">Copy</button></div><pre><code id="indexJspCode" data-source="lab-app/src/main/webapp/index.jsp">&lt;%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %&gt;
-&lt;%@ taglib prefix="c" uri="jakarta.tags.core" %&gt;
+      <section class="view" id="step-4">
+        <header class="hero"><span class="eyebrow">Step 4 · 15 minutes</span><h1>Create the JSP form</h1><p>The first JSP produces an HTML form. Its only job is to collect two values and send them to the Servlet.</p></header>
+        <ol>
+          <li>Open <code>src/main/webapp/index.jsp</code>.</li>
+          <li>Replace everything in it with the code below.</li>
+          <li>Save the file.</li>
+        </ol>
+        <div class="code-card"><div class="code-head"><span>src/main/webapp/index.jsp</span><button class="copy-button" type="button" data-copy="#indexjsp-source">Copy</button></div><pre id="indexjsp-source" data-source="lab-app/src/main/webapp/index.jsp"><code>&lt;%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %&gt;
 &lt;!doctype html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
   &lt;meta charset="UTF-8"&gt;
   &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
-  &lt;title&gt;Student Profile Form&lt;/title&gt;
-  &lt;link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css"&gt;
+  &lt;title&gt;Student Form&lt;/title&gt;
 &lt;/head&gt;
 &lt;body&gt;
-  &lt;main class="form-card"&gt;
-    &lt;p class="eyebrow"&gt;Servlet + JSP Lab&lt;/p&gt;
-    &lt;h1&gt;Tell us about yourself&lt;/h1&gt;
-    &lt;p class="intro"&gt;Submit the form to send your details to a Java Servlet.&lt;/p&gt;
-
-    &lt;c:if test="${not empty errorMessage}"&gt;
-      &lt;div class="error" role="alert"&gt;&lt;c:out value="${errorMessage}" /&gt;&lt;/div&gt;
-    &lt;/c:if&gt;
-
-    &lt;form action="${pageContext.request.contextPath}/profile" method="post"&gt;
-      &lt;label for="name"&gt;Name&lt;/label&gt;
-      &lt;input id="name" name="name" type="text" value="&lt;c:out value='${formName}' /&gt;"
-             autocomplete="name" required&gt;
-
-      &lt;label for="email"&gt;Email&lt;/label&gt;
-      &lt;input id="email" name="email" type="email" value="&lt;c:out value='${formEmail}' /&gt;"
-             autocomplete="email" required&gt;
-
-      &lt;button type="submit"&gt;Submit profile&lt;/button&gt;
-    &lt;/form&gt;
-  &lt;/main&gt;
+  &lt;h1&gt;Student Form&lt;/h1&gt;
+  &lt;form action="${pageContext.request.contextPath}/submit" method="post"&gt;
+    &lt;p&gt;
+      &lt;label for="name"&gt;Name:&lt;/label&gt;
+      &lt;input id="name" name="name" type="text" required&gt;
+    &lt;/p&gt;
+    &lt;p&gt;
+      &lt;label for="email"&gt;Email:&lt;/label&gt;
+      &lt;input id="email" name="email" type="email" required&gt;
+    &lt;/p&gt;
+    &lt;button type="submit"&gt;Submit&lt;/button&gt;
+  &lt;/form&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre></div>
-      <div class="callout blue"><strong>Two layers of validation:</strong> HTML attributes such as <code>required</code> improve the browser experience, but they can be bypassed. The Servlet must validate the data again on the server.</div>
-    </section>
+        <h2>Understand the important lines</h2>
+        <div class="grid">
+          <article class="card"><h3><code>name="name"</code></h3><p>This is the parameter name the Servlet will use. The email input similarly becomes an <code>email</code> parameter.</p></article>
+          <article class="card"><h3><code>method="post"</code></h3><p>The browser sends the values in a POST request, so our Servlet will implement <code>doPost()</code>.</p></article>
+          <article class="card"><h3>Context path</h3><p><code>${pageContext.request.contextPath}</code> becomes <code>/student-form</code>, keeping the URL correct in Jetty and Tomcat.</p></article>
+          <article class="card"><h3><code>required</code></h3><p>The browser asks the user to fill both fields before submission. This is browser-side checking, not secure server validation.</p></article>
+        </div>
+        <div class="callout blue"><p><strong>Checkpoint:</strong> the form action should be <code>${pageContext.request.contextPath}/submit</code>, not only <code>/submit</code>.</p></div>
+      </section>
 
-    <section class="view">
-      <header class="hero">
-        <span class="eyebrow">Step 7 · 20 minutes</span>
-        <h1>Read, validate, and route the request</h1>
-        <p>The Servlet is the controller. It receives the POST request, checks both fields, and forwards to the correct JSP.</p>
-      </header>
-
-      <div class="code-card"><div class="code-head"><span>ProfileServlet.java</span><button class="copy-button" data-copy="#servletCode">Copy</button></div><pre><code id="servletCode" data-source="lab-app/src/main/java/com/sarankar/codelabs/ProfileServlet.java">package com.sarankar.codelabs;
+      <section class="view" id="step-5">
+        <header class="hero"><span class="eyebrow">Step 5 · 25 minutes</span><h1>Create the Servlet</h1><p>The Servlet receives the POST request, reads the fields, attaches them to the request, and forwards that request to the result JSP.</p></header>
+        <ol>
+          <li>Inside <code>src/main/java/com/example/studentform</code>, create <code>FormServlet.java</code>.</li>
+          <li>Paste the complete class below.</li>
+          <li>Save it and wait for VS Code to finish importing Maven dependencies.</li>
+        </ol>
+        <div class="code-card"><div class="code-head"><span>src/main/java/com/example/studentform/FormServlet.java</span><button class="copy-button" type="button" data-copy="#servlet-source">Copy</button></div><pre id="servlet-source" data-source="lab-app/src/main/java/com/example/studentform/FormServlet.java"><code>package com.example.studentform;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -332,292 +217,124 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet(name = "ProfileServlet", urlPatterns = "/profile", loadOnStartup = 1)
-public class ProfileServlet extends HttpServlet {
-
-    @Override
-    public void init() throws ServletException {
-        super.init();
-        getServletContext().log("ProfileServlet initialized");
-    }
-
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        response.sendRedirect(request.getContextPath() + "/");
-    }
-
+@WebServlet("/submit")
+public class FormServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
+        String name = request.getParameter("name");
+        String email = request.getParameter("email");
 
-        String name = valueOrEmpty(request.getParameter("name")).trim();
-        String email = valueOrEmpty(request.getParameter("email")).trim();
+        request.setAttribute("name", name);
+        request.setAttribute("email", email);
 
-        request.setAttribute("formName", name);
-        request.setAttribute("formEmail", email);
-
-        if (name.isBlank() || email.isBlank()) {
-            request.setAttribute("errorMessage", "Please enter both your name and email.");
-            request.getRequestDispatcher("/index.jsp").forward(request, response);
-            return;
-        }
-
-        if (!isValidEmail(email)) {
-            request.setAttribute("errorMessage", "Please enter an email address such as student@example.com.");
-            request.getRequestDispatcher("/index.jsp").forward(request, response);
-            return;
-        }
-
-        request.setAttribute("submittedName", name);
-        request.setAttribute("submittedEmail", email);
-        request.getRequestDispatcher("/WEB-INF/result.jsp").forward(request, response);
-    }
-
-    private String valueOrEmpty(String value) {
-        return value == null ? "" : value;
-    }
-
-    private boolean isValidEmail(String email) {
-        int at = email.indexOf('@');
-        int dot = email.lastIndexOf('.');
-        return at &gt; 0 &amp;&amp; dot &gt; at + 1 &amp;&amp; dot &lt; email.length() - 1;
-    }
-
-    @Override
-    public void destroy() {
-        getServletContext().log("ProfileServlet destroyed");
-        super.destroy();
+        request.getRequestDispatcher("/result.jsp").forward(request, response);
     }
 }</code></pre></div>
 
-      <h2>Walk through <code>doPost()</code></h2>
-      <div class="timeline">
-        <div class="timeline-item"><div class="timeline-label">Encoding</div><div class="timeline-copy"><p>Set UTF-8 before reading parameters so the bytes are decoded correctly.</p></div></div>
-        <div class="timeline-item"><div class="timeline-label">Read</div><div class="timeline-copy"><p><code>getParameter()</code> reads values whose names match the form fields.</p></div></div>
-        <div class="timeline-item"><div class="timeline-label">Validate</div><div class="timeline-copy"><p>Reject blank values and a clearly malformed email. The browser's checks are not trusted as the only defence.</p></div></div>
-        <div class="timeline-item"><div class="timeline-label">Attach</div><div class="timeline-copy"><p><code>setAttribute()</code> gives the JSP named values for this request only.</p></div></div>
-        <div class="timeline-item"><div class="timeline-label">Forward</div><div class="timeline-copy"><p>The dispatcher runs a JSP on the server without making the browser send a second request.</p></div></div>
-      </div>
-      <div class="callout warn"><strong>Forward versus redirect:</strong> a forward keeps the same request and its attributes. A redirect tells the browser to make a new request, so ordinary request attributes do not survive.</div>
-    </section>
+        <div class="timeline">
+          <div class="timeline-item"><div class="timeline-label">Map</div><div class="timeline-copy"><strong><code>@WebServlet("/submit")</code></strong><p>Connects the <code>/submit</code URL to this Java class.</p></div></div>
+          <div class="timeline-item"><div class="timeline-label">Read</div><div class="timeline-copy"><strong><code>getParameter()</code></strong><p>Reads the values whose HTML input names are <code>name</code> and <code>email</code>.</p></div></div>
+          <div class="timeline-item"><div class="timeline-label">Attach</div><div class="timeline-copy"><strong><code>setAttribute()</code></strong><p>Stores the two values on this request so the next JSP can use them.</p></div></div>
+          <div class="timeline-item"><div class="timeline-label">Forward</div><div class="timeline-copy"><strong><code>forward()</code></strong><p>Runs <code>result.jsp</code> on the server without starting a new browser request.</p></div></div>
+        </div>
+        <div class="callout good"><p><strong>Basic lifecycle:</strong> the server creates and initializes the Servlet, calls its service logic for requests such as this POST, and destroys it when the application stops. You only override <code>doPost()</code> in this first example.</p></div>
+      </section>
 
-    <section class="view">
-      <header class="hero">
-        <span class="eyebrow">Step 8 · 10 minutes</span>
-        <h1>Display the values with a JSP view</h1>
-        <p>The result page reads request attributes and generates HTML. It does not repeat the validation or request-routing logic.</p>
-      </header>
-
-      <div class="code-card"><div class="code-head"><span>WEB-INF/result.jsp</span><button class="copy-button" data-copy="#resultJspCode">Copy</button></div><pre><code id="resultJspCode" data-source="lab-app/src/main/webapp/WEB-INF/result.jsp">&lt;%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %&gt;
-&lt;%@ taglib prefix="c" uri="jakarta.tags.core" %&gt;
+      <section class="view" id="step-6">
+        <header class="hero"><span class="eyebrow">Step 6 · 15 minutes</span><h1>Create the result JSP</h1><p>This page reads the request attributes created by the Servlet and places them into the returned HTML.</p></header>
+        <ol>
+          <li>In <code>src/main/webapp</code>, create <code>result.jsp</code> next to <code>index.jsp</code>.</li>
+          <li>Paste the code below and save it.</li>
+        </ol>
+        <div class="code-card"><div class="code-head"><span>src/main/webapp/result.jsp</span><button class="copy-button" type="button" data-copy="#resultjsp-source">Copy</button></div><pre id="resultjsp-source" data-source="lab-app/src/main/webapp/result.jsp"><code>&lt;%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %&gt;
 &lt;!doctype html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
   &lt;meta charset="UTF-8"&gt;
   &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
-  &lt;title&gt;Submitted Profile&lt;/title&gt;
-  &lt;link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css"&gt;
+  &lt;title&gt;Submitted Details&lt;/title&gt;
 &lt;/head&gt;
 &lt;body&gt;
-  &lt;main class="form-card result-card"&gt;
-    &lt;p class="eyebrow"&gt;Submission received&lt;/p&gt;
-    &lt;h1&gt;Hello, &lt;c:out value="${submittedName}" /&gt;!&lt;/h1&gt;
-    &lt;p&gt;Your form travelled through the Servlet and reached this JSP page.&lt;/p&gt;
-
-    &lt;dl&gt;
-      &lt;div&gt;
-        &lt;dt&gt;Name&lt;/dt&gt;
-        &lt;dd&gt;&lt;c:out value="${submittedName}" /&gt;&lt;/dd&gt;
-      &lt;/div&gt;
-      &lt;div&gt;
-        &lt;dt&gt;Email&lt;/dt&gt;
-        &lt;dd&gt;&lt;c:out value="${submittedEmail}" /&gt;&lt;/dd&gt;
-      &lt;/div&gt;
-    &lt;/dl&gt;
-
-    &lt;a class="button-link" href="${pageContext.request.contextPath}/"&gt;Submit another profile&lt;/a&gt;
-  &lt;/main&gt;
+  &lt;h1&gt;Submitted Details&lt;/h1&gt;
+  &lt;p&gt;Name: ${name}&lt;/p&gt;
+  &lt;p&gt;Email: ${email}&lt;/p&gt;
+  &lt;a href="${pageContext.request.contextPath}/"&gt;Back to the form&lt;/a&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre></div>
+        <p><code>${name}</code> and <code>${email}</code> are JSP Expression Language expressions. They look for request attributes with those names—the same names passed to <code>setAttribute()</code> in the Servlet.</p>
+        <div class="callout blue"><p><strong>What you should see in Explorer:</strong> two JSP files inside <code>webapp</code>, one Java class inside the package, plus <code>pom.xml</code> and <code>WEB-INF/web.xml</code>.</p></div>
+        <div class="file-tree" aria-label="Completed project structure"><span class="folder">student-form/</span><br>├── pom.xml<br>└── <span class="folder">src/main/</span><br>&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="folder">java/com/example/studentform/</span><br>&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="file">FormServlet.java</span><br>&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="folder">webapp/</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">index.jsp</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">result.jsp</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="folder">WEB-INF/</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="file">web.xml</span></div>
+      </section>
 
-      <h2>Expression Language and safe output</h2>
-      <p><code>${submittedName}</code> means “find the attribute named submittedName.” The <code>&lt;c:out&gt;</code> tag writes it as escaped text. If someone submits HTML such as <code>&lt;script&gt;</code>, the browser displays the characters instead of treating them as a script.</p>
-      <div class="callout good"><strong>Separation of responsibilities:</strong> the Servlet contains Java decision-making; the JSP contains presentation markup. This small separation is the foundation of the Model–View–Controller style used by larger frameworks.</div>
-    </section>
+      <section class="view" id="step-7">
+        <header class="hero"><span class="eyebrow">Step 7 · 15 minutes</span><h1>Run and test before packaging</h1><p>Yes—you can test first. Jetty reads the project directly from <code>src/main/webapp</code> and compiled classes, so Maven does not need to create the WAR yet.</p></header>
 
-    <section class="view">
-      <header class="hero">
-        <span class="eyebrow">Step 9 · 5 minutes</span>
-        <h1>Configure the web application</h1>
-        <p>The deployment descriptor records application-level settings. Servlet mapping stays in the <code>@WebServlet</code> annotation.</p>
-      </header>
+        <h2>1. Start the development server</h2>
+        <p>Open VS Code’s terminal in the folder that contains <code>pom.xml</code>, then run:</p>
+        <div class="code-card"><div class="code-head"><span>Terminal</span><button class="copy-button" type="button" data-copy="#jetty-run">Copy</button></div><pre id="jetty-run"><code>mvn jetty:run</code></pre></div>
+        <p>Wait until the terminal reports that Jetty has started. Keep this terminal running.</p>
 
-      <div class="code-card"><div class="code-head"><span>WEB-INF/web.xml</span><button class="copy-button" data-copy="#webXmlCode">Copy</button></div><pre><code id="webXmlCode" data-source="lab-app/src/main/webapp/WEB-INF/web.xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
-         version="6.0"&gt;
-  &lt;display-name&gt;Student Form Lab&lt;/display-name&gt;
-  &lt;request-character-encoding&gt;UTF-8&lt;/request-character-encoding&gt;
-  &lt;response-character-encoding&gt;UTF-8&lt;/response-character-encoding&gt;
-  &lt;welcome-file-list&gt;
-    &lt;welcome-file&gt;index.jsp&lt;/welcome-file&gt;
-  &lt;/welcome-file-list&gt;
-&lt;/web-app&gt;</code></pre></div>
+        <h2>2. Test the full request</h2>
+        <ol>
+          <li>Open <a href="http://localhost:8080/student-form/">http://localhost:8080/student-form/</a>.</li>
+          <li>Enter a name and email, then select <strong>Submit</strong>.</li>
+          <li>Confirm that the result page displays both values.</li>
+          <li>Select <strong>Back to the form</strong>, change a value, and submit again.</li>
+        </ol>
+        <div class="callout good"><p><strong>What you should see:</strong> the browser moves to <code>/student-form/submit</code> and shows “Submitted Details” followed by your name and email.</p></div>
 
-      <div class="grid">
-        <article class="card"><h3>Annotation configuration</h3><p><code>@WebServlet("/profile")</code> connects one URL pattern to one Servlet class.</p></article>
-        <article class="card"><h3>Descriptor configuration</h3><p><code>web.xml</code> chooses UTF-8 and makes <code>index.jsp</code> the page opened at the application root.</p></article>
-      </div>
-      <div class="callout blue"><strong>Both are valid:</strong> mappings can also be written in <code>web.xml</code>. This lab uses an annotation because the mapping is close to the Java class and easy to see.</div>
-    </section>
+        <h2>If port 8080 is already in use</h2>
+        <div class="code-card"><div class="code-head"><span>Alternative port</span><button class="copy-button" type="button" data-copy="#jetty-port">Copy</button></div><pre id="jetty-port"><code>mvn jetty:run -Djetty.http.port=8081</code></pre></div>
+        <p>Then open <code>http://localhost:8081/student-form/</code>.</p>
 
-    <section class="view">
-      <header class="hero">
-        <span class="eyebrow">Step 10 · 15 minutes</span>
-        <h1>Package the WAR and deploy it</h1>
-        <p>Maven collects compiled classes, JSP pages, configuration, styles, and dependencies into one Web Application Archive.</p>
-      </header>
+        <h2>Edit and retest</h2>
+        <p>While Jetty is running, change a heading in a JSP and save. Refresh the browser. The plugin scans for changes every second. For Java changes, wait for the restart message before refreshing.</p>
+        <p>When testing is complete, return to the terminal and press <strong>Ctrl+C</strong> to stop Jetty.</p>
 
-      <h2>1. Build from <code>lab-app</code></h2>
-      <div class="code-card"><div class="code-head"><span>macOS, Linux, or Windows</span><button class="copy-button" data-copy="#buildCommand">Copy</button></div><pre id="buildCommand"><code>mvn clean package</code></pre></div>
-      <p>A successful build ends with <code>BUILD SUCCESS</code> and creates <code>target/student-form.war</code>.</p>
+        <div class="table-wrap"><table><thead><tr><th>Problem</th><th>Check</th></tr></thead><tbody><tr><td>404 Not Found</td><td>Use <code>/student-form/</code> and confirm the Jetty terminal is still running.</td></tr><tr><td>Red imports in Java</td><td>Save <code>pom.xml</code>, then run <strong>Maven: Reload Projects</strong> in VS Code.</td></tr><tr><td>405 Method Not Allowed</td><td>Open the form first. The Servlet implements POST, not a direct GET to <code>/submit</code>.</td></tr><tr><td>Port already in use</td><td>Use the 8081 command above.</td></tr></tbody></table></div>
+      </section>
 
-      <h2>2. Copy the WAR into Tomcat</h2>
-      <div class="grid">
-        <article class="card">
-          <span class="badge">macOS / Linux</span>
-          <code class="command">cp target/student-form.war "$CATALINA_HOME/webapps/"<br>"$CATALINA_HOME/bin/startup.sh"</code>
-        </article>
-        <article class="card">
-          <span class="badge">Windows PowerShell</span>
-          <code class="command">Copy-Item target\student-form.war "$env:CATALINA_HOME\webapps\"<br>&amp; "$env:CATALINA_HOME\bin\startup.bat"</code>
-        </article>
-      </div>
+      <section class="view" id="step-8">
+        <header class="hero"><span class="eyebrow">Step 8 · 10 minutes</span><h1>Build the WAR and review</h1><p>Now that the source application works, package the same files into one archive that a compatible application server can deploy.</p></header>
+        <h2>1. Package the application</h2>
+        <div class="code-card"><div class="code-head"><span>Terminal</span><button class="copy-button" type="button" data-copy="#package-war">Copy</button></div><pre id="package-war"><code>mvn clean package</code></pre></div>
+        <div class="callout good"><p><strong>What you should see:</strong> <code>BUILD SUCCESS</code> and a new file at <code>target/student-form.war</code>.</p></div>
 
-      <h2>3. Open the application</h2>
-      <p>Wait a few seconds for Tomcat to expand the WAR, then open:</p>
-      <code class="command">http://localhost:8080/student-form/</code>
+        <h2>2. Optional Tomcat deployment</h2>
+        <ol>
+          <li>Install Apache Tomcat 10.1.</li>
+          <li>Copy <code>target/student-form.war</code> into Tomcat’s <code>webapps</code> folder.</li>
+          <li>Start Tomcat with <code>bin/startup.sh</code> on macOS/Linux or <code>bin\startup.bat</code> on Windows.</li>
+          <li>Open <code>http://localhost:8080/student-form/</code> and repeat the form test.</li>
+        </ol>
 
-      <h2>4. Stop Tomcat when finished</h2>
-      <div class="grid">
-        <article class="card"><h3>macOS / Linux</h3><code class="command">"$CATALINA_HOME/bin/shutdown.sh"</code></article>
-        <article class="card"><h3>Windows PowerShell</h3><code class="command">&amp; "$env:CATALINA_HOME\bin\shutdown.bat"</code></article>
-      </div>
-      <div class="callout warn"><strong>Redeploy after changes:</strong> rebuild the WAR, stop Tomcat, replace the old WAR and expanded <code>student-form</code> directory, then start Tomcat again.</div>
-    </section>
+        <div class="quiz" data-answer="1">
+          <h3>Quick check: who receives the POST request?</h3>
+          <div class="options"><button class="option" type="button">result.jsp</button><button class="option" type="button">FormServlet</button><button class="option" type="button">pom.xml</button></div>
+          <p class="feedback"><strong>Correct:</strong> <code>@WebServlet("/submit")</code> maps the submitted form to <code>FormServlet</code>. It then forwards the request to <code>result.jsp</code>.</p>
+        </div>
 
-    <section class="view">
-      <header class="hero">
-        <span class="eyebrow">Step 11 · 5 minutes</span>
-        <h1>Test more than the happy path</h1>
-        <p>A form is not finished when one valid submission works. Try invalid and surprising input too.</p>
-      </header>
+        <h2>Review</h2>
+        <ul class="checklist">
+          <li>Maven generated the standard webapp structure.</li>
+          <li><code>index.jsp</code> sent two form parameters in a POST request.</li>
+          <li><code>FormServlet</code> read the parameters and created request attributes.</li>
+          <li><code>result.jsp</code> displayed those request attributes.</li>
+          <li><code>mvn jetty:run</code> tested the source project before packaging.</li>
+          <li><code>mvn clean package</code> created <code>target/student-form.war</code>.</li>
+        </ul>
 
-      <h2>Manual test checklist</h2>
-      <ul class="checklist">
-        <li>Submit <strong>Asha Rao</strong> and <strong>asha@example.com</strong>; both appear on the result page.</li>
-        <li>Try a blank field; the browser blocks it, and the server also rejects a request that bypasses the browser check.</li>
-        <li>Try <strong>asha@example</strong>; the server returns the email-format message.</li>
-        <li>Try <strong>&lt;script&gt;alert(1)&lt;/script&gt;</strong> as the name; it appears as text and does not run.</li>
-        <li>Open <code>/student-form/profile</code> with GET; it redirects to the form.</li>
-      </ul>
+        <div class="callout coral"><p><strong>Important boundary:</strong> this is deliberately minimal teaching code. It has no server-side validation and directly displays user input without output escaping. Do not use this pattern as production-ready code. A real application must validate input and safely encode output.</p></div>
+        <p class="footer-note">Codelab 1 of 5 · Java Backend Development with Spring Boot · Module III</p>
+      </section>
+    </div>
+  </main>
 
-      <h2>Common problems</h2>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Symptom</th><th>Likely cause</th><th>What to check</th></tr></thead>
-        <tbody>
-          <tr><td>404 at <code>/student-form/</code></td><td>WAR was not deployed or Tomcat is not running.</td><td>Check <code>webapps</code>, Tomcat logs, port 8080, and the WAR filename.</td></tr>
-          <tr><td>404 after submitting</td><td>The form action and Servlet mapping differ.</td><td>Both should use <code>/profile</code>.</td></tr>
-          <tr><td><code>ClassNotFoundException</code> for Servlet classes</td><td>Tomcat 9 is running Jakarta code.</td><td>Use Tomcat 10.1 and <code>jakarta.servlet</code> imports.</td></tr>
-          <tr><td>JSTL tag cannot be found</td><td>JSTL dependencies are missing from the WAR.</td><td>Build with the supplied POM and inspect <code>WEB-INF/lib</code>.</td></tr>
-          <tr><td>Port 8080 already in use</td><td>Another service or Tomcat instance owns the port.</td><td>Stop the other process or configure another Tomcat connector port.</td></tr>
-        </tbody>
-      </table></div>
-      <div class="callout blue"><strong>Read the server log:</strong> Tomcat's console and <code>logs</code> folder usually contain the real exception. The browser may only show a short error page.</div>
-    </section>
-
-    <section class="view">
-      <header class="hero">
-        <span class="eyebrow">Step 12 · 5 minutes</span>
-        <h1>Explain the complete journey</h1>
-        <p>You have built Program 6. Check the main ideas, then choose an extension if time remains.</p>
-      </header>
-
-      <div class="quiz" data-answer="2">
-        <h3>Who creates and manages the Servlet object?</h3>
-        <div class="options"><button class="option" type="button">The browser</button><button class="option" type="button">The JSP page</button><button class="option" type="button">The Servlet container, Tomcat</button></div>
-        <p class="feedback">Tomcat loads, initializes, calls, and eventually destroys the Servlet.</p>
-      </div>
-      <div class="quiz" data-answer="0">
-        <h3>Why does the Servlet forward instead of redirecting to <code>result.jsp</code>?</h3>
-        <div class="options"><button class="option" type="button">A forward preserves the request attributes</button><button class="option" type="button">A redirect cannot open HTML</button><button class="option" type="button">A forward starts another Tomcat server</button></div>
-        <p class="feedback">The result JSP needs the name and email stored on the current request.</p>
-      </div>
-      <div class="quiz" data-answer="1">
-        <h3>Why use <code>&lt;c:out&gt;</code> for submitted text?</h3>
-        <div class="options"><button class="option" type="button">It saves the value to a database</button><button class="option" type="button">It escapes HTML-sensitive characters before output</button><button class="option" type="button">It restarts the Servlet lifecycle</button></div>
-        <p class="feedback">Escaped output displays user-controlled characters as text instead of executable HTML.</p>
-      </div>
-
-      <h2>The complete story</h2>
-      <ol>
-        <li>The browser renders <code>index.jsp</code> and sends a POST request.</li>
-        <li>Tomcat maps <code>/profile</code> to <code>ProfileServlet</code>.</li>
-        <li><code>doPost()</code> reads, trims, and validates request parameters.</li>
-        <li>Invalid data is forwarded back with an error; valid data is added as request attributes.</li>
-        <li><code>result.jsp</code> safely renders the attributes into HTML.</li>
-        <li>Tomcat sends that generated HTML response to the browser.</li>
-      </ol>
-
-      <h2>Optional extensions</h2>
-      <ul>
-        <li>Add a course field using a <code>&lt;select&gt;</code> element.</li>
-        <li>Add a confirmation checkbox and validate it on the server.</li>
-        <li>Display the current request method and context path on the result page.</li>
-        <li>Replace simple email validation with a dedicated validation library in a later lesson.</li>
-      </ul>
-      <div class="callout good"><strong>Program 6 complete:</strong> you can now describe the Servlet lifecycle and build a Java web application that processes a form with Servlet request handling and JSP presentation.</div>
-      <p class="footer-note">Servlets and JSP Form Handling · Full Stack Development Module III</p>
-    </section>
-  </div></main>
-
-  <div class="bottom-nav">
+  <div class="bottom-nav" aria-label="Previous and next step">
     <button id="previous" type="button">← Previous</button>
     <button class="next" id="next" type="button">Next →</button>
   </div>
-
   <script src="../module3.js"></script>
-  <script>
-    (() => {
-      const requestName = document.querySelector('#requestName');
-      const requestEmail = document.querySelector('#requestEmail');
-      const requestPreview = document.querySelector('#requestPreview');
-      function updateRequest() {
-        const body = new URLSearchParams({ name: requestName.value, email: requestEmail.value }).toString();
-        requestPreview.textContent = `POST /student-form/profile HTTP/1.1\nContent-Type: application/x-www-form-urlencoded\n\n${body}`;
-      }
-      requestName.addEventListener('input', updateRequest);
-      requestEmail.addEventListener('input', updateRequest);
-      updateRequest();
-
-      const lifecycle = {
-        load: ['Load and create', 'Tomcat finds the Servlet class and creates one Servlet object. With loadOnStartup = 1, this happens while the application starts.'],
-        init: ['Initialize once', 'Tomcat calls init() one time after creating the object. Use this stage for one-time setup, not for storing one student’s data.'],
-        service: ['Handle many requests', 'For every request, Tomcat calls service(). HttpServlet then chooses doGet(), doPost(), or another method. Several threads may enter the same Servlet object.'],
-        destroy: ['Clean up once', 'Before removing the Servlet, Tomcat calls destroy(). This is the place to release long-lived resources created during initialization.']
-      };
-      const panel = document.querySelector('#lifecyclePanel');
-      function showLifecycle(key) {
-        const [title, copy] = lifecycle[key];
-        panel.innerHTML = `<h3>${title}</h3><p>${copy}</p>`;
-        document.querySelectorAll('[data-life]').forEach(button => button.classList.toggle('active', button.dataset.life === key));
-      }
-      document.querySelectorAll('[data-life]').forEach(button => button.addEventListener('click', () => showLifecycle(button.dataset.life)));
-      showLifecycle('load');
-    })();
-  </script>
 </body>
 </html>
