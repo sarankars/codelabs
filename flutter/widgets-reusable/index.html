@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Building Reusable Widgets — Interactive Flutter Codelab</title>
+  <meta name="description" content="Learn to extract reusable Flutter widgets, pass data with constructors, send actions through callbacks, use const constructors, compose components, and organize shared widget files.">
+  <meta name="theme-color" content="#1769ff">
+  <meta property="og:title" content="Building Reusable Widgets">
+  <meta property="og:description" content="Refactor a repeated Flutter course dashboard into small, reusable widgets.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://codelab.sarankar.com/flutter/widgets-reusable/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Building Reusable Widgets">
+  <meta name="twitter:description" content="Refactor a repeated Flutter course dashboard into small, reusable widgets.">
+  <meta name="twitter:image" content="https://codelab.sarankar.com/flutter/widgets-reusable/og.png">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Building Reusable Widgets","learningResourceType":"Tutorial","educationalLevel":"Beginner","about":"Reusable Flutter widgets","inLanguage":"en"}</script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root{--blue:#1769ff;--blue-dark:#0b43b7;--blue-light:#dce9ff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--purple:#d8c5ff;--orange:#ffbd70;--teal:#9ce7e2;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:290px;--radius:4px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}.app{min-height:100vh}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);background:var(--blue);border-right:var(--border);padding:22px 18px;z-index:20;overflow:auto}.brand{background:#fff;border:var(--border);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:20px}.eyebrow,.progress-meta,.step-number,.step-kicker,.tiny{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{color:#fff;margin:0 2px 20px}.progress-meta{display:flex;justify-content:space-between;gap:10px;font-size:.72rem;font-weight:500;margin-bottom:7px}.progress-track{height:16px;background:#fff;border:var(--border);padding:2px}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:9px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;text-align:left;color:#fff;background:transparent;border:3px solid transparent;padding:9px 8px;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;background:var(--blue);border-bottom:var(--border);padding:10px;align-items:center;gap:10px}.mobile-bar strong{color:#fff}.menu-btn,.mobile-title{border:var(--border);background:#fff;box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{padding:8px 10px;flex:1;font-weight:800}
+    main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}.step-header{border:var(--border);background:#fff;box-shadow:var(--shadow);padding:28px;margin-bottom:24px}.step-kicker{display:inline-block;background:var(--blue);color:#fff;border:2px solid var(--ink);padding:5px 9px;font-size:.72rem;font-weight:500;margin-bottom:13px}h1,h2,h3{line-height:1.08}h1{font-size:clamp(2rem,5vw,3.7rem);margin:0 0 12px;letter-spacing:-.045em}h2{font-size:clamp(1.55rem,3vw,2.25rem);margin:30px 0 12px}h3{font-size:1.15rem;margin:24px 0 9px}.lede{font-size:1.08rem;max-width:760px;margin:0}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.yellow{background:var(--yellow)}.panel.pink{background:var(--pink)}.panel.purple{background:var(--purple)}.panel.teal{background:var(--teal)}.grid-2,.grid-3{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.concept{border:var(--border);padding:18px;background:#fff;box-shadow:var(--shadow-sm)}.concept strong{font-size:1.05rem}.callout{border:var(--border);box-shadow:var(--shadow-sm);padding:16px 18px;margin:20px 0;background:#fff}.callout .label{display:inline-block;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;border:2px solid var(--ink);background:var(--ink);color:#fff;padding:3px 7px;margin-bottom:8px}.callout p:last-child,.concept p:last-child,.panel p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;background:#111;color:#f7f7f7;border:var(--border);box-shadow:var(--shadow-sm);padding:20px;overflow:auto;font-family:"DM Mono",ui-monospace,monospace;font-size:.85rem;line-height:1.65;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:5px 9px;font-size:.75rem;font-weight:800;z-index:2}code:not(pre code){background:#e8edf7;border:1px solid #9da9bb;padding:1px 5px;font-family:"DM Mono",monospace;font-size:.88em}.code-note{border:var(--border);border-top:0;background:#e9edf4;padding:13px 16px;font-family:"DM Mono",monospace;font-size:.83rem}ul,ol{padding-left:1.35rem}li{margin:7px 0}
+    .quiz{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;border:2px solid var(--ink);background:#fff;padding:11px 13px;font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;font-weight:800;background:var(--blue-light)}.reveal>div{padding:15px 16px}.nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{border:var(--border);box-shadow:var(--shadow-sm);background:#fff;padding:12px 18px;font-weight:900;min-width:130px}.nav-btn.primary{background:var(--blue);color:#fff}.nav-btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:3px 3px 0 #777}.finish{display:none;background:var(--mint);border:var(--border);box-shadow:var(--shadow);padding:20px;margin-top:24px}.finish.show{display:block}.checklist{list-style:none;padding:0}.checklist li{padding:10px 12px;border:2px solid var(--ink);background:#fff;margin:8px 0}.checklist li::before{content:"✓";font-weight:900;margin-right:9px;color:var(--blue-dark)}.footer-note{text-align:center;font-family:"DM Mono",monospace;font-size:.78rem;margin:28px 0 0}
+    .repeat-lab{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.mock-dashboard{border:var(--border);background:#dfe8f7;box-shadow:var(--shadow-sm);padding:16px;display:grid;gap:12px}.mock-card{background:#fff;border:2px solid var(--ink);padding:14px;display:grid;grid-template-columns:46px 1fr auto;gap:12px;align-items:center}.mock-icon{width:46px;height:46px;display:grid;place-items:center;background:var(--yellow);border:2px solid var(--ink);font-weight:900}.mock-copy{min-width:0}.mock-copy strong,.mock-copy span{display:block}.mock-copy span{font-size:.82rem}.extract-controls{display:grid;gap:9px;align-content:start}.demo-btn{border:2px solid var(--ink);background:#fff;padding:10px 12px;text-align:left;font-weight:800}.demo-btn:hover{background:var(--blue-light)}.demo-btn.active{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}.mock-card.highlight{outline:5px solid var(--pink);outline-offset:2px}.demo-readout{border:2px solid var(--ink);background:#fff;padding:12px;font-weight:700}
+    .anatomy{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.anatomy-list{display:grid;gap:10px}.anatomy-item{border:2px solid var(--ink);background:#fff;padding:11px}.number-dot{display:inline-grid;place-items:center;width:25px;height:25px;border:2px solid var(--ink);background:var(--yellow);font-weight:900;margin-right:7px}
+    .demo{border:var(--border);background:var(--blue-light);box-shadow:var(--shadow-sm);padding:20px;margin:20px 0}.demo h2{margin-top:0}.demo-controls{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0 16px}.demo-controls .demo-btn{text-align:center}.course-preview{width:min(520px,100%);margin:18px auto;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);padding:18px}.course-preview-head{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center}.course-preview-icon{width:52px;height:52px;display:grid;place-items:center;background:var(--yellow);border:2px solid var(--ink);font-weight:900}.course-preview-copy strong,.course-preview-copy span{display:block}.course-preview-copy span{font-size:.85rem}.meter{height:14px;border:2px solid var(--ink);background:#fff;margin:14px 0 6px}.meter span{display:block;height:100%;background:var(--blue);width:72%;transition:width .2s}.preview-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:14px}.preview-action{border:2px solid var(--ink);padding:7px 11px;background:#fff;font-weight:800}.preview-action.primary{background:var(--blue);color:#fff}.constructor-call{font-family:"DM Mono",monospace;font-size:.8rem;background:#111;color:#fff;border:var(--border);padding:14px;overflow:auto;white-space:pre-wrap}.comparison{width:100%;border-collapse:collapse;background:#fff;box-shadow:var(--shadow-sm);margin:18px 0}.comparison th,.comparison td{border:2px solid var(--ink);padding:11px;text-align:left;vertical-align:top}.comparison th{background:var(--yellow)}
+    .ownership{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:20px 0}.owner-box{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:18px;min-height:145px}.owner-box.parent{background:var(--mint)}.owner-box.child{background:var(--blue-light)}.flow-arrow{font-size:2rem;font-weight:900}.event-stage{border:var(--border);background:#fff;padding:18px;display:grid;gap:12px}.event-log{min-height:54px;border:2px dashed var(--ink);background:#f4f6fb;padding:12px;font-family:"DM Mono",monospace;font-size:.82rem}.action-button{border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);background:var(--blue);color:#fff;padding:10px 14px;font-weight:900;justify-self:start}.action-button.secondary{background:var(--yellow);color:var(--ink)}
+    .value-lab{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.value-choice{border:2px solid var(--ink);background:#fff;padding:14px;font-weight:800}.value-choice.selected{background:var(--mint);box-shadow:3px 3px 0 var(--ink)}.const-stage{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.const-card{border:var(--border);background:#fff;padding:16px;box-shadow:var(--shadow-sm)}.const-card.valid{background:var(--mint)}.const-card.runtime{background:var(--purple)}.const-result{margin-top:14px;border:2px solid var(--ink);background:#111;color:#fff;padding:12px;font-family:"DM Mono",monospace;font-size:.82rem}
+    .composition-lab{display:grid;grid-template-columns:.9fr 1.1fr;gap:18px}.component-tree{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:18px}.component-tree ul{list-style:none;margin:8px 0 0;padding-left:22px;border-left:2px dashed #8d99ab}.component-tree>ul{padding:0;border:0}.component-node{border:2px solid var(--ink);background:#fff;padding:7px 10px;font-weight:800}.component-node.active{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}.compose-preview{border:var(--border);background:var(--blue-light);box-shadow:var(--shadow-sm);padding:22px;display:grid;place-items:center}.compose-preview [data-part]{transition:opacity .15s,outline .15s}.compose-preview.inspecting [data-part]{opacity:.25}.compose-preview.inspecting [data-part].focus-part{opacity:1;outline:5px solid var(--pink);outline-offset:3px}.tree-code{font-family:"DM Mono",monospace;background:#111;color:#fff;border:var(--border);padding:16px;overflow:auto}
+    .file-lab{display:grid;grid-template-columns:250px 1fr;gap:16px}.file-tree{border:var(--border);background:#fff;box-shadow:var(--shadow-sm);padding:14px;display:grid;gap:8px;align-content:start}.file-button{text-align:left;border:2px solid var(--ink);background:#fff;padding:9px 11px;font-family:"DM Mono",monospace;font-weight:500}.file-button.active{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}.file-code .code-wrap{margin:0}.challenge{border:var(--border);background:var(--yellow);box-shadow:var(--shadow);padding:22px;margin:20px 0}.references a{color:var(--blue-dark);font-weight:800}
+    @media(prefers-reduced-motion:reduce){.step-view.active{animation:none}.progress-bar{transition:none}}@media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease;box-shadow:10px 0 0 rgba(16,16,16,.18)}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}@media(max-width:650px){.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.grid-2,.grid-3,.repeat-lab,.anatomy,.ownership,.composition-lab,.file-lab,.const-stage{grid-template-columns:1fr}.flow-arrow{transform:rotate(90deg);justify-self:center}.value-lab{grid-template-columns:1fr}.nav-row{position:sticky;bottom:0;background:var(--paper);padding:12px 0;z-index:10}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{font-size:.76rem;padding:16px 12px}.copy-btn{position:static;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1;align-self:flex-end}.code-wrap .code-note{order:3}.mock-card{grid-template-columns:42px 1fr}.mock-card>strong{grid-column:2}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter UI · Codelab</div><h2>Reusable Widgets</h2><p>Build once. Compose everywhere.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">Reusable widgets</div></div>
+  <main><div class="content" id="content">
+
+    <section class="step-view" data-title="Find the repetition">
+      <header class="step-header"><span class="step-kicker">STEP 1 · SPOT THE BOUNDARY</span><h1>Repeated UI is asking for a name</h1><p class="lede">Large build methods become easier to read when one meaningful visual idea becomes one widget. Start by finding repeated structure—not by splitting every line.</p><div class="objective"><strong>By the end:</strong> You can extract a custom widget, configure it through constructor parameters, report actions with callbacks, use const correctly, compose components, and organize shared widgets into separate files.</div></header>
+      <div class="repeat-lab"><div class="mock-dashboard" id="repeatStage" aria-label="Preview of three repeated course cards"><div class="mock-card" data-card><div class="mock-icon">FL</div><div class="mock-copy"><strong>Flutter Layouts</strong><span>8 lessons · 72% complete</span></div><strong>Continue</strong></div><div class="mock-card" data-card><div class="mock-icon">DA</div><div class="mock-copy"><strong>Dart Async</strong><span>6 lessons · 40% complete</span></div><strong>Continue</strong></div><div class="mock-card" data-card><div class="mock-icon">ST</div><div class="mock-copy"><strong>State Basics</strong><span>10 lessons · 15% complete</span></div><strong>Continue</strong></div></div><div class="extract-controls"><button class="demo-btn active" type="button" data-extract="all">Show the repeated unit</button><button class="demo-btn" type="button" data-extract="first">Inspect one instance</button><button class="demo-btn" type="button" data-extract="none">Clear highlight</button><p class="demo-readout" id="extractReadout">Each outlined card has the same structure but different data. That repeated unit is a useful widget boundary.</p></div></div>
+      <h2>Extract by responsibility</h2><div class="grid-3"><div class="concept"><strong>One clear job</strong><p>A <code>CourseCard</code> presents one course and its actions.</p></div><div class="concept"><strong>Changing inputs</strong><p>Title, lesson count, and progress become constructor parameters.</p></div><div class="concept"><strong>Owned behavior</strong><p>The parent decides what “Continue” does; the card reports the tap.</p></div></div>
+      <div class="callout"><span class="label">GOOD BOUNDARY</span><p>Extract a widget when the group has a meaningful name, repeats, deserves isolated testing, or makes its parent easier to understand. A helper method can shorten code, but a widget creates a real reusable component boundary.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. The repeated card is a meaningful unit with changing data and a consistent structure."><h3>What is the strongest extraction candidate?</h3><div class="quiz-options"><button class="quiz-option">Every individual SizedBox</button><button class="quiz-option">The complete repeated course card</button><button class="quiz-option">The build method's return keyword</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Create a widget">
+      <header class="step-header"><span class="step-kicker">STEP 2 · NAME THE COMPONENT</span><h1>A custom widget is an ordinary Dart class</h1><p class="lede">Extend <code>StatelessWidget</code>, add a constructor, and return the smaller widget tree from <code>build()</code>.</p></header>
+      <div class="anatomy"><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>class CourseCard extends StatelessWidget {
+  const CourseCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Card(
+      child: ListTile(
+        leading: Icon(Icons.school_outlined),
+        title: Text('Flutter Layouts'),
+        subtitle: Text('8 lessons'),
+      ),
+    );
+  }
+}</code></pre></div><div class="anatomy-list"><div class="anatomy-item"><span class="number-dot">1</span><strong>Name the idea</strong><br><code>CourseCard</code> says what the component means.</div><div class="anatomy-item"><span class="number-dot">2</span><strong>Accept identity</strong><br><code>super.key</code> forwards an optional key to <code>StatelessWidget</code>.</div><div class="anatomy-item"><span class="number-dot">3</span><strong>Describe its UI</strong><br><code>build()</code> returns the card's internal composition.</div></div></div>
+      <div class="panel yellow"><strong>This is extracted, but not reusable yet.</strong><p>The text is still hard-coded. The next step turns the changing parts into inputs.</p></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Column(
+  children: [
+    CourseCard(),
+    CourseCard(),
+    CourseCard(),
+  ],
+)</code></pre><div class="code-note">A custom widget is used exactly like a Flutter framework widget.</div></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. StatelessWidget fits a presentation component whose current configuration arrives from its parent."><h3>Why begin with StatelessWidget here?</h3><div class="quiz-options"><button class="quiz-option">The card renders configuration supplied by its parent</button><button class="quiz-option">StatelessWidget can never receive callbacks</button><button class="quiz-option">Every extracted widget must be stateless</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Pass data in">
+      <header class="step-header"><span class="step-kicker">STEP 3 · CONSTRUCTOR PARAMETERS</span><h1>Make the differences explicit inputs</h1><p class="lede">A reusable widget keeps its structure while its parent supplies the values that change. Named parameters make each call easy to read.</p></header>
+      <div class="demo"><h2>Configure one CourseCard</h2><p>Select a course and progress value. The preview and constructor call update together.</p><div class="demo-controls" aria-label="Course selection"><button class="demo-btn active" type="button" data-course="layouts">Flutter Layouts</button><button class="demo-btn" type="button" data-course="async">Dart Async</button><button class="demo-btn" type="button" data-course="state">State Basics</button></div><div class="demo-controls" aria-label="Progress selection"><button class="demo-btn" type="button" data-progress="0.25">25%</button><button class="demo-btn active" type="button" data-progress="0.72">72%</button><button class="demo-btn" type="button" data-progress="1">100%</button></div><div class="course-preview"><div class="course-preview-head"><div class="course-preview-icon" id="parameterIcon">FL</div><div class="course-preview-copy"><strong id="parameterTitle">Flutter Layouts</strong><span id="parameterLessons">8 lessons</span></div></div><div class="meter"><span id="parameterMeter"></span></div><span id="parameterPercent">72% complete</span><div class="preview-actions"><span class="preview-action primary">Continue</span></div></div><div class="constructor-call" id="constructorCall">CourseCard(
+  title: 'Flutter Layouts',
+  lessonCount: 8,
+  progress: 0.72,
+  onContinue: _openCourse,
+)</div></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>class CourseCard extends StatelessWidget {
+  const CourseCard({
+    super.key,
+    required this.title,
+    required this.lessonCount,
+    required this.progress,
+    required this.onContinue,
+    this.onReview,
+  });
+
+  final String title;
+  final int lessonCount;
+  final double progress;
+  final VoidCallback onContinue;
+  final VoidCallback? onReview;
+
+  // build() uses these fields.
+}</code></pre></div>
+      <table class="comparison"><thead><tr><th>Parameter</th><th>Choice</th><th>Meaning</th></tr></thead><tbody><tr><td><code>title</code>, <code>lessonCount</code>, <code>progress</code></td><td><code>required</code></td><td>The card cannot present a course correctly without them.</td></tr><tr><td><code>onContinue</code></td><td><code>required</code></td><td>Every visible primary action must have behavior.</td></tr><tr><td><code>onReview</code></td><td>nullable and optional</td><td>The card may omit the secondary action.</td></tr></tbody></table>
+      <div class="quiz" data-answer="2" data-correct="Correct. Required named parameters make missing essential configuration a compile-time error."><h3>Why mark title as required?</h3><div class="quiz-options"><button class="quiz-option">To let the widget silently invent a title</button><button class="quiz-option">To store the title globally</button><button class="quiz-option">To prevent callers from omitting essential data</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Keep it immutable">
+      <header class="step-header"><span class="step-kicker">STEP 4 · FINAL FIELDS</span><h1>A widget configuration is a snapshot</h1><p class="lede">Flutter may create a new widget when inputs change. The existing widget object does not mutate, so constructor-backed fields should be <code>final</code>.</p></header>
+      <div class="grid-2"><div class="panel pink"><strong>Avoid mutable configuration</strong><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>class CourseCard extends StatelessWidget {
+  String title; // Mutable: avoid this.
+
+  CourseCard({required this.title});
+}</code></pre></div></div><div class="panel mint"><strong>Prefer an immutable snapshot</strong><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>class CourseCard extends StatelessWidget {
+  const CourseCard({
+    super.key,
+    required this.title,
+  });
+
+  final String title;
+}</code></pre></div></div></div>
+      <div class="ownership"><div class="owner-box parent"><strong>Parent rebuilds</strong><p>Its current data changes from “Flutter Layouts” to “Dart Async.”</p></div><div class="flow-arrow" aria-hidden="true">→</div><div class="owner-box child"><strong>New configuration</strong><p>Flutter receives a new <code>CourseCard(title: 'Dart Async')</code>.</p></div></div>
+      <div class="callout"><span class="label">STATE IS DIFFERENT</span><p>A stateless child can still display changing data. The state lives above it, and rebuilds supply a new immutable configuration. If a component truly owns changing UI state, use a stateful pattern deliberately.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. The parent rebuilds and supplies a new widget configuration."><h3>How does a stateless card show an updated title?</h3><div class="quiz-options"><button class="quiz-option">It assigns a new value to its final field</button><button class="quiz-option">Its parent rebuilds it with a new title</button><button class="quiz-option">It edits the old widget object in place</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Send actions up">
+      <header class="step-header"><span class="step-kicker">STEP 5 · VOIDCALLBACK</span><h1>The parent owns behavior. The child reports intent.</h1><p class="lede">A reusable card should not decide how navigation, analytics, or state updates work. It exposes an action parameter and invokes it when the user taps.</p></header>
+      <div class="ownership"><div class="owner-box parent"><strong>CourseDashboard</strong><p>Owns data, navigation, messages, and changing state.</p><p><code>onContinue: () =&gt; _openCourse(course)</code></p></div><div class="flow-arrow" aria-hidden="true">⇄</div><div class="owner-box child"><strong>CourseCard</strong><p>Shows the button and calls <code>onContinue</code>.</p><p>It does not know what happens next.</p></div></div>
+      <div class="demo"><h2>Trace the callback</h2><div class="event-stage"><button class="action-button" id="continueDemo" type="button">Continue course</button><div class="event-log" id="callbackLog" aria-live="polite">Waiting for a tap…</div></div></div>
+      <div class="grid-2"><div><h2>Child widget</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>final VoidCallback onContinue;
+
+ElevatedButton(
+  onPressed: onContinue,
+  child: const Text('Continue'),
+)</code></pre></div></div><div><h2>Parent call site</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>CourseCard(
+  title: course.title,
+  lessonCount: course.lessonCount,
+  progress: course.progress,
+  onContinue: () =&gt; _openCourse(course),
+)</code></pre></div></div></div>
+      <div class="panel yellow"><strong>Method tear-off or closure?</strong><p>Pass <code>onContinue: _openSelectedCourse</code> when the signatures already match. Use <code>() =&gt; _openCourse(course)</code> when the callback must capture a value from the parent.</p></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. The child reports the tap; the parent decides the application behavior."><h3>Where should navigation logic usually live?</h3><div class="quiz-options"><button class="quiz-option">In the parent that composes the card</button><button class="quiz-option">Hard-coded inside every reusable card</button><button class="quiz-option">Inside the Text widget</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Send values up">
+      <header class="step-header"><span class="step-kicker">STEP 6 · TYPED CALLBACKS</span><h1>Callbacks can carry a value</h1><p class="lede"><code>VoidCallback</code> says only “this happened.” Use a function type such as <code>ValueChanged&lt;String&gt;</code> when the child should also report which value was selected.</p></header>
+      <div class="demo"><h2>Select a course</h2><div class="value-lab" id="valueLab"><button class="value-choice" type="button" data-value="Flutter Layouts">Flutter Layouts</button><button class="value-choice" type="button" data-value="Dart Async">Dart Async</button><button class="value-choice" type="button" data-value="State Basics">State Basics</button></div><p class="demo-readout" id="valueReadout" aria-live="polite">No value sent yet.</p></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>class CourseChip extends StatelessWidget {
+  const CourseChip({
+    super.key,
+    required this.title,
+    required this.onSelected,
+  });
+
+  final String title;
+  final ValueChanged&lt;String&gt; onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      label: Text(title),
+      onPressed: () =&gt; onSelected(title),
+    );
+  }
+}</code></pre></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>CourseChip(
+  title: course.title,
+  onSelected: (title) {
+    setState(() =&gt; selectedTitle = title);
+  },
+)</code></pre><div class="code-note"><code>ValueChanged&lt;String&gt;</code> is shorthand for <code>void Function(String value)</code>.</div></div>
+      <table class="comparison"><thead><tr><th>Callback type</th><th>Use it when</th></tr></thead><tbody><tr><td><code>VoidCallback</code></td><td>The event needs no payload: close, retry, continue.</td></tr><tr><td><code>ValueChanged&lt;T&gt;</code></td><td>The event reports one value: selected course, slider value, toggle state.</td></tr><tr><td><code>void Function(A, B)</code></td><td>The event genuinely needs a custom multi-value signature.</td></tr></tbody></table>
+      <div class="quiz" data-answer="2" data-correct="Correct. ValueChanged&lt;bool&gt; reports the new boolean selection to the parent."><h3>Which type fits a reusable toggle that reports its new value?</h3><div class="quiz-options"><button class="quiz-option"><code>String</code></button><button class="quiz-option"><code>VoidCallback?</code></button><button class="quiz-option"><code>ValueChanged&lt;bool&gt;</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Use const well">
+      <header class="step-header"><span class="step-kicker">STEP 7 · CONSTANT CONSTRUCTORS</span><h1>Make constant construction possible</h1><p class="lede">When every instance field is <code>final</code> and initialization supports it, declare a <code>const</code> constructor. Callers can then create compile-time constant widgets when every argument is also constant.</p></header>
+      <div class="const-stage"><div class="const-card valid"><strong>Constant invocation</strong><pre><code>const ProgressBadge(
+  progress: 0.72,
+)</code></pre><p>Both the constructor and argument support a compile-time constant.</p></div><div class="const-card runtime"><strong>Runtime invocation</strong><pre><code>CourseCard(
+  title: course.title,
+  onContinue: () =&gt; open(course),
+)</code></pre><p>The class may still have a const constructor, but these arguments are known at runtime.</p></div></div>
+      <div class="demo"><h2>Check a call site</h2><div class="demo-controls"><button class="demo-btn active" type="button" data-const="static">Static badge</button><button class="demo-btn" type="button" data-const="runtime">Data-driven card</button><button class="demo-btn" type="button" data-const="missing">Mutable field</button></div><div class="const-result" id="constResult">✓ Use const: constructor and arguments are constant.</div></div>
+      <div class="grid-2"><div class="concept"><strong>Constructor declaration</strong><p><code>const CourseCard(...)</code> makes constant instances possible; it does not force every call to be constant.</p></div><div class="concept"><strong>Constant context</strong><p>Inside a <code>const</code> collection or constructor call, nested constant invocations do not need repeated <code>const</code> keywords.</p></div></div>
+      <div class="callout"><span class="label">WHY IT HELPS</span><p>Const communicates immutability and lets Dart canonicalize equal compile-time objects. Use it where valid, but never distort data flow merely to add the keyword.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. A const constructor enables constant instances, but runtime arguments still produce a normal runtime invocation."><h3>Does a const constructor make every CourseCard invocation constant?</h3><div class="quiz-options"><button class="quiz-option">Yes, automatically</button><button class="quiz-option">No, the supplied arguments must also be constant</button><button class="quiz-option">Only on Android</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Compose components">
+      <header class="step-header"><span class="step-kicker">STEP 8 · COMPOSITION</span><h1>Build larger widgets from smaller widgets</h1><p class="lede">Composition keeps each component focused. <code>CourseCard</code> coordinates structure while <code>ProgressBadge</code> owns the progress presentation.</p></header>
+      <div class="composition-lab"><div class="component-tree"><strong>Choose a component</strong><ul><li><button class="component-node active" type="button" data-component="card">CourseCard</button><ul><li><button class="component-node" type="button" data-component="header">Course header</button></li><li><button class="component-node" type="button" data-component="badge">ProgressBadge</button></li><li><button class="component-node" type="button" data-component="actions">Action row</button></li></ul></li></ul><p class="demo-readout" id="componentReadout">CourseCard composes the complete reusable unit.</p></div><div class="compose-preview" id="composePreview"><div class="course-preview" data-part="card"><div class="course-preview-head" data-part="header"><div class="course-preview-icon">FL</div><div class="course-preview-copy"><strong>Flutter Layouts</strong><span>8 lessons</span></div></div><div data-part="badge"><div class="meter"><span></span></div><span>72% complete</span></div><div class="preview-actions" data-part="actions"><span class="preview-action">Review</span><span class="preview-action primary">Continue</span></div></div></div></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Card(
+  child: Padding(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        Text('$lessonCount lessons'),
+        const SizedBox(height: 16),
+        ProgressBadge(progress: progress),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            if (onReview != null)
+              TextButton(
+                onPressed: onReview,
+                child: const Text('Review'),
+              ),
+            FilledButton(
+              onPressed: onContinue,
+              child: const Text('Continue'),
+            ),
+          ],
+        ),
+      ],
+    ),
+  ),
+)</code></pre></div>
+      <div class="grid-3"><div class="concept"><strong>Keep data flowing down</strong><p>The card passes only the inputs each child needs.</p></div><div class="concept"><strong>Keep actions flowing up</strong><p>Nested actions eventually invoke the parent callback.</p></div><div class="concept"><strong>Avoid tiny wrappers</strong><p>Extract a sub-widget only when it earns a meaningful responsibility.</p></div></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. Composition combines focused components without hiding their data flow."><h3>What does composition mean here?</h3><div class="quiz-options"><button class="quiz-option">Building a CourseCard from smaller widgets</button><button class="quiz-option">Copying the same card source three times</button><button class="quiz-option">Putting all app behavior inside ProgressBadge</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Organize files">
+      <header class="step-header"><span class="step-kicker">STEP 9 · SHARED COMPONENTS</span><h1>Give reusable widgets a predictable home</h1><p class="lede">Move shared presentation components into <code>lib/widgets/</code>. Keep screen-owned state and orchestration in <code>lib/screens/</code>.</p></header>
+      <div class="file-lab"><div class="file-tree" aria-label="Example Flutter file tree"><strong>lib/</strong><button class="file-button active" type="button" data-file="card">widgets/course_card.dart</button><button class="file-button" type="button" data-file="badge">widgets/progress_badge.dart</button><button class="file-button" type="button" data-file="dashboard">screens/course_dashboard.dart</button></div><div class="file-code"><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code id="fileCode">import 'package:flutter/material.dart';
+
+import 'progress_badge.dart';
+
+class CourseCard extends StatelessWidget {
+  const CourseCard({
+    super.key,
+    required this.title,
+    required this.lessonCount,
+    required this.progress,
+    required this.onContinue,
+    this.onReview,
+  });
+
+  final String title;
+  final int lessonCount;
+  final double progress;
+  final VoidCallback onContinue;
+  final VoidCallback? onReview;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleLarge),
+            Text('$lessonCount lessons'),
+            const SizedBox(height: 16),
+            ProgressBadge(progress: progress),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (onReview != null)
+                  TextButton(onPressed: onReview, child: const Text('Review')),
+                const SizedBox(width: 8),
+                FilledButton(onPressed: onContinue, child: const Text('Continue')),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre></div></div></div>
+      <div class="panel blue"><strong>Import direction:</strong><p>The screen imports shared widgets. <code>course_card.dart</code> imports <code>progress_badge.dart</code>. Shared presentation widgets do not import the dashboard screen or reach into its state.</p></div>
+      <div class="grid-2"><div class="concept"><strong>Feature-first alternative</strong><p>As an app grows, colocate a feature's screen and widgets under <code>lib/features/courses/</code>. The same dependency rule still applies.</p></div><div class="concept"><strong>Export only when useful</strong><p>A barrel file can shorten imports, but direct imports are perfectly clear for a small project.</p></div></div>
+      <div class="quiz" data-answer="2" data-correct="Correct. The screen owns state and composes shared presentation widgets."><h3>Which file should own the selected course state?</h3><div class="quiz-options"><button class="quiz-option"><code>progress_badge.dart</code></button><button class="quiz-option"><code>course_card.dart</code></button><button class="quiz-option"><code>course_dashboard.dart</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Refactor and challenge">
+      <header class="step-header"><span class="step-kicker">STEP 10 · PUT IT TOGETHER</span><h1>Refactor the dashboard from the outside in</h1><p class="lede">The screen keeps the course collection and changing message. Each list item configures a reusable card and connects its callbacks.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>ListView.separated(
+  padding: const EdgeInsets.all(16),
+  itemCount: courses.length,
+  separatorBuilder: (_, __) =&gt; const SizedBox(height: 12),
+  itemBuilder: (context, index) {
+    final course = courses[index];
+    return CourseCard(
+      title: course.title,
+      lessonCount: course.lessonCount,
+      progress: course.progress,
+      onContinue: () =&gt; _openCourse(course),
+      onReview: course.progress &gt; 0
+          ? () =&gt; _reviewCourse(course)
+          : null,
+    );
+  },
+)</code></pre></div>
+      <div class="panel teal"><strong>Read the flow:</strong><p>The dashboard maps domain data to widget parameters. The card renders that immutable configuration. A tap travels upward through a callback, and the dashboard updates state or navigates.</p></div>
+      <details class="reveal"><summary>Show a practical extraction sequence</summary><div><ol><li>Make the repeated card code work once.</li><li>Name the complete visual unit and extract it.</li><li>Replace hard-coded differences with typed constructor parameters.</li><li>Move application behavior behind callbacks.</li><li>Mark configuration fields final and add a const constructor when valid.</li><li>Extract focused subcomponents only where they clarify responsibility.</li><li>Move shared components into predictable files and update imports.</li><li>Run the app after each small change.</li></ol></div></details>
+      <div class="challenge"><h3>Final challenge: reusable LessonTile</h3><ol><li>Start with three repeated lesson rows containing an icon, title, duration, completion state, and action.</li><li>Extract a <code>LessonTile</code> with required named parameters.</li><li>Use <code>ValueChanged&lt;bool&gt;</code> to report completion changes.</li><li>Use a nullable <code>VoidCallback?</code> to hide or disable an optional preview action deliberately.</li><li>Add a const constructor and mark all configuration fields final.</li><li>Compose a small <code>CompletionBadge</code> inside the tile.</li><li>Move both shared widgets into <code>lib/widgets/</code>.</li><li>Test long titles, zero duration, both completion states, and a missing preview callback.</li></ol></div>
+      <h2>Completion checklist</h2><ul class="checklist"><li>I extract widgets around meaningful responsibilities.</li><li>I pass changing data through typed constructor parameters.</li><li>I choose required, optional, and nullable inputs deliberately.</li><li>I keep widget configuration fields final.</li><li>I use VoidCallback for actions without a payload.</li><li>I use ValueChanged or a function type when an event carries data.</li><li>I understand const constructors and constant call sites.</li><li>I compose focused widgets without hiding ownership.</li><li>I organize shared components without creating circular dependencies.</li></ul>
+      <div class="panel references"><h3>Continue learning</h3><p>Use the official references for <a href="https://docs.flutter.dev/ui">Flutter UI concepts</a>, <a href="https://dart.dev/language/constructors">Dart constructors</a>, and <a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a>.</p></div>
+      <div class="finish" id="finishBox"><h2>Codelab complete! 🎉</h2><p>You can now turn repeated Flutter interface code into small components with clear inputs, outputs, ownership, and file boundaries.</p></div>
+      <p class="footer-note">Building Reusable Widgets · Flutter UI · Beginner Foundation</p>
+    </section>
+
+  </div></main>
+</div>
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+  function render(updateHash=true){current=Math.max(0,Math.min(current,steps.length-1));steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});const percent=Math.round(((current+1)/steps.length)*100);document.getElementById('progressBar').style.width=`${percent}%`;document.getElementById('progressText').textContent=`${percent}%`;document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));document.getElementById('mobileTitle').textContent=titles[current];document.getElementById('prevBtn').disabled=current===0;document.getElementById('nextBtn').disabled=current===steps.length-1;document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';document.getElementById('finishBox')?.classList.toggle('show',current===steps.length-1);document.title=`${titles[current]} — Building Reusable Widgets`;if(updateHash)history.pushState({step:current},'',`#step-${current+1}`);window.scrollTo({top:0,behavior:'auto'});sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false')}
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render()}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+  document.addEventListener('click',async event=>{const copy=event.target.closest('.copy-btn');if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1500);return}const option=event.target.closest('.quiz-option');if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show')}});
+  document.querySelectorAll('[data-extract]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-extract]').forEach(item=>item.classList.toggle('active',item===button));const cards=[...document.querySelectorAll('[data-card]')];cards.forEach((card,index)=>card.classList.toggle('highlight',button.dataset.extract==='all'||(button.dataset.extract==='first'&&index===0)));const messages={all:'Each outlined card has the same structure but different data. That repeated unit is a useful widget boundary.',first:'One card combines a leading icon, course information, progress, and an action.',none:'The screen still works, but the repeated component boundary is harder to see.'};document.getElementById('extractReadout').textContent=messages[button.dataset.extract]}));
+  document.querySelectorAll('[data-card]').forEach(card=>card.classList.add('highlight'));
+
+  const courseOptions={layouts:{title:'Flutter Layouts',lessons:8,icon:'FL'},async:{title:'Dart Async',lessons:6,icon:'DA'},state:{title:'State Basics',lessons:10,icon:'ST'}};
+  let selectedCourse='layouts';let selectedProgress=.72;
+  function updateParameterDemo(){const course=courseOptions[selectedCourse];const rounded=Math.round(selectedProgress*100);document.getElementById('parameterIcon').textContent=course.icon;document.getElementById('parameterTitle').textContent=course.title;document.getElementById('parameterLessons').textContent=`${course.lessons} lessons`;document.getElementById('parameterMeter').style.width=`${rounded}%`;document.getElementById('parameterPercent').textContent=`${rounded}% complete`;document.getElementById('constructorCall').textContent=`CourseCard(\n  title: '${course.title}',\n  lessonCount: ${course.lessons},\n  progress: ${selectedProgress},\n  onContinue: _openCourse,\n)`}
+  document.querySelectorAll('[data-course]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-course]').forEach(item=>item.classList.toggle('active',item===button));selectedCourse=button.dataset.course;updateParameterDemo()}));
+  document.querySelectorAll('[data-progress]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-progress]').forEach(item=>item.classList.toggle('active',item===button));selectedProgress=Number(button.dataset.progress);updateParameterDemo()}));
+
+  let callbackCount=0;document.getElementById('continueDemo').addEventListener('click',()=>{callbackCount+=1;document.getElementById('callbackLog').textContent=`${callbackCount}. Child button tapped → onContinue() invoked → parent opens the course.`});
+  document.querySelectorAll('[data-value]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-value]').forEach(item=>item.classList.toggle('selected',item===button));document.getElementById('valueReadout').textContent=`onSelected sent “${button.dataset.value}” to the parent.`}));
+
+  const constMessages={static:'✓ Use const: constructor and arguments are constant.',runtime:'Runtime call: the const constructor is available, but course data and the closure are runtime values.',missing:'Cannot declare a const constructor until every instance field is final and validly initialized.'};
+  document.querySelectorAll('[data-const]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-const]').forEach(item=>item.classList.toggle('active',item===button));document.getElementById('constResult').textContent=constMessages[button.dataset.const]}));
+
+  const componentMessages={card:'CourseCard composes the complete reusable unit.',header:'The header presents identity: course name and lesson count.',badge:'ProgressBadge owns the progress indicator and percentage label.',actions:'The action row exposes intent through callbacks.'};
+  document.querySelectorAll('[data-component]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-component]').forEach(item=>item.classList.toggle('active',item===button));const name=button.dataset.component;const preview=document.getElementById('composePreview');preview.classList.toggle('inspecting',name!=='card');preview.querySelectorAll('[data-part]').forEach(part=>part.classList.toggle('focus-part',part.dataset.part===name));document.getElementById('componentReadout').textContent=componentMessages[name]}));
+
+  const fileCode=document.getElementById('fileCode');const cardFile=fileCode.textContent;
+  const fileContents={card:cardFile,badge:`import 'package:flutter/material.dart';
+
+class ProgressBadge extends StatelessWidget {
+  const ProgressBadge({
+    super.key,
+    required this.progress,
+  });
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final percent = (progress * 100).round();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LinearProgressIndicator(value: progress),
+        const SizedBox(height: 8),
+        Text('\$percent% complete'),
+      ],
+    );
+  }
+}`,dashboard:`import 'package:flutter/material.dart';
+
+import '../widgets/course_card.dart';
+
+class Course {
+  const Course(this.title, this.lessonCount, this.progress);
+
+  final String title;
+  final int lessonCount;
+  final double progress;
+}
+
+class CourseDashboard extends StatefulWidget {
+  const CourseDashboard({super.key});
+
+  @override
+  State<CourseDashboard> createState() => _CourseDashboardState();
+}
+
+class _CourseDashboardState extends State<CourseDashboard> {
+  static const courses = [
+    Course('Flutter Layouts', 8, 0.72),
+    Course('Dart Async', 6, 0.40),
+    Course('State Basics', 10, 0.15),
+  ];
+
+  String lastAction = 'Choose a course';
+
+  void _openCourse(Course course) {
+    setState(() => lastAction = 'Opened \${course.title}');
+  }
+
+  void _reviewCourse(Course course) {
+    setState(() => lastAction = 'Reviewing \${course.title}');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(lastAction)),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: courses.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          final course = courses[index];
+          return CourseCard(
+            title: course.title,
+            lessonCount: course.lessonCount,
+            progress: course.progress,
+            onContinue: () => _openCourse(course),
+            onReview: course.progress > 0
+                ? () => _reviewCourse(course)
+                : null,
+          );
+        },
+      ),
+    );
+  }
+}`};
+  document.querySelectorAll('[data-file]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-file]').forEach(item=>item.classList.toggle('active',item===button));fileCode.textContent=fileContents[button.dataset.file]}));
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});current=getHashStep();render(false);
+})();
+</script>
+</body>
+</html>
