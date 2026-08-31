@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Styling Flutter Widgets — Flutter Codelab</title>
+  <meta name="description" content="Style Flutter widgets with typography, colors, decorations, borders, gradients, shadows, buttons, and input decorations while keeping styling readable and reusable.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:800px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal,.demo{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.callout p:last-child{margin-bottom:0}.grid-2,.grid-3{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .demo{padding:20px;margin:20px 0}.demo-controls{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px}.demo-btn{padding:8px 12px;background:#fff;border:2px solid var(--ink);font-weight:800}.demo-btn.active{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}.demo-readout{margin:14px 0 0;padding:10px 12px;background:#fff;border:2px solid var(--ink);font-family:"DM Mono",monospace;font-size:.82rem}
+    .style-stage{min-height:230px;display:grid;place-items:center;padding:28px;background:#eaf0ff;border:3px solid var(--ink)}.sample-title{margin:0;font-size:40px;font-weight:700;letter-spacing:0;color:#2856d8;transition:all .2s ease}.sample-card{width:min(100%,520px);padding:24px;background:#fff;border:3px solid #101010;border-radius:18px;box-shadow:8px 8px 0 rgba(16,16,16,.85);transition:all .2s ease}.sample-card h3{margin:0 0 8px}.sample-card p{margin:0;color:#444}.mini-field{width:min(100%,520px);padding:14px 16px;background:#fff;border:2px solid #777;border-radius:12px;font-weight:600}.mini-field.focus{border-color:#2856d8;box-shadow:0 0 0 3px #e4ebff}.swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.swatch{min-height:86px;padding:10px;border:3px solid var(--ink);display:flex;align-items:end;font-family:"DM Mono",monospace;font-size:.72rem;font-weight:700}.tree{margin:20px 0;padding:16px;background:#fff;border:var(--border);font-family:"DM Mono",monospace;line-height:1.8;overflow:auto}.checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.references a{color:var(--blue-dark);font-weight:700}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.footer-note{margin-top:30px;color:#555;font-size:.8rem}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2,.grid-3{grid-template-columns:1fr}.swatches{grid-template-columns:1fr 1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz,.demo{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}.sample-title{font-size:32px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}.step-view.active{animation:none}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter UI Codelab</div><h2>Styling Flutter Widgets</h2><p>Turn functional UI into polished UI.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">Styling Flutter Widgets</div></div>
+  <main><div class="content" id="content">
+
+    <section class="step-view" data-title="Project goal">
+      <header class="step-header"><span class="step-kicker">STEP 1 · START HERE</span><h1>Style Widgets with Intention</h1><p class="lede">A screen can be perfectly laid out and still feel unfinished. In this codelab, you will style text, surfaces, buttons, and form fields using Flutter's built-in styling APIs without turning every widget into a wall of magic numbers.</p><div class="objective"><strong>By the end:</strong> You will build a polished Course Enrollment Card using typography, colors, borders, gradients, shadows, button styles, and input decorations.</div></header>
+      <div class="grid-3"><div class="concept"><strong>Typography</strong><p>Create visual hierarchy with size, weight, height, spacing, and color.</p></div><div class="concept"><strong>Surfaces</strong><p>Use decorations, borders, gradients, radius, and shadows to create visual structure.</p></div><div class="concept"><strong>Controls</strong><p>Style buttons and text fields while preserving clear interaction states.</p></div></div>
+      <h2>The visual language</h2>
+      <div class="panel blue"><div class="sample-card" style="margin:auto"><div style="display:inline-block;padding:5px 9px;background:#ffd83d;border:2px solid #101010;font-weight:800">FLUTTER UI</div><h3 style="font-size:28px">Build Better Interfaces</h3><p>Readable type, consistent spacing, purposeful color, and restrained decoration.</p><button style="margin-top:18px;padding:11px 18px;background:#2856d8;color:#fff;border:0;border-radius:10px;font-weight:800">Start learning</button></div></div>
+      <div class="callout"><span class="label">PREREQUISITE</span><p>You should already know basic widgets such as <code>Text</code>, <code>Container</code>, <code>Card</code>, <code>Padding</code>, <code>Row</code>, <code>Column</code>, and <code>ElevatedButton</code>.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. Styling changes how a widget looks and communicates hierarchy without changing its core purpose."><h3>What is the main goal of styling?</h3><div class="quiz-options"><button class="quiz-option">Replace layout widgets</button><button class="quiz-option">Improve visual communication and consistency</button><button class="quiz-option">Fetch data from the internet</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Style text">
+      <header class="step-header"><span class="step-kicker">STEP 2 · TYPOGRAPHY</span><h1>TextStyle Controls More Than Font Size</h1><p class="lede">Typography creates hierarchy. A title, subtitle, label, and body paragraph should not all shout with the same visual weight.</p></header>
+      <div class="demo"><h2>Change the headline</h2><div class="demo-controls" id="typeControls"><button class="demo-btn active" data-type="title">Title</button><button class="demo-btn" data-type="label">Label</button><button class="demo-btn" data-type="muted">Muted body</button></div><div class="style-stage"><p class="sample-title" id="sampleTitle">Flutter Styling</p></div><p class="demo-readout" id="typeReadout">fontSize: 40, fontWeight: w700, color: blue</p></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Text(
+  'Build Better Interfaces',
+  style: TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.w700,
+    color: Colors.indigo,
+    height: 1.2,
+    letterSpacing: -0.4,
+  ),
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Property</th><th>Use it for</th></tr></thead><tbody><tr><td><code>fontSize</code></td><td>Visual size of the text.</td></tr><tr><td><code>fontWeight</code></td><td>Emphasis, from thin to bold.</td></tr><tr><td><code>color</code></td><td>Foreground text color.</td></tr><tr><td><code>height</code></td><td>Line-height multiplier.</td></tr><tr><td><code>letterSpacing</code></td><td>Space between letters.</td></tr><tr><td><code>decoration</code></td><td>Underline, overline, or line-through.</td></tr></tbody></table>
+      <div class="callout"><span class="label">GOOD PRACTICE</span><p>Use only a few intentional text roles. If every label has a different size, weight, and color, the screen becomes visually noisy.</p></div>
+      <div class="quiz" data-answer="2" data-correct="Correct. fontWeight changes how heavy or emphasized the glyphs appear."><h3>Which property makes text visually heavier?</h3><div class="quiz-options"><button class="quiz-option"><code>height</code></button><button class="quiz-option"><code>letterSpacing</code></button><button class="quiz-option"><code>fontWeight</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Use color well">
+      <header class="step-header"><span class="step-kicker">STEP 3 · COLOR</span><h1>Use Color to Communicate, Not Decorate Everything</h1><p class="lede">Flutter gives you predefined Material colors, shades, ARGB values, and theme colors. The challenge is not finding a color—it is using a small, consistent palette.</p></header>
+      <div class="swatches"><div class="swatch" style="background:#2856d8;color:white">Primary</div><div class="swatch" style="background:#e4ebff">Surface</div><div class="swatch" style="background:#101010;color:white">Text</div><div class="swatch" style="background:#75e6c5">Success</div><div class="swatch" style="background:#ffd83d">Accent</div></div>
+      <div class="grid-2"><div><h2>Material color</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Container(
+  color: Colors.indigo.shade100,
+  child: const Text(
+    'Course card',
+    style: TextStyle(color: Colors.indigo),
+  ),
+)</code></pre></div></div><div><h2>Custom color</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>const Color brandBlue = Color(0xFF2856D8);
+
+Container(
+  color: brandBlue,
+  child: const Text('Brand surface'),
+)</code></pre></div></div></div>
+      <div class="panel yellow"><strong>Read <code>0xFF2856D8</code> as:</strong> <code>FF</code> opacity + <code>28</code> red + <code>56</code> green + <code>D8</code> blue.</div>
+      <h2>Avoid scattered hard-coded colors</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>// Hard to maintain if repeated everywhere
+color: const Color(0xFF2856D8)
+
+// Better for a small lesson or feature
+static const brandBlue = Color(0xFF2856D8);
+static const pageBackground = Color(0xFFF5F7FB);</code></pre></div>
+      <div class="callout"><span class="label">NEXT CODELAB</span><p>For application-wide color consistency, use <code>ThemeData</code> and <code>ColorScheme</code>. This lesson stays focused on styling individual components.</p></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. Reusing named color values makes intent clear and changes easier."><h3>The same brand blue appears in ten widgets. What is clearer?</h3><div class="quiz-options"><button class="quiz-option">Store it once under a meaningful name</button><button class="quiz-option">Copy the hex value ten times</button><button class="quiz-option">Use ten different blues</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Decorate surfaces">
+      <header class="step-header"><span class="step-kicker">STEP 4 · BOX DECORATION</span><h1>Build a Surface with BoxDecoration</h1><p class="lede"><code>BoxDecoration</code> groups visual properties that paint behind or around a child: background color, border, border radius, gradient, image, and shadow.</p></header>
+      <div class="demo"><h2>Compare surface styles</h2><div class="demo-controls" id="surfaceControls"><button class="demo-btn active" data-surface="plain">Plain</button><button class="demo-btn" data-surface="rounded">Rounded</button><button class="demo-btn" data-surface="outlined">Outlined</button></div><div class="style-stage"><div class="sample-card" id="surfaceCard"><h3>Course Spotlight</h3><p>A single surface can combine shape, color, border, and shadow.</p></div></div><p class="demo-readout" id="surfaceReadout">White surface, square corners, no extra border.</p></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Container(
+  padding: const EdgeInsets.all(20),
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(16),
+    border: Border.all(
+      color: Colors.indigo,
+      width: 2,
+    ),
+  ),
+  child: const Text('Styled surface'),
+)</code></pre></div>
+      <div class="callout"><span class="label">COMMON ERROR</span><p>When a <code>Container</code> has a <code>decoration</code>, place the background color inside <code>BoxDecoration</code> instead of also setting the container's <code>color</code> property.</p></div>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>color</code></td><td>Solid background color.</td></tr><tr><td><code>border</code></td><td>Outline around the box.</td></tr><tr><td><code>borderRadius</code></td><td>Rounded corners.</td></tr><tr><td><code>gradient</code></td><td>Blend multiple colors.</td></tr><tr><td><code>boxShadow</code></td><td>Paint one or more shadows.</td></tr></tbody></table>
+    </section>
+
+    <section class="step-view" data-title="Add gradients">
+      <header class="step-header"><span class="step-kicker">STEP 5 · GRADIENTS</span><h1>Blend Colors with a Gradient</h1><p class="lede">A gradient can create depth and direction, but it should support the content rather than compete with it.</p></header>
+      <div class="grid-2"><div><h2>LinearGradient</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Container(
+  decoration: const BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF2856D8),
+        Color(0xFF7C4DFF),
+      ],
+    ),
+  ),
+)</code></pre></div></div><div><h2>RadialGradient</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Container(
+  decoration: const BoxDecoration(
+    gradient: RadialGradient(
+      colors: [
+        Colors.amber,
+        Colors.deepOrange,
+      ],
+    ),
+  ),
+)</code></pre></div></div></div>
+      <div class="panel blue"><div style="height:180px;border:3px solid #101010;border-radius:18px;background:linear-gradient(135deg,#2856d8,#7c4dff);display:grid;place-items:center;color:white"><strong style="font-size:30px">Readable content first</strong></div></div>
+      <div class="callout"><span class="label">CONTRAST</span><p>Always check whether text remains readable across the entire gradient. A beautiful background is not useful if the label disappears on one side.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. begin and end describe the direction through which a LinearGradient travels."><h3>Which properties control a LinearGradient's direction?</h3><div class="quiz-options"><button class="quiz-option"><code>fontSize</code> and <code>height</code></button><button class="quiz-option"><code>begin</code> and <code>end</code></button><button class="quiz-option"><code>padding</code> and <code>margin</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Add shadows">
+      <header class="step-header"><span class="step-kicker">STEP 6 · DEPTH</span><h1>Use Shadows as a Hierarchy Cue</h1><p class="lede"><code>BoxShadow</code> can suggest elevation and separation. Small, soft shadows usually read more naturally than large dark shadows on every component.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>decoration: BoxDecoration(
+  color: Colors.white,
+  borderRadius: BorderRadius.circular(16),
+  boxShadow: const [
+    BoxShadow(
+      color: Color(0x22000000),
+      blurRadius: 16,
+      offset: Offset(0, 8),
+    ),
+  ],
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Property</th><th>Meaning</th></tr></thead><tbody><tr><td><code>color</code></td><td>Shadow color and opacity.</td></tr><tr><td><code>blurRadius</code></td><td>How soft the shadow becomes.</td></tr><tr><td><code>spreadRadius</code></td><td>How much the shadow expands before blurring.</td></tr><tr><td><code>offset</code></td><td>Horizontal and vertical displacement.</td></tr></tbody></table>
+      <div class="grid-3"><div class="concept"><strong>Small offset</strong><p>Feels close to the surface.</p></div><div class="concept"><strong>Large blur</strong><p>Feels softer and more diffused.</p></div><div class="concept"><strong>Low opacity</strong><p>Keeps depth subtle instead of muddy.</p></div></div>
+      <div class="callout"><span class="label">DON'T OVERSTYLE</span><p>Border + gradient + multiple shadows + bright color + large radius on every component usually reduces hierarchy. Decide what deserves emphasis.</p></div>
+    </section>
+
+    <section class="step-view" data-title="Style buttons">
+      <header class="step-header"><span class="step-kicker">STEP 7 · BUTTONS</span><h1>Style Buttons Without Rebuilding Them</h1><p class="lede">Flutter's Material buttons already understand interaction. Prefer their styling APIs instead of replacing them with a plain <code>Container</code> and manually recreating button behavior.</p></header>
+      <h2>Fast styling with styleFrom</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.indigo,
+    foregroundColor: Colors.white,
+    padding: const EdgeInsets.symmetric(
+      horizontal: 24,
+      vertical: 14,
+    ),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+    textStyle: const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+    ),
+  ),
+  onPressed: () {},
+  child: const Text('Enroll now'),
+)</code></pre></div>
+      <div class="grid-3"><div class="concept"><strong>ElevatedButton</strong><p>Primary action with an elevated Material surface.</p></div><div class="concept"><strong>FilledButton</strong><p>Strong Material 3 filled action.</p></div><div class="concept"><strong>OutlinedButton</strong><p>Lower emphasis with a visible border.</p></div></div>
+      <div class="panel yellow"><strong>Remember:</strong> <code>backgroundColor</code> styles the button surface; <code>foregroundColor</code> controls foreground content such as text and icons.</div>
+      <div class="callout"><span class="label">INTERACTION STATES</span><p>For advanced pressed, hovered, focused, or disabled styling, use a full <code>ButtonStyle</code> with state-aware properties. Keep the first version simple unless the design actually needs custom states.</p></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. foregroundColor is used for the button's foreground content, including text and icons."><h3>Which property controls an ElevatedButton's text/icon color?</h3><div class="quiz-options"><button class="quiz-option"><code>foregroundColor</code></button><button class="quiz-option"><code>blurRadius</code></button><button class="quiz-option"><code>borderRadius</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Style text fields">
+      <header class="step-header"><span class="step-kicker">STEP 8 · INPUT DECORATION</span><h1>Make Form Fields Clear Before Making Them Fancy</h1><p class="lede"><code>InputDecoration</code> controls the visual structure around a <code>TextField</code> or <code>TextFormField</code>: labels, hints, helper text, icons, fills, and borders.</p></header>
+      <div class="demo"><h2>Preview field states</h2><div class="demo-controls" id="fieldControls"><button class="demo-btn active" data-field="normal">Normal</button><button class="demo-btn" data-field="focus">Focused</button><button class="demo-btn" data-field="error">Error</button></div><div class="style-stage"><div style="width:min(100%,520px)"><div style="font-weight:800;margin-bottom:7px">Email address</div><div class="mini-field" id="fieldPreview">student@example.com</div><p id="fieldNote" style="margin:8px 0 0;color:#555">Use a clear label and predictable border.</p></div></div></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>TextField(
+  decoration: InputDecoration(
+    labelText: 'Email address',
+    hintText: 'student@example.com',
+    prefixIcon: const Icon(Icons.email_outlined),
+    filled: true,
+    fillColor: const Color(0xFFF5F7FB),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(
+        color: Colors.indigo,
+        width: 2,
+      ),
+    ),
+  ),
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Property</th><th>Purpose</th></tr></thead><tbody><tr><td><code>labelText</code></td><td>Identifies what the field represents.</td></tr><tr><td><code>hintText</code></td><td>Shows an example or temporary prompt.</td></tr><tr><td><code>prefixIcon</code></td><td>Places an icon before the editable text.</td></tr><tr><td><code>filled</code> / <code>fillColor</code></td><td>Paints the field's interior.</td></tr><tr><td><code>border</code></td><td>Default border shape.</td></tr><tr><td><code>focusedBorder</code></td><td>Border shown while the field has focus.</td></tr><tr><td><code>errorText</code></td><td>Displays an error message under the field.</td></tr></tbody></table>
+      <div class="quiz" data-answer="2" data-correct="Correct. focusedBorder lets the field visually communicate that it currently has keyboard focus."><h3>Which property can give a focused field a stronger border?</h3><div class="quiz-options"><button class="quiz-option"><code>hintText</code></button><button class="quiz-option"><code>fillColor</code></button><button class="quiz-option"><code>focusedBorder</code></button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Keep styling readable">
+      <header class="step-header"><span class="step-kicker">STEP 9 · MAINTAINABILITY</span><h1>Don't Hide the UI Inside Magic Numbers</h1><p class="lede">Readable styling makes future changes safer. A developer should be able to tell which values are intentional design decisions and which values belong only to one component.</p></header>
+      <h2>Problem: repeated unexplained values</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Container(
+  padding: const EdgeInsets.all(18),
+  decoration: BoxDecoration(
+    color: const Color(0xFF2856D8),
+    borderRadius: BorderRadius.circular(14),
+  ),
+  child: const Text(
+    'Enroll',
+    style: TextStyle(
+      color: Colors.white,
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+    ),
+  ),
+)</code></pre></div>
+      <p>This is not automatically bad. A one-off component can contain local values. The problem starts when the same values are copied across many files without a shared meaning.</p>
+      <h2>Better: name repeated design decisions</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>class AppStyles {
+  static const brandBlue = Color(0xFF2856D8);
+  static const cardRadius = 16.0;
+  static const sectionGap = 24.0;
+
+  static const title = TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.w700,
+    height: 1.2,
+  );
+}</code></pre></div>
+      <div class="grid-2"><div class="concept"><strong>Keep local values local</strong><p>If a value belongs to one widget only, keeping it nearby may be clearest.</p></div><div class="concept"><strong>Extract repeated decisions</strong><p>If a value represents your visual system, give it one source of truth.</p></div></div>
+      <div class="callout"><span class="label">IMPORTANT</span><p>Do not create a giant constants file just to avoid every number. The goal is meaningful reuse, not moving all values somewhere else.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. A repeated design decision deserves a meaningful shared name; a one-off value does not automatically need extraction."><h3>When should a style value usually be extracted?</h3><div class="quiz-options"><button class="quiz-option">Every time a number appears once</button><button class="quiz-option">When it represents a repeated design decision</button><button class="quiz-option">Only when Flutter throws an error</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Final challenge">
+      <header class="step-header"><span class="step-kicker">STEP 10 · PUT IT TOGETHER</span><h1>Build a Course Enrollment Card</h1><p class="lede">Combine the styling tools into one component. Keep each choice purposeful: type for hierarchy, color for emphasis, decoration for grouping, and controls for action.</p></header>
+      <div class="tree">CourseEnrollmentCard<br>├── Container: gradient + radius + shadow<br>│&nbsp;&nbsp;&nbsp;└── Padding<br>│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Column<br>│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Text: label style<br>│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Text: title style<br>│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Text: body style<br>│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── TextField: InputDecoration<br>│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── FilledButton: ButtonStyle</div>
+      <h2>One complete solution</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const StylingApp());
+}
+
+class StylingApp extends StatelessWidget {
+  const StylingApp({super.key});
+
+  static const brandBlue = Color(0xFF2856D8);
+  static const brandPurple = Color(0xFF7C4DFF);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: const Color(0xFFF5F7FB),
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 440),
+            child: Container(
+              margin: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [brandBlue, brandPurple],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x33000000),
+                    blurRadius: 18,
+                    offset: Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'FLUTTER UI',
+                    style: TextStyle(
+                      color: Color(0xFFFFD83D),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Build Better Interfaces',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w700,
+                      height: 1.1,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Practice typography, surfaces, controls, and readable styling.',
+                    style: TextStyle(
+                      color: Color(0xFFE7E9FF),
+                      fontSize: 15,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Enter your email',
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFD83D),
+                        foregroundColor: const Color(0xFF101010),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: const Text('Enroll now'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre></div>
+      <div class="challenge"><h3>Your version</h3><ol><li>Replace the gradient with a solid surface and add a 2-pixel border.</li><li>Create three distinct text roles: eyebrow label, title, and body.</li><li>Change the button from <code>FilledButton</code> to <code>OutlinedButton</code> while keeping it readable.</li><li>Add a focused border to the email field.</li><li>Move at least two repeated style values into named constants.</li><li>Remove the shadow and decide whether the visual hierarchy is still clear.</li></ol></div>
+      <h2>Completion checklist</h2>
+      <ul class="checklist"><li>I can create visual hierarchy with TextStyle.</li><li>I can use Material and custom colors intentionally.</li><li>I can style a surface with BoxDecoration.</li><li>I can create borders and rounded corners.</li><li>I can use gradients without harming readability.</li><li>I understand the main BoxShadow properties.</li><li>I can style Material buttons using their built-in style APIs.</li><li>I can style TextField using InputDecoration.</li><li>I can identify repeated styling values that deserve meaningful names.</li><li>I know that app-wide ThemeData belongs to the next theming lesson.</li></ul>
+      <div class="panel references"><h3>Continue learning</h3><p>Useful official Flutter references include <a href="https://api.flutter.dev/flutter/painting/TextStyle-class.html">TextStyle</a>, <a href="https://api.flutter.dev/flutter/painting/BoxDecoration-class.html">BoxDecoration</a>, <a href="https://api.flutter.dev/flutter/material/ButtonStyle-class.html">ButtonStyle</a>, and <a href="https://api.flutter.dev/flutter/material/InputDecoration-class.html">InputDecoration</a>.</p></div>
+      <div class="finish" id="finishBox"><h2>Codelab complete! 🎉</h2><p>You can now style individual Flutter components with purpose. Next, move repeated visual decisions into <code>ThemeData</code>, <code>ColorScheme</code>, <code>TextTheme</code>, component themes, custom fonts, and light/dark modes.</p></div>
+    </section>
+
+  </div></main>
+</div>
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});
+    document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+    document.title=`${titles[current]} — Styling Flutter Widgets Codelab`;
+    if(updateHash)history.pushState({step:current},'',`#step-${current+1}`);
+    window.scrollTo({top:0,behavior:'auto'});
+    sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');
+  }
+
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render()}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+  nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});
+  menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+
+  document.addEventListener('click',async event=>{
+    const copy=event.target.closest('.copy-btn');
+    if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1200);return}
+    const option=event.target.closest('.quiz-option');
+    if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show')}
+  });
+
+  const typeStyles={
+    title:{fontSize:'40px',fontWeight:'700',letterSpacing:'-0.5px',color:'#2856d8',textTransform:'none',text:'Flutter Styling',readout:'fontSize: 40, fontWeight: w700, color: blue'},
+    label:{fontSize:'15px',fontWeight:'700',letterSpacing:'1.8px',color:'#101010',textTransform:'uppercase',text:'Flutter Styling',readout:'fontSize: 15, fontWeight: w700, letterSpacing: 1.8'},
+    muted:{fontSize:'19px',fontWeight:'400',letterSpacing:'0',color:'#687083',textTransform:'none',text:'Flutter Styling',readout:'fontSize: 19, fontWeight: w400, muted foreground color'}
+  };
+  document.querySelectorAll('[data-type]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-type]').forEach(item=>item.classList.toggle('active',item===button));const s=typeStyles[button.dataset.type], el=document.getElementById('sampleTitle');Object.assign(el.style,{fontSize:s.fontSize,fontWeight:s.fontWeight,letterSpacing:s.letterSpacing,color:s.color,textTransform:s.textTransform});el.textContent=s.text;document.getElementById('typeReadout').textContent=s.readout}));
+
+  const surfaceStyles={
+    plain:{borderRadius:'0px',border:'0 solid transparent',boxShadow:'none',readout:'White surface, square corners, no extra border.'},
+    rounded:{borderRadius:'22px',border:'0 solid transparent',boxShadow:'none',readout:'Rounded corners soften the surface boundary.'},
+    outlined:{borderRadius:'16px',border:'3px solid #2856d8',boxShadow:'6px 6px 0 rgba(40,86,216,.22)',readout:'Border + modest shadow adds emphasis without changing the content.'}
+  };
+  document.querySelectorAll('[data-surface]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-surface]').forEach(item=>item.classList.toggle('active',item===button));const s=surfaceStyles[button.dataset.surface], card=document.getElementById('surfaceCard');Object.assign(card.style,{borderRadius:s.borderRadius,border:s.border,boxShadow:s.boxShadow});document.getElementById('surfaceReadout').textContent=s.readout}));
+
+  document.querySelectorAll('[data-field]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-field]').forEach(item=>item.classList.toggle('active',item===button));const preview=document.getElementById('fieldPreview'),note=document.getElementById('fieldNote'),mode=button.dataset.field;preview.className='mini-field';preview.style.borderColor='';preview.style.boxShadow='';note.style.color='#555';if(mode==='focus'){preview.classList.add('focus');note.textContent='Focused: stronger primary border makes keyboard focus visible.'}else if(mode==='error'){preview.style.borderColor='#c62828';preview.style.boxShadow='0 0 0 3px #ffe5e5';note.style.color='#a51616';note.textContent='Please enter a valid email address.'}else{note.textContent='Use a clear label and predictable border.'}}));
+
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});
+  window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+  document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});
+  current=getHashStep();render(false);
+})();
+</script>
+</body>
+</html>
