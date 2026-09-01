@@ -1,0 +1,1877 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interaction Part 2 — Flutter Self-Learning Codelab</title>
+<meta name="description" content="Self-learning Flutter codelab covering Radio, Dropdown, Slider, RangeSlider, advanced gestures, SnackBar, AlertDialog, BottomSheet, Dismissible, focus and keyboard handling, and a final interactive profile project.">
+<meta name="theme-color" content="#1769ff">
+<style>
+
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+    :root {
+      --blue: #1769ff;
+      --blue-dark: #0b43b7;
+      --blue-light: #dce9ff;
+      --ink: #101010;
+      --paper: #f5f7fb;
+      --white: #fff;
+      --yellow: #ffd83d;
+      --mint: #75e6c5;
+      --pink: #ff9bb7;
+      --purple: #d8c5ff;
+      --orange: #ffbd70;
+      --teal: #9ce7e2;
+      --border: 3px solid var(--ink);
+      --shadow: 6px 6px 0 var(--ink);
+      --shadow-sm: 4px 4px 0 var(--ink);
+      --sidebar: 290px;
+      --radius: 4px
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: auto
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      line-height: 1.55
+    }
+
+    button,
+    a {
+      font: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    :focus-visible {
+      outline: 4px solid var(--yellow);
+      outline-offset: 3px
+    }
+
+    .app {
+      min-height: 100vh
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar);
+      background: var(--blue);
+      border-right: var(--border);
+      padding: 22px 18px;
+      z-index: 20;
+      overflow: auto
+    }
+
+    .brand {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 16px;
+      margin-bottom: 20px
+    }
+
+    .eyebrow,
+    .progress-meta,
+    .step-number,
+    .step-kicker,
+    .tiny {
+      font-family: "DM Mono", monospace
+    }
+
+    .eyebrow {
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase
+    }
+
+    .brand h2 {
+      margin: 5px 0 3px;
+      font-size: 1.42rem;
+      line-height: 1.05
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: .85rem;
+      font-weight: 600
+    }
+
+    .progress-wrap {
+      color: #fff;
+      margin: 0 2px 20px
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: .72rem;
+      font-weight: 500;
+      margin-bottom: 7px
+    }
+
+    .progress-track {
+      height: 16px;
+      background: #fff;
+      border: var(--border);
+      padding: 2px
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: var(--yellow);
+      transition: width .2s ease
+    }
+
+    .steps {
+      display: grid;
+      gap: 9px
+    }
+
+    .step-link {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 34px 1fr 18px;
+      align-items: center;
+      gap: 9px;
+      text-align: left;
+      color: #fff;
+      background: transparent;
+      border: 3px solid transparent;
+      padding: 9px 8px;
+      font-weight: 700;
+      line-height: 1.15
+    }
+
+    .step-link:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .step-link.active {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--ink);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .step-number {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 2px solid currentColor;
+      font-size: .78rem
+    }
+
+    .step-status {
+      text-align: center
+    }
+
+    .mobile-bar {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--blue);
+      border-bottom: var(--border);
+      padding: 10px;
+      align-items: center;
+      gap: 10px
+    }
+
+    .mobile-bar strong {
+      color: #fff
+    }
+
+    .menu-btn,
+    .mobile-title {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .menu-btn {
+      width: 46px;
+      height: 42px;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .mobile-title {
+      padding: 8px 10px;
+      flex: 1;
+      font-weight: 800
+    }
+
+    main {
+      margin-left: var(--sidebar);
+      min-height: 100vh
+    }
+
+    .content {
+      width: min(980px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 42px 0 28px
+    }
+
+    .step-view {
+      display: none
+    }
+
+    .step-view.active {
+      display: block;
+      animation: stepIn .18s ease-out
+    }
+
+    @keyframes stepIn {
+      from {
+        opacity: .35;
+        transform: translateY(5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .step-header {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-bottom: 24px
+    }
+
+    .step-kicker {
+      display: inline-block;
+      background: var(--blue);
+      color: #fff;
+      border: 2px solid var(--ink);
+      padding: 5px 9px;
+      font-size: .72rem;
+      font-weight: 500;
+      margin-bottom: 13px
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.08
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.7rem);
+      margin: 0 0 12px;
+      letter-spacing: -.045em
+    }
+
+    h2 {
+      font-size: clamp(1.55rem, 3vw, 2.25rem);
+      margin: 30px 0 12px
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      margin: 24px 0 9px
+    }
+
+    .lede {
+      font-size: 1.08rem;
+      max-width: 760px;
+      margin: 0
+    }
+
+    .objective {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700
+    }
+
+    .panel {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .panel.blue {
+      background: var(--blue-light)
+    }
+
+    .panel.mint {
+      background: var(--mint)
+    }
+
+    .panel.yellow {
+      background: var(--yellow)
+    }
+
+    .panel.pink {
+      background: var(--pink)
+    }
+
+    .panel.purple {
+      background: var(--purple)
+    }
+
+    .panel.teal {
+      background: var(--teal)
+    }
+
+    .grid-2,
+    .grid-3 {
+      display: grid;
+      gap: 16px
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .concept {
+      border: var(--border);
+      padding: 18px;
+      background: #fff;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .concept strong {
+      font-size: 1.05rem
+    }
+
+    .callout {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 16px 18px;
+      margin: 20px 0;
+      background: #fff
+    }
+
+    .callout .label {
+      display: inline-block;
+      font-family: "DM Mono", monospace;
+      font-size: .72rem;
+      font-weight: 500;
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: #fff;
+      padding: 3px 7px;
+      margin-bottom: 8px
+    }
+
+    .callout p:last-child,
+    .concept p:last-child,
+    .panel p:last-child {
+      margin-bottom: 0
+    }
+
+    .code-wrap {
+      position: relative;
+      margin: 18px 0
+    }
+
+    pre {
+      margin: 0;
+      background: #111;
+      color: #f7f7f7;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 20px;
+      overflow: auto;
+      font-family: "DM Mono", ui-monospace, monospace;
+      font-size: .85rem;
+      line-height: 1.65;
+      tab-size: 2
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      padding: 5px 9px;
+      font-size: .75rem;
+      font-weight: 800;
+      z-index: 2
+    }
+
+    code:not(pre code) {
+      background: #e8edf7;
+      border: 1px solid #9da9bb;
+      padding: 1px 5px;
+      font-family: "DM Mono", monospace;
+      font-size: .88em
+    }
+
+    .code-note {
+      border: var(--border);
+      border-top: 0;
+      background: #e9edf4;
+      padding: 13px 16px;
+      font-family: "DM Mono", monospace;
+      font-size: .83rem
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35rem
+    }
+
+    li {
+      margin: 7px 0
+    }
+
+    .quiz {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      background: #fff;
+      padding: 20px;
+      margin: 20px 0
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px
+    }
+
+    .quiz-option {
+      text-align: left;
+      border: 2px solid var(--ink);
+      background: #fff;
+      padding: 11px 13px;
+      font-weight: 700
+    }
+
+    .quiz-option:hover {
+      background: var(--blue-light)
+    }
+
+    .quiz-option.correct {
+      background: var(--mint)
+    }
+
+    .quiz-option.wrong {
+      background: var(--pink)
+    }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 13px;
+      padding: 10px;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-feedback.show {
+      display: block
+    }
+
+    .reveal {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      margin: 18px 0
+    }
+
+    .reveal summary {
+      padding: 13px 16px;
+      cursor: pointer;
+      font-weight: 800;
+      background: var(--blue-light)
+    }
+
+    .reveal>div {
+      padding: 15px 16px
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: var(--border)
+    }
+
+    .nav-btn {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      background: #fff;
+      padding: 12px 18px;
+      font-weight: 900;
+      min-width: 130px
+    }
+
+    .nav-btn.primary {
+      background: var(--blue);
+      color: #fff
+    }
+
+    .nav-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      box-shadow: 3px 3px 0 #777
+    }
+
+    .finish {
+      display: none;
+      background: var(--mint);
+      border: var(--border);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-top: 24px
+    }
+
+    .finish.show {
+      display: block
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0
+    }
+
+    .checklist li {
+      padding: 10px 12px;
+      border: 2px solid var(--ink);
+      background: #fff;
+      margin: 8px 0
+    }
+
+    .checklist li::before {
+      content: "✓";
+      font-weight: 900;
+      margin-right: 9px;
+      color: var(--blue-dark)
+    }
+
+    .footer-note {
+      text-align: center;
+      font-family: "DM Mono", monospace;
+      font-size: .78rem;
+      margin: 28px 0 0
+    }
+
+    .theme-lab {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 18px
+    }
+
+    .theme-controls {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+      align-content: start
+    }
+
+    .demo-btn {
+      border: 2px solid var(--ink);
+      background: #fff;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 800
+    }
+
+    .demo-btn:hover {
+      background: var(--blue-light)
+    }
+
+    .demo-btn.active {
+      background: var(--yellow);
+      box-shadow: 3px 3px 0 var(--ink)
+    }
+
+    .phone {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 12px;
+      background: #1a1a1a;
+      min-height: 460px
+    }
+
+    .phone-screen {
+      height: 100%;
+      border: 2px solid var(--ink);
+      padding: 18px;
+      transition: background .18s, color .18s
+    }
+
+    .phone-screen.light {
+      background: #fdf8ff;
+      color: #1d1b20
+    }
+
+    .phone-screen.dark {
+      background: #141218;
+      color: #e6e1e5
+    }
+
+    .phone-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px
+    }
+
+    .phone-card {
+      border-radius: 20px;
+      padding: 18px;
+      margin: 14px 0
+    }
+
+    .light .phone-card {
+      background: #eaddff
+    }
+
+    .dark .phone-card {
+      background: #4f378b
+    }
+
+    .phone-action {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 800
+    }
+
+    .light .phone-action {
+      background: #6750a4;
+      color: #fff
+    }
+
+    .dark .phone-action {
+      background: #d0bcff;
+      color: #381e72
+    }
+
+    .scheme-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px
+    }
+
+    .swatch {
+      border: 2px solid var(--ink);
+      min-height: 100px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      font-family: "DM Mono", monospace;
+      font-size: .72rem
+    }
+
+    .swatch strong {
+      font-family: "Space Grotesk"
+    }
+
+    .type-sample {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 20px
+    }
+
+    .type-line {
+      padding: 10px 0;
+      border-bottom: 2px solid #ddd
+    }
+
+    .type-line:last-child {
+      border-bottom: 0
+    }
+
+    .component-demo {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px
+    }
+
+    .component-card {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 16px
+    }
+
+    .mini-btn {
+      display: inline-block;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: #6750a4;
+      color: white;
+      font-weight: 800
+    }
+
+    .mini-field {
+      border: 2px solid #6750a4;
+      border-radius: 8px;
+      padding: 11px;
+      background: #fff
+    }
+
+    .mini-chip {
+      display: inline-block;
+      border: 2px solid #6750a4;
+      border-radius: 999px;
+      padding: 7px 10px
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 10px
+    }
+
+    .flow-box {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 16px
+    }
+
+    .flow-arrow {
+      font-size: 1.8rem;
+      font-weight: 900
+    }
+
+    .comparison {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      margin: 18px 0
+    }
+
+    .comparison th,
+    .comparison td {
+      border: 2px solid var(--ink);
+      padding: 11px;
+      text-align: left;
+      vertical-align: top
+    }
+
+    .comparison th {
+      background: var(--yellow)
+    }
+
+    .challenge {
+      border: var(--border);
+      background: var(--yellow);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .references a {
+      color: var(--blue-dark);
+      font-weight: 800
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      .step-view.active {
+        animation: none
+      }
+
+      .progress-bar {
+        transition: none
+      }
+    }
+
+    @media(max-width:850px) {
+      :root {
+        --sidebar: 270px;
+        --mobile-bar-height: 65px
+      }
+
+      .sidebar {
+        inset: var(--mobile-bar-height) auto 0 0;
+        transform: translateX(-100%);
+        transition: transform .2s ease;
+        box-shadow: 10px 0 0 rgba(16, 16, 16, .18)
+      }
+
+      .sidebar.open {
+        transform: none
+      }
+
+      .mobile-bar {
+        display: flex;
+        height: var(--mobile-bar-height)
+      }
+
+      main {
+        margin-left: 0
+      }
+
+      .content {
+        width: min(940px, calc(100% - 28px));
+        padding-top: 24px
+      }
+    }
+
+    @media(max-width:650px) {
+      .content {
+        width: calc(100% - 18px);
+        padding-top: 16px
+      }
+
+      .step-header {
+        padding: 20px 16px
+      }
+
+      .panel,
+      .concept,
+      .quiz {
+        padding: 16px
+      }
+
+      .grid-2,
+      .grid-3,
+      .theme-lab,
+      .component-demo,
+      .flow {
+        grid-template-columns: 1fr
+      }
+
+      .flow-arrow {
+        transform: rotate(90deg);
+        justify-self: center
+      }
+
+      .scheme-grid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .nav-row {
+        position: sticky;
+        bottom: 0;
+        background: var(--paper);
+        padding: 12px 0;
+        z-index: 10
+      }
+
+      .nav-btn {
+        min-width: 0;
+        flex: 1;
+        padding: 11px 10px
+      }
+
+      pre {
+        font-size: .76rem;
+        padding: 16px 12px
+      }
+
+      .copy-btn {
+        position: static;
+        margin-bottom: 6px
+      }
+
+      .code-wrap {
+        display: flex;
+        flex-direction: column
+      }
+
+      .code-wrap pre {
+        order: 2
+      }
+
+      .code-wrap .copy-btn {
+        order: 1;
+        align-self: flex-end
+      }
+
+      .code-wrap .code-note {
+        order: 3
+      }
+    }
+  
+
+    .homework-badge {
+      display:inline-block;
+      background:var(--purple);
+      border:2px solid var(--ink);
+      box-shadow:3px 3px 0 var(--ink);
+      padding:5px 9px;
+      font-family:"DM Mono", monospace;
+      font-size:.72rem;
+      font-weight:700;
+      margin-left:8px;
+    }
+    .practice-grid {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+      margin:18px 0;
+    }
+    .practice-card {
+      border:var(--border);
+      background:#fff;
+      box-shadow:var(--shadow-sm);
+      padding:18px;
+    }
+    .practice-card h3 { margin-top:0; }
+    .mini-demo {
+      border:var(--border);
+      background:#fff;
+      box-shadow:var(--shadow-sm);
+      padding:18px;
+      margin:18px 0;
+    }
+    .mini-demo label {
+      display:block;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+    .mini-demo select,
+    .mini-demo input[type="text"] {
+      width:100%;
+      border:2px solid var(--ink);
+      padding:10px 12px;
+      font:inherit;
+      background:#fff;
+    }
+    .mini-output {
+      display:inline-block;
+      border:2px solid var(--ink);
+      background:var(--yellow);
+      padding:8px 12px;
+      font-family:"DM Mono", monospace;
+      font-weight:700;
+      margin-top:10px;
+    }
+    .task-box {
+      border:var(--border);
+      background:var(--yellow);
+      box-shadow:var(--shadow);
+      padding:20px;
+      margin:20px 0;
+    }
+    .task-box h3 { margin-top:0; }
+    .self-check {
+      border:var(--border);
+      background:var(--mint);
+      box-shadow:var(--shadow-sm);
+      padding:18px;
+      margin:18px 0;
+    }
+    .self-check strong { font-size:1.05rem; }
+    .gesture-pad {
+      border:3px dashed var(--ink);
+      background:var(--blue-light);
+      min-height:150px;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding:20px;
+      user-select:none;
+      margin-top:14px;
+      font-weight:800;
+    }
+    .gesture-pad.active { background:var(--pink); }
+    .snackbar-demo {
+      position:relative;
+      min-height:180px;
+      border:var(--border);
+      background:#fff;
+      box-shadow:var(--shadow-sm);
+      padding:18px;
+      overflow:hidden;
+    }
+    .fake-snackbar {
+      position:absolute;
+      left:18px;
+      right:18px;
+      bottom:18px;
+      background:#222;
+      color:#fff;
+      padding:12px 14px;
+      border:2px solid var(--ink);
+      transform:translateY(130%);
+      transition:transform .18s ease;
+      font-weight:700;
+    }
+    .fake-snackbar.show { transform:translateY(0); }
+    .demo-action {
+      border:2px solid var(--ink);
+      background:var(--blue);
+      color:#fff;
+      padding:10px 14px;
+      font-weight:800;
+      box-shadow:3px 3px 0 var(--ink);
+      cursor:pointer;
+    }
+    .demo-action.secondary { background:#fff; color:var(--ink); }
+    .demo-action.danger { background:var(--pink); color:var(--ink); }
+    .dialog-demo {
+      border:var(--border);
+      background:#fff;
+      box-shadow:var(--shadow-sm);
+      padding:20px;
+      margin:18px 0;
+    }
+    .dialog-card {
+      display:none;
+      border:var(--border);
+      background:#fff;
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-top:16px;
+    }
+    .dialog-card.show { display:block; }
+    .bottom-sheet-demo {
+      position:relative;
+      min-height:260px;
+      border:var(--border);
+      background:#e9edf4;
+      box-shadow:var(--shadow-sm);
+      padding:18px;
+      overflow:hidden;
+    }
+    .fake-sheet {
+      position:absolute;
+      left:0; right:0; bottom:0;
+      background:#fff;
+      border-top:var(--border);
+      padding:18px;
+      transform:translateY(110%);
+      transition:transform .18s ease;
+    }
+    .fake-sheet.show { transform:translateY(0); }
+    .dismiss-demo {
+      display:grid;
+      gap:10px;
+      margin:16px 0;
+    }
+    .dismiss-item {
+      border:2px solid var(--ink);
+      background:#fff;
+      padding:12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      box-shadow:3px 3px 0 var(--ink);
+    }
+    .kbd-flow {
+      display:grid;
+      grid-template-columns:1fr auto 1fr auto 1fr;
+      align-items:center;
+      gap:10px;
+      margin:18px 0;
+    }
+    .kbd-box {
+      border:var(--border);
+      background:#fff;
+      box-shadow:var(--shadow-sm);
+      padding:16px;
+      text-align:center;
+    }
+    .project-board {
+      border:var(--border);
+      background:#fff;
+      box-shadow:var(--shadow);
+      padding:22px;
+      margin:20px 0;
+    }
+    @media(max-width:650px) {
+      .practice-grid, .kbd-flow { grid-template-columns:1fr; }
+      .kbd-flow .flow-arrow { transform:rotate(90deg); justify-self:center; }
+    }
+
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+  <div class="brand">
+    <div class="eyebrow">Flutter UI · Self-Learning</div>
+    <h2>User Interaction · Part 2</h2>
+    <p>Explore, experiment, build.</p>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+    <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+  <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+</aside>
+
+<div class="mobile-bar">
+  <button class="menu-btn" id="menuBtn" aria-label="Open lesson navigation" aria-expanded="false">☰</button>
+  <div class="mobile-title" id="mobileTitle">User Interaction · Part 2</div>
+</div>
+
+<main>
+<div class="content" id="content">
+
+<section class="step-view" data-title="How to use this homework lab">
+<header class="step-header">
+  <span class="step-kicker">STEP 1 · SELF-LEARNING MODE</span>
+  <h1>Explore new widgets using patterns you already know <span class="homework-badge">HOME PRACTICE</span></h1>
+  <p class="lede">This part intentionally introduces widgets you can discover independently. For each topic, identify the current value, the callback, the state change, and the resulting UI update.</p>
+  <div class="objective"><strong>Your rule:</strong> before copying code, answer four questions—What is the state? What event occurs? Which callback runs? What changes on screen?</div>
+</header>
+
+<div class="grid-2">
+  <div class="concept"><strong>Do not memorize APIs</strong><p>Look for familiar ideas such as <code>value</code>, <code>onChanged</code>, callbacks, and <code>setState()</code>.</p></div>
+  <div class="concept"><strong>Build tiny experiments</strong><p>Test one widget at a time before combining everything into the final homework project.</p></div>
+</div>
+
+<div class="callout"><span class="label">REPEAT THIS PATTERN</span>
+<p><strong>State → Widget → User Action → Callback → setState → New State → Rebuild.</strong></p></div>
+
+<div class="quiz" data-answer="2" data-correct="Correct. The goal is to recognize the recurring interaction pattern, not memorize isolated widgets.">
+<h3>What should you focus on while self-learning these widgets?</h3>
+<div class="quiz-options">
+  <button class="quiz-option">Memorizing every constructor parameter</button>
+  <button class="quiz-option">Copying the largest possible example</button>
+  <button class="quiz-option">Recognizing state, callbacks, and rebuilds</button>
+</div>
+<div class="quiz-feedback" aria-live="polite"></div>
+</div>
+</section>
+
+<section class="step-view" data-title="Radio selection">
+<header class="step-header">
+  <span class="step-kicker">STEP 2 · SINGLE CHOICE</span>
+  <h1>Use Radio for one choice from a set</h1>
+  <p class="lede">A radio group represents a single selected value. Each option compares itself with the current group value and reports a new selection through a callback.</p>
+</header>
+
+<div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>String gender = &#x27;Male&#x27;;
+
+Radio&lt;String&gt;(
+  value: &#x27;Male&#x27;,
+  groupValue: gender,
+  onChanged: (value) {
+    setState(() {
+      gender = value!;
+    });
+  },
+)</code></pre><div class="code-note"><code>value</code> identifies this option. <code>groupValue</code> holds the currently selected option.</div></div>
+
+<div class="practice-grid">
+  <div class="practice-card"><h3>Find the state</h3><p>Which variable stores the current selection?</p><strong><code>gender</code></strong></div>
+  <div class="practice-card"><h3>Find the event</h3><p>Which callback reports the user's new choice?</p><strong><code>onChanged</code></strong></div>
+</div>
+
+<div class="task-box">
+  <h3>Your task</h3>
+  <p>Create three options: Beginner, Intermediate, Advanced. Display the selected level below the group.</p>
+</div>
+
+<div class="quiz" data-answer="1" data-correct="Correct. groupValue stores the value currently selected for the group.">
+<h3>What does groupValue represent?</h3>
+<div class="quiz-options">
+  <button class="quiz-option">The label shown beside Radio</button>
+  <button class="quiz-option">The currently selected value in the group</button>
+  <button class="quiz-option">A replacement for setState</button>
+</div>
+<div class="quiz-feedback" aria-live="polite"></div>
+</div>
+</section>
+
+<section class="step-view" data-title="Dropdown selection">
+<header class="step-header">
+  <span class="step-kicker">STEP 3 · COMPACT CHOICES</span>
+  <h1>Use a dropdown when choices should stay compact</h1>
+  <p class="lede">Dropdown controls follow the same controlled-value pattern: provide the current value, provide items, and update state when <code>onChanged</code> returns a new selection.</p>
+</header>
+
+<div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>String technology = &#x27;Flutter&#x27;;
+
+DropdownButton&lt;String&gt;(
+  value: technology,
+  items: const [
+    DropdownMenuItem(
+      value: &#x27;Flutter&#x27;,
+      child: Text(&#x27;Flutter&#x27;),
+    ),
+    DropdownMenuItem(
+      value: &#x27;React&#x27;,
+      child: Text(&#x27;React&#x27;),
+    ),
+    DropdownMenuItem(
+      value: &#x27;Spring Boot&#x27;,
+      child: Text(&#x27;Spring Boot&#x27;),
+    ),
+  ],
+  onChanged: (value) {
+    setState(() {
+      technology = value!;
+    });
+  },
+)</code></pre></div>
+
+<div class="mini-demo">
+  <label>Browser demo</label>
+  <select id="techDemo">
+    <option>Flutter</option>
+    <option>React</option>
+    <option>Spring Boot</option>
+  </select>
+  <div class="mini-output" id="techOutput">Selected: Flutter</div>
+</div>
+
+<div class="self-check"><strong>Self-check:</strong><p>Can you explain why <code>value</code> must match one of the available menu item values?</p></div>
+
+<div class="task-box">
+<h3>Your task</h3>
+<p>Create a dropdown for Favourite Technology and show a different icon or text below depending on the selected technology.</p>
+</div>
+
+<div class="quiz" data-answer="0" data-correct="Correct. onChanged gives you the newly selected dropdown value.">
+<h3>Where do you receive the newly selected dropdown value?</h3>
+<div class="quiz-options">
+  <button class="quiz-option"><code>onChanged</code></button>
+  <button class="quiz-option"><code>build()</code> only</button>
+  <button class="quiz-option"><code>dispose()</code></button>
+</div>
+<div class="quiz-feedback" aria-live="polite"></div>
+</div>
+</section>
+
+<section class="step-view" data-title="Slider and RangeSlider">
+<header class="step-header">
+  <span class="step-kicker">STEP 4 · CONTINUOUS VALUES</span>
+  <h1>Let the user choose a value from a range</h1>
+  <p class="lede"><code>Slider</code> handles one numeric value. <code>RangeSlider</code> handles a lower and upper value together.</p>
+</header>
+
+<div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>double experience = 2;
+
+Slider(
+  value: experience,
+  min: 0,
+  max: 5,
+  divisions: 5,
+  label: experience.round().toString(),
+  onChanged: (value) {
+    setState(() {
+      experience = value;
+    });
+  },
+)</code></pre></div>
+
+<div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>RangeValues budget = const RangeValues(1000, 5000);
+
+RangeSlider(
+  values: budget,
+  min: 0,
+  max: 10000,
+  onChanged: (values) {
+    setState(() {
+      budget = values;
+    });
+  },
+)</code></pre></div>
+
+<div class="grid-2">
+  <div class="concept"><strong>Slider</strong><p>One current value.</p></div>
+  <div class="concept"><strong>RangeSlider</strong><p>Two values: start and end.</p></div>
+</div>
+
+<div class="task-box"><h3>Your task</h3><p>Create an experience slider from 0–10 and display <code>Experience: 6 years</code>. Then create a RangeSlider for a preferred salary range.</p></div>
+
+<div class="quiz" data-answer="2" data-correct="Correct. RangeSlider stores two related values using RangeValues.">
+<h3>Which type commonly stores the selected RangeSlider values?</h3>
+<div class="quiz-options">
+  <button class="quiz-option"><code>String</code></button>
+  <button class="quiz-option"><code>BuildContext</code></button>
+  <button class="quiz-option"><code>RangeValues</code></button>
+</div>
+<div class="quiz-feedback" aria-live="polite"></div>
+</div>
+</section>
+
+<section class="step-view" data-title="Advanced gestures">
+<header class="step-header">
+  <span class="step-kicker">STEP 5 · EXPLORE GESTURES</span>
+  <h1>Go beyond a simple tap</h1>
+  <p class="lede">You already know <code>onTap</code>, <code>onDoubleTap</code>, and <code>onLongPress</code>. Now explore callbacks that expose more gesture detail.</p>
+</header>
+
+<div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>GestureDetector(
+  onTapDown: (details) {
+    print(details.localPosition);
+  },
+  onTapUp: (details) {
+    print(&#x27;Tap released&#x27;);
+  },
+  onPanUpdate: (details) {
+    print(details.delta);
+  },
+  child: Container(
+    width: 200,
+    height: 200,
+    color: Colors.blue,
+  ),
+)</code></pre></div>
+
+<div class="practice-grid">
+  <div class="practice-card"><h3><code>onTapDown</code></h3><p>Runs when a pointer begins a tap interaction and can provide position details.</p></div>
+  <div class="practice-card"><h3><code>onPanUpdate</code></h3><p>Runs repeatedly while a drag/pan is moving and provides movement deltas.</p></div>
+</div>
+
+<div class="mini-demo">
+  <strong>Gesture experiment</strong>
+  <div class="gesture-pad" id="gesturePad">Press / hold / move your pointer here</div>
+  <div class="mini-output" id="gestureOutput">Waiting for interaction</div>
+</div>
+
+<div class="task-box"><h3>Challenge</h3><p>Create a square whose position changes while the user drags it. Store its X and Y position in state and update them from <code>onPanUpdate</code>.</p></div>
+
+<div class="quiz" data-answer="1" data-correct="Correct. onPanUpdate is designed for repeated updates as the pointer moves during a pan gesture.">
+<h3>Which callback is useful while an object is being dragged?</h3>
+<div class="quiz-options">
+  <button class="quiz-option"><code>onSubmitted</code></button>
+  <button class="quiz-option"><code>onPanUpdate</code></button>
+  <button class="quiz-option"><code>dispose</code></button>
+</div>
+<div class="quiz-feedback" aria-live="polite"></div>
+</div>
+</section>
+
+<section class="step-view" data-title="SnackBar feedback">
+<header class="step-header">
+  <span class="step-kicker">STEP 6 · TEMPORARY FEEDBACK</span>
+  <h1>Tell the user what just happened</h1>
+  <p class="lede">A SnackBar is useful for brief, non-blocking feedback such as “Saved”, “Deleted”, or “Added to cart”.</p>
+</header>
+
+<div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>ScaffoldMessenger.of(context).showSnackBar(
+  const SnackBar(
+    content: Text(&#x27;Profile saved successfully&#x27;),
+  ),
+);</code></pre></div>
+
+<div class="snackbar-demo">
+  <button class="demo-action" id="showSnack">Save Profile</button>
+  <div class="fake-snackbar" id="fakeSnack">Profile saved successfully</div>
+</div>
+
+<div class="callout"><span class="label">THINK ABOUT UX</span><p>A SnackBar should usually confirm a completed action without forcing the user to dismiss a modal.</p></div>
+
+<div class="task-box"><h3>Your task</h3><p>Create a Save button. After it updates state, show a SnackBar confirming the action.</p></div>
+
+<div class="quiz" data-answer="0" data-correct="Correct. ScaffoldMessenger is the common way to show a SnackBar associated with the current Scaffold hierarchy.">
+<h3>Which class is commonly used to show a SnackBar?</h3>
+<div class="quiz-options">
+  <button class="quiz-option"><code>ScaffoldMessenger</code></button>
+  <button class="quiz-option"><code>TextEditingController</code></button>
+  <button class="quiz-option"><code>RangeValues</code></button>
+</div>
+<div class="quiz-feedback" aria-live="polite"></div>
+</div>
+</section>
+
+<section class="step-view" data-title="AlertDialog confirmation">
+<header class="step-header">
+  <span class="step-kicker">STEP 7 · BLOCKING DECISIONS</span>
+  <h1>Ask before destructive or important actions</h1>
+  <p class="lede"><code>showDialog()</code> displays a modal route. An <code>AlertDialog</code> is ideal for confirmations that require a clear choice before continuing.</p>
+</header>
+
+<div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>showDialog(
+  context: context,
+  builder: (context) {
+    return AlertDialog(
+      title: const Text(&#x27;Delete item?&#x27;),
+      content: const Text(
+        &#x27;This action cannot be undone.&#x27;,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text(&#x27;Cancel&#x27;),
+        ),
+        TextButton(
+          onPressed: () {
+            // Delete item
+            Navigator.pop(context);
+          },
+          child: const Text(&#x27;Delete&#x27;),
+        ),
+      ],
+    );
+  },
+);</code></pre></div>
+
+<div class="dialog-demo">
+  <button class="demo-action danger" id="openDialogDemo">Delete Item</button>
+  <div class="dialog-card" id="dialogCard">
+    <strong>Delete item?</strong>
+    <p>This action cannot be undone.</p>
+    <button class="demo-action secondary" id="cancelDialogDemo">Cancel</button>
+    <button class="demo-action danger" id="confirmDialogDemo">Delete</button>
+  </div>
+</div>
+
+<div class="task-box"><h3>Your task</h3><p>Before resetting a form, show a dialog with Cancel and Reset actions. Only clear the state when the user confirms.</p></div>
+
+<div class="quiz" data-answer="2" data-correct="Correct. Navigator.pop(context) closes the dialog route.">
+<h3>What commonly closes an AlertDialog?</h3>
+<div class="quiz-options">
+  <button class="quiz-option"><code>setState(null)</code></button>
+  <button class="quiz-option"><code>ThemeMode.dark</code></button>
+  <button class="quiz-option"><code>Navigator.pop(context)</code></button>
+</div>
+<div class="quiz-feedback" aria-live="polite"></div>
+</div>
+</section>
+
+<section class="step-view" data-title="Modal bottom sheets">
+<header class="step-header">
+  <span class="step-kicker">STEP 8 · ACTION SHEETS</span>
+  <h1>Show contextual choices from the bottom</h1>
+  <p class="lede"><code>showModalBottomSheet()</code> is useful for compact action menus, filters, sort options, photo-source choices, and other contextual actions.</p>
+</header>
+
+<div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>showModalBottomSheet(
+  context: context,
+  builder: (context) {
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.camera_alt),
+            title: const Text(&#x27;Camera&#x27;),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo),
+            title: const Text(&#x27;Gallery&#x27;),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  },
+);</code></pre></div>
+
+<div class="bottom-sheet-demo">
+  <button class="demo-action" id="openSheetDemo">Choose Photo</button>
+  <div class="fake-sheet" id="fakeSheet">
+    <strong>Choose photo source</strong>
+    <p>📷 Camera</p>
+    <p>🖼 Gallery</p>
+    <button class="demo-action secondary" id="closeSheetDemo">Cancel</button>
+  </div>
+</div>
+
+<div class="task-box"><h3>Your task</h3><p>Create a bottom sheet with Camera, Gallery, and Cancel. Actual image picking is not required.</p></div>
+
+<div class="quiz" data-answer="1" data-correct="Correct. showModalBottomSheet displays a modal surface from the bottom of the screen.">
+<h3>Which function opens a modal bottom sheet?</h3>
+<div class="quiz-options">
+  <button class="quiz-option"><code>showSnackBar()</code></button>
+  <button class="quiz-option"><code>showModalBottomSheet()</code></button>
+  <button class="quiz-option"><code>setState()</code></button>
+</div>
+<div class="quiz-feedback" aria-live="polite"></div>
+</div>
+</section>
+
+<section class="step-view" data-title="Dismissible list items">
+<header class="step-header">
+  <span class="step-kicker">STEP 9 · SWIPE ACTIONS</span>
+  <h1>Let list items respond to swipe gestures</h1>
+  <p class="lede"><code>Dismissible</code> wraps a child and reports when the user dismisses it. Your underlying data must also be updated, otherwise the item can reappear after a rebuild.</p>
+</header>
+
+<div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>Dismissible(
+  key: ValueKey(tasks[index]),
+  onDismissed: (direction) {
+    setState(() {
+      tasks.removeAt(index);
+    });
+  },
+  background: Container(
+    color: Colors.red,
+    alignment: Alignment.centerRight,
+    padding: const EdgeInsets.only(right: 20),
+    child: const Icon(
+      Icons.delete,
+      color: Colors.white,
+    ),
+  ),
+  child: ListTile(
+    title: Text(tasks[index]),
+  ),
+)</code></pre><div class="code-note">A stable key helps Flutter identify which list item is being dismissed.</div></div>
+
+<div class="dismiss-demo" id="dismissDemo">
+  <div class="dismiss-item"><span>Learn Radio</span><button class="demo-action danger dismiss-browser">Dismiss</button></div>
+  <div class="dismiss-item"><span>Learn SnackBar</span><button class="demo-action danger dismiss-browser">Dismiss</button></div>
+  <div class="dismiss-item"><span>Build Homework Project</span><button class="demo-action danger dismiss-browser">Dismiss</button></div>
+</div>
+
+<div class="callout"><span class="label">IMPORTANT</span><p>Removing the visual widget is not enough. Remove the corresponding item from the list or state as well.</p></div>
+
+<div class="task-box"><h3>Your task</h3><p>Create a list of tasks and allow the user to swipe a task away. Show a SnackBar after deletion.</p></div>
+
+<div class="quiz" data-answer="0" data-correct="Correct. The backing list must be updated so the dismissed item does not return on the next rebuild.">
+<h3>What should happen inside onDismissed?</h3>
+<div class="quiz-options">
+  <button class="quiz-option">Update the backing list/state</button>
+  <button class="quiz-option">Create another Scaffold</button>
+  <button class="quiz-option">Dispose the entire app</button>
+</div>
+<div class="quiz-feedback" aria-live="polite"></div>
+</div>
+</section>
+
+<section class="step-view" data-title="Focus and keyboard">
+<header class="step-header">
+  <span class="step-kicker">STEP 10 · INPUT FLOW</span>
+  <h1>Control where the keyboard focus goes</h1>
+  <p class="lede"><code>FocusNode</code> and <code>TextInputAction</code> help forms feel intentional: Next moves to the next field, Done can close the keyboard, and your code can request or release focus.</p>
+</header>
+
+<div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>final emailFocus = FocusNode();
+
+TextField(
+  textInputAction: TextInputAction.next,
+  onSubmitted: (_) {
+    FocusScope.of(context).requestFocus(
+      emailFocus,
+    );
+  },
+),
+
+TextField(
+  focusNode: emailFocus,
+  textInputAction: TextInputAction.done,
+  onSubmitted: (_) {
+    FocusScope.of(context).unfocus();
+  },
+)</code></pre></div>
+
+<div class="kbd-flow">
+  <div class="kbd-box"><strong>Name</strong><p>Next</p></div>
+  <div class="flow-arrow">→</div>
+  <div class="kbd-box"><strong>Email</strong><p>Next</p></div>
+  <div class="flow-arrow">→</div>
+  <div class="kbd-box"><strong>Password</strong><p>Done → keyboard closes</p></div>
+</div>
+
+<div class="panel blue"><strong>Remember</strong><p>If you create a <code>FocusNode</code> in State, dispose it in <code>dispose()</code>.</p></div>
+
+<div class="task-box"><h3>Your task</h3><p>Create Name, Email, and Password fields. Make Next move the focus forward and Done dismiss the keyboard.</p></div>
+
+<div class="quiz" data-answer="2" data-correct="Correct. unfocus() removes focus from the active field, which typically dismisses the software keyboard.">
+<h3>What can you use to dismiss the keyboard?</h3>
+<div class="quiz-options">
+  <button class="quiz-option"><code>RangeSlider</code></button>
+  <button class="quiz-option"><code>Theme.of(context)</code></button>
+  <button class="quiz-option"><code>FocusScope.of(context).unfocus()</code></button>
+</div>
+<div class="quiz-feedback" aria-live="polite"></div>
+</div>
+</section>
+
+<section class="step-view" data-title="Final homework project">
+<header class="step-header">
+  <span class="step-kicker">STEP 11 · PUT IT TOGETHER</span>
+  <h1>Build an Interactive Profile Form</h1>
+  <p class="lede">Combine the interaction patterns from Part 1 with the self-learning widgets from Part 2. The goal is not visual perfection—the goal is correct event flow and state handling.</p>
+</header>
+
+<div class="project-board">
+<pre><code>--------------------------------
+
+       CREATE PROFILE
+
+Name
+[________________________]
+
+Email
+[________________________]
+
+Gender
+
+( ) Male
+( ) Female
+( ) Other
+
+Receive Notifications
+
+[ Switch ]
+
+Experience
+
+Beginner ----●------ Expert
+
+Favourite Technology
+
+[ Flutter             ▼ ]
+
+[ ] I agree to Terms & Conditions
+
+
+        [ CREATE PROFILE ]
+
+--------------------------------</code></pre>
+</div>
+
+<div class="challenge">
+<h3>Required features</h3>
+<ol>
+  <li>Text input for name and email.</li>
+  <li>Radio selection for gender.</li>
+  <li>Switch for notifications.</li>
+  <li>Slider for experience.</li>
+  <li>Dropdown for favourite technology.</li>
+  <li>Checkbox for terms and conditions.</li>
+  <li>Disable or ignore Create Profile until required conditions are met.</li>
+  <li>Show a SnackBar when the profile is created.</li>
+  <li>Show an AlertDialog before resetting the form.</li>
+  <li>Open a BottomSheet for profile-photo source selection.</li>
+  <li>Add at least one advanced gesture.</li>
+  <li>Use sensible keyboard focus flow between fields.</li>
+</ol>
+</div>
+
+<h2>Bonus challenges</h2>
+<ul class="checklist">
+  <li>Add a RangeSlider for preferred salary range.</li>
+  <li>Add a dismissible list of interests or skills.</li>
+  <li>Show extra fields conditionally based on a selected value.</li>
+  <li>Add a character counter for the name field.</li>
+  <li>Reset every control back to its initial state.</li>
+  <li>Extract at least two reusable widgets and communicate with callbacks.</li>
+</ul>
+
+<div class="self-check">
+<strong>Before submitting, explain your own app:</strong>
+<p>For every control, point out its state variable, callback, <code>setState()</code> call, and the UI that changes afterward.</p>
+</div>
+
+<div class="finish" id="finishBox">
+  <h2>Part 2 complete! 🎉</h2>
+  <p>You have explored independent Flutter interaction patterns and combined them into a complete homework project.</p>
+</div>
+
+<p class="footer-note">User Interaction · Part 2 Self-Learning · Flutter UI</p>
+
+<div class="quiz" data-answer="1" data-correct="Correct. The strongest sign of understanding is being able to explain the state and event flow behind each interaction.">
+<h3>How do you know you really understand this homework?</h3>
+<div class="quiz-options">
+  <button class="quiz-option">The UI looks exactly like someone else's screenshot</button>
+  <button class="quiz-option">You can explain the state and callback flow for every control</button>
+  <button class="quiz-option">The file has as many widgets as possible</button>
+</div>
+<div class="quiz-feedback" aria-live="polite"></div>
+</div>
+</section>
+
+</div>
+</main>
+</div>
+
+<script>
+(() => {
+  const steps = [...document.querySelectorAll('.step-view')];
+  const titles = steps.map(step => step.dataset.title);
+  const nav = document.getElementById('stepNav');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const content = document.getElementById('content');
+  const completed = new Set();
+  let current = 0;
+
+  nav.innerHTML = titles.map((title, index) =>
+    `<button class="step-link" data-step="${index}" type="button">
+      <span class="step-number">${String(index + 1).padStart(2, '0')}</span>
+      <span>${title}</span>
+      <span class="step-status" aria-hidden="true"></span>
+    </button>`).join('');
+
+  const getHashStep = () => {
+    const match = location.hash.match(/^#step-(\d+)$/);
+    const value = match ? Number(match[1]) - 1 : 0;
+    return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+  };
+
+  function render(updateHash = true) {
+    current = Math.max(0, Math.min(current, steps.length - 1));
+    steps.forEach((step, index) => {
+      const active = index === current;
+      step.classList.toggle('active', active);
+      step.setAttribute('aria-hidden', String(!active));
+    });
+    document.querySelectorAll('.step-link').forEach((button, index) => {
+      button.classList.toggle('active', index === current);
+      button.setAttribute('aria-current', index === current ? 'step' : 'false');
+      button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '';
+    });
+    const percent = Math.round(((current + 1) / steps.length) * 100);
+    document.getElementById('progressBar').style.width = `${percent}%`;
+    document.getElementById('progressText').textContent = `${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+    document.getElementById('mobileTitle').textContent = titles[current];
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === steps.length - 1;
+    document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Homework complete' : 'Next →';
+    document.getElementById('finishBox')?.classList.toggle('show', current === steps.length - 1);
+    document.title = `${titles[current]} — User Interaction Part 2`;
+    if (updateHash) history.pushState({step: current}, '', `#step-${current + 1}`);
+    window.scrollTo({top:0,behavior:'auto'});
+    sidebar.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded','false');
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= steps.length) return;
+    completed.add(current);
+    current = index;
+    render();
+  }
+
+  const navRow = document.createElement('div');
+  navRow.className = 'nav-row';
+  navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';
+  content.appendChild(navRow);
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+  nav.addEventListener('click', e => {
+    const button = e.target.closest('.step-link');
+    if (button) goTo(Number(button.dataset.step));
+  });
+  menuBtn.addEventListener('click', () => {
+    const open = sidebar.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+  });
+
+  document.addEventListener('click', async e => {
+    const copy = e.target.closest('.copy-btn');
+    if (copy) {
+      const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+      try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!'; }
+      catch { copy.textContent = 'Select & copy'; }
+      setTimeout(() => copy.textContent = 'Copy', 1500);
+      return;
+    }
+    const option = e.target.closest('.quiz-option');
+    if (option) {
+      const quiz = option.closest('.quiz');
+      if (quiz.dataset.answered) return;
+      const options = [...quiz.querySelectorAll('.quiz-option')];
+      const choice = options.indexOf(option);
+      const answer = Number(quiz.dataset.answer);
+      quiz.dataset.answered = 'true';
+      options.forEach(button => button.disabled = true);
+      option.classList.add(choice === answer ? 'correct' : 'wrong');
+      if (choice !== answer) options[answer].classList.add('correct');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
+      feedback.classList.add('show');
+    }
+  });
+
+  document.getElementById('techDemo')?.addEventListener('change', e => {
+    document.getElementById('techOutput').textContent = `Selected: ${e.target.value}`;
+  });
+
+  const gesturePad = document.getElementById('gesturePad');
+  const gestureOutput = document.getElementById('gestureOutput');
+  gesturePad?.addEventListener('pointerdown', e => {
+    gesturePad.classList.add('active');
+    gestureOutput.textContent = `Pointer down at ${Math.round(e.offsetX)}, ${Math.round(e.offsetY)}`;
+  });
+  gesturePad?.addEventListener('pointermove', e => {
+    if (e.buttons) gestureOutput.textContent = `Moving: ${Math.round(e.offsetX)}, ${Math.round(e.offsetY)}`;
+  });
+  gesturePad?.addEventListener('pointerup', () => {
+    gesturePad.classList.remove('active');
+    gestureOutput.textContent = 'Pointer released';
+  });
+
+  const fakeSnack = document.getElementById('fakeSnack');
+  document.getElementById('showSnack')?.addEventListener('click', () => {
+    fakeSnack.classList.add('show');
+    setTimeout(() => fakeSnack.classList.remove('show'), 2200);
+  });
+
+  const dialogCard = document.getElementById('dialogCard');
+  document.getElementById('openDialogDemo')?.addEventListener('click', () => dialogCard.classList.add('show'));
+  document.getElementById('cancelDialogDemo')?.addEventListener('click', () => dialogCard.classList.remove('show'));
+  document.getElementById('confirmDialogDemo')?.addEventListener('click', () => {
+    dialogCard.innerHTML = '<strong>Item deleted.</strong>';
+    setTimeout(() => { dialogCard.classList.remove('show'); dialogCard.innerHTML = '<strong>Delete item?</strong><p>This action cannot be undone.</p><button class="demo-action secondary" id="cancelDialogDemo">Cancel</button><button class="demo-action danger" id="confirmDialogDemo">Delete</button>'; }, 1000);
+  });
+
+  const fakeSheet = document.getElementById('fakeSheet');
+  document.getElementById('openSheetDemo')?.addEventListener('click', () => fakeSheet.classList.add('show'));
+  document.getElementById('closeSheetDemo')?.addEventListener('click', () => fakeSheet.classList.remove('show'));
+
+  document.querySelectorAll('.dismiss-browser').forEach(button => {
+    button.addEventListener('click', () => button.closest('.dismiss-item')?.remove());
+  });
+
+  window.addEventListener('popstate', () => { current = getHashStep(); render(false); });
+  window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+  document.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
+    if (e.key === 'ArrowRight') goTo(current + 1);
+    if (e.key === 'ArrowLeft') goTo(current - 1);
+  });
+
+  current = getHashStep();
+  render(false);
+})();
+</script>
+</body>
+</html>

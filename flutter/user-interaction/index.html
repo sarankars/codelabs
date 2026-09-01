@@ -1,0 +1,1800 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>User Interaction & Local State — Interactive Flutter Codelab</title>
+  <meta name="description" content="Learn Flutter user interaction with callbacks, buttons, StatefulWidget, setState, gestures, TextField, TextEditingController, Checkbox, Switch, and parent-child callbacks.">
+  <meta name="theme-color" content="#1769ff">
+  <style>
+
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+    :root {
+      --blue: #1769ff;
+      --blue-dark: #0b43b7;
+      --blue-light: #dce9ff;
+      --ink: #101010;
+      --paper: #f5f7fb;
+      --white: #fff;
+      --yellow: #ffd83d;
+      --mint: #75e6c5;
+      --pink: #ff9bb7;
+      --purple: #d8c5ff;
+      --orange: #ffbd70;
+      --teal: #9ce7e2;
+      --border: 3px solid var(--ink);
+      --shadow: 6px 6px 0 var(--ink);
+      --shadow-sm: 4px 4px 0 var(--ink);
+      --sidebar: 290px;
+      --radius: 4px
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: auto
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      line-height: 1.55
+    }
+
+    button,
+    a {
+      font: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    :focus-visible {
+      outline: 4px solid var(--yellow);
+      outline-offset: 3px
+    }
+
+    .app {
+      min-height: 100vh
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar);
+      background: var(--blue);
+      border-right: var(--border);
+      padding: 22px 18px;
+      z-index: 20;
+      overflow: auto
+    }
+
+    .brand {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 16px;
+      margin-bottom: 20px
+    }
+
+    .eyebrow,
+    .progress-meta,
+    .step-number,
+    .step-kicker,
+    .tiny {
+      font-family: "DM Mono", monospace
+    }
+
+    .eyebrow {
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase
+    }
+
+    .brand h2 {
+      margin: 5px 0 3px;
+      font-size: 1.42rem;
+      line-height: 1.05
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: .85rem;
+      font-weight: 600
+    }
+
+    .progress-wrap {
+      color: #fff;
+      margin: 0 2px 20px
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: .72rem;
+      font-weight: 500;
+      margin-bottom: 7px
+    }
+
+    .progress-track {
+      height: 16px;
+      background: #fff;
+      border: var(--border);
+      padding: 2px
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: var(--yellow);
+      transition: width .2s ease
+    }
+
+    .steps {
+      display: grid;
+      gap: 9px
+    }
+
+    .step-link {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 34px 1fr 18px;
+      align-items: center;
+      gap: 9px;
+      text-align: left;
+      color: #fff;
+      background: transparent;
+      border: 3px solid transparent;
+      padding: 9px 8px;
+      font-weight: 700;
+      line-height: 1.15
+    }
+
+    .step-link:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .step-link.active {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--ink);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .step-number {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 2px solid currentColor;
+      font-size: .78rem
+    }
+
+    .step-status {
+      text-align: center
+    }
+
+    .mobile-bar {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--blue);
+      border-bottom: var(--border);
+      padding: 10px;
+      align-items: center;
+      gap: 10px
+    }
+
+    .mobile-bar strong {
+      color: #fff
+    }
+
+    .menu-btn,
+    .mobile-title {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .menu-btn {
+      width: 46px;
+      height: 42px;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .mobile-title {
+      padding: 8px 10px;
+      flex: 1;
+      font-weight: 800
+    }
+
+    main {
+      margin-left: var(--sidebar);
+      min-height: 100vh
+    }
+
+    .content {
+      width: min(980px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 42px 0 28px
+    }
+
+    .step-view {
+      display: none
+    }
+
+    .step-view.active {
+      display: block;
+      animation: stepIn .18s ease-out
+    }
+
+    @keyframes stepIn {
+      from {
+        opacity: .35;
+        transform: translateY(5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .step-header {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-bottom: 24px
+    }
+
+    .step-kicker {
+      display: inline-block;
+      background: var(--blue);
+      color: #fff;
+      border: 2px solid var(--ink);
+      padding: 5px 9px;
+      font-size: .72rem;
+      font-weight: 500;
+      margin-bottom: 13px
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.08
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.7rem);
+      margin: 0 0 12px;
+      letter-spacing: -.045em
+    }
+
+    h2 {
+      font-size: clamp(1.55rem, 3vw, 2.25rem);
+      margin: 30px 0 12px
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      margin: 24px 0 9px
+    }
+
+    .lede {
+      font-size: 1.08rem;
+      max-width: 760px;
+      margin: 0
+    }
+
+    .objective {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700
+    }
+
+    .panel {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .panel.blue {
+      background: var(--blue-light)
+    }
+
+    .panel.mint {
+      background: var(--mint)
+    }
+
+    .panel.yellow {
+      background: var(--yellow)
+    }
+
+    .panel.pink {
+      background: var(--pink)
+    }
+
+    .panel.purple {
+      background: var(--purple)
+    }
+
+    .panel.teal {
+      background: var(--teal)
+    }
+
+    .grid-2,
+    .grid-3 {
+      display: grid;
+      gap: 16px
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .concept {
+      border: var(--border);
+      padding: 18px;
+      background: #fff;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .concept strong {
+      font-size: 1.05rem
+    }
+
+    .callout {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 16px 18px;
+      margin: 20px 0;
+      background: #fff
+    }
+
+    .callout .label {
+      display: inline-block;
+      font-family: "DM Mono", monospace;
+      font-size: .72rem;
+      font-weight: 500;
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: #fff;
+      padding: 3px 7px;
+      margin-bottom: 8px
+    }
+
+    .callout p:last-child,
+    .concept p:last-child,
+    .panel p:last-child {
+      margin-bottom: 0
+    }
+
+    .code-wrap {
+      position: relative;
+      margin: 18px 0
+    }
+
+    pre {
+      margin: 0;
+      background: #111;
+      color: #f7f7f7;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 20px;
+      overflow: auto;
+      font-family: "DM Mono", ui-monospace, monospace;
+      font-size: .85rem;
+      line-height: 1.65;
+      tab-size: 2
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      padding: 5px 9px;
+      font-size: .75rem;
+      font-weight: 800;
+      z-index: 2
+    }
+
+    code:not(pre code) {
+      background: #e8edf7;
+      border: 1px solid #9da9bb;
+      padding: 1px 5px;
+      font-family: "DM Mono", monospace;
+      font-size: .88em
+    }
+
+    .code-note {
+      border: var(--border);
+      border-top: 0;
+      background: #e9edf4;
+      padding: 13px 16px;
+      font-family: "DM Mono", monospace;
+      font-size: .83rem
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35rem
+    }
+
+    li {
+      margin: 7px 0
+    }
+
+    .quiz {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      background: #fff;
+      padding: 20px;
+      margin: 20px 0
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px
+    }
+
+    .quiz-option {
+      text-align: left;
+      border: 2px solid var(--ink);
+      background: #fff;
+      padding: 11px 13px;
+      font-weight: 700
+    }
+
+    .quiz-option:hover {
+      background: var(--blue-light)
+    }
+
+    .quiz-option.correct {
+      background: var(--mint)
+    }
+
+    .quiz-option.wrong {
+      background: var(--pink)
+    }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 13px;
+      padding: 10px;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-feedback.show {
+      display: block
+    }
+
+    .reveal {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      margin: 18px 0
+    }
+
+    .reveal summary {
+      padding: 13px 16px;
+      cursor: pointer;
+      font-weight: 800;
+      background: var(--blue-light)
+    }
+
+    .reveal>div {
+      padding: 15px 16px
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: var(--border)
+    }
+
+    .nav-btn {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      background: #fff;
+      padding: 12px 18px;
+      font-weight: 900;
+      min-width: 130px
+    }
+
+    .nav-btn.primary {
+      background: var(--blue);
+      color: #fff
+    }
+
+    .nav-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      box-shadow: 3px 3px 0 #777
+    }
+
+    .finish {
+      display: none;
+      background: var(--mint);
+      border: var(--border);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-top: 24px
+    }
+
+    .finish.show {
+      display: block
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0
+    }
+
+    .checklist li {
+      padding: 10px 12px;
+      border: 2px solid var(--ink);
+      background: #fff;
+      margin: 8px 0
+    }
+
+    .checklist li::before {
+      content: "✓";
+      font-weight: 900;
+      margin-right: 9px;
+      color: var(--blue-dark)
+    }
+
+    .footer-note {
+      text-align: center;
+      font-family: "DM Mono", monospace;
+      font-size: .78rem;
+      margin: 28px 0 0
+    }
+
+    .theme-lab {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 18px
+    }
+
+    .theme-controls {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+      align-content: start
+    }
+
+    .demo-btn {
+      border: 2px solid var(--ink);
+      background: #fff;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 800
+    }
+
+    .demo-btn:hover {
+      background: var(--blue-light)
+    }
+
+    .demo-btn.active {
+      background: var(--yellow);
+      box-shadow: 3px 3px 0 var(--ink)
+    }
+
+    .phone {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 12px;
+      background: #1a1a1a;
+      min-height: 460px
+    }
+
+    .phone-screen {
+      height: 100%;
+      border: 2px solid var(--ink);
+      padding: 18px;
+      transition: background .18s, color .18s
+    }
+
+    .phone-screen.light {
+      background: #fdf8ff;
+      color: #1d1b20
+    }
+
+    .phone-screen.dark {
+      background: #141218;
+      color: #e6e1e5
+    }
+
+    .phone-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px
+    }
+
+    .phone-card {
+      border-radius: 20px;
+      padding: 18px;
+      margin: 14px 0
+    }
+
+    .light .phone-card {
+      background: #eaddff
+    }
+
+    .dark .phone-card {
+      background: #4f378b
+    }
+
+    .phone-action {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 800
+    }
+
+    .light .phone-action {
+      background: #6750a4;
+      color: #fff
+    }
+
+    .dark .phone-action {
+      background: #d0bcff;
+      color: #381e72
+    }
+
+    .scheme-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px
+    }
+
+    .swatch {
+      border: 2px solid var(--ink);
+      min-height: 100px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      font-family: "DM Mono", monospace;
+      font-size: .72rem
+    }
+
+    .swatch strong {
+      font-family: "Space Grotesk"
+    }
+
+    .type-sample {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 20px
+    }
+
+    .type-line {
+      padding: 10px 0;
+      border-bottom: 2px solid #ddd
+    }
+
+    .type-line:last-child {
+      border-bottom: 0
+    }
+
+    .component-demo {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px
+    }
+
+    .component-card {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 16px
+    }
+
+    .mini-btn {
+      display: inline-block;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: #6750a4;
+      color: white;
+      font-weight: 800
+    }
+
+    .mini-field {
+      border: 2px solid #6750a4;
+      border-radius: 8px;
+      padding: 11px;
+      background: #fff
+    }
+
+    .mini-chip {
+      display: inline-block;
+      border: 2px solid #6750a4;
+      border-radius: 999px;
+      padding: 7px 10px
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 10px
+    }
+
+    .flow-box {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 16px
+    }
+
+    .flow-arrow {
+      font-size: 1.8rem;
+      font-weight: 900
+    }
+
+    .comparison {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      margin: 18px 0
+    }
+
+    .comparison th,
+    .comparison td {
+      border: 2px solid var(--ink);
+      padding: 11px;
+      text-align: left;
+      vertical-align: top
+    }
+
+    .comparison th {
+      background: var(--yellow)
+    }
+
+    .challenge {
+      border: var(--border);
+      background: var(--yellow);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .references a {
+      color: var(--blue-dark);
+      font-weight: 800
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      .step-view.active {
+        animation: none
+      }
+
+      .progress-bar {
+        transition: none
+      }
+    }
+
+    @media(max-width:850px) {
+      :root {
+        --sidebar: 270px;
+        --mobile-bar-height: 65px
+      }
+
+      .sidebar {
+        inset: var(--mobile-bar-height) auto 0 0;
+        transform: translateX(-100%);
+        transition: transform .2s ease;
+        box-shadow: 10px 0 0 rgba(16, 16, 16, .18)
+      }
+
+      .sidebar.open {
+        transform: none
+      }
+
+      .mobile-bar {
+        display: flex;
+        height: var(--mobile-bar-height)
+      }
+
+      main {
+        margin-left: 0
+      }
+
+      .content {
+        width: min(940px, calc(100% - 28px));
+        padding-top: 24px
+      }
+    }
+
+    @media(max-width:650px) {
+      .content {
+        width: calc(100% - 18px);
+        padding-top: 16px
+      }
+
+      .step-header {
+        padding: 20px 16px
+      }
+
+      .panel,
+      .concept,
+      .quiz {
+        padding: 16px
+      }
+
+      .grid-2,
+      .grid-3,
+      .theme-lab,
+      .component-demo,
+      .flow {
+        grid-template-columns: 1fr
+      }
+
+      .flow-arrow {
+        transform: rotate(90deg);
+        justify-self: center
+      }
+
+      .scheme-grid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .nav-row {
+        position: sticky;
+        bottom: 0;
+        background: var(--paper);
+        padding: 12px 0;
+        z-index: 10
+      }
+
+      .nav-btn {
+        min-width: 0;
+        flex: 1;
+        padding: 11px 10px
+      }
+
+      pre {
+        font-size: .76rem;
+        padding: 16px 12px
+      }
+
+      .copy-btn {
+        position: static;
+        margin-bottom: 6px
+      }
+
+      .code-wrap {
+        display: flex;
+        flex-direction: column
+      }
+
+      .code-wrap pre {
+        order: 2
+      }
+
+      .code-wrap .copy-btn {
+        order: 1;
+        align-self: flex-end
+      }
+
+      .code-wrap .code-note {
+        order: 3
+      }
+    }
+  
+
+    .interaction-flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr;
+      align-items: stretch;
+      gap: 8px;
+      margin: 20px 0;
+    }
+    .interaction-flow .flow-box {
+      display: grid;
+      place-items: center;
+      text-align: center;
+      min-height: 110px;
+    }
+    .demo-stage {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .demo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin: 12px 0;
+    }
+    .demo-action {
+      border: 2px solid var(--ink);
+      background: var(--blue);
+      color: white;
+      padding: 10px 14px;
+      font-weight: 800;
+      box-shadow: 3px 3px 0 var(--ink);
+    }
+    .demo-action.secondary {
+      background: white;
+      color: var(--ink);
+    }
+    .demo-action.danger {
+      background: var(--pink);
+      color: var(--ink);
+    }
+    .demo-output {
+      border: 2px solid var(--ink);
+      background: var(--yellow);
+      padding: 10px 14px;
+      font-family: "DM Mono", monospace;
+      font-weight: 700;
+      min-width: 120px;
+      text-align: center;
+    }
+    .fake-field {
+      width: 100%;
+      border: 2px solid var(--ink);
+      padding: 11px 12px;
+      font: inherit;
+      background: white;
+    }
+    .mini-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 2px solid var(--ink);
+      padding: 10px 12px;
+      background: white;
+      font-weight: 700;
+    }
+    .state-map {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      margin: 18px 0;
+    }
+    .state-map th, .state-map td {
+      border: 2px solid var(--ink);
+      padding: 11px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .state-map th { background: var(--yellow); }
+    .parent-child {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 14px;
+      align-items: center;
+      margin: 20px 0;
+    }
+    .parent-child .concept { min-height: 170px; }
+    .arrow-stack {
+      display: grid;
+      gap: 28px;
+      text-align: center;
+      font-family: "DM Mono", monospace;
+      font-weight: 800;
+    }
+    @media(max-width:900px) {
+      .interaction-flow {
+        grid-template-columns: 1fr;
+      }
+      .interaction-flow .flow-arrow { transform: rotate(90deg); justify-self: center; }
+    }
+    @media(max-width:650px) {
+      .parent-child { grid-template-columns: 1fr; }
+      .arrow-stack { gap: 8px; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+      <div class="brand">
+        <div class="eyebrow">Flutter UI · Codelab</div>
+        <h2>User Interaction & Local State</h2>
+        <p>From taps to responsive UI.</p>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+        <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+      <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+    </aside>
+
+    <div class="mobile-bar">
+      <button class="menu-btn" id="menuBtn" aria-label="Open lesson navigation" aria-expanded="false">☰</button>
+      <div class="mobile-title" id="mobileTitle">User Interaction & Local State</div>
+    </div>
+
+    <main>
+      <div class="content" id="content">
+        
+<section class="step-view" data-title="How interaction works">
+  <header class="step-header">
+    <span class="step-kicker">STEP 1 · THE BIG PICTURE</span>
+    <h1>Make the UI respond to the user</h1>
+    <p class="lede">A Flutter interface becomes interactive when user actions trigger callbacks, callbacks run logic, state changes, and Flutter rebuilds the affected UI.</p>
+    <div class="objective"><strong>By the end:</strong> You can handle button taps, gestures, text changes, local state, selection controls, controllers, and reusable child-widget callbacks.</div>
+  </header>
+
+  <div class="interaction-flow">
+    <div class="flow-box"><strong>User Action</strong><p>Tap, type, toggle</p></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>Callback</strong><p><code>onPressed</code>, <code>onChanged</code>, <code>onTap</code></p></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>Logic</strong><p>Run Dart code</p></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>State Change</strong><p>Update values</p></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>Rebuild</strong><p>Updated UI</p></div>
+  </div>
+
+  <div class="grid-3">
+    <div class="concept"><strong>Buttons</strong><p>User taps a visible action such as Save, Add, Like, or Submit.</p></div>
+    <div class="concept"><strong>Inputs</strong><p>User types, checks, toggles, or selects a value.</p></div>
+    <div class="concept"><strong>Gestures</strong><p>User taps, double-taps, long-presses, or interacts with a custom surface.</p></div>
+  </div>
+
+  <div class="callout"><span class="label">MENTAL MODEL</span>
+    <p>Do not memorize widgets independently. Learn the repeating pattern: <strong>event → callback → state → rebuild</strong>.</p>
+  </div>
+
+  <div class="quiz" data-answer="1" data-correct="Correct. A callback is the function Flutter invokes when the corresponding user event happens.">
+    <h3>What connects a user event to your Dart code?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">A ColorScheme</button>
+      <button class="quiz-option">A callback</button>
+      <button class="quiz-option">A Scaffold</button>
+    </div>
+    <div class="quiz-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="Understand callbacks">
+  <header class="step-header">
+    <span class="step-kicker">STEP 2 · CALLBACKS</span>
+    <h1>Pass a function, don't call it immediately</h1>
+    <p class="lede">Flutter widgets expose callback properties. You give the widget a function, and Flutter calls that function later when the event happens.</p>
+  </header>
+
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>void sayHello() {
+  print(&#x27;Hello!&#x27;);
+}
+
+ElevatedButton(
+  onPressed: sayHello,
+  child: const Text(&#x27;Say Hello&#x27;),
+);</code></pre><div class="code-note"><code>onPressed: sayHello</code> passes the function itself.</div></div>
+
+  <div class="grid-2">
+    <div class="concept"><strong>Pass the function</strong>
+      <p><code>onPressed: sayHello</code></p>
+      <p>Flutter stores the callback and runs it after the user taps.</p>
+    </div>
+    <div class="concept"><strong>Do not call it here</strong>
+      <p><code>onPressed: sayHello()</code></p>
+      <p>This executes immediately while building and does not provide the callback Flutter expects.</p>
+    </div>
+  </div>
+
+  <h2>Anonymous callbacks</h2>
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>ElevatedButton(
+  onPressed: () {
+    print(&#x27;Button tapped&#x27;);
+  },
+  child: const Text(&#x27;Tap Me&#x27;),
+);</code></pre></div>
+
+  <div class="panel blue"><strong>Two common callback shapes</strong>
+    <p><code>() { ... }</code> receives no value. <code>(value) { ... }</code> receives data from the event—for example, the latest text or a Checkbox value.</p>
+  </div>
+
+  <div class="quiz" data-answer="0" data-correct="Correct. Passing sayHello gives Flutter a function it can call later.">
+    <h3>Which line correctly gives Flutter a callback?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option"><code>onPressed: sayHello</code></button>
+      <button class="quiz-option"><code>onPressed: sayHello()</code></button>
+      <button class="quiz-option"><code>onPressed: print</code> only works for every event</button>
+    </div>
+    <div class="quiz-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="Buttons and onPressed">
+  <header class="step-header">
+    <span class="step-kicker">STEP 3 · BUTTON EVENTS</span>
+    <h1>Different buttons, same callback idea</h1>
+    <p class="lede">Flutter provides several Material buttons. Their appearance and purpose differ, but they all become interactive through callbacks such as <code>onPressed</code>.</p>
+  </header>
+
+  <table class="comparison">
+    <thead><tr><th>Widget</th><th>Typical use</th></tr></thead>
+    <tbody>
+      <tr><td><code>ElevatedButton</code></td><td>Prominent action</td></tr>
+      <tr><td><code>TextButton</code></td><td>Low-emphasis action</td></tr>
+      <tr><td><code>OutlinedButton</code></td><td>Secondary action</td></tr>
+      <tr><td><code>IconButton</code></td><td>Compact icon action</td></tr>
+      <tr><td><code>FloatingActionButton</code></td><td>Main screen-level action such as Add</td></tr>
+    </tbody>
+  </table>
+
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>Column(
+  children: [
+    ElevatedButton(
+      onPressed: () {
+        print(&#x27;Saved&#x27;);
+      },
+      child: const Text(&#x27;Save&#x27;),
+    ),
+    TextButton(
+      onPressed: () {
+        print(&#x27;Cancelled&#x27;);
+      },
+      child: const Text(&#x27;Cancel&#x27;),
+    ),
+    IconButton(
+      onPressed: () {
+        print(&#x27;Liked&#x27;);
+      },
+      icon: const Icon(Icons.favorite_border),
+    ),
+  ],
+)</code></pre></div>
+
+  <div class="demo-stage">
+    <strong>Mini interaction demo</strong>
+    <div class="demo-row">
+      <button class="demo-action" id="htmlInc">+1</button>
+      <button class="demo-action secondary" id="htmlReset">Reset</button>
+      <span class="demo-output" id="htmlCount">0</span>
+    </div>
+    <p class="tiny">This browser demo mirrors the same idea you will implement in Flutter with callbacks and state.</p>
+  </div>
+
+  <div class="quiz" data-answer="2" data-correct="Correct. The specific button widget mainly changes presentation; onPressed still receives the action callback.">
+    <h3>What is shared by these button types?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">They must all be inside a Stack</button>
+      <button class="quiz-option">They all require a TextEditingController</button>
+      <button class="quiz-option">They can run logic through <code>onPressed</code></button>
+    </div>
+    <div class="quiz-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="StatefulWidget and setState">
+  <header class="step-header">
+    <span class="step-kicker">STEP 4 · LOCAL STATE</span>
+    <h1>A changed variable is not enough</h1>
+    <p class="lede">When values on the screen can change during the lifetime of a widget, local mutable state belongs in a <code>StatefulWidget</code>. Calling <code>setState()</code> tells Flutter to rebuild using the new state.</p>
+  </header>
+
+  <div class="grid-2">
+    <div class="concept"><strong>StatelessWidget</strong><p>Great when the widget renders from inputs and does not own changing local values.</p></div>
+    <div class="concept"><strong>StatefulWidget</strong><p>Use when this widget owns values that change while the user interacts with it.</p></div>
+  </div>
+
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>class CounterPage extends StatefulWidget {
+  const CounterPage({super.key});
+
+  @override
+  State&lt;CounterPage&gt; createState() =&gt; _CounterPageState();
+}
+
+class _CounterPageState extends State&lt;CounterPage&gt; {
+  int count = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text(&#x27;$count&#x27;),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            count++;
+          });
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}</code></pre><div class="code-note"><code>setState()</code> does not magically change the value. Your Dart code changes the value; <code>setState()</code> schedules the rebuild.</div></div>
+
+  <div class="flow">
+    <div class="flow-box"><strong>Tap</strong><p>User presses +</p></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>setState</strong><p><code>count++</code></p></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>build()</strong><p>Text receives new count</p></div>
+  </div>
+
+  <details class="reveal">
+    <summary>Light lifecycle preview</summary>
+    <div><p><code>createState()</code> → <code>initState()</code> → <code>build()</code> → user interaction → <code>setState()</code> → <code>build()</code> again → eventually <code>dispose()</code>.</p></div>
+  </details>
+
+  <div class="quiz" data-answer="1" data-correct="Correct. setState tells Flutter that local state changed and this State object should rebuild.">
+    <h3>What is the purpose of setState()?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">To create a new MaterialApp</button>
+      <button class="quiz-option">To notify Flutter that local state changed</button>
+      <button class="quiz-option">To permanently save data to disk</button>
+    </div>
+    <div class="quiz-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="State-driven UI">
+  <header class="step-header">
+    <span class="step-kicker">STEP 5 · UI FROM STATE</span>
+    <h1>Let state decide what the user sees</h1>
+    <p class="lede">State can control text, icons, colors, visibility, enabled/disabled behavior, and entire branches of the widget tree.</p>
+  </header>
+
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>bool liked = false;
+
+IconButton(
+  onPressed: () {
+    setState(() {
+      liked = !liked;
+    });
+  },
+  icon: Icon(
+    liked
+        ? Icons.favorite
+        : Icons.favorite_border,
+  ),
+);</code></pre></div>
+
+  <h2>Conditional expressions</h2>
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>Text(
+  isLoggedIn
+      ? &#x27;Welcome back!&#x27;
+      : &#x27;Please sign in&#x27;,
+)
+
+if (showDetails)
+  const Text(&#x27;Extra details appear here&#x27;),</code></pre></div>
+
+  <table class="state-map">
+    <thead><tr><th>State</th><th>Possible UI effect</th></tr></thead>
+    <tbody>
+      <tr><td><code>liked</code></td><td>Filled heart vs outline heart</td></tr>
+      <tr><td><code>isLoading</code></td><td>Spinner vs Submit button</td></tr>
+      <tr><td><code>isEnabled</code></td><td>Enabled vs disabled action</td></tr>
+      <tr><td><code>showDetails</code></td><td>Show or hide a widget</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout"><span class="label">KEY IDEA</span><p>In Flutter, you usually describe <strong>what the UI should look like for the current state</strong>. When state changes, Flutter builds that description again.</p></div>
+
+  <div class="quiz" data-answer="2" data-correct="Correct. The icon can be derived directly from the current boolean state.">
+    <h3>If liked is a bool, what is the cleanest way to choose the heart icon?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">Create a second app</button>
+      <button class="quiz-option">Store two complete screens</button>
+      <button class="quiz-option">Use a condition based on <code>liked</code></button>
+    </div>
+    <div class="quiz-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="Gestures with GestureDetector">
+  <header class="step-header">
+    <span class="step-kicker">STEP 6 · CUSTOM TAP SURFACES</span>
+    <h1>Make more than buttons tappable</h1>
+    <p class="lede"><code>GestureDetector</code> lets any child widget respond to gestures. <code>InkWell</code> is useful for tappable Material surfaces that should show ripple feedback.</p>
+  </header>
+
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>GestureDetector(
+  onTap: () {
+    print(&#x27;Card tapped&#x27;);
+  },
+  onDoubleTap: () {
+    print(&#x27;Card double-tapped&#x27;);
+  },
+  onLongPress: () {
+    print(&#x27;Card long-pressed&#x27;);
+  },
+  child: Container(
+    padding: const EdgeInsets.all(24),
+    color: Colors.blue,
+    child: const Text(&#x27;Tap this card&#x27;),
+  ),
+)</code></pre></div>
+
+  <div class="grid-2">
+    <div class="concept"><strong>GestureDetector</strong>
+      <p>Flexible gesture recognition. Useful when the child is not specifically a Material control.</p>
+    </div>
+    <div class="concept"><strong>InkWell</strong>
+      <p>Great for Material surfaces when you want visible ink/ripple feedback on tap.</p>
+    </div>
+  </div>
+
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>InkWell(
+  onTap: () {
+    print(&#x27;Course opened&#x27;);
+  },
+  child: const Padding(
+    padding: EdgeInsets.all(16),
+    child: Text(&#x27;Open Course&#x27;),
+  ),
+)</code></pre></div>
+
+  <div class="panel yellow"><strong>Class scope</strong><p>Focus on <code>onTap</code>, <code>onDoubleTap</code>, and <code>onLongPress</code> here. Drag and pan gestures can be explored later.</p></div>
+
+  <div class="quiz" data-answer="0" data-correct="Correct. InkWell is especially useful when you want a Material-style tap response with ripple feedback.">
+    <h3>Which widget is a good choice for a Material ripple effect?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option"><code>InkWell</code></button>
+      <button class="quiz-option"><code>Text</code></button>
+      <button class="quiz-option"><code>ThemeMode</code></button>
+    </div>
+    <div class="quiz-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="TextField and onChanged">
+  <header class="step-header">
+    <span class="step-kicker">STEP 7 · TEXT INPUT</span>
+    <h1>React while the user types</h1>
+    <p class="lede"><code>TextField.onChanged</code> provides the latest text each time the field changes. This is a callback that carries a value.</p>
+  </header>
+
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>String name = &#x27;&#x27;;
+
+TextField(
+  onChanged: (value) {
+    setState(() {
+      name = value;
+    });
+  },
+),
+
+Text(&#x27;Hello $name&#x27;),</code></pre></div>
+
+  <div class="callout"><span class="label">COMPARE</span>
+    <p><code>onPressed: () { ... }</code> has no event value. <code>onChanged: (value) { ... }</code> receives the new value from the widget.</p>
+  </div>
+
+  <div class="demo-stage">
+    <strong>Try the same idea in this codelab</strong>
+    <div class="demo-row">
+      <input class="fake-field" id="nameDemo" placeholder="Type your name">
+    </div>
+    <div class="demo-output" id="nameOutput">Hello ...</div>
+  </div>
+
+  <h2>Another useful callback</h2>
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>TextField(
+  onSubmitted: (value) {
+    print(&#x27;Submitted: $value&#x27;);
+  },
+)</code></pre></div>
+
+  <div class="quiz" data-answer="1" data-correct="Correct. onChanged receives the current field value every time the text changes.">
+    <h3>What does TextField.onChanged provide?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">The BuildContext only</button>
+      <button class="quiz-option">The latest text value</button>
+      <button class="quiz-option">A new MaterialApp</button>
+    </div>
+    <div class="quiz-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="TextEditingController">
+  <header class="step-header">
+    <span class="step-kicker">STEP 8 · CONTROL THE FIELD</span>
+    <h1>Read and control text programmatically</h1>
+    <p class="lede">A <code>TextEditingController</code> is useful when you want to read the field on demand, set its text, clear it, or observe it through a controller object.</p>
+  </header>
+
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>class _ProfilePageState extends State&lt;ProfilePage&gt; {
+  final nameController = TextEditingController();
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        TextField(
+          controller: nameController,
+        ),
+        ElevatedButton(
+          onPressed: () {
+            print(nameController.text);
+          },
+          child: const Text(&#x27;Submit&#x27;),
+        ),
+      ],
+    );
+  }
+}</code></pre><div class="code-note">Controllers should be disposed when the owning State object is permanently removed.</div></div>
+
+  <table class="comparison">
+    <thead><tr><th>Approach</th><th>Best mental model</th></tr></thead>
+    <tbody>
+      <tr><td><code>onChanged</code></td><td>React whenever the user changes the text.</td></tr>
+      <tr><td><code>TextEditingController</code></td><td>Read or manipulate the field programmatically.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="panel mint"><strong>Controller examples</strong><p>Use <code>controller.text</code> to read the current text and <code>controller.clear()</code> to clear the field.</p></div>
+
+  <div class="quiz" data-answer="2" data-correct="Correct. dispose() is the correct place to release a TextEditingController owned by a State object.">
+    <h3>Where should you normally dispose a TextEditingController?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">Inside every onChanged call</button>
+      <button class="quiz-option">Inside MaterialApp</button>
+      <button class="quiz-option">Inside the State object's <code>dispose()</code></button>
+    </div>
+    <div class="quiz-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="Checkbox and Switch">
+  <header class="step-header">
+    <span class="step-kicker">STEP 9 · CONTROLLED VALUES</span>
+    <h1>Value in, change callback out</h1>
+    <p class="lede">Selection controls make Flutter's state pattern very visible: the widget receives its current <code>value</code>, reports a new value through <code>onChanged</code>, and your state stores that new value.</p>
+  </header>
+
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>bool agreed = false;
+
+Checkbox(
+  value: agreed,
+  onChanged: (value) {
+    setState(() {
+      agreed = value ?? false;
+    });
+  },
+)</code></pre></div>
+
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>bool notificationsEnabled = true;
+
+Switch(
+  value: notificationsEnabled,
+  onChanged: (value) {
+    setState(() {
+      notificationsEnabled = value;
+    });
+  },
+)</code></pre></div>
+
+  <div class="interaction-flow" style="grid-template-columns:1fr auto 1fr auto 1fr">
+    <div class="flow-box"><strong>value</strong><p>Current state enters widget</p></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>onChanged</strong><p>User produces new value</p></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>setState</strong><p>Store value and rebuild</p></div>
+  </div>
+
+  <div class="callout"><span class="label">PATTERN</span><p>This same idea appears again in widgets such as Radio, Slider, Dropdowns, and many custom form controls.</p></div>
+
+  <div class="quiz" data-answer="0" data-correct="Correct. The value property represents the current state displayed by the control.">
+    <h3>What does Checkbox.value represent?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">The current selected state</button>
+      <button class="quiz-option">The callback function</button>
+      <button class="quiz-option">The widget's BuildContext</button>
+    </div>
+    <div class="quiz-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="Parent-child callbacks">
+  <header class="step-header">
+    <span class="step-kicker">STEP 10 · REUSABLE INTERACTION</span>
+    <h1>Data goes down, events come up</h1>
+    <p class="lede">A reusable child widget can receive data through constructor parameters and notify its parent through a callback. This keeps state ownership clear and prepares students for larger Flutter architectures.</p>
+  </header>
+
+  <div class="parent-child">
+    <div class="concept"><strong>Parent</strong>
+      <p>Owns <code>liked</code> state.</p>
+      <p>Passes <code>isLiked</code> down.</p>
+      <p>Provides an <code>onTap</code> callback.</p>
+    </div>
+    <div class="arrow-stack"><span>data →</span><span>← event</span></div>
+    <div class="concept"><strong>Child</strong>
+      <p>Displays the current value.</p>
+      <p>Does not need to own the parent's state.</p>
+      <p>Calls the callback when tapped.</p>
+    </div>
+  </div>
+
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>class LikeButton extends StatelessWidget {
+  const LikeButton({
+    super.key,
+    required this.isLiked,
+    required this.onTap,
+  });
+
+  final bool isLiked;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: onTap,
+      icon: Icon(
+        isLiked
+            ? Icons.favorite
+            : Icons.favorite_border,
+      ),
+    );
+  }
+}</code></pre></div>
+
+  <div class="code-wrap"><button class="copy-btn" type="button">Copy</button>
+<pre><code>LikeButton(
+  isLiked: liked,
+  onTap: () {
+    setState(() {
+      liked = !liked;
+    });
+  },
+)</code></pre></div>
+
+  <div class="challenge">
+    <h3>Final in-class challenge: Interactive Like Card</h3>
+    <ol>
+      <li>Create a <code>StatefulWidget</code> screen with a course card.</li>
+      <li>Add a reusable <code>LikeButton</code> child widget.</li>
+      <li>Keep the <code>liked</code> state in the parent.</li>
+      <li>Pass <code>isLiked</code> down and a callback up.</li>
+      <li>Add a <code>TextField</code> so the learner can type a display name.</li>
+      <li>Show <code>Hello, name</code> live using <code>onChanged</code>.</li>
+      <li>Add a <code>Switch</code> that enables/disables notifications.</li>
+      <li>Make the card respond to a long press with <code>GestureDetector</code> or <code>InkWell</code>.</li>
+    </ol>
+  </div>
+
+  <h2>Completion checklist</h2>
+  <ul class="checklist">
+    <li>I understand user action → callback → logic → state → rebuild.</li>
+    <li>I can pass named and anonymous callback functions.</li>
+    <li>I can use button <code>onPressed</code> callbacks.</li>
+    <li>I understand when local state belongs in a <code>StatefulWidget</code>.</li>
+    <li>I can update local UI with <code>setState()</code>.</li>
+    <li>I can build conditional UI from state.</li>
+    <li>I can use <code>GestureDetector</code> and <code>InkWell</code>.</li>
+    <li>I can react to TextField changes with <code>onChanged</code>.</li>
+    <li>I can read text using a <code>TextEditingController</code>.</li>
+    <li>I can connect Checkbox and Switch values to state.</li>
+    <li>I can send data down to a child and events back through callbacks.</li>
+  </ul>
+
+  <div class="panel references">
+    <h3>Continue learning</h3>
+    <p>Next, students can independently explore Radio, DropdownButton, Slider, RangeSlider, SnackBar, AlertDialog, BottomSheet, Dismissible, and focus/keyboard handling.</p>
+  </div>
+
+  <div class="finish" id="finishBox">
+    <h2>Codelab complete! 🎉</h2>
+    <p>You can now connect Flutter widgets to user actions and use local state to keep the UI synchronized with what the user does.</p>
+  </div>
+  <p class="footer-note">User Interaction & Local State · Flutter UI · Beginner Foundation</p>
+
+  <div class="quiz" data-answer="1" data-correct="Correct. A common reusable pattern is to pass data down through properties and notify the parent through callbacks.">
+    <h3>How should a child usually notify its parent about a user action?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">By directly editing the parent's private variable</button>
+      <button class="quiz-option">By invoking a callback provided by the parent</button>
+      <button class="quiz-option">By creating another MaterialApp</button>
+    </div>
+    <div class="quiz-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const steps = [...document.querySelectorAll('.step-view')];
+      const titles = steps.map(step => step.dataset.title);
+      const nav = document.getElementById('stepNav');
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.getElementById('menuBtn');
+      const content = document.getElementById('content');
+      const completed = new Set();
+      let current = 0;
+
+      nav.innerHTML = titles.map((title, index) =>
+        `<button class="step-link" data-step="${index}" type="button">
+          <span class="step-number">${String(index + 1).padStart(2, '0')}</span>
+          <span>${title}</span>
+          <span class="step-status" aria-hidden="true"></span>
+        </button>`
+      ).join('');
+
+      const getHashStep = () => {
+        const match = location.hash.match(/^#step-(\d+)$/);
+        const value = match ? Number(match[1]) - 1 : 0;
+        return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+      };
+
+      function render(updateHash = true) {
+        current = Math.max(0, Math.min(current, steps.length - 1));
+        steps.forEach((step, index) => {
+          const active = index === current;
+          step.classList.toggle('active', active);
+          step.setAttribute('aria-hidden', String(!active));
+        });
+
+        document.querySelectorAll('.step-link').forEach((button, index) => {
+          button.classList.toggle('active', index === current);
+          button.setAttribute('aria-current', index === current ? 'step' : 'false');
+          button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '';
+        });
+
+        const percent = Math.round(((current + 1) / steps.length) * 100);
+        document.getElementById('progressBar').style.width = `${percent}%`;
+        document.getElementById('progressText').textContent = `${percent}%`;
+        document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+        document.getElementById('mobileTitle').textContent = titles[current];
+        document.getElementById('prevBtn').disabled = current === 0;
+        document.getElementById('nextBtn').disabled = current === steps.length - 1;
+        document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+        document.getElementById('finishBox')?.classList.toggle('show', current === steps.length - 1);
+        document.title = `${titles[current]} — User Interaction & Local State`;
+        if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        sidebar.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+      }
+
+      function goTo(index) {
+        if (index < 0 || index >= steps.length) return;
+        completed.add(current);
+        current = index;
+        render();
+      }
+
+      const navRow = document.createElement('div');
+      navRow.className = 'nav-row';
+      navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';
+      content.appendChild(navRow);
+
+      document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+      document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+      nav.addEventListener('click', event => {
+        const button = event.target.closest('.step-link');
+        if (button) goTo(Number(button.dataset.step));
+      });
+      menuBtn.addEventListener('click', () => {
+        const open = sidebar.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', String(open));
+      });
+
+      document.addEventListener('click', async event => {
+        const copy = event.target.closest('.copy-btn');
+        if (copy) {
+          const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+          try {
+            await navigator.clipboard.writeText(code);
+            copy.textContent = 'Copied!';
+          } catch {
+            copy.textContent = 'Select & copy';
+          }
+          setTimeout(() => copy.textContent = 'Copy', 1500);
+          return;
+        }
+
+        const option = event.target.closest('.quiz-option');
+        if (option) {
+          const quiz = option.closest('.quiz');
+          if (quiz.dataset.answered) return;
+          const options = [...quiz.querySelectorAll('.quiz-option')];
+          const choice = options.indexOf(option);
+          const answer = Number(quiz.dataset.answer);
+          quiz.dataset.answered = 'true';
+          options.forEach(button => button.disabled = true);
+          option.classList.add(choice === answer ? 'correct' : 'wrong');
+          if (choice !== answer) options[answer].classList.add('correct');
+          const feedback = quiz.querySelector('.quiz-feedback');
+          feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
+          feedback.classList.add('show');
+        }
+      });
+
+      let demoCount = 0;
+      const htmlCount = document.getElementById('htmlCount');
+      document.getElementById('htmlInc')?.addEventListener('click', () => {
+        demoCount++;
+        htmlCount.textContent = String(demoCount);
+      });
+      document.getElementById('htmlReset')?.addEventListener('click', () => {
+        demoCount = 0;
+        htmlCount.textContent = '0';
+      });
+
+      document.getElementById('nameDemo')?.addEventListener('input', event => {
+        const value = event.target.value.trim();
+        document.getElementById('nameOutput').textContent = value ? `Hello ${value}` : 'Hello ...';
+      });
+
+      window.addEventListener('popstate', () => { current = getHashStep(); render(false); });
+      window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+      document.addEventListener('keydown', event => {
+        if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+        if (event.key === 'ArrowRight') goTo(current + 1);
+        if (event.key === 'ArrowLeft') goTo(current - 1);
+      });
+
+      current = getHashStep();
+      render(false);
+    })();
+  </script>
+</body>
+</html>
