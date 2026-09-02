@@ -1,0 +1,1125 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>K-Means Image Segmentation — Interactive Computer Vision Codelab</title>
+  <meta name="description"
+    content="Learn K-means clustering and build colour-based image segmentation with Python, NumPy, and OpenCV through simple line-by-line explanations.">
+  <meta name="theme-color" content="#1769ff">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+    :root {
+      --blue: #1769ff;
+      --blue-dark: #0b43b7;
+      --blue-light: #dce9ff;
+      --ink: #101010;
+      --paper: #f5f7fb;
+      --white: #fff;
+      --yellow: #ffd83d;
+      --mint: #75e6c5;
+      --pink: #ff9bb7;
+      --purple: #d8c5ff;
+      --orange: #ffbd70;
+      --teal: #9ce7e2;
+      --border: 3px solid var(--ink);
+      --shadow: 6px 6px 0 var(--ink);
+      --shadow-sm: 4px 4px 0 var(--ink);
+      --sidebar: 290px;
+      --radius: 4px
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: auto
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      line-height: 1.55
+    }
+
+    button,
+    a {
+      font: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    :focus-visible {
+      outline: 4px solid var(--yellow);
+      outline-offset: 3px
+    }
+
+    .app {
+      min-height: 100vh
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar);
+      background: var(--blue);
+      border-right: var(--border);
+      padding: 22px 18px;
+      z-index: 20;
+      overflow: auto
+    }
+
+    .brand {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 16px;
+      margin-bottom: 20px
+    }
+
+    .eyebrow,
+    .progress-meta,
+    .step-number,
+    .step-kicker,
+    .tiny {
+      font-family: "DM Mono", monospace
+    }
+
+    .eyebrow {
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase
+    }
+
+    .brand h2 {
+      margin: 5px 0 3px;
+      font-size: 1.42rem;
+      line-height: 1.05
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: .85rem;
+      font-weight: 600
+    }
+
+    .progress-wrap {
+      color: #fff;
+      margin: 0 2px 20px
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: .72rem;
+      font-weight: 500;
+      margin-bottom: 7px
+    }
+
+    .progress-track {
+      height: 16px;
+      background: #fff;
+      border: var(--border);
+      padding: 2px
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: var(--yellow);
+      transition: width .2s ease
+    }
+
+    .steps {
+      display: grid;
+      gap: 9px
+    }
+
+    .step-link {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 34px 1fr 18px;
+      align-items: center;
+      gap: 9px;
+      text-align: left;
+      color: #fff;
+      background: transparent;
+      border: 3px solid transparent;
+      padding: 9px 8px;
+      font-weight: 700;
+      line-height: 1.15
+    }
+
+    .step-link:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .step-link.active {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--ink);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .step-number {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 2px solid currentColor;
+      font-size: .78rem
+    }
+
+    .step-status {
+      text-align: center
+    }
+
+    .mobile-bar {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--blue);
+      border-bottom: var(--border);
+      padding: 10px;
+      align-items: center;
+      gap: 10px
+    }
+
+    .mobile-bar strong {
+      color: #fff
+    }
+
+    .menu-btn,
+    .mobile-title {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .menu-btn {
+      width: 46px;
+      height: 42px;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .mobile-title {
+      padding: 8px 10px;
+      flex: 1;
+      font-weight: 800
+    }
+
+    main {
+      margin-left: var(--sidebar);
+      min-height: 100vh
+    }
+
+    .content {
+      width: min(980px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 42px 0 28px
+    }
+
+    .step-view {
+      display: none
+    }
+
+    .step-view.active {
+      display: block;
+      animation: stepIn .18s ease-out
+    }
+
+    @keyframes stepIn {
+      from {
+        opacity: .35;
+        transform: translateY(5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .step-header {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-bottom: 24px
+    }
+
+    .step-kicker {
+      display: inline-block;
+      background: var(--blue);
+      color: #fff;
+      border: 2px solid var(--ink);
+      padding: 5px 9px;
+      font-size: .72rem;
+      font-weight: 500;
+      margin-bottom: 13px
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.08
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.7rem);
+      margin: 0 0 12px;
+      letter-spacing: -.045em
+    }
+
+    h2 {
+      font-size: clamp(1.55rem, 3vw, 2.25rem);
+      margin: 30px 0 12px
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      margin: 24px 0 9px
+    }
+
+    .lede {
+      font-size: 1.08rem;
+      max-width: 760px;
+      margin: 0
+    }
+
+    .objective {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700
+    }
+
+    .panel {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .panel.blue {
+      background: var(--blue-light)
+    }
+
+    .panel.mint {
+      background: var(--mint)
+    }
+
+    .panel.yellow {
+      background: var(--yellow)
+    }
+
+    .panel.pink {
+      background: var(--pink)
+    }
+
+    .panel.purple {
+      background: var(--purple)
+    }
+
+    .panel.teal {
+      background: var(--teal)
+    }
+
+    .grid-2,
+    .grid-3 {
+      display: grid;
+      gap: 16px
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .concept {
+      border: var(--border);
+      padding: 18px;
+      background: #fff;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .concept strong {
+      font-size: 1.05rem
+    }
+
+    .callout {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 16px 18px;
+      margin: 20px 0;
+      background: #fff
+    }
+
+    .callout .label {
+      display: inline-block;
+      font-family: "DM Mono", monospace;
+      font-size: .72rem;
+      font-weight: 500;
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: #fff;
+      padding: 3px 7px;
+      margin-bottom: 8px
+    }
+
+    .callout p:last-child,
+    .concept p:last-child,
+    .panel p:last-child {
+      margin-bottom: 0
+    }
+
+    .code-wrap {
+      position: relative;
+      margin: 18px 0
+    }
+
+    pre {
+      margin: 0;
+      background: #111;
+      color: #f7f7f7;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 20px;
+      overflow: auto;
+      font-family: "DM Mono", ui-monospace, monospace;
+      font-size: .85rem;
+      line-height: 1.65;
+      tab-size: 2
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      padding: 5px 9px;
+      font-size: .75rem;
+      font-weight: 800;
+      z-index: 2
+    }
+
+    code:not(pre code) {
+      background: #e8edf7;
+      border: 1px solid #9da9bb;
+      padding: 1px 5px;
+      font-family: "DM Mono", monospace;
+      font-size: .88em
+    }
+
+    .code-note {
+      border: var(--border);
+      border-top: 0;
+      background: #e9edf4;
+      padding: 13px 16px;
+      font-family: "DM Mono", monospace;
+      font-size: .83rem
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35rem
+    }
+
+    li {
+      margin: 7px 0
+    }
+
+    .quiz {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      background: #fff;
+      padding: 20px;
+      margin: 20px 0
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px
+    }
+
+    .quiz-option {
+      text-align: left;
+      border: 2px solid var(--ink);
+      background: #fff;
+      padding: 11px 13px;
+      font-weight: 700
+    }
+
+    .quiz-option:hover {
+      background: var(--blue-light)
+    }
+
+    .quiz-option.correct {
+      background: var(--mint)
+    }
+
+    .quiz-option.wrong {
+      background: var(--pink)
+    }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 13px;
+      padding: 10px;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-feedback.show {
+      display: block
+    }
+
+    .reveal {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      margin: 18px 0
+    }
+
+    .reveal summary {
+      padding: 13px 16px;
+      cursor: pointer;
+      font-weight: 800;
+      background: var(--blue-light)
+    }
+
+    .reveal>div {
+      padding: 15px 16px
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: var(--border)
+    }
+
+    .nav-btn {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      background: #fff;
+      padding: 12px 18px;
+      font-weight: 900;
+      min-width: 130px
+    }
+
+    .nav-btn.primary {
+      background: var(--blue);
+      color: #fff
+    }
+
+    .nav-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      box-shadow: 3px 3px 0 #777
+    }
+
+    .finish {
+      display: none;
+      background: var(--mint);
+      border: var(--border);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-top: 24px
+    }
+
+    .finish.show {
+      display: block
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0
+    }
+
+    .checklist li {
+      padding: 10px 12px;
+      border: 2px solid var(--ink);
+      background: #fff;
+      margin: 8px 0
+    }
+
+    .checklist li::before {
+      content: "✓";
+      font-weight: 900;
+      margin-right: 9px;
+      color: var(--blue-dark)
+    }
+
+    .footer-note {
+      text-align: center;
+      font-family: "DM Mono", monospace;
+      font-size: .78rem;
+      margin: 28px 0 0
+    }
+
+    .theme-lab {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 18px
+    }
+
+    .theme-controls {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+      align-content: start
+    }
+
+    .demo-btn {
+      border: 2px solid var(--ink);
+      background: #fff;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 800
+    }
+
+    .demo-btn:hover {
+      background: var(--blue-light)
+    }
+
+    .demo-btn.active {
+      background: var(--yellow);
+      box-shadow: 3px 3px 0 var(--ink)
+    }
+
+    .phone {
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 12px;
+      background: #1a1a1a;
+      min-height: 460px
+    }
+
+    .phone-screen {
+      height: 100%;
+      border: 2px solid var(--ink);
+      padding: 18px;
+      transition: background .18s, color .18s
+    }
+
+    .phone-screen.light {
+      background: #fdf8ff;
+      color: #1d1b20
+    }
+
+    .phone-screen.dark {
+      background: #141218;
+      color: #e6e1e5
+    }
+
+    .phone-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px
+    }
+
+    .phone-card {
+      border-radius: 20px;
+      padding: 18px;
+      margin: 14px 0
+    }
+
+    .light .phone-card {
+      background: #eaddff
+    }
+
+    .dark .phone-card {
+      background: #4f378b
+    }
+
+    .phone-action {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 800
+    }
+
+    .light .phone-action {
+      background: #6750a4;
+      color: #fff
+    }
+
+    .dark .phone-action {
+      background: #d0bcff;
+      color: #381e72
+    }
+
+    .scheme-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px
+    }
+
+    .swatch {
+      border: 2px solid var(--ink);
+      min-height: 100px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      font-family: "DM Mono", monospace;
+      font-size: .72rem
+    }
+
+    .swatch strong {
+      font-family: "Space Grotesk"
+    }
+
+    .type-sample {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 20px
+    }
+
+    .type-line {
+      padding: 10px 0;
+      border-bottom: 2px solid #ddd
+    }
+
+    .type-line:last-child {
+      border-bottom: 0
+    }
+
+    .component-demo {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px
+    }
+
+    .component-card {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 16px
+    }
+
+    .mini-btn {
+      display: inline-block;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: #6750a4;
+      color: white;
+      font-weight: 800
+    }
+
+    .mini-field {
+      border: 2px solid #6750a4;
+      border-radius: 8px;
+      padding: 11px;
+      background: #fff
+    }
+
+    .mini-chip {
+      display: inline-block;
+      border: 2px solid #6750a4;
+      border-radius: 999px;
+      padding: 7px 10px
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 10px
+    }
+
+    .flow-box {
+      border: var(--border);
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      padding: 16px
+    }
+
+    .flow-arrow {
+      font-size: 1.8rem;
+      font-weight: 900
+    }
+
+    .comparison {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: var(--shadow-sm);
+      margin: 18px 0
+    }
+
+    .comparison th,
+    .comparison td {
+      border: 2px solid var(--ink);
+      padding: 11px;
+      text-align: left;
+      vertical-align: top
+    }
+
+    .comparison th {
+      background: var(--yellow)
+    }
+
+    .challenge {
+      border: var(--border);
+      background: var(--yellow);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .references a {
+      color: var(--blue-dark);
+      font-weight: 800
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      .step-view.active {
+        animation: none
+      }
+
+      .progress-bar {
+        transition: none
+      }
+    }
+
+    @media(max-width:850px) {
+      :root {
+        --sidebar: 270px;
+        --mobile-bar-height: 65px
+      }
+
+      .sidebar {
+        inset: var(--mobile-bar-height) auto 0 0;
+        transform: translateX(-100%);
+        transition: transform .2s ease;
+        box-shadow: 10px 0 0 rgba(16, 16, 16, .18)
+      }
+
+      .sidebar.open {
+        transform: none
+      }
+
+      .mobile-bar {
+        display: flex;
+        height: var(--mobile-bar-height)
+      }
+
+      main {
+        margin-left: 0
+      }
+
+      .content {
+        width: min(940px, calc(100% - 28px));
+        padding-top: 24px
+      }
+    }
+
+    @media(max-width:650px) {
+      .content {
+        width: calc(100% - 18px);
+        padding-top: 16px
+      }
+
+      .step-header {
+        padding: 20px 16px
+      }
+
+      .panel,
+      .concept,
+      .quiz {
+        padding: 16px
+      }
+
+      .grid-2,
+      .grid-3,
+      .theme-lab,
+      .component-demo,
+      .flow {
+        grid-template-columns: 1fr
+      }
+
+      .flow-arrow {
+        transform: rotate(90deg);
+        justify-self: center
+      }
+
+      .scheme-grid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .nav-row {
+        position: sticky;
+        bottom: 0;
+        background: var(--paper);
+        padding: 12px 0;
+        z-index: 10
+      }
+
+      .nav-btn {
+        min-width: 0;
+        flex: 1;
+        padding: 11px 10px
+      }
+
+      pre {
+        font-size: .76rem;
+        padding: 16px 12px
+      }
+
+      .copy-btn {
+        position: static;
+        margin-bottom: 6px
+      }
+
+      .code-wrap {
+        display: flex;
+        flex-direction: column
+      }
+
+      .code-wrap pre {
+        order: 2
+      }
+
+      .code-wrap .copy-btn {
+        order: 1;
+        align-self: flex-end
+      }
+
+      .code-wrap .code-note {
+        order: 3
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+      <div class="brand"><div class="eyebrow">Computer Vision · Codelab</div><h2>K-Means Segmentation</h2><p>Group pixels by colour.</p></div>
+      <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+      <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+    </aside>
+    <div class="mobile-bar"><button class="menu-btn" id="menuBtn" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">K-Means Segmentation</div></div>
+    <main><div class="content" id="content">
+
+      <section class="step-view" data-title="Understand K-means">
+        <header class="step-header"><span class="step-kicker">STEP 1 · THE BIG IDEA</span><h1>Put similar values into groups</h1><p class="lede">K-means is a clustering algorithm. It finds groups in data without being told the name of each group.</p><div class="objective"><strong>By the end:</strong> You will segment an image into a small number of colour groups using Python, NumPy, and OpenCV—and understand every line you write.</div></header>
+        <div class="grid-3"><div class="concept"><strong>K</strong><p>The number of groups we want.</p></div><div class="concept"><strong>Cluster</strong><p>One group of similar values.</p></div><div class="concept"><strong>Center</strong><p>The average value of a cluster. It is also called a centroid.</p></div></div>
+        <div class="panel yellow"><strong>A tiny example</strong><p>For <code>2, 3, 4, 20, 22, 24</code> and <code>K = 2</code>, we expect one group near 3 and another near 22.</p></div>
+        <div class="flow"><div class="flow-box"><strong>Choose K centers</strong></div><div class="flow-arrow">→</div><div class="flow-box"><strong>Assign nearest points</strong></div><div class="flow-arrow">→</div><div class="flow-box"><strong>Average and repeat</strong></div></div>
+        <div class="quiz" data-answer="1" data-correct="Correct. K tells the algorithm how many clusters to create."><h3>What does K mean?</h3><div class="quiz-options"><button class="quiz-option">The number of loops</button><button class="quiz-option">The number of clusters</button><button class="quiz-option">The number of pixels</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+      </section>
+
+      <section class="step-view" data-title="See one K-means round">
+        <header class="step-header"><span class="step-kicker">STEP 2 · DO IT BY HAND</span><h1>Nearest center wins</h1><p class="lede">Before using OpenCV, follow one round manually. This makes the library code much easier to understand.</p></header>
+        <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Values: 2, 3, 4, 20, 22, 24
+Starting centers: 3 and 20
+
+For value 22:
+Distance from 3  = |22 - 3|  = 19
+Distance from 20 = |22 - 20| = 2
+
+22 joins the second cluster.</code></pre><div class="code-note">K-means compares distances. The smaller distance decides the cluster.</div></div>
+        <div class="grid-2"><div class="panel mint"><strong>Cluster 1</strong><p>Values: 2, 3, 4<br>New center: <code>(2 + 3 + 4) / 3 = 3</code></p></div><div class="panel pink"><strong>Cluster 2</strong><p>Values: 20, 22, 24<br>New center: <code>(20 + 22 + 24) / 3 = 22</code></p></div></div>
+        <div class="callout"><span class="label">THE REPEATING CYCLE</span><p>Assign every value to the nearest center → calculate new average centers → repeat until the centers barely change.</p></div>
+        <div class="quiz" data-answer="2" data-correct="Correct. A cluster center is the average of the values currently inside that cluster."><h3>How is a new center calculated?</h3><div class="quiz-options"><button class="quiz-option">Choose the largest value</button><button class="quiz-option">Choose a random value</button><button class="quiz-option">Calculate the average</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+      </section>
+
+      <section class="step-view" data-title="Set up the project">
+        <header class="step-header"><span class="step-kicker">STEP 3 · PREPARE</span><h1>Create a tiny Python project</h1><p class="lede">We need one Python file, one image, OpenCV, and NumPy.</p></header>
+        <div class="grid-2"><div class="panel blue"><strong>Project structure</strong><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>k-means-project/
+├── main.py
+└── image.jpg</code></pre></div></div><div class="panel mint"><strong>Install libraries</strong><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>pip install opencv-python numpy</code></pre></div></div></div>
+        <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>import cv2
+import numpy as np</code></pre></div>
+        <table class="comparison"><thead><tr><th>Line</th><th>Meaning</th></tr></thead><tbody><tr><td><code>import cv2</code></td><td>Loads OpenCV so we can read, process, and display images.</td></tr><tr><td><code>import numpy as np</code></td><td>Loads NumPy and gives it the shorter name <code>np</code>. NumPy works with the arrays inside images.</td></tr></tbody></table>
+        <div class="panel yellow"><strong>What is an image to Python?</strong><p>An image is an array of numbers. A colour pixel has three values. OpenCV keeps them in <strong>BGR</strong> order: Blue, Green, Red.</p></div>
+      </section>
+
+      <section class="step-view" data-title="Read and check the image">
+        <header class="step-header"><span class="step-kicker">STEP 4 · LOAD THE DATA</span><h1>Read the image safely</h1><p class="lede">OpenCV must turn <code>image.jpg</code> into a NumPy array before K-means can use its pixels.</p></header>
+        <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>image = cv2.imread("image.jpg")</code></pre><div class="code-note"><code>cv2.imread()</code> reads the file. The returned image array is stored in <code>image</code>.</div></div>
+        <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>if image is None:
+    raise FileNotFoundError("Could not find image.jpg")</code></pre></div>
+        <div class="grid-2"><div class="concept"><strong><code>if image is None:</code></strong><p>Checks whether OpenCV failed to read the image. The colon starts the indented block.</p></div><div class="concept"><strong><code>raise FileNotFoundError(...)</code></strong><p>Stops the program and shows a useful message. This is clearer than allowing a confusing error later.</p></div></div>
+        <div class="panel purple"><strong>Image shape</strong><p>A shape such as <code>(400, 600, 3)</code> means 400 rows, 600 columns, and 3 colour values per pixel.</p></div>
+        <div class="quiz" data-answer="0" data-correct="Correct. imread returns None when OpenCV cannot read the requested image."><h3>What does <code>image is None</code> usually mean?</h3><div class="quiz-options"><button class="quiz-option">The image could not be read</button><button class="quiz-option">The image is black</button><button class="quiz-option">The image has no pixels</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+      </section>
+
+      <section class="step-view" data-title="Prepare the pixels">
+        <header class="step-header"><span class="step-kicker">STEP 5 · RESHAPE AND CONVERT</span><h1>Give K-means one pixel per row</h1><p class="lede">OpenCV K-means accepts a 2D <code>float32</code> array. Our normal colour image is a 3D array, so we must prepare it.</p></header>
+        <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>pixels = image.reshape(-1, 3)</code></pre></div>
+        <table class="comparison"><thead><tr><th>Part</th><th>Meaning</th></tr></thead><tbody><tr><td><code>image.reshape(...)</code></td><td>Changes the arrangement of the data. It does not delete pixels.</td></tr><tr><td><code>-1</code></td><td>“NumPy, calculate the number of rows for me.”</td></tr><tr><td><code>3</code></td><td>Keep three values in each row: B, G, and R.</td></tr><tr><td><code>pixels =</code></td><td>Store the rearranged array in a new variable.</td></tr></tbody></table>
+        <div class="flow"><div class="flow-box"><strong>Image</strong><p><code>(400, 600, 3)</code></p></div><div class="flow-arrow">→</div><div class="flow-box"><strong>Reshape</strong><p><code>-1, 3</code></p></div><div class="flow-arrow">→</div><div class="flow-box"><strong>Pixel rows</strong><p><code>(240000, 3)</code></p></div></div>
+        <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>pixels = np.float32(pixels)</code></pre><div class="code-note">OpenCV requires K-means input to use the <code>float32</code> data type. Without this line, you may get <code>type == CV_32F</code>.</div></div>
+        <div class="quiz" data-answer="1" data-correct="Correct. Each row represents one pixel and its three BGR features."><h3>After reshaping, what does one row represent?</h3><div class="quiz-options"><button class="quiz-option">One complete image</button><button class="quiz-option">One BGR pixel</button><button class="quiz-option">One cluster</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+      </section>
+
+      <section class="step-view" data-title="Choose stopping rules">
+        <header class="step-header"><span class="step-kicker">STEP 6 · KNOW WHEN TO STOP</span><h1>Create the termination criteria</h1><p class="lede">K-means repeats its assignment and averaging steps. The criteria tell OpenCV when it has done enough work.</p></header>
+        <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>criteria = (
+    cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER,
+    100,
+    0.2
+)</code></pre><div class="code-note">Read the tuple as: <strong>(how to stop, maximum loops, minimum change)</strong>.</div></div>
+        <table class="comparison"><thead><tr><th>Code</th><th>Easy meaning</th></tr></thead><tbody><tr><td><code>criteria = (</code></td><td>Create a tuple named <code>criteria</code>.</td></tr><tr><td><code>TERM_CRITERIA_EPS</code></td><td>Allow stopping when the centers change by only a tiny amount.</td></tr><tr><td><code>+</code></td><td>Combine both stopping conditions.</td></tr><tr><td><code>TERM_CRITERIA_MAX_ITER</code></td><td>Allow stopping at the maximum number of iterations.</td></tr><tr><td><code>100</code></td><td>Never repeat more than 100 times.</td></tr><tr><td><code>0.2</code></td><td>The epsilon, or tiny-change limit.</td></tr><tr><td><code>)</code></td><td>Finish the tuple.</td></tr></tbody></table>
+        <div class="callout"><span class="label">PLAIN ENGLISH</span><p>Stop when the centers settle within 0.2, or after 100 repetitions—whichever happens first. It does not always run 100 times.</p></div>
+        <div class="quiz" data-answer="2" data-correct="Correct. Both stopping rules are enabled, so reaching either one can stop the algorithm."><h3>When can this K-means run stop?</h3><div class="quiz-options"><button class="quiz-option">Only after exactly 100 loops</button><button class="quiz-option">Only when every pixel is identical</button><button class="quiz-option">When centers settle or 100 loops are reached</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+      </section>
+
+      <section class="step-view" data-title="Run OpenCV K-means">
+        <header class="step-header"><span class="step-kicker">STEP 7 · CLUSTER THE COLOURS</span><h1>Ask for three colour groups</h1><p class="lede">Now pass the prepared pixels and settings to <code>cv2.kmeans()</code>.</p></header>
+        <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>k = 3
+
+compactness, labels, centers = cv2.kmeans(
+    pixels,
+    k,
+    None,
+    criteria,
+    10,
+    cv2.KMEANS_PP_CENTERS
+)</code></pre></div>
+        <table class="comparison"><thead><tr><th>Argument</th><th>What it tells OpenCV</th></tr></thead><tbody><tr><td><code>pixels</code></td><td>Group these BGR pixel values.</td></tr><tr><td><code>k</code></td><td>Create 3 clusters.</td></tr><tr><td><code>None</code></td><td>We are not supplying starting labels.</td></tr><tr><td><code>criteria</code></td><td>Use our stopping rules.</td></tr><tr><td><code>10</code></td><td>Try the algorithm 10 times with different starting centers and keep the best result.</td></tr><tr><td><code>KMEANS_PP_CENTERS</code></td><td>Choose smart, spread-out starting centers.</td></tr></tbody></table>
+        <div class="grid-3"><div class="concept"><strong>compactness</strong><p>The total squared distance between pixels and their centers. Smaller means tighter groups.</p></div><div class="concept"><strong>labels</strong><p>One cluster number—0, 1, or 2—for every pixel.</p></div><div class="concept"><strong>centers</strong><p>The average BGR colour of every cluster.</p></div></div>
+        <div class="panel yellow"><strong>K-means is not object recognition</strong><p>It does not know “sky,” “grass,” or “car.” It only sees numbers and groups similar colours.</p></div>
+      </section>
+
+      <section class="step-view" data-title="Rebuild the image">
+        <header class="step-header"><span class="step-kicker">STEP 8 · TURN CLUSTERS INTO COLOURS</span><h1>Replace every pixel with its center</h1><p class="lede">The cluster result is still a list. We will convert it into a displayable image.</p></header>
+        <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>centers = np.uint8(centers)</code></pre><div class="code-note">K-means returns decimal center values. <code>uint8</code> converts them to whole image-colour values from 0 to 255.</div></div>
+        <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>segmented_pixels = centers[labels.flatten()]</code></pre></div>
+        <table class="comparison"><thead><tr><th>Part</th><th>Meaning</th></tr></thead><tbody><tr><td><code>labels.flatten()</code></td><td>Turns the label column into a simple one-dimensional list.</td></tr><tr><td><code>centers[...]</code></td><td>Uses each label as an index to pick that cluster's average colour.</td></tr><tr><td><code>segmented_pixels =</code></td><td>Stores all replacement pixel colours.</td></tr></tbody></table>
+        <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>segmented_image = segmented_pixels.reshape(image.shape)</code></pre><div class="code-note">Restore the original height, width, and three colour channels. The flat list becomes an image again.</div></div>
+        <div class="flow"><div class="flow-box"><strong>Label 0</strong><p>Use <code>centers[0]</code></p></div><div class="flow-arrow">→</div><div class="flow-box"><strong>Replacement colour</strong><p>Cluster 0's average BGR</p></div><div class="flow-arrow">→</div><div class="flow-box"><strong>Segmented pixel</strong></div></div>
+        <div class="quiz" data-answer="0" data-correct="Correct. labels tells us which center colour should replace each pixel."><h3>What decides a pixel's replacement colour?</h3><div class="quiz-options"><button class="quiz-option">Its cluster label</button><button class="quiz-option">Its file position</button><button class="quiz-option">The window title</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+      </section>
+
+      <section class="step-view" data-title="Display the result">
+        <header class="step-header"><span class="step-kicker">STEP 9 · SEE THE SEGMENTATION</span><h1>Show both images</h1><p class="lede">Display the original and segmented versions side by side so you can compare them.</p></header>
+        <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>cv2.imshow("Original Image", image)
+cv2.imshow("K-Means Segmentation", segmented_image)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()</code></pre></div>
+        <table class="comparison"><thead><tr><th>Line</th><th>Meaning</th></tr></thead><tbody><tr><td><code>cv2.imshow("Original Image", image)</code></td><td>Open a window titled “Original Image” and show the original array.</td></tr><tr><td><code>cv2.imshow("K-Means Segmentation", segmented_image)</code></td><td>Open another window and show the clustered image.</td></tr><tr><td><code>cv2.waitKey(0)</code></td><td>Wait until any key is pressed. Zero means wait without a time limit.</td></tr><tr><td><code>cv2.destroyAllWindows()</code></td><td>Close all OpenCV windows cleanly.</td></tr></tbody></table>
+        <div class="panel mint"><strong>Optional: save the result</strong><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>cv2.imwrite("segmented_image.jpg", segmented_image)</code></pre></div><p><code>imwrite()</code> creates the output file in your project folder.</p></div>
+        <div class="panel pink"><strong>Using Jupyter or Colab?</strong><p><code>cv2.imshow()</code> is meant for local desktop programs. In a notebook, display the image with Matplotlib or the notebook's image-display function.</p></div>
+      </section>
+
+      <section class="step-view" data-title="Build the complete program">
+        <header class="step-header"><span class="step-kicker">STEP 10 · PUT EVERYTHING TOGETHER</span><h1>Run the complete segmentation program</h1><p class="lede">The comments summarize why each part exists. Compare this final program with every earlier step.</p></header>
+        <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>import cv2
+import numpy as np
+
+# Read the image from the project folder.
+image = cv2.imread("image.jpg")
+
+# Stop early if the image could not be read.
+if image is None:
+    raise FileNotFoundError("Could not find image.jpg")
+
+# Turn the image into rows of BGR pixels.
+pixels = image.reshape(-1, 3)
+
+# OpenCV K-means requires float32 input.
+pixels = np.float32(pixels)
+
+# Stop after convergence or at most 100 iterations.
+criteria = (
+    cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER,
+    100,
+    0.2
+)
+
+# Create three colour clusters.
+k = 3
+
+# Group similar pixel colours.
+compactness, labels, centers = cv2.kmeans(
+    pixels,
+    k,
+    None,
+    criteria,
+    10,
+    cv2.KMEANS_PP_CENTERS
+)
+
+# Convert center colours to whole numbers from 0 to 255.
+centers = np.uint8(centers)
+
+# Replace every pixel with its cluster's center colour.
+segmented_pixels = centers[labels.flatten()]
+
+# Restore the original image dimensions.
+segmented_image = segmented_pixels.reshape(image.shape)
+
+# Display the original and segmented images.
+cv2.imshow("Original Image", image)
+cv2.imshow("K-Means Segmentation", segmented_image)
+
+# Wait for a key, then close the windows.
+cv2.waitKey(0)
+cv2.destroyAllWindows()</code></pre></div>
+        <div class="challenge"><h3>Try it yourself</h3><ol><li>Run the program with <code>k = 2</code>.</li><li>Change it to <code>k = 5</code>.</li><li>Change it to <code>k = 10</code>.</li><li>Observe how a larger K keeps more colour detail.</li><li>Save your preferred result using <code>cv2.imwrite()</code>.</li></ol></div>
+        <h2>Common errors</h2>
+        <details class="reveal"><summary><code>type == CV_32F</code></summary><div><p>Your pixels are not <code>float32</code>. Add <code>pixels = np.float32(pixels)</code> before calling K-means.</p></div></details>
+        <details class="reveal"><summary><code>data0.dims &lt;= 2</code></summary><div><p>You probably passed the original 3D image. Pass <code>image.reshape(-1, 3).astype(np.float32)</code>.</p></div></details>
+        <details class="reveal"><summary>The output groups unrelated objects</summary><div><p>This is expected. Plain K-means groups colours, not objects, and it ignores pixel position.</p></div></details>
+        <h2>Completion checklist</h2><ul class="checklist"><li>I know that K is the number of clusters.</li><li>I can explain assignment, averaging, and repetition.</li><li>I know why the image becomes one pixel per row.</li><li>I know why OpenCV requires <code>float32</code>.</li><li>I understand the two stopping conditions.</li><li>I can explain <code>labels</code> and <code>centers</code>.</li><li>I can rebuild and display the segmented image.</li></ul>
+        <div class="finish" id="finishBox"><h2>Codelab complete! 🎉</h2><p>You can now explain and implement colour-based K-means image segmentation one line at a time.</p></div>
+        <p class="footer-note">K-Means Image Segmentation · Computer Vision · Beginner Foundation</p>
+      </section>
+
+    </div></main>
+  </div>
+  <script>
+    (() => {
+      const steps = [...document.querySelectorAll('.step-view')];
+      const titles = steps.map(step => step.dataset.title);
+      const nav = document.getElementById('stepNav');
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.getElementById('menuBtn');
+      const content = document.getElementById('content');
+      const completed = new Set();
+      let current = 0;
+      nav.innerHTML = titles.map((title, index) => `<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+      const getHashStep = () => { const match = location.hash.match(/^#step-(\d+)$/); const value = match ? Number(match[1]) - 1 : 0; return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0 };
+      function render(updateHash = true) { current = Math.max(0, Math.min(current, steps.length - 1)); steps.forEach((step, index) => { const active = index === current; step.classList.toggle('active', active); step.setAttribute('aria-hidden', String(!active)) }); document.querySelectorAll('.step-link').forEach((button, index) => { button.classList.toggle('active', index === current); button.setAttribute('aria-current', index === current ? 'step' : 'false'); button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '' }); const percent = Math.round(((current + 1) / steps.length) * 100); document.getElementById('progressBar').style.width = `${percent}%`; document.getElementById('progressText').textContent = `${percent}%`; document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent)); document.getElementById('mobileTitle').textContent = titles[current]; document.getElementById('prevBtn').disabled = current === 0; document.getElementById('nextBtn').disabled = current === steps.length - 1; document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →'; document.getElementById('finishBox')?.classList.toggle('show', current === steps.length - 1); document.title = `${titles[current]} — K-Means Image Segmentation`; if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`); window.scrollTo({ top: 0, behavior: 'auto' }); sidebar.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false') }
+      function goTo(index) { if (index < 0 || index >= steps.length) return; completed.add(current); current = index; render() }
+      const navRow = document.createElement('div'); navRow.className = 'nav-row'; navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>'; content.appendChild(navRow);
+      document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1)); document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1)); nav.addEventListener('click', event => { const button = event.target.closest('.step-link'); if (button) goTo(Number(button.dataset.step)) }); menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)) });
+      document.addEventListener('click', async event => { const copy = event.target.closest('.copy-btn'); if (copy) { const code = copy.parentElement.querySelector('pre code')?.textContent ?? ''; try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!' } catch { copy.textContent = 'Select & copy' } setTimeout(() => copy.textContent = 'Copy', 1500); return } const option = event.target.closest('.quiz-option'); if (option) { const quiz = option.closest('.quiz'); if (quiz.dataset.answered) return; const options = [...quiz.querySelectorAll('.quiz-option')]; const choice = options.indexOf(option); const answer = Number(quiz.dataset.answer); quiz.dataset.answered = 'true'; options.forEach(button => button.disabled = true); option.classList.add(choice === answer ? 'correct' : 'wrong'); if (choice !== answer) options[answer].classList.add('correct'); const feedback = quiz.querySelector('.quiz-feedback'); feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`; feedback.classList.add('show') } });
+      window.addEventListener('popstate', () => { current = getHashStep(); render(false) }); window.addEventListener('hashchange', () => { current = getHashStep(); render(false) }); document.addEventListener('keydown', event => { if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return; if (event.key === 'ArrowRight') goTo(current + 1); if (event.key === 'ArrowLeft') goTo(current - 1) }); current = getHashStep(); render(false);
+    })();
+  </script>
+</body>
+</html>
