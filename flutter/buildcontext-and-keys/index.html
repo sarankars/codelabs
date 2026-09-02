@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Understanding BuildContext and Keys — Flutter Codelab</title>
+  <meta name="description" content="Understand BuildContext and Flutter keys through simple mental models, practical examples, widget identity experiments, and interview-focused revision.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal,.demo{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.callout p:last-child{margin-bottom:0}.grid-2,.grid-3{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.syntax{padding:14px;overflow:auto;background:#edf2ff;border:var(--border);font-family:"DM Mono",monospace}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .demo{padding:20px;margin:20px 0}.demo-controls{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px}.demo-btn{padding:8px 12px;background:#fff;border:2px solid var(--ink);font-weight:800}.demo-btn.active{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}.constraint-stage{height:250px;display:grid;place-items:center;padding:24px;background:repeating-linear-gradient(45deg,#eef2ff,#eef2ff 12px,#e1e8ff 12px,#e1e8ff 24px);border:2px solid var(--ink)}.constraint-parent{width:100%;height:100%;display:grid;place-items:center;padding:14px;background:#fff;border:3px dashed var(--blue)}.constraint-child{display:grid;place-items:center;width:100px;height:70px;padding:8px;background:var(--mint);border:3px solid var(--ink);font-weight:800;text-align:center;transition:all .2s ease}.constraint-child.tight{width:100%;height:100%}.constraint-child.maximum{width:min(100%,280px);height:130px}.demo-readout{margin:14px 0 0;padding:10px 12px;background:#fff;border:2px solid var(--ink);font-family:"DM Mono",monospace;font-size:.82rem}
+    .spacing-visual{display:grid;place-items:center;min-height:230px;padding:28px;background:var(--pink);border:3px solid var(--ink)}.spacing-margin{padding:30px;background:var(--yellow);border:3px dashed var(--ink)}.spacing-padding{padding:26px;background:var(--blue-light);border:3px solid var(--ink)}.spacing-child{padding:13px;color:#fff;background:var(--blue);border:3px solid var(--ink);font-weight:800}.space-label{display:block;margin-bottom:6px;font-family:"DM Mono",monospace;font-size:.7rem;font-weight:700;text-transform:uppercase}
+    .alignment-stage{height:260px;display:grid;padding:18px;background:#eaf0ff;border:3px solid var(--ink)}.alignment-box{width:88px;height:64px;display:grid;place-items:center;justify-self:center;align-self:center;background:var(--orange);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);font-weight:900;transition:all .2s ease}
+    .fit-stage{height:260px;display:grid;place-items:center;background:#151515;border:3px solid var(--ink)}.fit-frame{width:320px;max-width:90%;height:190px;background:#fff;border:3px solid var(--yellow);overflow:hidden}.fit-image{width:100%;height:100%;object-fit:contain;display:block}.fit-note{margin-top:12px;font-weight:700}.tree{margin:20px 0;padding:16px;background:#fff;border:var(--border);font-family:"DM Mono",monospace;line-height:1.8;overflow:auto}.checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.references a{color:var(--blue-dark);font-weight:700}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.footer-note{margin-top:30px;color:#555;font-size:.8rem}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2,.grid-3{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz,.demo{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}.constraint-stage,.alignment-stage{height:220px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}.step-view.active{animation:none}}
+  
+    .context-tree{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}
+    .mental-model{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;margin:22px 0}
+    .mental-card{padding:22px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);text-align:center}
+    .mental-card strong{display:block;font-size:1.45rem;margin-bottom:6px}.mental-arrow{font-size:2rem;font-weight:900}
+    .identity-list{display:grid;gap:10px;margin:18px 0}.identity-item{padding:14px;background:#fff;border:3px solid var(--ink);font-weight:800}
+    .identity-item span{display:inline-block;min-width:90px;padding:3px 7px;margin-right:8px;background:var(--yellow);border:2px solid var(--ink);font-family:"DM Mono",monospace;font-size:.75rem}
+    @media(max-width:680px){.mental-model{grid-template-columns:1fr}.mental-arrow{transform:rotate(90deg)}}
+    </style>
+
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter Fundamentals Codelab</div><h2>BuildContext &amp; Keys</h2><p>Understand location and identity.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">BuildContext &amp; Keys</div></div>
+  <main><div class="content" id="content">
+
+    <section class="step-view" data-title="Why this matters">
+      <header class="step-header"><span class="step-kicker">STEP 1 · START HERE</span><h1>Where Is This Widget, and Which Widget Is It?</h1><p class="lede">Flutter builds interfaces as a tree of widgets. Two concepts help Flutter work with that tree: <code>BuildContext</code> tells us where a widget is, while a <code>Key</code> helps Flutter identify which widget is which.</p><div class="objective"><strong>By the end:</strong> You will understand BuildContext, use context with Theme, MediaQuery and ScaffoldMessenger, recognize context mistakes, and use ValueKey, UniqueKey, ObjectKey and GlobalKey appropriately.</div></header>
+      <div class="mental-model"><div class="mental-card"><strong>BuildContext</strong><p>WHERE is this widget?</p></div><div class="mental-arrow">+</div><div class="mental-card"><strong>Key</strong><p>WHICH widget is this?</p></div></div>
+      <div class="callout"><span class="label">PREREQUISITE</span><p>You should already understand widgets, the widget tree, <code>StatelessWidget</code>, <code>StatefulWidget</code>, <code>setState()</code>, themes, and SnackBars. Navigation is intentionally not used in this lesson.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. BuildContext is about a widget's location in the widget tree."><h3>Which question does BuildContext mainly help answer?</h3><div class="quiz-options"><button class="quiz-option">What color is this widget?</button><button class="quiz-option">Where is this widget in the tree?</button><button class="quiz-option">How many times has setState run?</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Meet BuildContext">
+      <header class="step-header"><span class="step-kicker">STEP 2 · LOCATION</span><h1>BuildContext Is a Widget's Location</h1><p class="lede">The simplest useful definition is: <strong>BuildContext represents the location of a widget in Flutter's widget tree.</strong> You already use it every time you write a <code>build</code> method.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>@override
+Widget build(BuildContext context) {
+  return const Text('Hello Flutter');
+}</code></pre></div>
+      <div class="panel yellow"><h2>The mental model</h2><p><strong>Widget = WHAT am I?</strong></p><p><strong>BuildContext = WHERE am I?</strong></p></div>
+      <div class="context-tree">MaterialApp<br>└── Scaffold<br>&nbsp;&nbsp;&nbsp;&nbsp;└── Column<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Text<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── MyButton ← its BuildContext represents this location</div>
+      <p>Flutter's API documentation describes <code>BuildContext</code> as a handle to a widget's location. Internally, BuildContext is connected to Flutter's element tree, but you do not need to manipulate Elements directly to use context correctly.</p>
+      <div class="callout"><span class="label">DO NOT THINK</span><p>There is not one magical global <code>context</code> for the entire application. Different widgets occupy different locations and therefore have their own contexts.</p></div>
+      <div class="quiz" data-answer="2" data-correct="Exactly. The parameter represents the location where that widget is being built."><h3>What does the context parameter in build() represent?</h3><div class="quiz-options"><button class="quiz-option">The app's database</button><button class="quiz-option">The current state variable</button><button class="quiz-option">That widget's location in the tree</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Different contexts">
+      <header class="step-header"><span class="step-kicker">STEP 3 · NOT ONE CONTEXT</span><h1>Different Widgets Have Different Contexts</h1><p class="lede">Two widgets can both have a variable named <code>context</code>, but those contexts represent different positions in the widget tree.</p></header>
+      <div class="grid-2">
+        <div><h2>Parent widget</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // context belongs to ProfilePage
+    return const ProfileButton();
+  }
+}</code></pre></div></div>
+        <div><h2>Child widget</h2><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>class ProfileButton extends StatelessWidget {
+  const ProfileButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // context belongs to ProfileButton
+    return const Text('Save');
+  }
+}</code></pre></div></div>
+      </div>
+      <div class="context-tree">ProfilePage  ← parent context<br>└── ProfileButton ← child context<br>&nbsp;&nbsp;&nbsp;&nbsp;└── Text</div>
+      <div class="panel blue"><strong>Why does this matter?</strong><p>Many Flutter APIs search the widget tree starting from the context you give them. A context at one location may be able to find something that a context higher in the tree cannot.</p></div>
+    </section>
+
+    <section class="step-view" data-title="Look upward with context">
+      <header class="step-header"><span class="step-kicker">STEP 4 · SEARCH THE TREE</span><h1>Context Helps Flutter Look Upward</h1><p class="lede">One of the most useful ways to think about context is: <strong>start here and look upward for something provided by an ancestor.</strong></p></header>
+      <div class="context-tree">MaterialApp / Theme<br>&nbsp;&nbsp;&nbsp;&nbsp;▲<br>&nbsp;&nbsp;Scaffold<br>&nbsp;&nbsp;&nbsp;&nbsp;▲<br>&nbsp;&nbsp;Column<br>&nbsp;&nbsp;&nbsp;&nbsp;▲<br>&nbsp;&nbsp;Text ← context starts here</div>
+      <h2>Read the current theme</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>final theme = Theme.of(context);
+
+Text(
+  'Flutter Course',
+  style: theme.textTheme.headlineMedium,
+)</code></pre></div>
+      <h2>Read information about the screen</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>final screenWidth = MediaQuery.sizeOf(context).width;
+
+Text('Width: $screenWidth')</code></pre></div>
+      <h2>Show a SnackBar</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>ScaffoldMessenger.of(context).showSnackBar(
+  const SnackBar(
+    content: Text('Profile saved'),
+  ),
+);</code></pre></div>
+      <div class="panel mint"><strong>Pattern to notice:</strong><p><code>Theme.of(context)</code>, <code>MediaQuery.sizeOf(context)</code>, and <code>ScaffoldMessenger.of(context)</code> all use a context so Flutter knows where in the tree to begin looking.</p></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. Flutter starts from the supplied context and finds the appropriate ancestor information."><h3>Why does Theme.of(context) need context?</h3><div class="quiz-options"><button class="quiz-option">To know where to start looking for the nearest appropriate Theme</button><button class="quiz-option">To convert a color into a string</button><button class="quiz-option">To create a StatefulWidget</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="The wrong context">
+      <header class="step-header"><span class="step-kicker">STEP 5 · COMMON INTERVIEW IDEA</span><h1>A Context Cannot Find a Descendant Below It</h1><p class="lede">A common context mistake happens when you create something lower in the returned widget tree but try to find it using the context of a widget above it.</p></header>
+      <div class="panel pink"><h2>Rule to remember</h2><p><strong>A context can search its ancestors above it. Do not expect it to find a widget that is below that context.</strong></p></div>
+      <div class="context-tree">MyPage ← page context starts here<br>└── Theme ← created BELOW page context<br>&nbsp;&nbsp;&nbsp;&nbsp;└── Builder ← new context here<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Text</div>
+      <h2>Why Builder can help</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>@override
+Widget build(BuildContext context) {
+  return Theme(
+    data: ThemeData(
+      colorSchemeSeed: Colors.purple,
+    ),
+    child: Builder(
+      builder: (innerContext) {
+        final color =
+            Theme.of(innerContext).colorScheme.primary;
+
+        return Text(
+          'I can see the new Theme',
+          style: TextStyle(color: color),
+        );
+      },
+    ),
+  );
+}</code></pre></div>
+      <p>The original <code>context</code> belongs to the widget whose <code>build()</code> method is running. The <code>innerContext</code> from <code>Builder</code> is lower in the tree, underneath the new <code>Theme</code>, so it can find that Theme.</p>
+      <div class="callout"><span class="label">WHY BUILDER?</span><p><code>Builder</code> is useful when you need a new BuildContext at a lower position in the widget tree. It is not something you need to wrap around every widget.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Exactly. Builder gives its callback a context for the Builder's lower position in the tree."><h3>Why might we use Builder in a context example?</h3><div class="quiz-options"><button class="quiz-option">It makes every widget stateful</button><button class="quiz-option">It gives us a BuildContext from a lower position in the tree</button><button class="quiz-option">It permanently stores BuildContext</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Context best practices">
+      <header class="step-header"><span class="step-kicker">STEP 6 · USE CONTEXT SAFELY</span><h1>Context Belongs to a Living Location</h1><p class="lede">Because context represents a location in the widget tree, you should use it while that location is still mounted and avoid treating it like permanent application data.</p></header>
+      <div class="grid-2"><div class="concept"><strong>Do</strong><p>Use context when calling APIs that need to know the widget's location.</p></div><div class="concept"><strong>Do not</strong><p>Store a BuildContext globally or keep it around unnecessarily.</p></div></div>
+      <h2>After asynchronous work</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>onPressed: () async {
+  await Future.delayed(
+    const Duration(seconds: 2),
+  );
+
+  if (!context.mounted) return;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Work complete'),
+    ),
+  );
+}</code></pre></div>
+      <p>The delay gives time for the widget to potentially be removed from the tree. <code>context.mounted</code> tells us whether that context is still attached to a mounted widget before we use it again.</p>
+      <div class="callout"><span class="label">INTERVIEW NOTE</span><p>BuildContext objects are actually implemented by Flutter's <code>Element</code> objects. For this course, the important practical idea is still simpler: <strong>context represents a widget's location in the tree.</strong></p></div>
+    </section>
+
+    <section class="step-view" data-title="Why keys exist">
+      <header class="step-header"><span class="step-kicker">STEP 7 · IDENTITY</span><h1>Keys Help Flutter Know Which Widget Is Which</h1><p class="lede">BuildContext is about location. Keys solve a different problem: <strong>identity</strong>. They become especially useful when similar widgets are inserted, removed, or reordered.</p></header>
+      <div class="mental-model"><div class="mental-card"><strong>BuildContext</strong><p>WHERE?</p></div><div class="mental-arrow">≠</div><div class="mental-card"><strong>Key</strong><p>WHICH?</p></div></div>
+      <div class="identity-list"><div class="identity-item"><span>101</span>Aman</div><div class="identity-item"><span>102</span>Riya</div><div class="identity-item"><span>103</span>John</div></div>
+      <p>Imagine these student cards contain their own state. If we reorder them, Flutter needs a reliable way to understand that Aman is still Aman even though his position changed.</p>
+      <div class="panel yellow"><strong>Simple definition:</strong> A <code>Key</code> is an identifier that helps Flutter match widgets with their existing elements/state when the widget tree changes.</div>
+      <div class="quiz" data-answer="2" data-correct="Correct. Keys are primarily about widget identity when Flutter updates the tree."><h3>What is the main purpose of a Key?</h3><div class="quiz-options"><button class="quiz-option">Give a widget a color</button><button class="quiz-option">Find the screen width</button><button class="quiz-option">Help Flutter identify widgets during tree updates</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Reorder without keys">
+      <header class="step-header"><span class="step-kicker">STEP 8 · SEE THE PROBLEM</span><h1>Position Is Not Always Identity</h1><p class="lede">When children have state and their order changes, matching only by widget type and position can attach existing state to the wrong logical item. A stable key tells Flutter what each item represents.</p></header>
+      <div class="grid-2">
+        <div class="panel blue"><h3>Before reorder</h3><div class="identity-list"><div class="identity-item">Aman — state A</div><div class="identity-item">Riya — state B</div><div class="identity-item">John — state C</div></div></div>
+        <div class="panel pink"><h3>After reorder</h3><div class="identity-list"><div class="identity-item">Riya — should keep B</div><div class="identity-item">Aman — should keep A</div><div class="identity-item">John — should keep C</div></div></div>
+      </div>
+      <h2>A list without keys</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>children: students.map((student) {
+  return StudentCard(
+    student: student,
+  );
+}).toList(),</code></pre></div>
+      <h2>Give every logical item a stable identity</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>children: students.map((student) {
+  return StudentCard(
+    key: ValueKey(student.id),
+    student: student,
+  );
+}).toList(),</code></pre></div>
+      <div class="callout"><span class="label">IMPORTANT</span><p>Keys matter most when Flutter must distinguish similar sibling widgets whose order or membership changes. You do <strong>not</strong> need to add a key to every widget.</p></div>
+    </section>
+
+    <section class="step-view" data-title="ValueKey">
+      <header class="step-header"><span class="step-kicker">STEP 9 · MOST PRACTICAL KEY</span><h1>ValueKey Uses a Value as Identity</h1><p class="lede"><code>ValueKey</code> is a great choice when your data already contains a stable value such as an ID.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>StudentCard(
+  key: ValueKey(student.id),
+  student: student,
+)</code></pre></div>
+      <table class="comparison"><thead><tr><th>Example</th><th>Meaning</th></tr></thead><tbody><tr><td><code>ValueKey(101)</code></td><td>Identity is based on the integer value 101.</td></tr><tr><td><code>ValueKey('student-101')</code></td><td>Identity is based on that string value.</td></tr><tr><td><code>ValueKey(product.id)</code></td><td>A common real-world pattern using a model ID.</td></tr></tbody></table>
+      <div class="panel mint"><strong>Rule:</strong><p>Choose a value that remains stable for the same logical item and is unique among the sibling widgets that need to be distinguished.</p></div>
+      <div class="quiz" data-answer="0" data-correct="Correct. A stable database/model ID is usually an excellent ValueKey."><h3>A product has a stable unique ID. Which key is a natural choice?</h3><div class="quiz-options"><button class="quiz-option"><code>ValueKey(product.id)</code></button><button class="quiz-option"><code>UniqueKey()</code> created on every build</button><button class="quiz-option">No widget can use a key</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Other local keys">
+      <header class="step-header"><span class="step-kicker">STEP 10 · RECOGNIZE THE OPTIONS</span><h1>UniqueKey and ObjectKey</h1><p class="lede">Both are local keys, but they identify widgets differently. Know what they mean; <code>ValueKey</code> will still be the most natural choice in many data-driven lists.</p></header>
+      <div class="grid-2">
+        <div class="concept"><strong>UniqueKey</strong><p>Every <code>UniqueKey()</code> instance is different from every other one. It is equal only to itself.</p></div>
+        <div class="concept"><strong>ObjectKey</strong><p>Uses the identity of a particular object as the key.</p></div>
+      </div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>final firstKey = UniqueKey();
+final secondKey = UniqueKey();
+
+// firstKey and secondKey are different.</code></pre></div>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>StudentCard(
+  key: ObjectKey(student),
+  student: student,
+)</code></pre></div>
+      <div class="callout"><span class="label">COMMON MISTAKE</span><p>Do not create <code>UniqueKey()</code> inside every build just because “keys are good.” A fresh key gives the widget a fresh identity, which can prevent Flutter from preserving the state you expected to keep.</p></div>
+      <table class="comparison"><thead><tr><th>Key</th><th>Identity comes from</th></tr></thead><tbody><tr><td><code>ValueKey</code></td><td>A value</td></tr><tr><td><code>ObjectKey</code></td><td>A particular object's identity</td></tr><tr><td><code>UniqueKey</code></td><td>The unique key instance itself</td></tr></tbody></table>
+    </section>
+
+    <section class="step-view" data-title="GlobalKey">
+      <header class="step-header"><span class="step-kicker">STEP 11 · GLOBAL IDENTITY</span><h1>GlobalKey Can Identify and Access State</h1><p class="lede"><code>GlobalKey</code> is different from local keys. It must be unique across the entire app and can provide access to the widget, context, or State associated with that key.</p></header>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>final myKey = GlobalKey();</code></pre></div>
+      <table class="comparison"><thead><tr><th>Property</th><th>What it can provide</th></tr></thead><tbody><tr><td><code>currentContext</code></td><td>The BuildContext associated with the widget using the key.</td></tr><tr><td><code>currentWidget</code></td><td>The current widget associated with the key.</td></tr><tr><td><code>currentState</code></td><td>The State object, when the key is typed for a StatefulWidget state.</td></tr></tbody></table>
+      <div class="panel yellow"><h2>Coming next: Forms</h2><p>In the next codelab you will see a very common use:</p><div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>final formKey = GlobalKey&lt;FormState&gt;();</code></pre></div><p>That key will let us work with the <code>FormState</code> later to validate or reset the form. For now, understand the idea rather than memorizing the form API.</p></div>
+      <div class="callout"><span class="label">BEST PRACTICE</span><p>GlobalKeys should normally be long-lived. Do not recreate a GlobalKey inside every <code>build()</code>. Also, do not use a GlobalKey when a simpler local key solves the problem.</p></div>
+      <div class="quiz" data-answer="1" data-correct="Correct. GlobalKey can uniquely identify a widget across the app and can expose associated state/context."><h3>What makes GlobalKey special?</h3><div class="quiz-options"><button class="quiz-option">It automatically makes every widget global</button><button class="quiz-option">It has app-wide uniqueness and can access associated state/context</button><button class="quiz-option">It replaces setState()</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Key family">
+      <header class="step-header"><span class="step-kicker">STEP 12 · INTERVIEW MAP</span><h1>LocalKey vs GlobalKey</h1><p class="lede">Interview questions often ask for the key hierarchy. You do not need to memorize framework internals, but you should recognize the major key types and know when they are appropriate.</p></header>
+      <div class="tree">Key<br>├── LocalKey<br>│&nbsp;&nbsp;&nbsp;├── ValueKey<br>│&nbsp;&nbsp;&nbsp;├── ObjectKey<br>│&nbsp;&nbsp;&nbsp;└── UniqueKey<br>│<br>└── GlobalKey</div>
+      <table class="comparison"><thead><tr><th>Key</th><th>Use it when...</th><th>Practical importance</th></tr></thead><tbody><tr><td><code>ValueKey</code></td><td>You have a stable value such as an item ID.</td><td>Very high</td></tr><tr><td><code>ObjectKey</code></td><td>The identity of a specific object should distinguish the widget.</td><td>Recognize it</td></tr><tr><td><code>UniqueKey</code></td><td>You intentionally need an identity different from every other key instance.</td><td>Know the behavior</td></tr><tr><td><code>GlobalKey</code></td><td>You genuinely need global identity or access to associated State/context.</td><td>High, especially for forms</td></tr></tbody></table>
+      <div class="panel orange"><strong>Do not overuse keys:</strong><p>If widgets are simple, stay in the same order, and Flutter can already match them correctly, adding keys everywhere provides no automatic benefit.</p></div>
+    </section>
+
+    <section class="step-view" data-title="Interview revision">
+      <header class="step-header"><span class="step-kicker">STEP 13 · CHECK YOUR UNDERSTANDING</span><h1>BuildContext and Keys Interview Revision</h1><p class="lede">You should now be able to explain the concepts in plain language first, then add the technical detail.</p></header>
+      <div class="reveal"><summary>1. What is BuildContext?</summary><div>A BuildContext represents the location of a widget in the widget tree. Flutter APIs can use that location to find appropriate ancestors or inherited information.</div></div>
+      <div class="reveal"><summary>2. Does the whole application have one BuildContext?</summary><div>No. Widgets have contexts associated with their own locations in the tree.</div></div>
+      <div class="reveal"><summary>3. Why does Theme.of(context) need context?</summary><div>It needs a starting location so Flutter can find the appropriate Theme above that location in the tree.</div></div>
+      <div class="reveal"><summary>4. What is Builder used for?</summary><div>Builder creates a widget whose callback receives a BuildContext for that lower position in the tree. This is useful when the outer context is above an ancestor you need to access.</div></div>
+      <div class="reveal"><summary>5. What does context.mounted mean?</summary><div>It tells you whether the widget associated with that context is still mounted in the widget tree. This is especially important after asynchronous gaps.</div></div>
+      <div class="reveal"><summary>6. Why do we use Keys?</summary><div>Keys help Flutter identify widgets when updating the widget tree, especially when similar stateful children are inserted, removed, or reordered.</div></div>
+      <div class="reveal"><summary>7. ValueKey vs UniqueKey?</summary><div>ValueKey compares using a supplied value. Each UniqueKey instance is different and equal only to itself.</div></div>
+      <div class="reveal"><summary>8. What is ObjectKey?</summary><div>ObjectKey identifies a widget using the identity of a particular object.</div></div>
+      <div class="reveal"><summary>9. What is special about GlobalKey?</summary><div>It is unique across the app and can provide access to the associated widget, BuildContext, and State. It is more powerful and should not be used when a simpler key is enough.</div></div>
+      <div class="reveal"><summary>10. Should every widget have a Key?</summary><div>No. Use keys when widget identity matters. Adding keys everywhere is unnecessary.</div></div>
+      <div class="quiz" data-answer="2" data-correct="Correct. Context describes location; keys help Flutter preserve and match identity."><h3>Which summary is best?</h3><div class="quiz-options"><button class="quiz-option">Context and Key mean exactly the same thing</button><button class="quiz-option">Context stores state and Key builds UI</button><button class="quiz-option">Context answers WHERE; Key helps answer WHICH</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+    </section>
+
+    <section class="step-view" data-title="Final practical">
+      <header class="step-header"><span class="step-kicker">STEP 14 · PUT IT TOGETHER</span><h1>Build a Reorderable Student List</h1><p class="lede">Use a stable <code>ValueKey</code> for each student and use BuildContext to read the theme and show feedback. This combines location and identity without introducing navigation.</p></header>
+      <h2>Complete example</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+        colorSchemeSeed: Colors.blue,
+      ),
+      home: const StudentPage(),
+    );
+  }
+}
+
+class Student {
+  final int id;
+  final String name;
+
+  const Student(this.id, this.name);
+}
+
+class StudentPage extends StatefulWidget {
+  const StudentPage({super.key});
+
+  @override
+  State&lt;StudentPage&gt; createState() =&gt; _StudentPageState();
+}
+
+class _StudentPageState extends State&lt;StudentPage&gt; {
+  List&lt;Student&gt; students = const [
+    Student(101, 'Aman'),
+    Student(102, 'Riya'),
+    Student(103, 'John'),
+  ];
+
+  void reverseStudents() {
+    setState(() {
+      students = students.reversed.toList();
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Student order changed'),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Students'),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              children: students.map((student) {
+                return StudentCard(
+                  key: ValueKey(student.id),
+                  student: student,
+                  color: colors.secondaryContainer,
+                );
+              }).toList(),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: ElevatedButton(
+              onPressed: reverseStudents,
+              child: const Text('Reverse Students'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class StudentCard extends StatefulWidget {
+  final Student student;
+  final Color color;
+
+  const StudentCard({
+    super.key,
+    required this.student,
+    required this.color,
+  });
+
+  @override
+  State&lt;StudentCard&gt; createState() =&gt; _StudentCardState();
+}
+
+class _StudentCardState extends State&lt;StudentCard&gt; {
+  int taps = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: widget.color,
+      child: ListTile(
+        title: Text(widget.student.name),
+        subtitle: Text('Tapped $taps times'),
+        trailing: IconButton(
+          onPressed: () {
+            setState(() {
+              taps++;
+            });
+          },
+          icon: const Icon(Icons.add),
+        ),
+      ),
+    );
+  }
+}</code></pre></div>
+      <div class="challenge"><h3>Experiment</h3><ol><li>Tap different students a different number of times.</li><li>Press <strong>Reverse Students</strong> and check whether each student's counter stays with that student.</li><li>Temporarily remove <code>key: ValueKey(student.id)</code> and repeat the experiment.</li><li>Explain the result using the words <strong>position</strong> and <strong>identity</strong>.</li><li>Change the app's <code>colorSchemeSeed</code> and identify where <code>Theme.of(context)</code> reads the resulting theme.</li></ol></div>
+      <h2>Completion checklist</h2>
+      <ul class="checklist"><li>I can explain BuildContext as a location in the widget tree.</li><li>I understand that different widgets have different contexts.</li><li>I can explain why Flutter APIs use context to find information above a widget.</li><li>I understand why a context cannot find a descendant below its location.</li><li>I know why Builder can provide a more appropriate context.</li><li>I can explain context.mounted.</li><li>I can explain why keys exist.</li><li>I can use ValueKey for stable data identity.</li><li>I can distinguish ValueKey, ObjectKey, UniqueKey and GlobalKey.</li><li>I know that keys should not be added everywhere.</li><li>I am ready to use GlobalKey&lt;FormState&gt; in the next codelab.</li></ul>
+      <div class="panel references"><h3>Continue learning</h3><p>Official references: <a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a>, <a href="https://api.flutter.dev/flutter/widgets/Builder-class.html">Builder</a>, <a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>, <a href="https://api.flutter.dev/flutter/foundation/ValueKey-class.html">ValueKey</a>, <a href="https://api.flutter.dev/flutter/foundation/UniqueKey-class.html">UniqueKey</a>, and <a href="https://api.flutter.dev/flutter/widgets/GlobalKey-class.html">GlobalKey</a>.</p></div>
+      <div class="finish" id="finishBox"><h2>Codelab complete! 🎉</h2><p>You can now think about the widget tree in two ways: <strong>BuildContext tells you where a widget is, and Keys help Flutter know which widget it is.</strong> Next, you will use <code>GlobalKey&lt;FormState&gt;</code> to build and validate Flutter forms.</p></div>
+    </section>
+
+  </div></main>
+</div>
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});
+    document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+    if(updateHash)history.pushState({step:current},'',`#step-${current+1}`);
+    window.scrollTo({top:0,behavior:'auto'});
+    sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');
+  }
+
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render()}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+  nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});
+  menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+
+  document.addEventListener('click',async event=>{
+    const copy=event.target.closest('.copy-btn');
+    if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1200);return}
+    const option=event.target.closest('.quiz-option');
+    if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show')}
+  });
+
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});
+  window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+  document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});
+  current=getHashStep();render(false);
+})();
+</script>
+</body>
+</html>
