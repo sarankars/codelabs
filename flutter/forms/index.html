@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Building and Validating Forms — Flutter Codelab</title>
+  <meta name="description" content="Build complete Flutter forms using Form, TextFormField, GlobalKey<FormState>, validators, controllers, reset, autovalidation, and user feedback.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal,.demo{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.callout p:last-child{margin-bottom:0}.grid-2,.grid-3{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.syntax{padding:14px;overflow:auto;background:#edf2ff;border:var(--border);font-family:"DM Mono",monospace}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .demo{padding:20px;margin:20px 0}.demo-controls{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px}.demo-btn{padding:8px 12px;background:#fff;border:2px solid var(--ink);font-weight:800}.demo-btn.active{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}.constraint-stage{height:250px;display:grid;place-items:center;padding:24px;background:repeating-linear-gradient(45deg,#eef2ff,#eef2ff 12px,#e1e8ff 12px,#e1e8ff 24px);border:2px solid var(--ink)}.constraint-parent{width:100%;height:100%;display:grid;place-items:center;padding:14px;background:#fff;border:3px dashed var(--blue)}.constraint-child{display:grid;place-items:center;width:100px;height:70px;padding:8px;background:var(--mint);border:3px solid var(--ink);font-weight:800;text-align:center;transition:all .2s ease}.constraint-child.tight{width:100%;height:100%}.constraint-child.maximum{width:min(100%,280px);height:130px}.demo-readout{margin:14px 0 0;padding:10px 12px;background:#fff;border:2px solid var(--ink);font-family:"DM Mono",monospace;font-size:.82rem}
+    .spacing-visual{display:grid;place-items:center;min-height:230px;padding:28px;background:var(--pink);border:3px solid var(--ink)}.spacing-margin{padding:30px;background:var(--yellow);border:3px dashed var(--ink)}.spacing-padding{padding:26px;background:var(--blue-light);border:3px solid var(--ink)}.spacing-child{padding:13px;color:#fff;background:var(--blue);border:3px solid var(--ink);font-weight:800}.space-label{display:block;margin-bottom:6px;font-family:"DM Mono",monospace;font-size:.7rem;font-weight:700;text-transform:uppercase}
+    .alignment-stage{height:260px;display:grid;padding:18px;background:#eaf0ff;border:3px solid var(--ink)}.alignment-box{width:88px;height:64px;display:grid;place-items:center;justify-self:center;align-self:center;background:var(--orange);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);font-weight:900;transition:all .2s ease}
+    .fit-stage{height:260px;display:grid;place-items:center;background:#151515;border:3px solid var(--ink)}.fit-frame{width:320px;max-width:90%;height:190px;background:#fff;border:3px solid var(--yellow);overflow:hidden}.fit-image{width:100%;height:100%;object-fit:contain;display:block}.fit-note{margin-top:12px;font-weight:700}.tree{margin:20px 0;padding:16px;background:#fff;border:var(--border);font-family:"DM Mono",monospace;line-height:1.8;overflow:auto}.checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.references a{color:var(--blue-dark);font-weight:700}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.footer-note{margin-top:30px;color:#555;font-size:.8rem}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2,.grid-3{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz,.demo{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}.constraint-stage,.alignment-stage{height:220px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}.step-view.active{animation:none}}
+  
+    .context-tree{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}
+    .mental-model{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;margin:22px 0}
+    .mental-card{padding:22px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);text-align:center}
+    .mental-card strong{display:block;font-size:1.45rem;margin-bottom:6px}.mental-arrow{font-size:2rem;font-weight:900}
+    .identity-list{display:grid;gap:10px;margin:18px 0}.identity-item{padding:14px;background:#fff;border:3px solid var(--ink);font-weight:800}
+    .identity-item span{display:inline-block;min-width:90px;padding:3px 7px;margin-right:8px;background:var(--yellow);border:2px solid var(--ink);font-family:"DM Mono",monospace;font-size:.75rem}
+    @media(max-width:680px){.mental-model{grid-template-columns:1fr}.mental-arrow{transform:rotate(90deg)}}
+    
+    .form-flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}
+    .validator-map{display:grid;gap:12px;margin:20px 0}
+    .validator-row{display:grid;grid-template-columns:190px 1fr;gap:12px;align-items:center;padding:14px;background:#fff;border:3px solid var(--ink)}
+    .validator-row strong{font-family:"DM Mono",monospace}
+    .mini-form{max-width:620px;margin:22px auto;padding:22px;background:#fff;border:var(--border);box-shadow:var(--shadow)}
+    .fake-field{margin:14px 0}.fake-field label{display:block;margin-bottom:6px;font-weight:800}.fake-input{min-height:48px;padding:12px 14px;background:#fff;border:3px solid var(--ink);font-family:"DM Mono",monospace}.fake-error{margin-top:5px;color:#a60000;font-size:.86rem;font-weight:800}
+    @media(max-width:680px){.validator-row{grid-template-columns:1fr}}
+
+</style>
+
+
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand">
+      <div class="eyebrow">Flutter Fundamentals Codelab</div>
+      <h2>Forms &amp; Validation</h2>
+      <p>Collect, validate, submit, and reset input.</p>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+      <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+
+  <div class="mobile-bar">
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button>
+    <div class="mobile-title" id="mobileTitle">Forms &amp; Validation</div>
+  </div>
+
+  <main><div class="content" id="content">
+
+    <section class="step-view" data-title="Why forms?">
+      <header class="step-header">
+        <span class="step-kicker">STEP 1 · START WITH THE PROBLEM</span>
+        <h1>Why Do We Need a Form?</h1>
+        <p class="lede">A single text field is easy. Real applications usually collect several related values and need to check all of them before accepting the data.</p>
+        <div class="objective"><strong>By the end:</strong> You will build a complete registration form using <code>Form</code>, <code>TextFormField</code>, <code>GlobalKey&lt;FormState&gt;</code>, validators, controllers, reset, autovalidation, and successful submission feedback.</div>
+      </header>
+
+      <div class="mini-form">
+        <div class="fake-field"><label>Name</label><div class="fake-input">Aman</div></div>
+        <div class="fake-field"><label>Email</label><div class="fake-input">aman@example.com</div></div>
+        <div class="fake-field"><label>Password</label><div class="fake-input">••••••••</div></div>
+        <div class="fake-field"><label>Confirm Password</label><div class="fake-input">••••••••</div></div>
+      </div>
+
+      <div class="panel yellow"><h2>The problem</h2><p>Before accepting registration, we may need to make sure that the name is not empty, the email is acceptable, the password is long enough, and both password fields match.</p></div>
+      <div class="form-flow">User enters data<br>↓<br>Presses Register<br>↓<br>Validate ALL fields<br>↓<br>Invalid? → Show errors<br>Valid? → Submit data</div>
+
+      <div class="quiz" data-answer="1" data-correct="Correct. Form lets related form fields be managed and validated together.">
+        <h3>Why use a Form?</h3>
+        <div class="quiz-options">
+          <button class="quiz-option">Because Form automatically calls an API</button>
+          <button class="quiz-option">Because related fields can be validated and managed together</button>
+          <button class="quiz-option">Because TextField cannot accept text</button>
+        </div>
+        <div class="quiz-feedback" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="step-view" data-title="TextField vs TextFormField">
+      <header class="step-header">
+        <span class="step-kicker">STEP 2 · CHOOSE THE RIGHT INPUT</span>
+        <h1>TextField vs TextFormField</h1>
+        <p class="lede">You already know <code>TextField</code>. For structured forms, Flutter gives us <code>TextFormField</code>, which integrates with the Form validation system.</p>
+      </header>
+
+      <div class="grid-2">
+        <div>
+          <h2>TextField</h2>
+          <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>TextField(
+  decoration: const InputDecoration(
+    labelText: 'Name',
+  ),
+)</code></pre></div>
+        </div>
+        <div>
+          <h2>TextFormField</h2>
+          <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>TextFormField(
+  decoration: const InputDecoration(
+    labelText: 'Name',
+  ),
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return 'Name is required';
+    }
+
+    return null;
+  },
+)</code></pre></div>
+        </div>
+      </div>
+
+      <table class="comparison">
+        <thead><tr><th>Widget</th><th>Main purpose</th><th>validator property?</th></tr></thead>
+        <tbody>
+          <tr><td><code>TextField</code></td><td>General text input</td><td>No</td></tr>
+          <tr><td><code>TextFormField</code></td><td>Text input that participates in Form</td><td>Yes</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout"><span class="label">MENTAL MODEL</span><p><strong>TextField = collect text.</strong> <strong>TextFormField = collect text + participate in form validation.</strong></p></div>
+    </section>
+
+    <section class="step-view" data-title="Create the Form">
+      <header class="step-header">
+        <span class="step-kicker">STEP 3 · GROUP THE FIELDS</span>
+        <h1>Wrap Related Inputs in Form</h1>
+        <p class="lede"><code>Form</code> groups multiple form fields so Flutter can validate, save, or reset them as one unit.</p>
+      </header>
+
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Form(
+  child: Column(
+    children: [
+      TextFormField(),
+      TextFormField(),
+      TextFormField(),
+    ],
+  ),
+)</code></pre></div>
+
+      <div class="form-flow">Form<br>├── Name TextFormField<br>├── Email TextFormField<br>├── Password TextFormField<br>└── Confirm Password TextFormField</div>
+
+      <div class="panel blue"><strong>Important:</strong><p><code>Form</code> does not invent your validation rules. Each field defines its own validator, while the Form coordinates the fields.</p></div>
+    </section>
+
+    <section class="step-view" data-title="GlobalKey<FormState>">
+      <header class="step-header">
+        <span class="step-kicker">STEP 4 · CONNECT TO KEYS</span>
+        <h1>Access the Form with GlobalKey&lt;FormState&gt;</h1>
+        <p class="lede">You already learned that a GlobalKey can access the State associated with a widget. Now that idea becomes useful.</p>
+      </header>
+
+      <h2>Create the key</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>final formKey =
+    GlobalKey&lt;FormState&gt;();</code></pre></div>
+
+      <h2>Attach it</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Form(
+  key: formKey,
+  child: Column(
+    children: [
+      // fields
+    ],
+  ),
+)</code></pre></div>
+
+      <div class="form-flow">formKey<br>↓<br>Form<br>↓<br>FormState</div>
+
+      <p>Now:</p>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>formKey.currentState</code></pre></div>
+      <p>means:</p>
+      <div class="panel mint"><strong>"Give me the State object associated with this Form."</strong></div>
+
+      <div class="callout"><span class="label">BEST PRACTICE</span><p>Create the GlobalKey once as a field in the State class. Do not recreate it inside <code>build()</code>.</p></div>
+
+      <div class="quiz" data-answer="0" data-correct="Correct. The key lets us reach FormState so we can call validate() and reset().">
+        <h3>Why GlobalKey&lt;FormState&gt;?</h3>
+        <div class="quiz-options">
+          <button class="quiz-option">To access FormState</button>
+          <button class="quiz-option">To store the password permanently</button>
+          <button class="quiz-option">To create a TextEditingController</button>
+        </div>
+        <div class="quiz-feedback" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="step-view" data-title="How validator works">
+      <header class="step-header">
+        <span class="step-kicker">STEP 5 · THE MOST IMPORTANT RULE</span>
+        <h1>Validator Returns an Error or null</h1>
+        <p class="lede">Every validator receives the current field value and decides whether that value is acceptable.</p>
+      </header>
+
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>validator: (value) {
+  if (value == null || value.isEmpty) {
+    return 'Name is required';
+  }
+
+  return null;
+},</code></pre></div>
+
+      <div class="validator-map">
+        <div class="validator-row"><strong>return 'Error'</strong><span>❌ Invalid. Flutter displays the returned message.</span></div>
+        <div class="validator-row"><strong>return null</strong><span>✅ Valid. No validation error exists.</span></div>
+      </div>
+
+      <div class="panel yellow"><h2>Memorize this</h2><p><strong>String = invalid. null = valid.</strong></p></div>
+
+      <div class="mini-form">
+        <div class="fake-field"><label>Name</label><div class="fake-input"></div><div class="fake-error">Name is required</div></div>
+      </div>
+
+      <div class="quiz" data-answer="1" data-correct="Exactly. null means the validator found no error.">
+        <h3>What should a validator return when input is valid?</h3>
+        <div class="quiz-options">
+          <button class="quiz-option">true</button>
+          <button class="quiz-option">null</button>
+          <button class="quiz-option">'Valid'</button>
+        </div>
+        <div class="quiz-feedback" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="step-view" data-title="Useful validators">
+      <header class="step-header">
+        <span class="step-kicker">STEP 6 · WRITE REAL RULES</span>
+        <h1>Validate Name, Email, and Password</h1>
+        <p class="lede">A validator can have one rule or several. Return the first useful error message you find.</p>
+      </header>
+
+      <h2>Name</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>validator: (value) {
+  if (value == null ||
+      value.trim().isEmpty) {
+    return 'Please enter your name';
+  }
+
+  return null;
+},</code></pre></div>
+
+      <p><code>trim()</code> removes extra spaces from the beginning and end, so a value containing only spaces is treated as empty.</p>
+
+      <h2>Email</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>validator: (value) {
+  if (value == null ||
+      value.trim().isEmpty) {
+    return 'Please enter your email';
+  }
+
+  if (!value.contains('@')) {
+    return 'Please enter a valid email';
+  }
+
+  return null;
+},</code></pre></div>
+
+      <div class="callout"><span class="label">KEEP IT SIMPLE</span><p>This is intentionally a beginner-friendly email check. The goal of this codelab is learning Flutter validation, not building a giant regular expression.</p></div>
+
+      <h2>Password</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>validator: (value) {
+  if (value == null ||
+      value.isEmpty) {
+    return 'Please enter a password';
+  }
+
+  if (value.length &lt; 8) {
+    return 'Password must be at least 8 characters';
+  }
+
+  return null;
+},</code></pre></div>
+
+      <div class="form-flow">Password entered<br>↓<br>Empty? → error<br>↓ no<br>Less than 8 chars? → error<br>↓ no<br>return null → valid</div>
+    </section>
+
+    <section class="step-view" data-title="Validate everything">
+      <header class="step-header">
+        <span class="step-kicker">STEP 7 · ONE CALL, ALL FIELDS</span>
+        <h1>Validate the Whole Form</h1>
+        <p class="lede">The Form coordinates all participating fields, so one call can run every validator.</p>
+      </header>
+
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>final isValid =
+    formKey.currentState!.validate();</code></pre></div>
+
+      <table class="comparison">
+        <thead><tr><th>validate() result</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>true</code></td><td>Every validator returned <code>null</code>.</td></tr>
+          <tr><td><code>false</code></td><td>At least one validator returned an error message.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>void submitForm() {
+  final isValid =
+      formKey.currentState!.validate();
+
+  if (!isValid) {
+    return;
+  }
+
+  print('Form is valid');
+}</code></pre></div>
+
+      <div class="form-flow">Register button<br>↓<br>validate()<br>↓<br>Every validator runs<br>↓<br>Any error?<br>├── YES → false → stop<br>└── NO → true → continue</div>
+
+      <div class="quiz" data-answer="2" data-correct="Correct. validate() returns true only when all validators pass.">
+        <h3>When does validate() return true?</h3>
+        <div class="quiz-options">
+          <button class="quiz-option">When any one field is valid</button>
+          <button class="quiz-option">Whenever the button is pressed</button>
+          <button class="quiz-option">When every validator reports no error</button>
+        </div>
+        <div class="quiz-feedback" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="step-view" data-title="Controllers and values">
+      <header class="step-header">
+        <span class="step-kicker">STEP 8 · READ THE DATA</span>
+        <h1>Use Controllers to Read Submitted Values</h1>
+        <p class="lede">Validation tells us whether the data is acceptable. Controllers let us access the actual text entered by the user.</p>
+      </header>
+
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>final nameController =
+    TextEditingController();
+
+final emailController =
+    TextEditingController();
+
+final passwordController =
+    TextEditingController();
+
+final confirmPasswordController =
+    TextEditingController();</code></pre></div>
+
+      <h2>Attach one to a field</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>TextFormField(
+  controller: nameController,
+  decoration: const InputDecoration(
+    labelText: 'Name',
+  ),
+)</code></pre></div>
+
+      <h2>Read the text</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>print(nameController.text);
+print(emailController.text);</code></pre></div>
+
+      <div class="panel blue"><strong>Different jobs:</strong><p><code>validator</code> checks the input. <code>TextEditingController</code> lets you access and control the input text.</p></div>
+    </section>
+
+    <section class="step-view" data-title="Lifecycle cleanup">
+      <header class="step-header">
+        <span class="step-kicker">STEP 9 · CONNECT TO LIFECYCLE</span>
+        <h1>Dispose the Controllers</h1>
+        <p class="lede">This is where the StatefulWidget lifecycle lesson becomes practical. The State owns these controllers, so clean them up when the State is permanently removed.</p>
+      </header>
+
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>@override
+void dispose() {
+  nameController.dispose();
+  emailController.dispose();
+  passwordController.dispose();
+  confirmPasswordController.dispose();
+
+  super.dispose();
+}</code></pre></div>
+
+      <div class="form-flow">State created<br>↓<br>Controllers created<br>↓<br>User interacts<br>↓<br>State permanently removed<br>↓<br>dispose() controllers</div>
+
+      <div class="callout"><span class="label">INTERVIEW CONNECTION</span><p>This is a practical answer to “Why do we use <code>dispose()</code>?” — State objects may own controllers and other resources that should be cleaned up.</p></div>
+    </section>
+
+    <section class="step-view" data-title="Cross-field validation">
+      <header class="step-header">
+        <span class="step-kicker">STEP 10 · FIELDS CAN WORK TOGETHER</span>
+        <h1>Validate Confirm Password</h1>
+        <p class="lede">Some rules depend on another field. Confirm-password validation is a perfect beginner example.</p>
+      </header>
+
+      <h2>Password field</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>TextFormField(
+  controller: passwordController,
+  obscureText: true,
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a password';
+    }
+
+    if (value.length &lt; 8) {
+      return 'Password must be at least 8 characters';
+    }
+
+    return null;
+  },
+)</code></pre></div>
+
+      <h2>Confirm password field</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>TextFormField(
+  controller: confirmPasswordController,
+  obscureText: true,
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return 'Please confirm your password';
+    }
+
+    if (value != passwordController.text) {
+      return 'Passwords do not match';
+    }
+
+    return null;
+  },
+)</code></pre></div>
+
+      <div class="panel mint"><strong>Why this works:</strong><p>The confirm-password validator receives its own value and compares it with <code>passwordController.text</code>.</p></div>
+
+      <div class="quiz" data-answer="0" data-correct="Correct. The confirm field can compare its value with passwordController.text.">
+        <h3>How does Confirm Password check the original password?</h3>
+        <div class="quiz-options">
+          <button class="quiz-option">Compare with passwordController.text</button>
+          <button class="quiz-option">Call MaterialApp.validate()</button>
+          <button class="quiz-option">Use UniqueKey()</button>
+        </div>
+        <div class="quiz-feedback" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="step-view" data-title="Submit successfully">
+      <header class="step-header">
+        <span class="step-kicker">STEP 11 · VALIDATE BEFORE SUBMITTING</span>
+        <h1>Build a Clean Submission Function</h1>
+        <p class="lede">Keep the button small and move the validation/submission logic into a method.</p>
+      </header>
+
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>void submitForm() {
+  final isValid =
+      formKey.currentState!.validate();
+
+  if (!isValid) {
+    return;
+  }
+
+  final name =
+      nameController.text.trim();
+
+  final email =
+      emailController.text.trim();
+
+  print('Name: $name');
+  print('Email: $email');
+
+  ScaffoldMessenger.of(context)
+      .showSnackBar(
+    const SnackBar(
+      content: Text(
+        'Registration successful!',
+      ),
+    ),
+  );
+}</code></pre></div>
+
+      <h2>The button</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>ElevatedButton(
+  onPressed: submitForm,
+  child: const Text('Register'),
+)</code></pre></div>
+
+      <div class="form-flow">Button<br>↓<br>submitForm()<br>↓<br>validate()<br>↓<br>Invalid → return<br>↓<br>Valid → read data → process → feedback</div>
+
+      <div class="callout"><span class="label">BUILD CONTEXT CONNECTION</span><p><code>ScaffoldMessenger.of(context)</code> reuses your BuildContext knowledge: context tells Flutter where to start looking for the appropriate ScaffoldMessenger.</p></div>
+    </section>
+
+    <section class="step-view" data-title="Reset the form">
+      <header class="step-header">
+        <span class="step-kicker">STEP 12 · START FRESH</span>
+        <h1>Reset the Form</h1>
+        <p class="lede">A Reset button lets the user clear the form and remove validation state.</p>
+      </header>
+
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>void resetForm() {
+  formKey.currentState?.reset();
+
+  nameController.clear();
+  emailController.clear();
+  passwordController.clear();
+  confirmPasswordController.clear();
+}</code></pre></div>
+
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>OutlinedButton(
+  onPressed: resetForm,
+  child: const Text('Reset'),
+)</code></pre></div>
+
+      <div class="grid-2">
+        <div class="concept"><strong>FormState.reset()</strong><p>Resets the state of the form fields, including validation state.</p></div>
+        <div class="concept"><strong>controller.clear()</strong><p>Explicitly clears the text managed by that controller.</p></div>
+      </div>
+
+      <div class="panel yellow"><strong>Beginner-friendly rule:</strong><p>If you are using controllers and want a visibly empty form, clear them explicitly.</p></div>
+    </section>
+
+    <section class="step-view" data-title="Better form UX">
+      <header class="step-header">
+        <span class="step-kicker">STEP 13 · POLISH THE EXPERIENCE</span>
+        <h1>Keyboard, Actions, and Autovalidation</h1>
+        <p class="lede">Once the form works, improve how it feels without changing the fundamental validation logic.</p>
+      </header>
+
+      <h2>Use the email keyboard</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>TextFormField(
+  keyboardType:
+      TextInputType.emailAddress,
+)</code></pre></div>
+
+      <h2>Move through fields</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>TextFormField(
+  textInputAction:
+      TextInputAction.next,
+)</code></pre></div>
+
+      <h2>Last field</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>TextFormField(
+  textInputAction:
+      TextInputAction.done,
+)</code></pre></div>
+
+      <h2>Validate after interaction</h2>
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>Form(
+  key: formKey,
+  autovalidateMode:
+      AutovalidateMode.onUserInteraction,
+  child: ...
+)</code></pre></div>
+
+      <div class="callout"><span class="label">TEACHING ORDER</span><p>Understand manual <code>validate()</code> first. Add autovalidation only after the validator mental model is clear.</p></div>
+    </section>
+
+    <section class="step-view" data-title="Complete registration form">
+      <header class="step-header">
+        <span class="step-kicker">STEP 14 · BUILD THE REAL THING</span>
+        <h1>Complete Student Registration Form</h1>
+        <p class="lede">Now combine everything into one runnable application.</p>
+      </header>
+
+      <div class="code-wrap"><button class="copy-btn" type="button">Copy</button><pre><code>import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorSchemeSeed: Colors.blue,
+        useMaterial3: true,
+      ),
+      home: const RegistrationPage(),
+    );
+  }
+}
+
+class RegistrationPage extends StatefulWidget {
+  const RegistrationPage({super.key});
+
+  @override
+  State&lt;RegistrationPage&gt; createState() =&gt;
+      _RegistrationPageState();
+}
+
+class _RegistrationPageState
+    extends State&lt;RegistrationPage&gt; {
+
+  final formKey =
+      GlobalKey&lt;FormState&gt;();
+
+  final nameController =
+      TextEditingController();
+
+  final emailController =
+      TextEditingController();
+
+  final passwordController =
+      TextEditingController();
+
+  final confirmPasswordController =
+      TextEditingController();
+
+  void submitForm() {
+    final isValid =
+        formKey.currentState!.validate();
+
+    if (!isValid) {
+      return;
+    }
+
+    final name =
+        nameController.text.trim();
+
+    final email =
+        emailController.text.trim();
+
+    print('Name: $name');
+    print('Email: $email');
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      SnackBar(
+        content: Text(
+          'Welcome, $name! Registration successful.',
+        ),
+      ),
+    );
+  }
+
+  void resetForm() {
+    formKey.currentState?.reset();
+
+    nameController.clear();
+    emailController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Student Registration',
+        ),
+      ),
+
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+
+          child: Form(
+            key: formKey,
+
+            autovalidateMode:
+                AutovalidateMode
+                    .onUserInteraction,
+
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.stretch,
+
+              children: [
+                TextFormField(
+                  controller:
+                      nameController,
+
+                  textInputAction:
+                      TextInputAction.next,
+
+                  decoration:
+                      const InputDecoration(
+                    labelText: 'Name',
+                    border:
+                        OutlineInputBorder(),
+                  ),
+
+                  validator: (value) {
+                    if (value == null ||
+                        value.trim().isEmpty) {
+                      return 'Please enter your name';
+                    }
+
+                    if (value.trim().length &lt; 2) {
+                      return 'Name is too short';
+                    }
+
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller:
+                      emailController,
+
+                  keyboardType:
+                      TextInputType
+                          .emailAddress,
+
+                  textInputAction:
+                      TextInputAction.next,
+
+                  decoration:
+                      const InputDecoration(
+                    labelText: 'Email',
+                    border:
+                        OutlineInputBorder(),
+                  ),
+
+                  validator: (value) {
+                    if (value == null ||
+                        value.trim().isEmpty) {
+                      return 'Please enter your email';
+                    }
+
+                    if (!value.contains('@')) {
+                      return 'Please enter a valid email';
+                    }
+
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller:
+                      passwordController,
+
+                  obscureText: true,
+
+                  textInputAction:
+                      TextInputAction.next,
+
+                  decoration:
+                      const InputDecoration(
+                    labelText: 'Password',
+                    border:
+                        OutlineInputBorder(),
+                  ),
+
+                  validator: (value) {
+                    if (value == null ||
+                        value.isEmpty) {
+                      return 'Please enter a password';
+                    }
+
+                    if (value.length &lt; 8) {
+                      return 'Password must be at least 8 characters';
+                    }
+
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller:
+                      confirmPasswordController,
+
+                  obscureText: true,
+
+                  textInputAction:
+                      TextInputAction.done,
+
+                  decoration:
+                      const InputDecoration(
+                    labelText:
+                        'Confirm Password',
+                    border:
+                        OutlineInputBorder(),
+                  ),
+
+                  validator: (value) {
+                    if (value == null ||
+                        value.isEmpty) {
+                      return 'Please confirm your password';
+                    }
+
+                    if (value !=
+                        passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 24),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: resetForm,
+                        child:
+                            const Text('Reset'),
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: submitForm,
+                        child:
+                            const Text('Register'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre></div>
+
+      <h2>What each important line is doing</h2>
+      <table class="comparison">
+        <thead><tr><th>Code</th><th>Why it exists</th></tr></thead>
+        <tbody>
+          <tr><td><code>GlobalKey&lt;FormState&gt;()</code></td><td>Lets us access the Form's state.</td></tr>
+          <tr><td><code>Form(key: formKey)</code></td><td>Connects that key to this Form.</td></tr>
+          <tr><td><code>TextEditingController()</code></td><td>Lets us read and control entered text.</td></tr>
+          <tr><td><code>validator:</code></td><td>Defines the validity rules for a field.</td></tr>
+          <tr><td><code>validate()</code></td><td>Runs all validators in the Form.</td></tr>
+          <tr><td><code>return null</code></td><td>Means that field is valid.</td></tr>
+          <tr><td><code>dispose()</code></td><td>Cleans up controllers.</td></tr>
+          <tr><td><code>ScaffoldMessenger.of(context)</code></td><td>Shows successful submission feedback.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="challenge">
+        <h3>Test every case</h3>
+        <ol>
+          <li>Press Register with all fields empty.</li>
+          <li>Enter only spaces as the name.</li>
+          <li>Enter an email without <code>@</code>.</li>
+          <li>Use a password shorter than 8 characters.</li>
+          <li>Use different Password and Confirm Password values.</li>
+          <li>Correct every field and submit successfully.</li>
+          <li>Press Reset and confirm that the form clears.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="step-view" data-title="Interview revision">
+      <header class="step-header">
+        <span class="step-kicker">STEP 15 · CHECK YOUR UNDERSTANDING</span>
+        <h1>Forms and Validation Interview Revision</h1>
+        <p class="lede">Explain the idea in simple language first, then mention the Flutter API.</p>
+      </header>
+
+      <div class="reveal"><summary>1. What is Form?</summary><div>Form groups related form fields so they can be validated, saved, and reset together.</div></div>
+      <div class="reveal"><summary>2. TextField vs TextFormField?</summary><div>TextField is general text input. TextFormField participates in the Form system and has a validator.</div></div>
+      <div class="reveal"><summary>3. Why GlobalKey&lt;FormState&gt;?</summary><div>It lets us access the FormState associated with that specific Form and call methods such as validate() and reset().</div></div>
+      <div class="reveal"><summary>4. What does a validator return?</summary><div>A String means an error exists. null means the value is valid.</div></div>
+      <div class="reveal"><summary>5. What does validate() do?</summary><div>It runs the form fields' validators and returns true only when they all pass.</div></div>
+      <div class="reveal"><summary>6. Why TextEditingController?</summary><div>It gives access to the current text and lets us control or clear it.</div></div>
+      <div class="reveal"><summary>7. Why dispose controllers?</summary><div>The State owns those resources, so they should be cleaned up when the State is permanently removed.</div></div>
+      <div class="reveal"><summary>8. How can one field validate against another?</summary><div>Its validator can compare its value with another controller, such as comparing Confirm Password with passwordController.text.</div></div>
+      <div class="reveal"><summary>9. What is AutovalidateMode.onUserInteraction?</summary><div>It automatically validates after the user interacts with the field instead of showing errors immediately on the first frame.</div></div>
+      <div class="reveal"><summary>10. Should submission happen before validation?</summary><div>No. Validate first. If invalid, stop. Submit only when validation succeeds.</div></div>
+
+      <div class="quiz" data-answer="0" data-correct="Correct. This is the central form flow.">
+        <h3>Which flow is correct?</h3>
+        <div class="quiz-options">
+          <button class="quiz-option">Input → validate → valid? → submit</button>
+          <button class="quiz-option">Submit → validate afterward</button>
+          <button class="quiz-option">GlobalKey → API → TextFormField</button>
+        </div>
+        <div class="quiz-feedback" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="step-view" data-title="Final mental model">
+      <header class="step-header">
+        <span class="step-kicker">STEP 16 · CONNECT EVERYTHING</span>
+        <h1>The Complete Forms Mental Model</h1>
+        <p class="lede">Remember this flow and the individual methods become much easier to recall.</p>
+      </header>
+
+      <div class="form-flow">GlobalKey&lt;FormState&gt;<br>↓<br>Form<br>├── Name TextFormField → validator<br>├── Email TextFormField → validator<br>├── Password TextFormField → validator<br>└── Confirm Password → validator<br>↓<br>formKey.currentState!.validate()<br>↓<br>Every validator runs<br>↓<br>String returned? → show error ❌<br>null returned? → field valid ✅<br>↓<br>All fields valid?<br>↓<br>Read controller values<br>↓<br>Submit<br>↓<br>Show SnackBar</div>
+
+      <h2>Completion checklist</h2>
+      <ul class="checklist">
+        <li>I can explain why Form is useful.</li>
+        <li>I know TextField vs TextFormField.</li>
+        <li>I can create and attach a GlobalKey&lt;FormState&gt;.</li>
+        <li>I understand String = error and null = valid.</li>
+        <li>I can write multiple validation rules.</li>
+        <li>I can validate all fields using validate().</li>
+        <li>I can read values with controllers.</li>
+        <li>I can perform cross-field validation.</li>
+        <li>I can reset the Form and clear text.</li>
+        <li>I remember to dispose controllers.</li>
+        <li>I understand autovalidation.</li>
+        <li>I submit only after validation succeeds.</li>
+        <li>I can show success feedback with ScaffoldMessenger.</li>
+      </ul>
+
+      <div class="panel references">
+        <h3>Continue learning</h3>
+        <p>Official Flutter references: <a href="https://api.flutter.dev/flutter/widgets/Form-class.html">Form</a>, <a href="https://api.flutter.dev/flutter/widgets/FormState-class.html">FormState</a>, <a href="https://api.flutter.dev/flutter/material/TextFormField-class.html">TextFormField</a>, <a href="https://api.flutter.dev/flutter/widgets/GlobalKey-class.html">GlobalKey</a>, and <a href="https://api.flutter.dev/flutter/widgets/AutovalidateMode.html">AutovalidateMode</a>.</p>
+      </div>
+
+      <div class="finish" id="finishBox">
+        <h2>Codelab complete! 🎉</h2>
+        <p>You can now build, validate, submit, and reset a complete Flutter form using the built-in Form system.</p>
+      </div>
+    </section>
+
+  </div></main>
+</div>
+
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+
+  const getHashStep=()=>{
+    const match=location.hash.match(/^#step-(\d+)$/);
+    const value=match?Number(match[1])-1:0;
+    return Number.isInteger(value)&&value>=0&&value<steps.length?value:0
+  };
+
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{
+      const active=index===current;
+      step.classList.toggle('active',active);
+      step.setAttribute('aria-hidden',String(!active))
+    });
+
+    document.querySelectorAll('.step-link').forEach((button,index)=>{
+      button.classList.toggle('active',index===current);
+      button.setAttribute('aria-current',index===current?'step':'false');
+      button.querySelector('.step-status').textContent=completed.has(index)?'✓':''
+    });
+
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+
+    if(updateHash) history.pushState({step:current},'',`#step-${current+1}`);
+
+    window.scrollTo({top:0,behavior:'auto'});
+    sidebar.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded','false');
+  }
+
+  function goTo(index){
+    if(index<0||index>=steps.length)return;
+    completed.add(current);
+    current=index;
+    render();
+  }
+
+  const navRow=document.createElement('div');
+  navRow.className='nav-row';
+  navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';
+  content.appendChild(navRow);
+
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+
+  nav.addEventListener('click',event=>{
+    const button=event.target.closest('.step-link');
+    if(button)goTo(Number(button.dataset.step))
+  });
+
+  menuBtn.addEventListener('click',()=>{
+    const open=sidebar.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded',String(open))
+  });
+
+  document.addEventListener('click',async event=>{
+    const copy=event.target.closest('.copy-btn');
+    if(copy){
+      const code=copy.parentElement.querySelector('pre code')?.textContent??'';
+      try{
+        await navigator.clipboard.writeText(code);
+        copy.textContent='Copied!'
+      }catch{
+        copy.textContent='Select & copy'
+      }
+      setTimeout(()=>copy.textContent='Copy',1200);
+      return;
+    }
+
+    const option=event.target.closest('.quiz-option');
+    if(option){
+      const quiz=option.closest('.quiz');
+      if(quiz.dataset.answered)return;
+      const options=[...quiz.querySelectorAll('.quiz-option')];
+      const choice=options.indexOf(option);
+      const answer=Number(quiz.dataset.answer);
+      quiz.dataset.answered='true';
+      options.forEach(button=>button.disabled=true);
+      option.classList.add(choice===answer?'correct':'wrong');
+      if(choice!==answer)options[answer].classList.add('correct');
+      const feedback=quiz.querySelector('.quiz-feedback');
+      feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;
+      feedback.classList.add('show');
+    }
+  });
+
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});
+  window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+
+  document.addEventListener('keydown',event=>{
+    if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;
+    if(event.key==='ArrowRight')goTo(current+1);
+    if(event.key==='ArrowLeft')goTo(current-1);
+  });
+
+  current=getHashStep();
+  render(false);
+})();
+</script>
+</body>
+</html>
