@@ -1,0 +1,2238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigating with Navigator — Flutter Codelab</title>
+  <meta name="description"
+    content="Learn Flutter navigation using Navigator.push, Navigator.pop, MaterialPageRoute, the navigation stack, passing data forward, and returning results back.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+    :root {
+      --blue: #2856d8;
+      --blue-dark: #17348e;
+      --blue-light: #e4ebff;
+      --ink: #101010;
+      --paper: #f5f7fb;
+      --white: #fff;
+      --yellow: #ffd83d;
+      --mint: #75e6c5;
+      --pink: #ff9bb7;
+      --orange: #ffb866;
+      --border: 3px solid var(--ink);
+      --shadow: 6px 6px 0 var(--ink);
+      --shadow-sm: 4px 4px 0 var(--ink);
+      --sidebar: 292px
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: auto
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      line-height: 1.55
+    }
+
+    button,
+    a {
+      font: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    :focus-visible {
+      outline: 4px solid var(--yellow);
+      outline-offset: 3px
+    }
+
+    .app {
+      min-height: 100vh
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar);
+      padding: 22px 18px;
+      background: var(--blue);
+      border-right: var(--border);
+      overflow: auto;
+      z-index: 20
+    }
+
+    .brand {
+      padding: 16px;
+      margin-bottom: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .eyebrow,
+    .progress-meta,
+    .step-number,
+    .step-kicker,
+    .label,
+    .footer-note {
+      font-family: "DM Mono", monospace
+    }
+
+    .eyebrow {
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase
+    }
+
+    .brand h2 {
+      margin: 5px 0 3px;
+      font-size: 1.42rem;
+      line-height: 1.05
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: .85rem;
+      font-weight: 600
+    }
+
+    .progress-wrap {
+      margin: 0 2px 20px;
+      color: #fff
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+      font-size: .72rem
+    }
+
+    .progress-track {
+      height: 16px;
+      padding: 2px;
+      background: #fff;
+      border: var(--border)
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: var(--yellow);
+      transition: width .2s ease
+    }
+
+    .steps {
+      display: grid;
+      gap: 8px
+    }
+
+    .step-link {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 34px 1fr 18px;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 8px;
+      color: #fff;
+      background: transparent;
+      border: 3px solid transparent;
+      text-align: left;
+      font-weight: 700;
+      line-height: 1.15
+    }
+
+    .step-link:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .step-link.active {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--ink);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .step-number {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 2px solid currentColor;
+      font-size: .78rem
+    }
+
+    .step-status {
+      text-align: center
+    }
+
+    .mobile-bar {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: var(--blue);
+      border-bottom: var(--border)
+    }
+
+    .menu-btn,
+    .mobile-title {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .menu-btn {
+      width: 46px;
+      height: 42px;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .mobile-title {
+      flex: 1;
+      padding: 8px 10px;
+      font-weight: 800
+    }
+
+    main {
+      margin-left: var(--sidebar);
+      min-height: 100vh
+    }
+
+    .content {
+      width: min(980px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 42px 0 28px
+    }
+
+    .step-view {
+      display: none
+    }
+
+    .step-view.active {
+      display: block;
+      animation: stepIn .18s ease-out
+    }
+
+    @keyframes stepIn {
+      from {
+        opacity: .35;
+        transform: translateY(5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .step-header {
+      padding: 28px;
+      margin-bottom: 24px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .step-kicker {
+      display: inline-block;
+      margin-bottom: 13px;
+      padding: 5px 9px;
+      color: #fff;
+      background: var(--blue);
+      border: 2px solid var(--ink);
+      font-size: .72rem
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.08
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 5vw, 3.7rem);
+      letter-spacing: -.045em
+    }
+
+    h2 {
+      margin: 30px 0 12px;
+      font-size: clamp(1.5rem, 3vw, 2.15rem)
+    }
+
+    h3 {
+      margin: 22px 0 9px;
+      font-size: 1.15rem
+    }
+
+    .lede {
+      max-width: 780px;
+      margin: 0;
+      font-size: 1.08rem
+    }
+
+    .objective {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700
+    }
+
+    .panel,
+    .concept,
+    .quiz,
+    .reveal,
+    .demo {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .panel {
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .panel.blue {
+      background: var(--blue-light)
+    }
+
+    .panel.mint {
+      background: var(--mint)
+    }
+
+    .panel.pink {
+      background: var(--pink)
+    }
+
+    .panel.yellow {
+      background: var(--yellow)
+    }
+
+    .panel.orange {
+      background: var(--orange)
+    }
+
+    .callout {
+      padding: 16px 18px;
+      margin: 20px 0;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .callout .label {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 3px 7px;
+      color: #fff;
+      background: var(--ink);
+      border: 2px solid var(--ink);
+      font-size: .72rem
+    }
+
+    .callout p:last-child {
+      margin-bottom: 0
+    }
+
+    .grid-2,
+    .grid-3 {
+      display: grid;
+      gap: 16px
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .concept {
+      padding: 18px
+    }
+
+    .concept strong {
+      font-size: 1.05rem
+    }
+
+    .concept p:last-child {
+      margin-bottom: 0
+    }
+
+    .code-wrap {
+      position: relative;
+      margin: 18px 0
+    }
+
+    pre {
+      margin: 0;
+      padding: 20px;
+      overflow: auto;
+      color: #f7f7f7;
+      background: #111;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", ui-monospace, monospace;
+      font-size: .84rem;
+      line-height: 1.62;
+      tab-size: 2
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      padding: 5px 9px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      font-size: .75rem;
+      font-weight: 800
+    }
+
+    code:not(pre code) {
+      padding: 1px 5px;
+      background: #e8edf7;
+      border: 1px solid #9da9bb;
+      font-family: "DM Mono", monospace;
+      font-size: .88em
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35rem
+    }
+
+    li {
+      margin: 7px 0
+    }
+
+    .syntax {
+      padding: 14px;
+      overflow: auto;
+      background: #edf2ff;
+      border: var(--border);
+      font-family: "DM Mono", monospace
+    }
+
+    .comparison {
+      width: 100%;
+      margin: 18px 0;
+      background: #fff;
+      border: var(--border);
+      border-collapse: collapse
+    }
+
+    .comparison th,
+    .comparison td {
+      padding: 11px;
+      border: 2px solid var(--ink);
+      text-align: left;
+      vertical-align: top
+    }
+
+    .comparison th {
+      color: #fff;
+      background: var(--blue)
+    }
+
+    .quiz {
+      padding: 20px;
+      margin: 20px 0
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px
+    }
+
+    .quiz-option {
+      text-align: left;
+      padding: 11px 13px;
+      background: #fff;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-option:hover {
+      background: var(--blue-light)
+    }
+
+    .quiz-option.correct {
+      background: var(--mint)
+    }
+
+    .quiz-option.wrong {
+      background: var(--pink)
+    }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 13px;
+      padding: 10px;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-feedback.show {
+      display: block
+    }
+
+    .reveal {
+      margin: 18px 0
+    }
+
+    .reveal summary {
+      padding: 13px 16px;
+      cursor: pointer;
+      background: var(--blue-light);
+      font-weight: 800
+    }
+
+    .reveal>div {
+      padding: 15px 16px
+    }
+
+    .challenge {
+      padding: 22px;
+      margin: 24px 0;
+      color: #fff;
+      background: var(--ink);
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .challenge h3 {
+      margin-top: 0;
+      color: var(--yellow)
+    }
+
+    .challenge code {
+      color: #fff;
+      background: #303030;
+      border-color: #777
+    }
+
+    .demo {
+      padding: 20px;
+      margin: 20px 0
+    }
+
+    .demo-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-bottom: 16px
+    }
+
+    .demo-btn {
+      padding: 8px 12px;
+      background: #fff;
+      border: 2px solid var(--ink);
+      font-weight: 800
+    }
+
+    .demo-btn.active {
+      background: var(--yellow);
+      box-shadow: 3px 3px 0 var(--ink)
+    }
+
+    .constraint-stage {
+      height: 250px;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: repeating-linear-gradient(45deg, #eef2ff, #eef2ff 12px, #e1e8ff 12px, #e1e8ff 24px);
+      border: 2px solid var(--ink)
+    }
+
+    .constraint-parent {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 14px;
+      background: #fff;
+      border: 3px dashed var(--blue)
+    }
+
+    .constraint-child {
+      display: grid;
+      place-items: center;
+      width: 100px;
+      height: 70px;
+      padding: 8px;
+      background: var(--mint);
+      border: 3px solid var(--ink);
+      font-weight: 800;
+      text-align: center;
+      transition: all .2s ease
+    }
+
+    .constraint-child.tight {
+      width: 100%;
+      height: 100%
+    }
+
+    .constraint-child.maximum {
+      width: min(100%, 280px);
+      height: 130px
+    }
+
+    .demo-readout {
+      margin: 14px 0 0;
+      padding: 10px 12px;
+      background: #fff;
+      border: 2px solid var(--ink);
+      font-family: "DM Mono", monospace;
+      font-size: .82rem
+    }
+
+    .spacing-visual {
+      display: grid;
+      place-items: center;
+      min-height: 230px;
+      padding: 28px;
+      background: var(--pink);
+      border: 3px solid var(--ink)
+    }
+
+    .spacing-margin {
+      padding: 30px;
+      background: var(--yellow);
+      border: 3px dashed var(--ink)
+    }
+
+    .spacing-padding {
+      padding: 26px;
+      background: var(--blue-light);
+      border: 3px solid var(--ink)
+    }
+
+    .spacing-child {
+      padding: 13px;
+      color: #fff;
+      background: var(--blue);
+      border: 3px solid var(--ink);
+      font-weight: 800
+    }
+
+    .space-label {
+      display: block;
+      margin-bottom: 6px;
+      font-family: "DM Mono", monospace;
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase
+    }
+
+    .alignment-stage {
+      height: 260px;
+      display: grid;
+      padding: 18px;
+      background: #eaf0ff;
+      border: 3px solid var(--ink)
+    }
+
+    .alignment-box {
+      width: 88px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      justify-self: center;
+      align-self: center;
+      background: var(--orange);
+      border: 3px solid var(--ink);
+      box-shadow: 4px 4px 0 var(--ink);
+      font-weight: 900;
+      transition: all .2s ease
+    }
+
+    .fit-stage {
+      height: 260px;
+      display: grid;
+      place-items: center;
+      background: #151515;
+      border: 3px solid var(--ink)
+    }
+
+    .fit-frame {
+      width: 320px;
+      max-width: 90%;
+      height: 190px;
+      background: #fff;
+      border: 3px solid var(--yellow);
+      overflow: hidden
+    }
+
+    .fit-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block
+    }
+
+    .fit-note {
+      margin-top: 12px;
+      font-weight: 700
+    }
+
+    .tree {
+      margin: 20px 0;
+      padding: 16px;
+      background: #fff;
+      border: var(--border);
+      font-family: "DM Mono", monospace;
+      line-height: 1.8;
+      overflow: auto
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 30px
+    }
+
+    .checklist li::before {
+      content: "□";
+      position: absolute;
+      left: 0;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .references a {
+      color: var(--blue-dark);
+      font-weight: 700
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: var(--border)
+    }
+
+    .nav-btn {
+      min-width: 130px;
+      padding: 12px 18px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 900
+    }
+
+    .nav-btn.primary {
+      color: #fff;
+      background: var(--blue)
+    }
+
+    .nav-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed
+    }
+
+    .finish {
+      padding: 20px;
+      margin-top: 24px;
+      background: var(--mint);
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .footer-note {
+      margin-top: 30px;
+      color: #555;
+      font-size: .8rem
+    }
+
+    @media(max-width:850px) {
+      :root {
+        --sidebar: 270px;
+        --mobile-bar-height: 65px
+      }
+
+      .sidebar {
+        inset: var(--mobile-bar-height) auto 0 0;
+        transform: translateX(-100%);
+        transition: transform .2s ease
+      }
+
+      .sidebar.open {
+        transform: none
+      }
+
+      .mobile-bar {
+        display: flex;
+        height: var(--mobile-bar-height)
+      }
+
+      main {
+        margin-left: 0
+      }
+
+      .content {
+        width: min(940px, calc(100% - 28px));
+        padding-top: 24px
+      }
+    }
+
+    @media(max-width:680px) {
+
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr
+      }
+
+      .content {
+        width: calc(100% - 18px);
+        padding-top: 16px
+      }
+
+      .step-header {
+        padding: 20px 16px
+      }
+
+      .panel,
+      .concept,
+      .quiz,
+      .demo {
+        padding: 16px
+      }
+
+      .nav-row {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        padding: 12px 0;
+        background: var(--paper)
+      }
+
+      .nav-btn {
+        min-width: 0;
+        flex: 1;
+        padding: 11px 10px
+      }
+
+      pre {
+        padding: 16px 12px;
+        font-size: .76rem
+      }
+
+      .copy-btn {
+        position: static;
+        align-self: flex-end;
+        margin-bottom: 6px
+      }
+
+      .code-wrap {
+        display: flex;
+        flex-direction: column
+      }
+
+      .code-wrap pre {
+        order: 2
+      }
+
+      .code-wrap .copy-btn {
+        order: 1
+      }
+
+      .comparison {
+        display: block;
+        overflow-x: auto
+      }
+
+      .constraint-stage,
+      .alignment-stage {
+        height: 220px
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      * {
+        scroll-behavior: auto !important;
+        transition: none !important
+      }
+
+      .step-view.active {
+        animation: none
+      }
+    }
+
+    .context-tree {
+      margin: 20px 0;
+      padding: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", monospace;
+      line-height: 1.9;
+      overflow: auto
+    }
+
+    .mental-model {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 16px;
+      margin: 22px 0
+    }
+
+    .mental-card {
+      padding: 22px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      text-align: center
+    }
+
+    .mental-card strong {
+      display: block;
+      font-size: 1.45rem;
+      margin-bottom: 6px
+    }
+
+    .mental-arrow {
+      font-size: 2rem;
+      font-weight: 900
+    }
+
+    .identity-list {
+      display: grid;
+      gap: 10px;
+      margin: 18px 0
+    }
+
+    .identity-item {
+      padding: 14px;
+      background: #fff;
+      border: 3px solid var(--ink);
+      font-weight: 800
+    }
+
+    .identity-item span {
+      display: inline-block;
+      min-width: 90px;
+      padding: 3px 7px;
+      margin-right: 8px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      font-family: "DM Mono", monospace;
+      font-size: .75rem
+    }
+
+    @media(max-width:680px) {
+      .mental-model {
+        grid-template-columns: 1fr
+      }
+
+      .mental-arrow {
+        transform: rotate(90deg)
+      }
+    }
+
+    .form-flow {
+      margin: 20px 0;
+      padding: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", monospace;
+      line-height: 1.9;
+      overflow: auto
+    }
+
+    .validator-map {
+      display: grid;
+      gap: 12px;
+      margin: 20px 0
+    }
+
+    .validator-row {
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      background: #fff;
+      border: 3px solid var(--ink)
+    }
+
+    .validator-row strong {
+      font-family: "DM Mono", monospace
+    }
+
+    .mini-form {
+      max-width: 620px;
+      margin: 22px auto;
+      padding: 22px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .fake-field {
+      margin: 14px 0
+    }
+
+    .fake-field label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 800
+    }
+
+    .fake-input {
+      min-height: 48px;
+      padding: 12px 14px;
+      background: #fff;
+      border: 3px solid var(--ink);
+      font-family: "DM Mono", monospace
+    }
+
+    .fake-error {
+      margin-top: 5px;
+      color: #a60000;
+      font-size: .86rem;
+      font-weight: 800
+    }
+
+    @media(max-width:680px) {
+      .validator-row {
+        grid-template-columns: 1fr
+      }
+    }
+
+
+    .nav-flow {
+      margin: 20px 0;
+      padding: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", monospace;
+      line-height: 1.9;
+      overflow: auto
+    }
+
+    .screen-stack {
+      display: grid;
+      gap: 12px;
+      margin: 22px 0
+    }
+
+    .screen-card {
+      padding: 16px;
+      background: #fff;
+      border: 3px solid var(--ink);
+      box-shadow: var(--shadow-sm);
+      font-weight: 800
+    }
+
+    .screen-card.active {
+      background: var(--mint)
+    }
+
+    .route-chip {
+      display: inline-block;
+      padding: 4px 8px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      font-family: "DM Mono", monospace;
+      font-size: .76rem;
+      font-weight: 800
+    }
+
+    .direction-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: center;
+      margin: 20px 0
+    }
+
+    .direction-arrow {
+      font-size: 2rem;
+      font-weight: 900
+    }
+
+    @media(max-width:680px) {
+      .direction-grid {
+        grid-template-columns: 1fr
+      }
+
+      .direction-arrow {
+        transform: rotate(90deg);
+        text-align: center
+      }
+    }
+  </style>
+
+
+
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+      <div class="brand">
+        <div class="eyebrow">Flutter Navigation Codelab</div>
+        <h2>Navigating with Navigator</h2>
+        <p>Move between screens and exchange data.</p>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+        <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+          aria-valuenow="0">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+      <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+    </aside>
+
+    <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation"
+        aria-expanded="false">☰</button>
+      <div class="mobile-title" id="mobileTitle">Navigating with Navigator</div>
+    </div>
+
+    <main>
+      <div class="content" id="content">
+
+        <section class="step-view" data-title="Why navigation?">
+          <header class="step-header">
+            <span class="step-kicker">STEP 1 · START WITH THE PROBLEM</span>
+            <h1>One App, Multiple Screens</h1>
+            <p class="lede">Real apps rarely stay on one screen. Flutter's built-in <code>Navigator</code> manages
+              movement between screens while keeping track of where the user came from.</p>
+          </header>
+
+          <div class="objective"><strong>By the end:</strong> Understand the navigation stack, use
+            <code>Navigator.push()</code>, <code>Navigator.pop()</code>, <code>MaterialPageRoute</code>, pass
+            constructor data forward, and return results back.</div>
+          <div class="direction-grid">
+            <div class="screen-card active">Home Screen</div>
+            <div class="direction-arrow">→</div>
+            <div class="screen-card">Profile Screen</div>
+          </div>
+          <div class="panel yellow">
+            <h2>Core idea</h2>
+            <p>Opening a new screen usually should not destroy the old one. Flutter keeps routes in a stack so the user
+              can return.</p>
+          </div>
+          <div class="quiz" data-answer="1" data-correct="Correct. Navigator manages a stack of routes/screens.">
+            <h3>What is Navigator mainly responsible for?</h3>
+            <div class="quiz-options"><button class="quiz-option">Saving database records</button><button
+                class="quiz-option">Managing a stack of routes</button><button class="quiz-option">Validating
+                forms</button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Navigation stack">
+          <header class="step-header">
+            <span class="step-kicker">STEP 2 · THE MENTAL MODEL</span>
+            <h1>Think of Screens as a Stack</h1>
+            <p class="lede">The route on top of the stack is the route the user currently sees.</p>
+          </header>
+
+          <div class="screen-stack">
+            <div class="screen-card active">TOP → ProfilePage</div>
+            <div class="screen-card">HomePage</div>
+          </div>
+          <div class="nav-flow">Start<br>↓<br>HomePage<br>↓ push ProfilePage<br>ProfilePage becomes top<br>↓
+            pop<br>ProfilePage removed<br>↓<br>HomePage visible again</div>
+          <div class="grid-2">
+            <div class="concept"><strong>push</strong>
+              <p>Add a new route to the top.</p>
+            </div>
+            <div class="concept"><strong>pop</strong>
+              <p>Remove the top route.</p>
+            </div>
+          </div>
+          <div class="callout"><span class="label">INTERVIEW TERM</span>
+            <p>This is the <strong>navigation stack</strong> or <strong>route stack</strong>.</p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Create two screens">
+          <header class="step-header">
+            <span class="step-kicker">STEP 3 · BUILD THE DESTINATION</span>
+            <h1>Create Two Simple Screens</h1>
+            <p class="lede">A page in Flutter is still just a widget. Let's create a source page and a destination page.
+            </p>
+          </header>
+
+          <h2>HomePage</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+      ),
+      body: const Center(
+        child: Text('Home Screen'),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+          <h2>ProfilePage</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile'),
+      ),
+      body: const Center(
+        child: Text('Profile Screen'),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+          <div class="panel blue"><strong>Important:</strong>
+            <p>Flutter navigation works with widgets wrapped in Route objects. A “screen” does not need a special class
+              type.</p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="MaterialPageRoute">
+          <header class="step-header">
+            <span class="step-kicker">STEP 4 · WHAT IS A ROUTE?</span>
+            <h1>Wrap the Destination in MaterialPageRoute</h1>
+            <p class="lede"><code>MaterialPageRoute</code> is a Route that builds a destination widget and provides
+              Material-style transitions.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>MaterialPageRoute(
+  builder: (context) {
+    return const ProfilePage();
+  },
+)</code></pre>
+          </div>
+          <div class="nav-flow">ProfilePage<br>↓ wrapped by<br>MaterialPageRoute<br>↓ managed by<br>Navigator</div>
+          <table class="comparison">
+            <thead>
+              <tr>
+                <th>Part</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>ProfilePage</code></td>
+                <td>The destination widget.</td>
+              </tr>
+              <tr>
+                <td><code>MaterialPageRoute</code></td>
+                <td>Builds and represents the page as a route.</td>
+              </tr>
+              <tr>
+                <td><code>Navigator</code></td>
+                <td>Manages the route stack.</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </section>
+
+        <section class="step-view" data-title="Navigator.push">
+          <header class="step-header">
+            <span class="step-kicker">STEP 5 · GO FORWARD</span>
+            <h1>Open a Screen with Navigator.push()</h1>
+            <p class="lede">Push a new Route onto the Navigator stack.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) {
+      return const ProfilePage();
+    },
+  ),
+);</code></pre>
+          </div>
+          <h2>Use it from a button</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>ElevatedButton(
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return const ProfilePage();
+        },
+      ),
+    );
+  },
+  child: const Text('Open Profile'),
+)</code></pre>
+          </div>
+          <div class="screen-stack">
+            <div class="screen-card active">TOP → ProfilePage</div>
+            <div class="screen-card">HomePage</div>
+          </div>
+          <div class="quiz" data-answer="2" data-correct="Correct. push adds a new route to the top of the stack.">
+            <h3>What does push() do?</h3>
+            <div class="quiz-options"><button class="quiz-option">Removes every route</button><button
+                class="quiz-option">Rebuilds MaterialApp</button><button class="quiz-option">Adds a route to the
+                top</button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Navigator.pop">
+          <header class="step-header">
+            <span class="step-kicker">STEP 6 · COME BACK</span>
+            <h1>Close the Current Screen with Navigator.pop()</h1>
+            <p class="lede"><code>pop()</code> removes the route currently on top of the stack.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>Navigator.pop(context);</code></pre>
+          </div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>ElevatedButton(
+  onPressed: () {
+    Navigator.pop(context);
+  },
+  child: const Text('Go Back'),
+)</code></pre>
+          </div>
+          <div class="nav-flow">ProfilePage ← TOP<br>HomePage<br>↓ pop()<br>ProfilePage removed<br>↓<br>HomePage becomes
+            top</div>
+          <div class="callout"><span class="label">APPBAR NOTE</span>
+            <p>An AppBar on a pushed Material route can automatically show a back button when another route exists
+              underneath.</p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Basic navigation app">
+          <header class="step-header">
+            <span class="step-kicker">STEP 7 · FIRST RUNNABLE APP</span>
+            <h1>Complete Push/Pop Example</h1>
+            <p class="lede">This is the smallest complete Navigator example students should be able to write
+              confidently.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return const ProfilePage();
+                },
+              ),
+            );
+          },
+          child: const Text('Open Profile'),
+        ),
+      ),
+    );
+  }
+}
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile'),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Go Back'),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+          <div class="challenge">
+            <h3>Experiment</h3>
+            <ol>
+              <li>Open Profile.</li>
+              <li>Use the AppBar back arrow.</li>
+              <li>Open Profile again.</li>
+              <li>Use the custom Go Back button.</li>
+              <li>Explain the stack before and after pop().</li>
+            </ol>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="BuildContext connection">
+          <header class="step-header">
+            <span class="step-kicker">STEP 8 · CONNECT TO BUILDCONTEXT</span>
+            <h1>Why Does Navigator Need context?</h1>
+            <p class="lede">Navigator uses BuildContext to find the appropriate Navigator in the widget tree.</p>
+          </header>
+
+          <div class="nav-flow">Current widget's BuildContext<br>↓<br>Navigator looks upward<br>↓<br>Finds
+            Navigator<br>↓<br>Pushes or pops a route</div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>Navigator.of(context).push(
+  MaterialPageRoute(
+    builder: (context) {
+      return const ProfilePage();
+    },
+  ),
+);</code></pre>
+          </div>
+          <div class="grid-2">
+            <div class="concept"><strong>Navigator.push(context, route)</strong>
+              <p>Convenient static method.</p>
+            </div>
+            <div class="concept"><strong>Navigator.of(context).push(route)</strong>
+              <p>Find Navigator using context, then call push.</p>
+            </div>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Pass data forward">
+          <header class="step-header">
+            <span class="step-kicker">STEP 9 · SEND DATA FORWARD</span>
+            <h1>Pass Data Through Constructor Parameters</h1>
+            <p class="lede">A destination screen is still a widget, so constructor parameters are the simplest way to
+              send data to it.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class StudentDetailsPage
+    extends StatelessWidget {
+
+  final String studentName;
+  final int studentAge;
+
+  const StudentDetailsPage({
+    super.key,
+    required this.studentName,
+    required this.studentAge,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(studentName),
+      ),
+      body: Center(
+        child: Text(
+          '$studentName is $studentAge years old',
+        ),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) {
+      return const StudentDetailsPage(
+        studentName: 'Aman',
+        studentAge: 21,
+      );
+    },
+  ),
+);</code></pre>
+          </div>
+          <div class="direction-grid">
+            <div class="screen-card">HomePage<br><span class="route-chip">Aman, 21</span></div>
+            <div class="direction-arrow">→</div>
+            <div class="screen-card active">StudentDetailsPage</div>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Pass a model object">
+          <header class="step-header">
+            <span class="step-kicker">STEP 10 · REAL-WORLD DATA</span>
+            <h1>Pass a Student Object</h1>
+            <p class="lede">When several values describe one entity, pass the model object instead of many separate
+              parameters.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class Student {
+  final int id;
+  final String name;
+  final int age;
+
+  const Student({
+    required this.id,
+    required this.name,
+    required this.age,
+  });
+}</code></pre>
+          </div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class StudentDetailsPage
+    extends StatelessWidget {
+
+  final Student student;
+
+  const StudentDetailsPage({
+    super.key,
+    required this.student,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(student.name),
+      ),
+      body: Text(
+        'Age: ${student.age}',
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>final student = Student(
+  id: 101,
+  name: 'Aman',
+  age: 21,
+);
+
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) {
+      return StudentDetailsPage(
+        student: student,
+      );
+    },
+  ),
+);</code></pre>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Return data with pop">
+          <header class="step-header">
+            <span class="step-kicker">STEP 11 · SEND DATA BACK</span>
+            <h1>Navigator.pop() Can Return a Result</h1>
+            <p class="lede">A page can pop itself and send a value back to the page that opened it.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>Navigator.pop(
+  context,
+  'Blue',
+);</code></pre>
+          </div>
+          <div class="nav-flow">HomePage<br>push ColorSelectionPage<br>↓<br>User chooses Blue<br>↓<br>pop(context,
+            'Blue')<br>↓<br>HomePage receives Blue</div>
+          <div class="panel yellow"><strong>Important:</strong>
+            <p><code>Navigator.push()</code> returns a Future that completes when the pushed route is later popped.</p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Await returned result">
+          <header class="step-header">
+            <span class="step-kicker">STEP 12 · RECEIVE THE RESULT</span>
+            <h1>await Navigator.push()</h1>
+            <p class="lede">The source page can wait until the destination closes and then receive the returned result.
+            </p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>final result =
+    await Navigator.push&lt;String&gt;(
+  context,
+  MaterialPageRoute(
+    builder: (context) {
+      return const ColorSelectionPage();
+    },
+  ),
+);
+
+if (result != null) {
+  print('Selected: $result');
+}</code></pre>
+          </div>
+          <div class="quiz" data-answer="1"
+            data-correct="Correct. The Future completes when the pushed route is popped.">
+            <h3>When does the Future from push() complete?</h3>
+            <div class="quiz-options"><button class="quiz-option">Before the page opens</button><button
+                class="quiz-option">When the route is popped</button><button class="quiz-option">Only when the app
+                closes</button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Complete result example">
+          <header class="step-header">
+            <span class="step-kicker">STEP 13 · TWO-WAY NAVIGATION</span>
+            <h1>Select a Color and Return It</h1>
+            <p class="lede">This complete example demonstrates pushing a page and returning a selected value.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State&lt;HomePage&gt; createState() =&gt;
+      _HomePageState();
+}
+
+class _HomePageState
+    extends State&lt;HomePage&gt; {
+
+  String selectedColor = 'None';
+
+  Future&lt;void&gt; chooseColor() async {
+    final result =
+        await Navigator.push&lt;String&gt;(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return const ColorSelectionPage();
+        },
+      ),
+    );
+
+    if (result == null) return;
+
+    setState(() {
+      selectedColor = result;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Selected: $selectedColor',
+            ),
+            ElevatedButton(
+              onPressed: chooseColor,
+              child: const Text(
+                'Choose Color',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ColorSelectionPage
+    extends StatelessWidget {
+
+  const ColorSelectionPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Select Color'),
+      ),
+      body: Column(
+        children: [
+          ListTile(
+            title: const Text('Blue'),
+            onTap: () {
+              Navigator.pop(
+                context,
+                'Blue',
+              );
+            },
+          ),
+          ListTile(
+            title: const Text('Green'),
+            onTap: () {
+              Navigator.pop(
+                context,
+                'Green',
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+          <div class="challenge">
+            <h3>Experiment</h3>
+            <ol>
+              <li>Select Blue.</li>
+              <li>Confirm the Home page updates.</li>
+              <li>Open the selector again and press Back without choosing.</li>
+              <li>Explain why the result is null.</li>
+              <li>Add a third color.</li>
+            </ol>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="pushReplacement">
+          <header class="step-header">
+            <span class="step-kicker">STEP 14 · COMMON VARIANT</span>
+            <h1>Replace the Current Route</h1>
+            <p class="lede"><code>pushReplacement()</code> is useful when the current page should not stay directly
+              underneath the new one.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (context) {
+      return const HomePage();
+    },
+  ),
+);</code></pre>
+          </div>
+          <div class="grid-2">
+            <div class="concept"><strong>push()</strong>
+              <p>Keep the current route underneath.</p>
+            </div>
+            <div class="concept"><strong>pushReplacement()</strong>
+              <p>Replace the current route.</p>
+            </div>
+          </div>
+          <div class="nav-flow">push()<br>Home → Profile<br>Back can return Home<br><br>pushReplacement()<br>Login →
+            Home<br>Login is replaced</div>
+
+        </section>
+
+        <section class="step-view" data-title="Can pop?">
+          <header class="step-header">
+            <span class="step-kicker">STEP 15 · STACK SAFETY</span>
+            <h1>Check Whether You Can Pop</h1>
+            <p class="lede">Flutter can tell you whether a Navigator has a route underneath the current route.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>if (Navigator.canPop(context)) {
+  Navigator.pop(context);
+}</code></pre>
+          </div>
+          <div class="panel blue"><strong>Interview point:</strong>
+            <p><code>canPop()</code> checks whether popping can reveal another route underneath.</p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Common mistakes">
+          <header class="step-header">
+            <span class="step-kicker">STEP 16 · AVOID THESE</span>
+            <h1>Common Navigator Mistakes</h1>
+            <p class="lede">Most beginner mistakes come from confusing stack operations, context, or data direction.</p>
+          </header>
+
+          <div class="validator-map">
+            <div class="validator-row"><strong>Mistake 1</strong><span>Using global variables instead of constructor
+                parameters for simple forward data.</span></div>
+            <div class="validator-row"><strong>Mistake 2</strong><span>Calling <code>pop()</code> expecting it to open a
+                new screen.</span></div>
+            <div class="validator-row"><strong>Mistake 3</strong><span>Forgetting <code>await</code> when expecting a
+                returned result.</span></div>
+            <div class="validator-row"><strong>Mistake 4</strong><span>Assuming the returned result can never be
+                <code>null</code>.</span></div>
+            <div class="validator-row"><strong>Mistake 5</strong><span>Using <code>pushReplacement()</code> when Back
+                should return to the previous page.</span></div>
+          </div>
+          <div class="panel yellow"><strong>Simple rule:</strong>
+            <p><code>push</code> = add. <code>pop</code> = remove top. <code>pushReplacement</code> = replace current.
+            </p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Interview revision">
+          <header class="step-header">
+            <span class="step-kicker">STEP 17 · CHECK YOUR UNDERSTANDING</span>
+            <h1>Navigator Interview Revision</h1>
+            <p class="lede">Students should be able to explain the stack first and the API second.</p>
+          </header>
+
+          <div class="reveal">
+            <summary>1. What is Navigator?</summary>
+            <div>A widget that manages a stack of Route objects.</div>
+          </div>
+          <div class="reveal">
+            <summary>2. What is a Route?</summary>
+            <div>A navigable entry/page managed by Navigator. MaterialPageRoute is a common route implementation.</div>
+          </div>
+          <div class="reveal">
+            <summary>3. What does push() do?</summary>
+            <div>Adds a route to the top and returns a Future that completes when that route is popped.</div>
+          </div>
+          <div class="reveal">
+            <summary>4. What does pop() do?</summary>
+            <div>Removes the top route and can optionally return a result.</div>
+          </div>
+          <div class="reveal">
+            <summary>5. Why does Navigator need BuildContext?</summary>
+            <div>To find the appropriate Navigator relative to that widget's location.</div>
+          </div>
+          <div class="reveal">
+            <summary>6. How do you pass data forward?</summary>
+            <div>Constructor parameters are a simple and clean approach.</div>
+          </div>
+          <div class="reveal">
+            <summary>7. How do you return data?</summary>
+            <div>Call <code>Navigator.pop(context, result)</code> and await the original push.</div>
+          </div>
+          <div class="reveal">
+            <summary>8. Why can a returned result be null?</summary>
+            <div>The page may close without returning a value.</div>
+          </div>
+          <div class="reveal">
+            <summary>9. push vs pushReplacement?</summary>
+            <div>push keeps the current route underneath; pushReplacement replaces it.</div>
+          </div>
+          <div class="reveal">
+            <summary>10. What does canPop() check?</summary>
+            <div>Whether popping can reveal another route below.</div>
+          </div>
+          <div class="quiz" data-answer="1" data-correct="Correct. That is the two-way result flow.">
+            <h3>Which result flow is correct?</h3>
+            <div class="quiz-options"><button class="quiz-option">pop → push → constructor</button><button
+                class="quiz-option">await push → pop(result) → receive result</button><button
+                class="quiz-option">setState → GlobalKey → pop</button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Final practical">
+          <header class="step-header">
+            <span class="step-kicker">STEP 18 · PUT EVERYTHING TOGETHER</span>
+            <h1>Student List → Details → Result</h1>
+            <p class="lede">Open a details page, pass a Student object forward, then return a result back to the list
+              page.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: StudentListPage(),
+    );
+  }
+}
+
+class Student {
+  final int id;
+  final String name;
+  final int age;
+
+  const Student({
+    required this.id,
+    required this.name,
+    required this.age,
+  });
+}
+
+class StudentListPage
+    extends StatefulWidget {
+
+  const StudentListPage({super.key});
+
+  @override
+  State&lt;StudentListPage&gt; createState() =&gt;
+      _StudentListPageState();
+}
+
+class _StudentListPageState
+    extends State&lt;StudentListPage&gt; {
+
+  final students = const [
+    Student(id: 101, name: 'Aman', age: 21),
+    Student(id: 102, name: 'Riya', age: 20),
+    Student(id: 103, name: 'John', age: 22),
+  ];
+
+  String lastAction = 'No action yet';
+
+  Future&lt;void&gt; openStudent(
+    Student student,
+  ) async {
+
+    final result =
+        await Navigator.push&lt;String&gt;(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return StudentDetailsPage(
+            student: student,
+          );
+        },
+      ),
+    );
+
+    if (result == null) return;
+
+    setState(() {
+      lastAction = result;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Students'),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(lastAction),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: students.length,
+              itemBuilder: (context, index) {
+                final student = students[index];
+
+                return ListTile(
+                  title: Text(student.name),
+                  subtitle: Text(
+                    'Age: ${student.age}',
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                  ),
+                  onTap: () {
+                    openStudent(student);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class StudentDetailsPage
+    extends StatelessWidget {
+
+  final Student student;
+
+  const StudentDetailsPage({
+    super.key,
+    required this.student,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(student.name),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Student ID: ${student.id}',
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Age: ${student.age}',
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(
+                  context,
+                  'Viewed ${student.name}',
+                );
+              },
+              child: const Text(
+                'Mark as Viewed & Go Back',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+
+          <div class="nav-flow">StudentListPage<br>tap Aman<br>↓<br>push StudentDetailsPage(student:
+            Aman)<br>↓<br>details page shows Aman<br>↓<br>pop(context, 'Viewed Aman')<br>↓<br>await push receives
+            result<br>↓<br>StudentListPage updates UI</div>
+
+          <h2>Completion checklist</h2>
+          <ul class="checklist">
+            <li>I can explain the route stack.</li>
+            <li>I know what a Route is.</li>
+            <li>I can use MaterialPageRoute.</li>
+            <li>I can push and pop screens.</li>
+            <li>I understand why Navigator uses BuildContext.</li>
+            <li>I can pass primitive values and model objects forward.</li>
+            <li>I can return a result with pop(context, result).</li>
+            <li>I can await push() to receive a result.</li>
+            <li>I understand push vs pushReplacement.</li>
+            <li>I know what canPop() checks.</li>
+          </ul>
+          <div class="panel references">
+            <h3>Official references</h3>
+            <p><a href="https://api.flutter.dev/flutter/widgets/Navigator-class.html">Navigator</a>, <a
+                href="https://api.flutter.dev/flutter/widgets/Navigator/push.html">Navigator.push</a>, <a
+                href="https://api.flutter.dev/flutter/widgets/Navigator/pop.html">Navigator.pop</a>, and <a
+                href="https://api.flutter.dev/flutter/material/MaterialPageRoute-class.html">MaterialPageRoute</a>.</p>
+          </div>
+          <div class="finish" id="finishBox">
+            <h2>Codelab complete! 🎉</h2>
+            <p>You can now navigate between Flutter screens, understand the stack, pass data forward, and return results
+              back.</p>
+          </div>
+
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const steps = [...document.querySelectorAll('.step-view')];
+      const titles = steps.map(step => step.dataset.title);
+      const nav = document.getElementById('stepNav');
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.getElementById('menuBtn');
+      const content = document.getElementById('content');
+      const completed = new Set();
+      let current = 0;
+
+      nav.innerHTML = titles.map((title, index) => `<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+
+      const getHashStep = () => {
+        const match = location.hash.match(/^#step-(\d+)$/);
+        const value = match ? Number(match[1]) - 1 : 0;
+        return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0
+      };
+
+      function render(updateHash = true) {
+        current = Math.max(0, Math.min(current, steps.length - 1));
+        steps.forEach((step, index) => {
+          const active = index === current;
+          step.classList.toggle('active', active);
+          step.setAttribute('aria-hidden', String(!active))
+        });
+
+        document.querySelectorAll('.step-link').forEach((button, index) => {
+          button.classList.toggle('active', index === current);
+          button.setAttribute('aria-current', index === current ? 'step' : 'false');
+          button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : ''
+        });
+
+        const percent = Math.round(((current + 1) / steps.length) * 100);
+        document.getElementById('progressBar').style.width = `${percent}%`;
+        document.getElementById('progressText').textContent = `${percent}%`;
+        document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+        document.getElementById('mobileTitle').textContent = titles[current];
+        document.getElementById('prevBtn').disabled = current === 0;
+        document.getElementById('nextBtn').disabled = current === steps.length - 1;
+        document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+
+        if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        sidebar.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+      }
+
+      function goTo(index) {
+        if (index < 0 || index >= steps.length) return;
+        completed.add(current);
+        current = index;
+        render();
+      }
+
+      const navRow = document.createElement('div');
+      navRow.className = 'nav-row';
+      navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';
+      content.appendChild(navRow);
+
+      document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+      document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+      nav.addEventListener('click', event => {
+        const button = event.target.closest('.step-link');
+        if (button) goTo(Number(button.dataset.step))
+      });
+
+      menuBtn.addEventListener('click', () => {
+        const open = sidebar.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', String(open))
+      });
+
+      document.addEventListener('click', async event => {
+        const copy = event.target.closest('.copy-btn');
+        if (copy) {
+          const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+          try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!' }
+          catch { copy.textContent = 'Select & copy' }
+          setTimeout(() => copy.textContent = 'Copy', 1200);
+          return;
+        }
+
+        const option = event.target.closest('.quiz-option');
+        if (option) {
+          const quiz = option.closest('.quiz');
+          if (quiz.dataset.answered) return;
+          const options = [...quiz.querySelectorAll('.quiz-option')];
+          const choice = options.indexOf(option);
+          const answer = Number(quiz.dataset.answer);
+          quiz.dataset.answered = 'true';
+          options.forEach(button => button.disabled = true);
+          option.classList.add(choice === answer ? 'correct' : 'wrong');
+          if (choice !== answer) options[answer].classList.add('correct');
+          const feedback = quiz.querySelector('.quiz-feedback');
+          feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
+          feedback.classList.add('show');
+        }
+      });
+
+      window.addEventListener('popstate', () => { current = getHashStep(); render(false) });
+      window.addEventListener('hashchange', () => { current = getHashStep(); render(false) });
+
+      document.addEventListener('keydown', event => {
+        if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+        if (event.key === 'ArrowRight') goTo(current + 1);
+        if (event.key === 'ArrowLeft') goTo(current - 1);
+      });
+
+      current = getHashStep();
+      render(false);
+    })();
+  </script>
+</body>
+
+</html>
