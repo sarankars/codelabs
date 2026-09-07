@@ -1,134 +1,522 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Interactive codelab for shot-boundary detection and background subtraction with OpenCV.">
-  <meta name="theme-color" content="#122238">
-  <title>Video Segmentation Applications · Computer Vision Codelab</title>
-  <link rel="stylesheet" href="../module3.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Segmentation Applications — Computer Vision Codelab</title>
+  <meta name="description" content="Learn two simple video segmentation applications: hard shot boundary detection using HSV histogram comparison and moving foreground extraction using MOG2 background subtraction.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.syntax{padding:14px;overflow:auto;background:#edf2ff;border:var(--border);font-family:"DM Mono",monospace}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}.challenge code{color:#fff;background:#303030;border-color:#777}
+    .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}
+    .checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.footer-note{margin-top:30px;color:#555;font-size:.8rem}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}}
+  </style>
 </head>
-<body data-steps='["Start here","Shot boundaries","Try a cut detector","Background subtraction","Failure modes","Check & review"]'>
-  <aside class="sidebar" id="sidebar">
-    <div class="brand"><small>Module 3 · Codelab</small><h2>Video Segmentation Applications</h2><p>Find scene changes and moving foreground regions.</p></div>
-    <div class="progress-meta"><span>PROGRESS</span><span id="progressText">0%</span></div>
-    <div class="track"><div class="bar" id="progressBar"></div></div>
-    <nav class="steps" id="stepNav" aria-label="Codelab steps"></nav>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand">
+      <div class="eyebrow">Computer Vision Codelab</div>
+      <h2>Video Segmentation Applications</h2>
+      <p>Shot boundaries + moving foreground.</p>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+      <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
   </aside>
-  <div class="mobile-bar"><button id="menuButton" aria-label="Open lesson steps" aria-expanded="false">☰</button><strong id="mobileTitle">Start here</strong></div>
-  <main class="main"><div class="content">
-    <section class="view" data-step="0">
-      <header class="hero"><span class="eyebrow">Step 1 · Two video questions</span><h1>Where did the scene change—and what is moving?</h1><p>Video is a sequence of images. Comparing those images over time lets us divide a movie into shots or separate foreground motion from a learned background.</p></header>
-      <div class="grid">
-        <article class="card"><span class="badge">Application A</span><h3>Shot-boundary detection</h3><p>Find the frame where one camera shot ends and another begins. Editors, search systems, and video summarizers use these boundaries.</p></article>
-        <article class="card"><span class="badge">Application B</span><h3>Background subtraction</h3><p>Model the stable scene and label pixels that no longer fit it. Traffic monitoring and fixed security cameras use foreground masks.</p></article>
-      </div>
-      <h2>Learning outcomes</h2>
-      <ul><li>Compare neighboring frames using color histograms.</li><li>Turn a distance score into a hard-cut decision.</li><li>Explain how MOG2 learns a changing background.</li><li>Diagnose camera motion, shadows, and gradual transitions.</li></ul>
-      <div class="callout blue"><strong>Prerequisite:</strong> Complete Segmentation Fundamentals first. Here, the extra feature is <em>time</em>: the previous frames help interpret the current one.</div>
-    </section>
 
-    <section class="view" data-step="1">
-      <header class="hero"><span class="eyebrow">Step 2 · Divide a video</span><h1>A shot boundary is a large visual change</h1><p>A hard cut replaces one shot with another between two consecutive frames. We can compare compact color summaries instead of every pixel position.</p></header>
-      <div class="pipeline">
-        <div class="stage"><h3>Read frames</h3><p>Take frames <em>t−1</em> and <em>t</em>.</p></div>
-        <div class="stage"><h3>Make histograms</h3><p>Count HSV colors and normalize the counts.</p></div>
-        <div class="stage"><h3>Compare</h3><p>Use Bhattacharyya distance: 0 is similar, 1 is different.</p></div>
-        <div class="stage"><h3>Threshold</h3><p>Mark a cut when distance is above the chosen limit.</p></div>
-      </div>
-      <h2>Why HSV histograms?</h2>
-      <p>Hue and saturation summarize the color distribution while ignoring exact object positions. A beach and a dark indoor room usually have very different distributions even if objects move inside each shot.</p>
-      <div class="callout warn"><strong>Important:</strong> a score is evidence, not meaning. A camera flash can create a large score without a new shot; a dissolve may spread a smaller change over many frames.</div>
-      <div class="code-card"><div class="code-head"><strong>Core OpenCV operation</strong><button class="copy-btn" data-copy="#shotCode">Copy</button></div><pre id="shotCode"><code>hist = cv2.calcHist([hsv], [0, 1], None, [30, 32], [0, 180, 0, 256])
-cv2.normalize(hist, hist)
-distance = cv2.compareHist(previous_hist, hist, cv2.HISTCMP_BHATTACHARYYA)
-is_cut = distance &gt; threshold</code></pre></div>
-    </section>
+  <div class="mobile-bar">
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button>
+    <div class="mobile-title" id="mobileTitle">Video Segmentation Applications</div>
+  </div>
 
-    <section class="view" data-step="2">
-      <header class="hero"><span class="eyebrow">Step 3 · Interactive timeline</span><h1>Choose a decision threshold</h1><p>Each bar is the distance between a frame and its predecessor. The known hard cut is at frame 7.</p></header>
-      <div class="lab"><div class="lab-head"><strong>Explore · Hard-cut scores</strong><span class="mono">drag the threshold</span></div><div class="lab-body">
-        <div class="control-row"><label for="cutThreshold">Cut threshold</label><input id="cutThreshold" type="range" min="20" max="90" value="58" aria-describedby="cutResult"><span class="readout" id="cutReadout">0.58</span></div>
-        <div class="timeline" id="timeline" aria-label="Histogram distance by frame"></div>
-        <p id="cutResult" class="graph-caption" aria-live="polite"></p>
-      </div></div>
-      <div class="grid three">
-        <article class="card"><h3>Too low</h3><p>Motion and lighting changes become false boundaries.</p></article>
-        <article class="card"><h3>Balanced</h3><p>The large spike becomes the only detected boundary.</p></article>
-        <article class="card"><h3>Too high</h3><p>Even the real cut can be missed.</p></article>
-      </div>
-    </section>
+  <main><div class="content" id="content">
 
-    <section class="view" data-step="3">
-      <header class="hero"><span class="eyebrow">Step 4 · Learn the scene</span><h1>Background subtraction creates a foreground mask</h1><p>MOG2 keeps a statistical model for each pixel. A new value that does not fit the learned history is marked as foreground.</p></header>
-      <div class="grid">
-        <article class="card"><h3>Background model</h3><p>Several Gaussian distributions represent common values such as waving leaves, shadows, or an empty road.</p></article>
-        <article class="card"><h3>Foreground mask</h3><p>Pixels unlike the model become white. Morphological opening can remove isolated noise after subtraction.</p></article>
-      </div>
-      <div class="lab"><div class="lab-head"><strong>Explore · View the processing stage</strong><span class="mono">select a stage</span></div><div class="lab-body">
-        <div class="toggle-row" role="group" aria-label="Background subtraction stage"><button class="toggle active" data-mask="scene">Camera frame</button><button class="toggle" data-mask="noisy">Raw mask</button><button class="toggle" data-mask="clean">Clean mask</button></div>
-        <div class="mask-demo" id="maskDemo" role="img" aria-label="A pedestrian in a fixed-camera scene"></div>
-        <p class="graph-caption" id="maskCaption">The camera frame contains a stable scene and one moving person.</p>
-      </div></div>
-      <div class="code-card"><div class="code-head"><strong>MOG2 loop</strong><button class="copy-btn" data-copy="#mogCode">Copy</button></div><pre id="mogCode"><code>subtractor = cv2.createBackgroundSubtractorMOG2(
-    history=300, varThreshold=24, detectShadows=True)
+<section class="step-view" data-title="What is video segmentation?">
+  <header class="step-header">
+    <span class="step-kicker">STEP 1 · BASIC IDEA</span>
+    <h1>Segmentation Across Time</h1>
+    <p class="lede">In an image, segmentation separates useful regions. In a video, we do the same thing across many frames.</p>
+  </header>
+
+  <div class="objective"><strong>For exams:</strong> Remember two simple applications: <strong>shot boundary detection</strong> and <strong>background subtraction</strong>.</div>
+
+  <div class="grid-2">
+    <div class="concept"><strong>Shot Boundary Detection</strong><p>Find where one scene suddenly changes to another scene.</p></div>
+    <div class="concept"><strong>Background Subtraction</strong><p>Separate moving foreground objects from the background.</p></div>
+  </div>
+
+  <div class="flow">Video<br>↓<br>Frame 1 → Frame 2 → Frame 3 → Frame 4<br>↓<br>Compare frames over time</div>
+
+  <div class="quiz" data-answer="1" data-correct="Correct. Video segmentation studies useful regions or changes across frames.">
+    <h3>What extra thing does video give us compared with one image?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">Only more pixels</button>
+      <button class="quiz-option">Changes across time</button>
+      <button class="quiz-option">Only audio</button>
+    </div>
+    <div class="quiz-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="Setup">
+  <header class="step-header">
+    <span class="step-kicker">STEP 2 · GET READY</span>
+    <h1>Install OpenCV</h1>
+    <p class="lede">We only need Python and OpenCV for this codelab.</p>
+  </header>
+
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>pip install opencv-python</code></pre></div>
+
+  <div class="panel yellow">
+    <strong>Video file:</strong>
+    <p>Keep a small video in the same folder and name it <code>video.mp4</code>.</p>
+  </div>
+
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import cv2
+
+video = cv2.VideoCapture("video.mp4")
 
 while True:
-    ok, frame = video.read()
-    if not ok:
+    success, frame = video.read()
+
+    if not success:
         break
-    foreground = subtractor.apply(frame)
-    clean = cv2.morphologyEx(foreground, cv2.MORPH_OPEN, kernel)</code></pre></div>
-    </section>
 
-    <section class="view" data-step="4">
-      <header class="hero"><span class="eyebrow">Step 5 · Know the assumptions</span><h1>Both methods can fail for understandable reasons</h1><p>Diagnose the input and score before changing parameters.</p></header>
-      <div class="grid">
-        <article class="card"><span class="badge">Shot detection</span><h3>Gradual transition</h3><p>A fade or dissolve distributes change across several frames. Add a sliding-window accumulated score.</p></article>
-        <article class="card"><span class="badge">Shot detection</span><h3>Flash or fast motion</h3><p>A flash produces a temporary spike. Check whether the following frame returns to the earlier distribution.</p></article>
-        <article class="card"><span class="badge">Background</span><h3>Moving camera</h3><p>Nearly every pixel changes. Stabilize the video or use motion compensation before subtraction.</p></article>
-        <article class="card"><span class="badge">Background</span><h3>Shadows and stopped objects</h3><p>Shadows may enter the mask; an object that remains still long enough may be absorbed into the model.</p></article>
-      </div>
-      <h2>Safe media handling</h2>
-      <ul><li>Check that <code>VideoCapture</code> opened successfully.</li><li>Stop cleanly when a frame cannot be read.</li><li>Log the frame number, timestamp, score, and threshold for every boundary.</li><li>Test on a short annotated sequence before processing a long video.</li></ul>
-    </section>
+    cv2.imshow("Video", frame)
 
-    <section class="view" data-step="5">
-      <header class="hero"><span class="eyebrow">Step 6 · Check & review</span><h1>Choose the right temporal comparison</h1><p>Complete the questions, then explain each pipeline without looking back.</p></header>
-      <div class="quiz" data-answer="1"><h3>Which event should create the largest neighboring-frame histogram distance?</h3><div class="options"><button class="option">A pedestrian takes one step</button><button class="option">A hard cut from a beach to a dark room</button><button class="option">A stationary camera records an empty road</button></div><p class="feedback">A hard cut replaces the complete visual distribution in a single step.</p></div>
-      <div class="quiz" data-answer="2"><h3>Why does camera motion damage background subtraction?</h3><div class="options"><button class="option">It reduces the video frame rate</button><button class="option">It removes all shadows</button><button class="option">The background shifts, so many stable pixels appear to change</button></div><p class="feedback">Background subtraction assumes a fixed or stabilized viewpoint.</p></div>
-      <div class="callout good"><strong>Module mapping complete:</strong> this codelab covers the syllabus applications “Shot Boundary Detection” and “Background Subtraction.”</div>
-      <p class="footer-note">Next topic: graph-theoretic segmentation models an image as connected regions rather than a time sequence.</p>
-    </section>
+    if cv2.waitKey(30) == ord("q"):
+        break
+
+video.release()
+cv2.destroyAllWindows()</code></pre></div>
+
+  <div class="callout"><span class="label">REMEMBER</span><p>A video is processed <strong>frame by frame</strong>.</p></div>
+</section>
+
+<section class="step-view" data-title="Shot boundaries">
+  <header class="step-header">
+    <span class="step-kicker">STEP 3 · APPLICATION 1</span>
+    <h1>What Is a Shot Boundary?</h1>
+    <p class="lede">A shot boundary is the point where one camera shot ends and another shot begins.</p>
+  </header>
+
+  <div class="flow">Shot A<br>Frame 1 → Frame 2 → Frame 3<br><strong>HARD CUT</strong><br>Frame 4 → Frame 5 → Frame 6<br>Shot B</div>
+
+  <div class="panel mint">
+    <strong>Hard shot boundary:</strong>
+    <p>The change happens suddenly in one frame. This is the easiest type to detect.</p>
+  </div>
+
+  <div class="panel blue">
+    <strong>Main idea:</strong>
+    <p>If two consecutive frames look very different, a new shot may have started.</p>
+  </div>
+
+  <div class="quiz" data-answer="0" data-correct="Correct. A hard cut is a sudden change from one shot to another.">
+    <h3>What is a hard cut?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">A sudden scene change</button>
+      <button class="quiz-option">A slowly moving object</button>
+      <button class="quiz-option">A dark shadow</button>
+    </div>
+    <div class="quiz-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="HSV histograms">
+  <header class="step-header">
+    <span class="step-kicker">STEP 4 · COMPARE COLOUR</span>
+    <h1>Use an HSV Histogram</h1>
+    <p class="lede">Instead of comparing every pixel directly, we can compare the colour distribution of two frames.</p>
+  </header>
+
+  <div class="grid-2">
+    <div class="concept"><strong>HSV</strong><p>A colour format. H is hue, S is saturation, V is brightness.</p></div>
+    <div class="concept"><strong>Histogram</strong><p>A count of how much of each colour appears in the frame.</p></div>
+  </div>
+
+  <div class="panel yellow">
+    <strong>Why normalize?</strong>
+    <p>Normalization puts histogram values on a common scale, so two frames can be compared more fairly.</p>
+  </div>
+
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+hist = cv2.calcHist(
+    [hsv],
+    [0, 1],
+    None,
+    [50, 60],
+    [0, 180, 0, 256]
+)
+
+cv2.normalize(hist, hist)</code></pre></div>
+
+  <div class="callout"><span class="label">EXAM LINE</span><p>An HSV histogram represents the colour distribution of a video frame.</p></div>
+</section>
+
+<section class="step-view" data-title="Detect hard cuts">
+  <header class="step-header">
+    <span class="step-kicker">STEP 5 · SIMPLE PROGRAM</span>
+    <h1>Detect Hard Shot Boundaries</h1>
+    <p class="lede">We compare the current frame histogram with the previous frame histogram.</p>
+  </header>
+
+  <div class="flow">Previous frame histogram<br>↓ compare<br>Current frame histogram<br>↓<br>Very different? → Possible hard cut</div>
+
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import cv2
+
+video = cv2.VideoCapture("video.mp4")
+
+previous_hist = None
+frame_number = 0
+
+while True:
+    success, frame = video.read()
+
+    if not success:
+        break
+
+    frame_number += 1
+
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    hist = cv2.calcHist(
+        [hsv],
+        [0, 1],
+        None,
+        [50, 60],
+        [0, 180, 0, 256]
+    )
+
+    cv2.normalize(hist, hist)
+
+    if previous_hist is not None:
+
+        score = cv2.compareHist(
+            previous_hist,
+            hist,
+            cv2.HISTCMP_CORREL
+        )
+
+        if score < 0.5:
+            print("Possible shot boundary at frame:",
+                  frame_number)
+
+    previous_hist = hist
+
+video.release()</code></pre></div>
+
+  <div class="panel yellow">
+    <strong>Very simple meaning of the score:</strong>
+    <p>A score close to <code>1</code> means the histograms are similar. A much smaller score means the frames are different.</p>
+  </div>
+
+  <div class="panel orange">
+    <strong>Threshold:</strong>
+    <p>Here we used <code>0.5</code> only as an example. The best threshold depends on the video.</p>
+  </div>
+
+  <div class="quiz" data-answer="2" data-correct="Correct. A low correlation score means the two colour histograms are less similar.">
+    <h3>With histogram correlation, what may indicate a shot change?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">A score exactly 1</button>
+      <button class="quiz-option">The same frame number</button>
+      <button class="quiz-option">A low similarity score</button>
+    </div>
+    <div class="quiz-feedback" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="Background subtraction">
+  <header class="step-header">
+    <span class="step-kicker">STEP 6 · APPLICATION 2</span>
+    <h1>What Is Background Subtraction?</h1>
+    <p class="lede">Background subtraction tries to separate moving objects from the mostly stable background.</p>
+  </header>
+
+  <div class="flow">Video frame<br>↓<br>Learn background<br>↓<br>Compare current frame with background<br>↓<br>Moving parts become foreground mask</div>
+
+  <div class="grid-2">
+    <div class="concept"><strong>Background</strong><p>Usually the part that stays mostly unchanged.</p></div>
+    <div class="concept"><strong>Foreground</strong><p>The moving object, such as a person or vehicle.</p></div>
+  </div>
+
+  <div class="panel mint">
+    <strong>Example:</strong>
+    <p>A fixed CCTV camera watches a road. The road is background. Moving cars are foreground.</p>
+  </div>
+</section>
+
+<section class="step-view" data-title="MOG2">
+  <header class="step-header">
+    <span class="step-kicker">STEP 7 · USE MOG2</span>
+    <h1>MOG2 Background Subtraction</h1>
+    <p class="lede">OpenCV already provides a background subtractor called MOG2.</p>
+  </header>
+
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>background_subtractor =
+    cv2.createBackgroundSubtractorMOG2()</code></pre></div>
+
+  <div class="panel blue">
+    <strong>Simple idea:</strong>
+    <p>MOG2 watches many frames, learns what the background usually looks like, and marks changing regions as foreground.</p>
+  </div>
+
+  <div class="callout"><span class="label">EXAM LINE</span><p>MOG2 is a background-subtraction method used to detect moving foreground regions in video.</p></div>
+</section>
+
+<section class="step-view" data-title="Extract moving objects">
+  <header class="step-header">
+    <span class="step-kicker">STEP 8 · SIMPLE PROGRAM</span>
+    <h1>Extract the Moving Foreground</h1>
+    <p class="lede">Apply MOG2 to every frame. The result is a foreground mask.</p>
+  </header>
+
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import cv2
+
+video = cv2.VideoCapture("video.mp4")
+
+background_subtractor =
+    cv2.createBackgroundSubtractorMOG2()
+
+while True:
+    success, frame = video.read()
+
+    if not success:
+        break
+
+    mask = background_subtractor.apply(frame)
+
+    cv2.imshow("Original Video", frame)
+    cv2.imshow("Foreground Mask", mask)
+
+    if cv2.waitKey(30) == ord("q"):
+        break
+
+video.release()
+cv2.destroyAllWindows()</code></pre></div>
+
+  <div class="panel yellow">
+    <strong>What will you see?</strong>
+    <p>The mask is mostly black for background. Moving foreground regions appear brighter.</p>
+  </div>
+
+  <h2>Optional: reduce shadow pixels</h2>
+
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>_, clean_mask = cv2.threshold(
+    mask,
+    200,
+    255,
+    cv2.THRESH_BINARY
+)
+
+cv2.imshow("Clean Mask", clean_mask)</code></pre></div>
+
+  <div class="panel blue">
+    <strong>Why?</strong>
+    <p>MOG2 may mark shadows as gray. A simple threshold can remove many gray shadow pixels.</p>
+  </div>
+</section>
+
+<section class="step-view" data-title="What can go wrong?">
+  <header class="step-header">
+    <span class="step-kicker">STEP 9 · IMPORTANT LIMITATIONS</span>
+    <h1>Things That Affect the Result</h1>
+    <p class="lede">For college exams, you mainly need to remember why these methods may fail or give extra detections.</p>
+  </header>
+
+  <table class="comparison">
+    <thead><tr><th>Problem</th><th>What happens?</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Threshold too strict</strong></td><td>Shot detector may report too many boundaries.</td></tr>
+      <tr><td><strong>Threshold too loose</strong></td><td>Real shot changes may be missed.</td></tr>
+      <tr><td><strong>Camera motion</strong></td><td>Much of the frame moves, so MOG2 may think the whole scene is foreground.</td></tr>
+      <tr><td><strong>Lighting change</strong></td><td>A sudden brightness change may look like motion or a shot change.</td></tr>
+      <tr><td><strong>Shadows</strong></td><td>MOG2 may detect shadows along with the moving object.</td></tr>
+      <tr><td><strong>Gradual transition</strong></td><td>A fade or dissolve changes slowly, so a hard-cut detector may miss it.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="panel pink">
+    <strong>Very important:</strong>
+    <p>These simple programs are good for understanding the concept. Real video systems usually need better tuning and extra processing.</p>
+  </div>
+</section>
+
+<section class="step-view" data-title="Exam revision">
+  <header class="step-header">
+    <span class="step-kicker">STEP 10 · EXAM REVISION</span>
+    <h1>What You Need to Remember</h1>
+    <p class="lede">These short answers are enough for a basic college exam or viva.</p>
+  </header>
+
+  <div class="reveal"><summary>1. What is shot boundary detection?</summary><div>It finds the point where one video shot ends and another shot begins.</div></div>
+
+  <div class="reveal"><summary>2. What is a hard shot boundary?</summary><div>A sudden change from one shot to another in consecutive frames.</div></div>
+
+  <div class="reveal"><summary>3. Why use HSV histograms?</summary><div>They give a simple representation of the colour distribution of each frame.</div></div>
+
+  <div class="reveal"><summary>4. Why normalize histograms?</summary><div>Normalization puts histogram values on a common scale before comparison.</div></div>
+
+  <div class="reveal"><summary>5. How do we detect a hard cut?</summary><div>Compare histograms of consecutive frames. A large difference or low similarity can indicate a shot boundary.</div></div>
+
+  <div class="reveal"><summary>6. What is background subtraction?</summary><div>It separates moving foreground objects from a mostly stable background.</div></div>
+
+  <div class="reveal"><summary>7. What is MOG2?</summary><div>An OpenCV background-subtraction method that learns the background and detects moving foreground regions.</div></div>
+
+  <div class="reveal"><summary>8. What is a foreground mask?</summary><div>A binary-like image where moving regions are highlighted and background regions are dark.</div></div>
+
+  <div class="reveal"><summary>9. Why can camera movement cause problems?</summary><div>Because many pixels change at once, so the algorithm may think most of the frame is foreground.</div></div>
+
+  <div class="reveal"><summary>10. Why are gradual transitions harder?</summary><div>Because fades and dissolves change slowly instead of producing one sudden hard cut.</div></div>
+
+  <h2>Completion checklist</h2>
+  <ul class="checklist">
+    <li>I know what video segmentation means.</li>
+    <li>I can explain a hard shot boundary.</li>
+    <li>I know why HSV histograms are compared.</li>
+    <li>I understand that a threshold decides when a change is large enough.</li>
+    <li>I can explain background subtraction.</li>
+    <li>I know what MOG2 does.</li>
+    <li>I can explain foreground masks.</li>
+    <li>I know the effects of camera motion, lighting, shadows, and gradual transitions.</li>
+  </ul>
+
+  <div class="finish">
+    <h2>Codelab complete! 🎉</h2>
+    <p>You now know the two basic video segmentation applications needed for this topic: hard shot boundary detection and moving foreground extraction.</p>
+  </div>
+</section>
+
   </div></main>
-  <div class="bottom-nav"><button id="previous">← Previous</button><button class="next" id="next">Next →</button></div>
-  <script src="../module3.js"></script>
-  <script>
-    (() => {
-      const scores = [.08,.12,.16,.22,.31,.18,.84,.14,.27,.19,.11,.17];
-      const timeline = document.querySelector('#timeline');
-      timeline.innerHTML = scores.map((score, index) => `<span class="frame-score" data-score="${score}" data-label="F${index + 1}" style="height:${Math.max(8, score * 120)}px" title="Frame ${index + 1}: ${score.toFixed(2)}"></span>`).join('');
-      const slider = document.querySelector('#cutThreshold');
-      function updateCuts() {
-        const threshold = Number(slider.value) / 100;
-        document.querySelector('#cutReadout').textContent = threshold.toFixed(2);
-        const cuts = [];
-        document.querySelectorAll('.frame-score').forEach((bar, index) => {
-          const isCut = Number(bar.dataset.score) > threshold;
-          bar.classList.toggle('cut', isCut);
-          if (isCut) cuts.push(index + 1);
-        });
-        document.querySelector('#cutResult').textContent = cuts.length ? `Detected boundaries: frame ${cuts.join(', frame ')}` : 'No boundaries detected.';
-      }
-      slider.addEventListener('input', updateCuts); updateCuts();
-      const demo = document.querySelector('#maskDemo');
-      const captions = { scene:'The camera frame contains a stable scene and one moving person.', noisy:'The raw mask contains the person plus isolated foreground noise.', clean:'Opening removes small dots while preserving the main foreground region.' };
-      document.querySelectorAll('[data-mask]').forEach(button => button.addEventListener('click', () => {
-        document.querySelectorAll('[data-mask]').forEach(item => item.classList.toggle('active', item === button));
-        demo.className = `mask-demo ${button.dataset.mask === 'scene' ? '' : 'masked'} ${button.dataset.mask === 'noisy' ? 'noisy' : ''}`;
-        document.querySelector('#maskCaption').textContent = captions[button.dataset.mask];
-      }));
-    })();
-  </script>
+</div>
+
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+
+  const getHashStep=()=>{
+    const match=location.hash.match(/^#step-(\d+)$/);
+    const value=match?Number(match[1])-1:0;
+    return Number.isInteger(value)&&value>=0&&value<steps.length?value:0
+  };
+
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{
+      const active=index===current;
+      step.classList.toggle('active',active);
+      step.setAttribute('aria-hidden',String(!active))
+    });
+
+    document.querySelectorAll('.step-link').forEach((button,index)=>{
+      button.classList.toggle('active',index===current);
+      button.setAttribute('aria-current',index===current?'step':'false');
+      button.querySelector('.step-status').textContent=completed.has(index)?'✓':''
+    });
+
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+
+    if(updateHash) history.pushState({step:current},'',`#step-${current+1}`);
+    window.scrollTo({top:0,behavior:'auto'});
+    sidebar.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded','false');
+  }
+
+  function goTo(index){
+    if(index<0||index>=steps.length)return;
+    completed.add(current);
+    current=index;
+    render();
+  }
+
+  const navRow=document.createElement('div');
+  navRow.className='nav-row';
+  navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';
+  content.appendChild(navRow);
+
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+
+  nav.addEventListener('click',event=>{
+    const button=event.target.closest('.step-link');
+    if(button)goTo(Number(button.dataset.step))
+  });
+
+  menuBtn.addEventListener('click',()=>{
+    const open=sidebar.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded',String(open))
+  });
+
+  document.addEventListener('click',async event=>{
+    const copy=event.target.closest('.copy-btn');
+    if(copy){
+      const code=copy.parentElement.querySelector('pre code')?.textContent??'';
+      try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}
+      catch{copy.textContent='Select & copy'}
+      setTimeout(()=>copy.textContent='Copy',1200);
+      return;
+    }
+
+    const option=event.target.closest('.quiz-option');
+    if(option){
+      const quiz=option.closest('.quiz');
+      if(quiz.dataset.answered)return;
+      const options=[...quiz.querySelectorAll('.quiz-option')];
+      const choice=options.indexOf(option);
+      const answer=Number(quiz.dataset.answer);
+      quiz.dataset.answered='true';
+      options.forEach(button=>button.disabled=true);
+      option.classList.add(choice===answer?'correct':'wrong');
+      if(choice!==answer)options[answer].classList.add('correct');
+      const feedback=quiz.querySelector('.quiz-feedback');
+      feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;
+      feedback.classList.add('show');
+    }
+  });
+
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});
+  window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+
+  document.addEventListener('keydown',event=>{
+    if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;
+    if(event.key==='ArrowRight')goTo(current+1);
+    if(event.key==='ArrowLeft')goTo(current-1);
+  });
+
+  current=getHashStep();
+  render(false);
+})();
+</script>
 </body>
 </html>
