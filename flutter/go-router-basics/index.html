@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Routing with go_router — Flutter Codelab</title>
+  <meta name="description"
+    content="Learn Flutter routing with go_router using GoRouter, GoRoute, MaterialApp.router, context.go, context.push, path parameters, query parameters, and nested routes.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+    :root {
+      --blue: #2856d8;
+      --blue-dark: #17348e;
+      --blue-light: #e4ebff;
+      --ink: #101010;
+      --paper: #f5f7fb;
+      --white: #fff;
+      --yellow: #ffd83d;
+      --mint: #75e6c5;
+      --pink: #ff9bb7;
+      --orange: #ffb866;
+      --border: 3px solid var(--ink);
+      --shadow: 6px 6px 0 var(--ink);
+      --shadow-sm: 4px 4px 0 var(--ink);
+      --sidebar: 292px
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: auto
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      line-height: 1.55
+    }
+
+    button,
+    a {
+      font: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    :focus-visible {
+      outline: 4px solid var(--yellow);
+      outline-offset: 3px
+    }
+
+    .app {
+      min-height: 100vh
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar);
+      padding: 22px 18px;
+      background: var(--blue);
+      border-right: var(--border);
+      overflow: auto;
+      z-index: 20
+    }
+
+    .brand {
+      padding: 16px;
+      margin-bottom: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .eyebrow,
+    .progress-meta,
+    .step-number,
+    .step-kicker,
+    .label,
+    .footer-note {
+      font-family: "DM Mono", monospace
+    }
+
+    .eyebrow {
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase
+    }
+
+    .brand h2 {
+      margin: 5px 0 3px;
+      font-size: 1.42rem;
+      line-height: 1.05
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: .85rem;
+      font-weight: 600
+    }
+
+    .progress-wrap {
+      margin: 0 2px 20px;
+      color: #fff
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+      font-size: .72rem
+    }
+
+    .progress-track {
+      height: 16px;
+      padding: 2px;
+      background: #fff;
+      border: var(--border)
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: var(--yellow);
+      transition: width .2s ease
+    }
+
+    .steps {
+      display: grid;
+      gap: 8px
+    }
+
+    .step-link {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 34px 1fr 18px;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 8px;
+      color: #fff;
+      background: transparent;
+      border: 3px solid transparent;
+      text-align: left;
+      font-weight: 700;
+      line-height: 1.15
+    }
+
+    .step-link:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .step-link.active {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--ink);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .step-number {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 2px solid currentColor;
+      font-size: .78rem
+    }
+
+    .step-status {
+      text-align: center
+    }
+
+    .mobile-bar {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: var(--blue);
+      border-bottom: var(--border)
+    }
+
+    .menu-btn,
+    .mobile-title {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .menu-btn {
+      width: 46px;
+      height: 42px;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .mobile-title {
+      flex: 1;
+      padding: 8px 10px;
+      font-weight: 800
+    }
+
+    main {
+      margin-left: var(--sidebar);
+      min-height: 100vh
+    }
+
+    .content {
+      width: min(980px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 42px 0 28px
+    }
+
+    .step-view {
+      display: none
+    }
+
+    .step-view.active {
+      display: block;
+      animation: stepIn .18s ease-out
+    }
+
+    @keyframes stepIn {
+      from {
+        opacity: .35;
+        transform: translateY(5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .step-header {
+      padding: 28px;
+      margin-bottom: 24px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .step-kicker {
+      display: inline-block;
+      margin-bottom: 13px;
+      padding: 5px 9px;
+      color: #fff;
+      background: var(--blue);
+      border: 2px solid var(--ink);
+      font-size: .72rem
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.08
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 5vw, 3.7rem);
+      letter-spacing: -.045em
+    }
+
+    h2 {
+      margin: 30px 0 12px;
+      font-size: clamp(1.5rem, 3vw, 2.15rem)
+    }
+
+    h3 {
+      margin: 22px 0 9px;
+      font-size: 1.15rem
+    }
+
+    .lede {
+      max-width: 780px;
+      margin: 0;
+      font-size: 1.08rem
+    }
+
+    .objective {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700
+    }
+
+    .panel,
+    .concept,
+    .quiz,
+    .reveal {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .panel {
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .panel.blue {
+      background: var(--blue-light)
+    }
+
+    .panel.mint {
+      background: var(--mint)
+    }
+
+    .panel.pink {
+      background: var(--pink)
+    }
+
+    .panel.yellow {
+      background: var(--yellow)
+    }
+
+    .panel.orange {
+      background: var(--orange)
+    }
+
+    .callout {
+      padding: 16px 18px;
+      margin: 20px 0;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .callout .label {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 3px 7px;
+      color: #fff;
+      background: var(--ink);
+      border: 2px solid var(--ink);
+      font-size: .72rem
+    }
+
+    .grid-2 {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    .concept {
+      padding: 18px
+    }
+
+    .concept strong {
+      font-size: 1.05rem
+    }
+
+    .concept p:last-child {
+      margin-bottom: 0
+    }
+
+    .code-wrap {
+      position: relative;
+      margin: 18px 0
+    }
+
+    pre {
+      margin: 0;
+      padding: 20px;
+      overflow: auto;
+      color: #f7f7f7;
+      background: #111;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", ui-monospace, monospace;
+      font-size: .84rem;
+      line-height: 1.62;
+      tab-size: 2
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      padding: 5px 9px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      font-size: .75rem;
+      font-weight: 800
+    }
+
+    code:not(pre code) {
+      padding: 1px 5px;
+      background: #e8edf7;
+      border: 1px solid #9da9bb;
+      font-family: "DM Mono", monospace;
+      font-size: .88em
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35rem
+    }
+
+    li {
+      margin: 7px 0
+    }
+
+    .comparison {
+      width: 100%;
+      margin: 18px 0;
+      background: #fff;
+      border: var(--border);
+      border-collapse: collapse
+    }
+
+    .comparison th,
+    .comparison td {
+      padding: 11px;
+      border: 2px solid var(--ink);
+      text-align: left;
+      vertical-align: top
+    }
+
+    .comparison th {
+      color: #fff;
+      background: var(--blue)
+    }
+
+    .quiz {
+      padding: 20px;
+      margin: 20px 0
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px
+    }
+
+    .quiz-option {
+      text-align: left;
+      padding: 11px 13px;
+      background: #fff;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-option:hover {
+      background: var(--blue-light)
+    }
+
+    .quiz-option.correct {
+      background: var(--mint)
+    }
+
+    .quiz-option.wrong {
+      background: var(--pink)
+    }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 13px;
+      padding: 10px;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-feedback.show {
+      display: block
+    }
+
+    .reveal {
+      margin: 18px 0
+    }
+
+    .reveal summary {
+      padding: 13px 16px;
+      cursor: pointer;
+      background: var(--blue-light);
+      font-weight: 800
+    }
+
+    .reveal>div {
+      padding: 15px 16px
+    }
+
+    .challenge {
+      padding: 22px;
+      margin: 24px 0;
+      color: #fff;
+      background: var(--ink);
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .challenge h3 {
+      margin-top: 0;
+      color: var(--yellow)
+    }
+
+    .flow {
+      margin: 20px 0;
+      padding: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", monospace;
+      line-height: 1.9;
+      overflow: auto
+    }
+
+    .screen-stack {
+      display: grid;
+      gap: 12px;
+      margin: 22px 0
+    }
+
+    .screen-card {
+      padding: 16px;
+      background: #fff;
+      border: 3px solid var(--ink);
+      box-shadow: var(--shadow-sm);
+      font-weight: 800
+    }
+
+    .screen-card.active {
+      background: var(--mint)
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 30px
+    }
+
+    .checklist li::before {
+      content: "□";
+      position: absolute;
+      left: 0;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: var(--border)
+    }
+
+    .nav-btn {
+      min-width: 130px;
+      padding: 12px 18px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 900
+    }
+
+    .nav-btn.primary {
+      color: #fff;
+      background: var(--blue)
+    }
+
+    .nav-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed
+    }
+
+    .finish {
+      padding: 20px;
+      margin-top: 24px;
+      background: var(--mint);
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .references a {
+      color: var(--blue-dark);
+      font-weight: 700
+    }
+
+    @media(max-width:850px) {
+      :root {
+        --sidebar: 270px;
+        --mobile-bar-height: 65px
+      }
+
+      .sidebar {
+        inset: var(--mobile-bar-height) auto 0 0;
+        transform: translateX(-100%);
+        transition: transform .2s ease
+      }
+
+      .sidebar.open {
+        transform: none
+      }
+
+      .mobile-bar {
+        display: flex;
+        height: var(--mobile-bar-height)
+      }
+
+      main {
+        margin-left: 0
+      }
+
+      .content {
+        width: min(940px, calc(100% - 28px));
+        padding-top: 24px
+      }
+    }
+
+    @media(max-width:680px) {
+      .grid-2 {
+        grid-template-columns: 1fr
+      }
+
+      .content {
+        width: calc(100% - 18px);
+        padding-top: 16px
+      }
+
+      .step-header {
+        padding: 20px 16px
+      }
+
+      .panel,
+      .concept,
+      .quiz {
+        padding: 16px
+      }
+
+      .nav-row {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        padding: 12px 0;
+        background: var(--paper)
+      }
+
+      .nav-btn {
+        min-width: 0;
+        flex: 1;
+        padding: 11px 10px
+      }
+
+      pre {
+        padding: 16px 12px;
+        font-size: .76rem
+      }
+
+      .copy-btn {
+        position: static;
+        align-self: flex-end;
+        margin-bottom: 6px
+      }
+
+      .code-wrap {
+        display: flex;
+        flex-direction: column
+      }
+
+      .code-wrap pre {
+        order: 2
+      }
+
+      .code-wrap .copy-btn {
+        order: 1
+      }
+
+      .comparison {
+        display: block;
+        overflow-x: auto
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+      <div class="brand">
+        <div class="eyebrow">Flutter Navigation Codelab</div>
+        <h2>Routing with go_router</h2>
+        <p>Structured, URL-based navigation.</p>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+        <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+          aria-valuenow="0">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+      <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+    </aside>
+    <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation"
+        aria-expanded="false">☰</button>
+      <div class="mobile-title" id="mobileTitle">Routing with go_router</div>
+    </div>
+    <main>
+      <div class="content" id="content">
+
+        <section class="step-view" data-title="Why go_router?">
+          <header class="step-header"><span class="step-kicker">STEP 1 · WHY ROUTING?</span>
+            <h1>Navigation Gets Bigger as Apps Grow</h1>
+            <p class="lede">For a tiny app, Navigator is enough. In a larger app, it is useful to keep routes organized
+              in one routing configuration.</p>
+          </header>
+          <div class="objective"><strong>By the end:</strong> Configure <code>GoRouter</code>, define
+            <code>GoRoute</code>s, use <code>MaterialApp.router</code>, navigate with <code>go()</code> and
+            <code>push()</code>, pass URL parameters, and create nested routes.</div>
+          <div class="grid-2">
+            <div class="concept"><strong>Navigator</strong>
+              <p>You manually push and pop routes.</p>
+            </div>
+            <div class="concept"><strong>go_router</strong>
+              <p>You describe routes using URL-like paths and let the router build the correct screen.</p>
+            </div>
+          </div>
+          <div class="flow">/ → Home<br>/profile → Profile<br>/students/101 → Student 101<br>/products?category=mobile →
+            Filtered products</div>
+        </section>
+
+        <section class="step-view" data-title="Create project and install">
+          <header class="step-header"><span class="step-kicker">STEP 2 · SETUP</span>
+            <h1>Create the Project and Add go_router</h1>
+            <p class="lede">Start with a normal Flutter project, then add the routing package.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>flutter create go_router_demo
+cd go_router_demo
+flutter pub add go_router</code></pre>
+          </div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';</code></pre>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Create screens">
+          <header class="step-header"><span class="step-kicker">STEP 3 · MAKE TWO SCREENS</span>
+            <h1>Create Home and Profile</h1>
+            <p class="lede">Pages are still normal Flutter widgets.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Home')),
+      body: const Center(child: Text('Home Page')),
+    );
+  }
+}
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Profile')),
+      body: const Center(child: Text('Profile Page')),
+    );
+  }
+}</code></pre>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Create GoRouter">
+          <header class="step-header"><span class="step-kicker">STEP 4 · DEFINE ROUTES</span>
+            <h1>Create a GoRouter</h1>
+            <p class="lede"><code>GoRouter</code> stores your app's route configuration.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>final router = GoRouter(
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) {
+        return const HomePage();
+      },
+    ),
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) {
+        return const ProfilePage();
+      },
+    ),
+  ],
+);</code></pre>
+          </div>
+          <table class="comparison">
+            <thead>
+              <tr>
+                <th>Part</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>GoRouter</code></td>
+                <td>Main routing configuration.</td>
+              </tr>
+              <tr>
+                <td><code>GoRoute</code></td>
+                <td>Defines one route.</td>
+              </tr>
+              <tr>
+                <td><code>path</code></td>
+                <td>The URL-like path.</td>
+              </tr>
+              <tr>
+                <td><code>builder</code></td>
+                <td>Returns the screen for that path.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="step-view" data-title="MaterialApp.router">
+          <header class="step-header"><span class="step-kicker">STEP 5 · CONNECT THE ROUTER</span>
+            <h1>Use MaterialApp.router</h1>
+            <p class="lede">Connect your <code>GoRouter</code> to Flutter using <code>routerConfig</code>.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
+    );
+  }
+}</code></pre>
+          </div>
+          <div class="panel mint"><strong>Key line:</strong>
+            <p><code>routerConfig: router</code> connects the app to your route configuration.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="context.go()">
+          <header class="step-header"><span class="step-kicker">STEP 6 · GO TO A ROUTE</span>
+            <h1>Navigate with context.go()</h1>
+            <p class="lede">Use <code>go()</code> when you want the app to move to a destination path.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>ElevatedButton(
+  onPressed: () {
+    context.go('/profile');
+  },
+  child: const Text('Open Profile'),
+)</code></pre>
+          </div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>context.go('/');</code></pre>
+          </div>
+          <div class="panel yellow"><strong>Easy meaning:</strong>
+            <p><code>context.go('/profile')</code> means “make <code>/profile</code> the current destination.”</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="context.push()">
+          <header class="step-header"><span class="step-kicker">STEP 7 · PUSH ON TOP</span>
+            <h1>Navigate with context.push()</h1>
+            <p class="lede"><code>push()</code> puts another destination on top of the current navigation history.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>context.push('/profile');</code></pre>
+          </div>
+          <div class="screen-stack">
+            <div class="screen-card active">TOP → ProfilePage</div>
+            <div class="screen-card">HomePage</div>
+          </div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>context.pop();</code></pre>
+          </div>
+          <div class="panel blue"><strong>Memory trick:</strong>
+            <p><code>push()</code> puts a page on top. <code>pop()</code> removes the top page.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="go vs push">
+          <header class="step-header"><span class="step-kicker">STEP 8 · KNOW THE DIFFERENCE</span>
+            <h1>context.go() vs context.push()</h1>
+            <p class="lede">Both navigate, but they express different intentions.</p>
+          </header>
+          <table class="comparison">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Simple meaning</th>
+                <th>Good use</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>go()</code></td>
+                <td>Go to this destination.</td>
+                <td>Main sections and URL-style navigation.</td>
+              </tr>
+              <tr>
+                <td><code>push()</code></td>
+                <td>Put this destination on top.</td>
+                <td>Details pages where Back should return.</td>
+              </tr>
+              <tr>
+                <td><code>pop()</code></td>
+                <td>Remove the top page.</td>
+                <td>Return from a pushed page.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+
+
+        <section class="step-view" data-title="Return results">
+          <header class="step-header">
+            <span class="step-kicker">STEP 9 · RETURN DATA BACK</span>
+            <h1>Get a Result Back from Another Screen</h1>
+            <p class="lede">When you open a page with <code>context.push()</code>, you can wait for that page to return
+              a value.</p>
+          </header>
+
+          <div class="objective">
+            <strong>Goal:</strong> Open another screen, choose a value there, return it with
+            <code>context.pop(result)</code>, and receive it back on the Home screen.
+          </div>
+
+          <div class="flow">
+            HomePage<br>
+            ↓ context.push&lt;String&gt;('/color')<br>
+            ColorPage<br>
+            ↓ user selects Blue<br>
+            context.pop('Blue')<br>
+            ↓<br>
+            HomePage receives "Blue"
+          </div>
+
+          <h2>1. Create the route</h2>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>GoRoute(
+  path: '/color',
+  builder: (context, state) {
+    return const ColorPage();
+  },
+),</code></pre>
+          </div>
+
+          <h2>2. Wait for the result on HomePage</h2>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>final result =
+    await context.push&lt;String&gt;('/color');
+
+if (result != null) {
+  print('Selected color: $result');
+}</code></pre>
+          </div>
+
+          <div class="panel yellow">
+            <strong>Important:</strong>
+            <p><code>context.push()</code> returns a <code>Future</code>. That Future completes when the pushed page is
+              popped.</p>
+          </div>
+
+          <h2>3. Return a value from ColorPage</h2>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class ColorPage extends StatelessWidget {
+  const ColorPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Choose Color'),
+      ),
+      body: Column(
+        children: [
+
+          ListTile(
+            title: const Text('Blue'),
+            onTap: () {
+              context.pop('Blue');
+            },
+          ),
+
+          ListTile(
+            title: const Text('Green'),
+            onTap: () {
+              context.pop('Green');
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+
+          <h2>4. Update the Home screen</h2>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State&lt;HomePage&gt; createState() {
+    return _HomePageState();
+  }
+}
+
+class _HomePageState extends State&lt;HomePage&gt; {
+
+  String selectedColor = 'None';
+
+  Future&lt;void&gt; chooseColor() async {
+
+    final result =
+        await context.push&lt;String&gt;('/color');
+
+    if (result == null) {
+      return;
+    }
+
+    setState(() {
+      selectedColor = result;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+
+            Text(
+              'Selected: $selectedColor',
+            ),
+
+            ElevatedButton(
+              onPressed: chooseColor,
+              child: const Text(
+                'Choose Color',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+
+          <div class="panel blue">
+            <strong>Easy memory trick:</strong>
+            <p><code>push()</code> sends you forward. <code>pop(result)</code> sends you back with data.</p>
+          </div>
+
+          <div class="flow">
+            await context.push&lt;String&gt;('/color')<br>
+            ↓<br>
+            context.pop('Blue')<br>
+            ↓<br>
+            result == 'Blue'<br>
+            ↓<br>
+            setState()<br>
+            ↓<br>
+            Home screen updates
+          </div>
+
+          <div class="quiz" data-answer="1"
+            data-correct="Correct. context.pop(result) closes the current route and returns the value to the page that pushed it.">
+            <h3>How do we send a value back from the pushed page?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option">context.go(result)</button>
+              <button class="quiz-option">context.pop(result)</button>
+              <button class="quiz-option">routerConfig(result)</button>
+            </div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+        </section>
+        <section class="step-view" data-title="pushReplacement">
+          <header class="step-header">
+            <span class="step-kicker">STEP 10 · REPLACE THE TOP PAGE</span>
+            <h1>Use context.pushReplacement()</h1>
+            <p class="lede"><code>pushReplacement()</code> removes the current top page and replaces it with a new
+              route.</p>
+          </header>
+
+          <div class="flow">
+            Login Page<br>
+            ↓ pushReplacement('/home')<br>
+            Home Page<br>
+            ↓<br>
+            Login is no longer underneath
+          </div>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>ElevatedButton(
+  onPressed: () {
+    context.pushReplacement('/home');
+  },
+  child: const Text('Login'),
+)</code></pre>
+          </div>
+
+          <div class="panel yellow">
+            <strong>When is this useful?</strong>
+            <p>A common example is after login. Once the user reaches Home, you normally do not want the Back button to
+              return to the Login page.</p>
+          </div>
+
+          <table class="comparison">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>What happens?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>push()</code></td>
+                <td>Adds the new page on top.</td>
+              </tr>
+              <tr>
+                <td><code>pushReplacement()</code></td>
+                <td>Removes the current top page and puts the new page there.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="quiz" data-answer="1"
+            data-correct="Correct. pushReplacement() is useful when the current page should not remain underneath.">
+            <h3>Which method is useful after a successful login?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option">push()</button>
+              <button class="quiz-option">pushReplacement()</button>
+              <button class="quiz-option">pop()</button>
+            </div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+        </section>
+        <section class="step-view" data-title="Path parameters">
+          <header class="step-header"><span class="step-kicker">STEP 11 · DATA IN THE PATH</span>
+            <h1>Pass a Path Parameter</h1>
+            <p class="lede">Use a path parameter when the value identifies what you are opening.</p>
+          </header>
+          <div class="flow">/students/101<br>↓<br>101 = student ID</div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>GoRoute(
+  path: '/students/:id',
+  builder: (context, state) {
+    final id = state.pathParameters['id']!;
+
+    return StudentPage(
+      studentId: id,
+    );
+  },
+)</code></pre>
+          </div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>context.go('/students/101');</code></pre>
+          </div>
+          <div class="panel yellow"><strong>Remember:</strong>
+            <p><code>:id</code> declares the parameter. <code>state.pathParameters['id']</code> reads it.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Query parameters">
+          <header class="step-header"><span class="step-kicker">STEP 12 · OPTIONAL URL DATA</span>
+            <h1>Pass a Query Parameter</h1>
+            <p class="lede">Query parameters appear after <code>?</code> and are useful for filters, searches, and
+              optional settings.</p>
+          </header>
+          <div class="flow">/products?category=mobile<br>↓<br>path = /products<br>query = category=mobile</div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>GoRoute(
+  path: '/products',
+  builder: (context, state) {
+    final category =
+        state.uri.queryParameters['category'];
+
+    return ProductsPage(
+      category: category,
+    );
+  },
+)</code></pre>
+          </div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>context.go('/products?category=mobile');</code></pre>
+          </div>
+          <table class="comparison">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Example</th>
+                <th>Read with</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Path</td>
+                <td><code>/students/101</code></td>
+                <td><code>state.pathParameters['id']</code></td>
+              </tr>
+              <tr>
+                <td>Query</td>
+                <td><code>/products?category=mobile</code></td>
+                <td><code>state.uri.queryParameters['category']</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="step-view" data-title="Nested routes">
+          <header class="step-header"><span class="step-kicker">STEP 13 · ROUTES INSIDE ROUTES</span>
+            <h1>Create Nested Routes</h1>
+            <p class="lede">Put related child routes inside the parent's <code>routes</code> list.</p>
+          </header>
+          <div class="flow">/students<br>└── /students/:id<br>&nbsp;&nbsp;&nbsp;&nbsp;└── Student details</div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>GoRoute(
+  path: '/students',
+  builder: (context, state) {
+    return const StudentsPage();
+  },
+  routes: [
+    GoRoute(
+      path: ':id',
+      builder: (context, state) {
+        final id =
+            state.pathParameters['id']!;
+
+        return StudentPage(
+          studentId: id,
+        );
+      },
+    ),
+  ],
+)</code></pre>
+          </div>
+          <div class="panel yellow"><strong>Notice:</strong>
+            <p>The child path is only <code>:id</code>. go_router combines it with the parent <code>/students</code>.
+            </p>
+          </div>
+        </section>
+
+
+        <section class="step-view" data-title="Nested navigation">
+          <header class="step-header">
+            <span class="step-kicker">STEP 14 · NESTED NAVIGATION</span>
+            <h1>Keep a Bottom Bar While Screens Change</h1>
+            <p class="lede">Nested navigation means part of the app keeps its own Navigator. A common example is a
+              BottomNavigationBar that stays visible while its child screen changes.</p>
+          </header>
+
+          <div class="objective">
+            <strong>Simple idea:</strong> Use <code>ShellRoute</code> when you want a common layout around several
+            routes.
+          </div>
+
+          <div class="flow">
+            App<br>
+            ↓<br>
+            ShellRoute<br>
+            ├── Home<br>
+            └── Profile<br>
+            ↓<br>
+            BottomNavigationBar stays visible
+          </div>
+
+          <div class="panel yellow">
+            <strong>Important difference:</strong>
+            <p>A normal nested <code>GoRoute</code> groups related URL paths. A <code>ShellRoute</code> creates another
+              Navigator and keeps a shared shell around its child routes.</p>
+          </div>
+
+          <h2>1. Create the ShellRoute</h2>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>final router = GoRouter(
+  initialLocation: '/home',
+  routes: [
+
+    ShellRoute(
+      builder: (context, state, child) {
+        return MainPage(
+          child: child,
+        );
+      },
+      routes: [
+
+        GoRoute(
+          path: '/home',
+          builder: (context, state) {
+            return const HomePage();
+          },
+        ),
+
+        GoRoute(
+          path: '/profile',
+          builder: (context, state) {
+            return const ProfilePage();
+          },
+        ),
+      ],
+    ),
+  ],
+);</code></pre>
+          </div>
+
+          <div class="panel blue">
+            <strong>What is child?</strong>
+            <p><code>child</code> is the screen matched by the route. We place that child inside our common page layout.
+            </p>
+          </div>
+
+          <h2>2. Create the common layout</h2>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class MainPage extends StatelessWidget {
+
+  final Widget child;
+
+  const MainPage({
+    super.key,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+
+      body: child,
+
+      bottomNavigationBar:
+          BottomNavigationBar(
+
+        currentIndex:
+            GoRouterState.of(context)
+                    .uri
+                    .path == '/profile'
+                ? 1
+                : 0,
+
+        onTap: (index) {
+
+          if (index == 0) {
+            context.go('/home');
+          }
+
+          if (index == 1) {
+            context.go('/profile');
+          }
+        },
+
+        items: const [
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+
+          <div class="flow">
+            Tap Home<br>
+            ↓<br>
+            context.go('/home')<br>
+            ↓<br>
+            ShellRoute keeps MainPage<br>
+            ↓<br>
+            child becomes HomePage
+          </div>
+
+          <h2>3. What stays on the screen?</h2>
+
+          <div class="grid-2">
+            <div class="concept">
+              <strong>Changes</strong>
+              <p>The <code>child</code> page changes between HomePage and ProfilePage.</p>
+            </div>
+
+            <div class="concept">
+              <strong>Stays</strong>
+              <p>The <code>BottomNavigationBar</code> stays because it belongs to MainPage.</p>
+            </div>
+          </div>
+
+          <div class="callout">
+            <span class="label">EXAM / INTERVIEW POINT</span>
+            <p><code>ShellRoute</code> creates a nested Navigator for its matching child routes and is useful for
+              layouts such as persistent bottom navigation.</p>
+          </div>
+
+          <div class="panel orange">
+            <strong>What about separate history for every tab?</strong>
+            <p>For more advanced apps where each bottom-navigation tab must remember its own navigation stack, go_router
+              provides <code>StatefulShellRoute</code>. You only need to remember that concept for now.</p>
+          </div>
+
+          <div class="quiz" data-answer="2"
+            data-correct="Correct. ShellRoute is useful when shared UI such as a bottom bar should remain visible around child routes.">
+            <h3>Why would we use ShellRoute?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option">To install Flutter packages</button>
+              <button class="quiz-option">To convert query parameters</button>
+              <button class="quiz-option">To keep shared UI around nested routes</button>
+            </div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+        </section>
+        <section class="step-view" data-title="Complete example">
+          <header class="step-header"><span class="step-kicker">STEP 15 · PUT IT TOGETHER</span>
+            <h1>Complete go_router Example</h1>
+            <p class="lede">One small app using routes, go, push, path parameters, query parameters, and nesting.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+final router = GoRouter(
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) {
+        return const HomePage();
+      },
+    ),
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) {
+        return const ProfilePage();
+      },
+    ),
+    GoRoute(
+      path: '/products',
+      builder: (context, state) {
+        final category =
+            state.uri.queryParameters['category'];
+
+        return ProductsPage(
+          category: category,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/students',
+      builder: (context, state) {
+        return const StudentsPage();
+      },
+      routes: [
+        GoRoute(
+          path: ':id',
+          builder: (context, state) {
+            final id =
+                state.pathParameters['id']!;
+
+            return StudentPage(
+              studentId: id,
+            );
+          },
+        ),
+      ],
+    ),
+  ],
+);
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Home')),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                context.go('/profile');
+              },
+              child: const Text('Go to Profile'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                context.push('/students/101');
+              },
+              child: const Text('Open Student 101'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                context.go('/products?category=mobile');
+              },
+              child: const Text('Mobile Products'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Profile')),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            context.go('/');
+          },
+          child: const Text('Go Home'),
+        ),
+      ),
+    );
+  }
+}
+
+class StudentsPage extends StatelessWidget {
+  const StudentsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Students')),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            context.push('/students/101');
+          },
+          child: const Text('Open Student 101'),
+        ),
+      ),
+    );
+  }
+}
+
+class StudentPage extends StatelessWidget {
+  final String studentId;
+
+  const StudentPage({
+    super.key,
+    required this.studentId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Student Details'),
+      ),
+      body: Center(
+        child: Text('Student ID: $studentId'),
+      ),
+    );
+  }
+}
+
+class ProductsPage extends StatelessWidget {
+  final String? category;
+
+  const ProductsPage({
+    super.key,
+    this.category,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Products')),
+      body: Center(
+        child: Text(
+          'Category: ${category ?? 'All'}',
+        ),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+          <div class="challenge">
+            <h3>Try these changes</h3>
+            <ol>
+              <li>Change <code>/students/101</code> to <code>/students/500</code>.</li>
+              <li>Change <code>mobile</code> to <code>laptop</code>.</li>
+              <li>Add an <code>/about</code> route.</li>
+              <li>Open Profile with both <code>go()</code> and <code>push()</code>.</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Declarative routing">
+          <header class="step-header"><span class="step-kicker">STEP 16 · THE BIG IDEA</span>
+            <h1>Why Is It Declarative?</h1>
+            <p class="lede">You describe which screen belongs to each location, and the router builds navigation from
+              that configuration.</p>
+          </header>
+          <div class="grid-2">
+            <div class="concept"><strong>Imperative</strong>
+              <p>“Push this Route object now.”</p>
+            </div>
+            <div class="concept"><strong>Declarative</strong>
+              <p>“When the location is /profile, show ProfilePage.”</p>
+            </div>
+          </div>
+          <div class="flow">Current location<br>↓<br>GoRouter finds matching GoRoute<br>↓<br>builder creates the screen
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Revision">
+          <header class="step-header"><span class="step-kicker">STEP 17 · QUICK REVISION</span>
+            <h1>go_router Revision</h1>
+            <p class="lede">Important points for class, viva, and interviews.</p>
+          </header>
+          <div class="reveal">
+            <summary>1. What is go_router?</summary>
+            <div>A Flutter package for declarative, URL-based routing.</div>
+          </div>
+          <div class="reveal">
+            <summary>2. What is GoRouter?</summary>
+            <div>The main object that stores the route configuration.</div>
+          </div>
+          <div class="reveal">
+            <summary>3. What is GoRoute?</summary>
+            <div>It defines a path and the widget for that path.</div>
+          </div>
+          <div class="reveal">
+            <summary>4. Why MaterialApp.router?</summary>
+            <div>It connects the Flutter app to the router configuration.</div>
+          </div>
+          <div class="reveal">
+            <summary>5. What does context.go() do?</summary>
+            <div>It goes to a destination path and makes the stack match that destination.</div>
+          </div>
+          <div class="reveal">
+            <summary>6. What does context.push() do?</summary>
+            <div>It pushes the destination on top of the current navigation stack.</div>
+          </div>
+          <div class="reveal">
+            <summary>7. How do you return a result from a pushed page?</summary>
+            <div>Use <code>context.pop(result)</code> on the pushed page and <code>await context.push&lt;T&gt;()</code>
+              on the source page.</div>
+          </div>
+
+          <div class="reveal">
+            <summary>8. What does pushReplacement() do?</summary>
+            <div>It removes the current top page and replaces it with a new route.</div>
+          </div>
+
+          <div class="reveal">
+            <summary>9. How do you read a path parameter?</summary>
+            <div><code>state.pathParameters['name']</code></div>
+          </div>
+          <div class="reveal">
+            <summary>10. How do you read a query parameter?</summary>
+            <div><code>state.uri.queryParameters['name']</code></div>
+          </div>
+          <div class="reveal">
+            <summary>11. What is a nested route?</summary>
+            <div>A child <code>GoRoute</code> inside a parent's <code>routes</code> list.</div>
+          </div>
+          <div class="reveal">
+            <summary>10. Why declarative routing?</summary>
+            <div>It keeps routes structured and makes larger navigation easier to organize.</div>
+          </div>
+          <h2>Completion checklist</h2>
+          <ul class="checklist">
+            <li>I can install go_router.</li>
+            <li>I can create GoRouter and GoRoute.</li>
+            <li>I can use MaterialApp.router.</li>
+            <li>I can use context.go().</li>
+            <li>I can use context.push() and pop().</li>
+            <li>I understand go vs push.</li>
+            <li>I can return results using await context.push() and context.pop(result).</li>
+            <li>I can use context.pushReplacement().</li>
+            <li>I can use path parameters.</li>
+            <li>I can use query parameters.</li>
+            <li>I can create nested routes.</li>
+            <li>I understand nested navigation with ShellRoute.</li>
+            <li>I understand declarative routing.</li>
+          </ul>
+          <div class="panel references">
+            <h3>Official references</h3>
+            <p><a href="https://pub.dev/packages/go_router">go_router package</a>, <a
+                href="https://pub.dev/documentation/go_router/latest/topics/Configuration-topic.html">Configuration</a>,
+              <a href="https://pub.dev/documentation/go_router/latest/topics/Navigation-topic.html">Navigation</a>, and
+              <a href="https://docs.flutter.dev/ui/navigation">Flutter navigation</a>.</p>
+          </div>
+          <div class="finish">
+            <h2>Codelab complete! 🎉</h2>
+            <p>You can now configure go_router, navigate between routes, pass URL parameters, and organize related
+              screens with nested routes.</p>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+  <script>
+    (() => {
+      const steps = [...document.querySelectorAll('.step-view')];
+      const titles = steps.map(step => step.dataset.title);
+      const nav = document.getElementById('stepNav');
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.getElementById('menuBtn');
+      const content = document.getElementById('content');
+      const completed = new Set();
+      let current = 0;
+      nav.innerHTML = titles.map((title, index) => `<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+      const getHashStep = () => { const match = location.hash.match(/^#step-(\d+)$/); const value = match ? Number(match[1]) - 1 : 0; return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0 };
+      function render(updateHash = true) {
+        current = Math.max(0, Math.min(current, steps.length - 1));
+        steps.forEach((step, index) => { const active = index === current; step.classList.toggle('active', active); step.setAttribute('aria-hidden', String(!active)) });
+        document.querySelectorAll('.step-link').forEach((button, index) => { button.classList.toggle('active', index === current); button.setAttribute('aria-current', index === current ? 'step' : 'false'); button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '' });
+        const percent = Math.round(((current + 1) / steps.length) * 100);
+        document.getElementById('progressBar').style.width = `${percent}%`;
+        document.getElementById('progressText').textContent = `${percent}%`;
+        document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+        document.getElementById('mobileTitle').textContent = titles[current];
+        document.getElementById('prevBtn').disabled = current === 0;
+        document.getElementById('nextBtn').disabled = current === steps.length - 1;
+        document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+        if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+        window.scrollTo({ top: 0, behavior: 'auto' }); sidebar.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false');
+      }
+      function goTo(index) { if (index < 0 || index >= steps.length) return; completed.add(current); current = index; render(); }
+      const navRow = document.createElement('div'); navRow.className = 'nav-row'; navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>'; content.appendChild(navRow);
+      document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+      document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+      nav.addEventListener('click', event => { const button = event.target.closest('.step-link'); if (button) goTo(Number(button.dataset.step)) });
+      menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)) });
+      document.addEventListener('click', async event => { const copy = event.target.closest('.copy-btn'); if (copy) { const code = copy.parentElement.querySelector('pre code')?.textContent ?? ''; try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!' } catch { copy.textContent = 'Select & copy' } setTimeout(() => copy.textContent = 'Copy', 1200); return; } const option = event.target.closest('.quiz-option'); if (option) { const quiz = option.closest('.quiz'); if (quiz.dataset.answered) return; const options = [...quiz.querySelectorAll('.quiz-option')]; const choice = options.indexOf(option); const answer = Number(quiz.dataset.answer); quiz.dataset.answered = 'true'; options.forEach(button => button.disabled = true); option.classList.add(choice === answer ? 'correct' : 'wrong'); if (choice !== answer) options[answer].classList.add('correct'); const feedback = quiz.querySelector('.quiz-feedback'); feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`; feedback.classList.add('show'); } });
+      window.addEventListener('popstate', () => { current = getHashStep(); render(false) }); window.addEventListener('hashchange', () => { current = getHashStep(); render(false) });
+      document.addEventListener('keydown', event => { if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return; if (event.key === 'ArrowRight') goTo(current + 1); if (event.key === 'ArrowLeft') goTo(current - 1) });
+      current = getHashStep(); render(false);
+    })();
+  </script>
+</body>
+
+</html>
