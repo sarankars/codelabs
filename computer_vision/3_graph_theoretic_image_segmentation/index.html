@@ -1,91 +1,1213 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Interactive graph-theoretic image segmentation codelab using superpixels, region-adjacency graphs, and normalized cuts.">
-  <meta name="theme-color" content="#122238"><title>Graph-Theoretic Image Segmentation · Computer Vision Codelab</title>
-  <link rel="stylesheet" href="../module3.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Segmentation by Graph-Theoretic Clustering — OpenCV Codelab</title>
+  <meta name="description"
+    content="Learn segmentation by graph-theoretic clustering in OpenCV using very simple language and one small practical.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+    :root {
+      --blue: #2856d8;
+      --blue-dark: #17348e;
+      --blue-light: #e4ebff;
+      --ink: #101010;
+      --paper: #f5f7fb;
+      --white: #fff;
+      --yellow: #ffd83d;
+      --mint: #75e6c5;
+      --pink: #ff9bb7;
+      --orange: #ffb866;
+      --border: 3px solid var(--ink);
+      --shadow: 6px 6px 0 var(--ink);
+      --shadow-sm: 4px 4px 0 var(--ink);
+      --sidebar: 292px
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: auto
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      line-height: 1.55
+    }
+
+    button,
+    a {
+      font: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    :focus-visible {
+      outline: 4px solid var(--yellow);
+      outline-offset: 3px
+    }
+
+    .app {
+      min-height: 100vh
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar);
+      padding: 22px 18px;
+      background: var(--blue);
+      border-right: var(--border);
+      overflow: auto;
+      z-index: 20
+    }
+
+    .brand {
+      padding: 16px;
+      margin-bottom: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .eyebrow,
+    .progress-meta,
+    .step-number,
+    .step-kicker,
+    .label,
+    .footer-note {
+      font-family: "DM Mono", monospace
+    }
+
+    .eyebrow {
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase
+    }
+
+    .brand h2 {
+      margin: 5px 0 3px;
+      font-size: 1.42rem;
+      line-height: 1.05
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: .85rem;
+      font-weight: 600
+    }
+
+    .progress-wrap {
+      margin: 0 2px 20px;
+      color: #fff
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+      font-size: .72rem
+    }
+
+    .progress-track {
+      height: 16px;
+      padding: 2px;
+      background: #fff;
+      border: var(--border)
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: var(--yellow);
+      transition: width .2s ease
+    }
+
+    .steps {
+      display: grid;
+      gap: 8px
+    }
+
+    .step-link {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 34px 1fr 18px;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 8px;
+      color: #fff;
+      background: transparent;
+      border: 3px solid transparent;
+      text-align: left;
+      font-weight: 700;
+      line-height: 1.15
+    }
+
+    .step-link:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .step-link.active {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--ink);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .step-number {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 2px solid currentColor;
+      font-size: .78rem
+    }
+
+    .step-status {
+      text-align: center
+    }
+
+    .mobile-bar {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: var(--blue);
+      border-bottom: var(--border)
+    }
+
+    .menu-btn,
+    .mobile-title {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .menu-btn {
+      width: 46px;
+      height: 42px;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .mobile-title {
+      flex: 1;
+      padding: 8px 10px;
+      font-weight: 800
+    }
+
+    main {
+      margin-left: var(--sidebar);
+      min-height: 100vh
+    }
+
+    .content {
+      width: min(980px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 42px 0 28px
+    }
+
+    .step-view {
+      display: none
+    }
+
+    .step-view.active {
+      display: block;
+      animation: stepIn .18s ease-out
+    }
+
+    @keyframes stepIn {
+      from {
+        opacity: .35;
+        transform: translateY(5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .step-header {
+      padding: 28px;
+      margin-bottom: 24px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .step-kicker {
+      display: inline-block;
+      margin-bottom: 13px;
+      padding: 5px 9px;
+      color: #fff;
+      background: var(--blue);
+      border: 2px solid var(--ink);
+      font-size: .72rem
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.08
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 5vw, 3.7rem);
+      letter-spacing: -.045em
+    }
+
+    h2 {
+      margin: 30px 0 12px;
+      font-size: clamp(1.5rem, 3vw, 2.15rem)
+    }
+
+    h3 {
+      margin: 22px 0 9px;
+      font-size: 1.15rem
+    }
+
+    .lede {
+      max-width: 780px;
+      margin: 0;
+      font-size: 1.08rem
+    }
+
+    .objective {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700
+    }
+
+    .panel,
+    .concept,
+    .quiz,
+    .reveal {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .panel {
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .panel.blue {
+      background: var(--blue-light)
+    }
+
+    .panel.mint {
+      background: var(--mint)
+    }
+
+    .panel.pink {
+      background: var(--pink)
+    }
+
+    .panel.yellow {
+      background: var(--yellow)
+    }
+
+    .panel.orange {
+      background: var(--orange)
+    }
+
+    .callout {
+      padding: 16px 18px;
+      margin: 20px 0;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .callout .label {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 3px 7px;
+      color: #fff;
+      background: var(--ink);
+      border: 2px solid var(--ink);
+      font-size: .72rem
+    }
+
+    .grid-2 {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    .grid-3 {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .concept {
+      padding: 18px
+    }
+
+    .concept strong {
+      font-size: 1.05rem
+    }
+
+    .concept p:last-child {
+      margin-bottom: 0
+    }
+
+    .code-wrap {
+      position: relative;
+      margin: 18px 0
+    }
+
+    pre {
+      margin: 0;
+      padding: 20px;
+      overflow: auto;
+      color: #f7f7f7;
+      background: #111;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", ui-monospace, monospace;
+      font-size: .84rem;
+      line-height: 1.62;
+      tab-size: 2
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      padding: 5px 9px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      font-size: .75rem;
+      font-weight: 800
+    }
+
+    code:not(pre code) {
+      padding: 1px 5px;
+      background: #e8edf7;
+      border: 1px solid #9da9bb;
+      font-family: "DM Mono", monospace;
+      font-size: .88em
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35rem
+    }
+
+    li {
+      margin: 7px 0
+    }
+
+    .syntax {
+      padding: 14px;
+      overflow: auto;
+      background: #edf2ff;
+      border: var(--border);
+      font-family: "DM Mono", monospace
+    }
+
+    .comparison {
+      width: 100%;
+      margin: 18px 0;
+      background: #fff;
+      border: var(--border);
+      border-collapse: collapse
+    }
+
+    .comparison th,
+    .comparison td {
+      padding: 11px;
+      border: 2px solid var(--ink);
+      text-align: left;
+      vertical-align: top
+    }
+
+    .comparison th {
+      color: #fff;
+      background: var(--blue)
+    }
+
+    .quiz {
+      padding: 20px;
+      margin: 20px 0
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px
+    }
+
+    .quiz-option {
+      text-align: left;
+      padding: 11px 13px;
+      background: #fff;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-option:hover {
+      background: var(--blue-light)
+    }
+
+    .quiz-option.correct {
+      background: var(--mint)
+    }
+
+    .quiz-option.wrong {
+      background: var(--pink)
+    }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 13px;
+      padding: 10px;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-feedback.show {
+      display: block
+    }
+
+    .reveal {
+      margin: 18px 0
+    }
+
+    .reveal summary {
+      padding: 13px 16px;
+      cursor: pointer;
+      background: var(--blue-light);
+      font-weight: 800
+    }
+
+    .reveal>div {
+      padding: 15px 16px
+    }
+
+    .challenge {
+      padding: 22px;
+      margin: 24px 0;
+      color: #fff;
+      background: var(--ink);
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .challenge h3 {
+      margin-top: 0;
+      color: var(--yellow)
+    }
+
+    .challenge code {
+      color: #fff;
+      background: #303030;
+      border-color: #777
+    }
+
+    .flow {
+      margin: 20px 0;
+      padding: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", monospace;
+      line-height: 1.9;
+      overflow: auto
+    }
+
+    .graph-box {
+      padding: 18px;
+      margin: 20px 0;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", monospace;
+      line-height: 2;
+      text-align: center
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 30px
+    }
+
+    .checklist li::before {
+      content: "□";
+      position: absolute;
+      left: 0;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: var(--border)
+    }
+
+    .nav-btn {
+      min-width: 130px;
+      padding: 12px 18px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 900
+    }
+
+    .nav-btn.primary {
+      color: #fff;
+      background: var(--blue)
+    }
+
+    .nav-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed
+    }
+
+    .finish {
+      padding: 20px;
+      margin-top: 24px;
+      background: var(--mint);
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .footer-note {
+      margin-top: 30px;
+      color: #555;
+      font-size: .8rem
+    }
+
+    .references a {
+      color: var(--blue-dark);
+      font-weight: 700
+    }
+
+    @media(max-width:850px) {
+      :root {
+        --sidebar: 270px;
+        --mobile-bar-height: 65px
+      }
+
+      .sidebar {
+        inset: var(--mobile-bar-height) auto 0 0;
+        transform: translateX(-100%);
+        transition: transform .2s ease
+      }
+
+      .sidebar.open {
+        transform: none
+      }
+
+      .mobile-bar {
+        display: flex;
+        height: var(--mobile-bar-height)
+      }
+
+      main {
+        margin-left: 0
+      }
+
+      .content {
+        width: min(940px, calc(100% - 28px));
+        padding-top: 24px
+      }
+    }
+
+    @media(max-width:680px) {
+
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr
+      }
+
+      .content {
+        width: calc(100% - 18px);
+        padding-top: 16px
+      }
+
+      .step-header {
+        padding: 20px 16px
+      }
+
+      .panel,
+      .concept,
+      .quiz {
+        padding: 16px
+      }
+
+      .nav-row {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        padding: 12px 0;
+        background: var(--paper)
+      }
+
+      .nav-btn {
+        min-width: 0;
+        flex: 1;
+        padding: 11px 10px
+      }
+
+      pre {
+        padding: 16px 12px;
+        font-size: .76rem
+      }
+
+      .copy-btn {
+        position: static;
+        align-self: flex-end;
+        margin-bottom: 6px
+      }
+
+      .code-wrap {
+        display: flex;
+        flex-direction: column
+      }
+
+      .code-wrap pre {
+        order: 2
+      }
+
+      .code-wrap .copy-btn {
+        order: 1
+      }
+
+      .comparison {
+        display: block;
+        overflow-x: auto
+      }
+    }
+  </style>
 </head>
-<body data-steps='["Start here","Images as graphs","Superpixels & RAGs","Normalized cuts","Try the pipeline","Check & review"]'>
-  <aside class="sidebar" id="sidebar"><div class="brand"><small>Module 3 · Codelab</small><h2>Graph-Theoretic Segmentation</h2><p>Turn regions into nodes and boundaries into weighted edges.</p></div><div class="progress-meta"><span>PROGRESS</span><span id="progressText">0%</span></div><div class="track"><div class="bar" id="progressBar"></div></div><nav class="steps" id="stepNav" aria-label="Codelab steps"></nav></aside>
-  <div class="mobile-bar"><button id="menuButton" aria-label="Open lesson steps" aria-expanded="false">☰</button><strong id="mobileTitle">Start here</strong></div>
-  <main class="main"><div class="content">
-    <section class="view" data-step="0">
-      <header class="hero"><span class="eyebrow">Step 1 · A different representation</span><h1>What if an image were a network?</h1><p>Graph-theoretic segmentation represents visual pieces as nodes and their relationships as edges. Strongly related nodes stay together; weak connections are candidates for a cut.</p></header>
-      <div class="grid three"><article class="card"><span class="badge">Node</span><h3>A pixel or region</h3><p>One item that may receive a segment label.</p></article><article class="card"><span class="badge">Edge</span><h3>A relationship</h3><p>A connection between neighboring nodes.</p></article><article class="card"><span class="badge">Weight</span><h3>Similarity</h3><p>A number derived from color, texture, or boundary strength.</p></article></div>
-      <div class="callout blue"><strong>Why use a graph?</strong> K-means asks whether features are close in feature space. A graph can additionally insist that regions be spatial neighbors and explicitly represent their boundary.</div>
-      <h2>Learning outcomes</h2><ul><li>Build the vocabulary of nodes, edges, weights, and cuts.</li><li>Explain why superpixels reduce a pixel graph.</li><li>Construct a region-adjacency graph (RAG).</li><li>Interpret the normalized-cut objective and its parameters.</li></ul>
-    </section>
 
-    <section class="view" data-step="1">
-      <header class="hero"><span class="eyebrow">Step 2 · Pixels become nodes</span><h1>Neighbors exchange evidence</h1><p>Connect each pixel to its four or eight immediate neighbors. Similar colors get strong edges; a sharp visual boundary gets a weak edge.</p></header>
-      <div class="lab"><div class="lab-head"><strong>Explore · A tiny pixel graph</strong><span class="mono">select a view</span></div><div class="lab-body"><div class="toggle-row"><button class="toggle active" data-graph="pixels">Pixel values</button><button class="toggle" data-graph="edges">Show relationships</button><button class="toggle" data-graph="cut">Cut weak edges</button></div><div class="graph-canvas" id="graphCanvas" aria-label="Six by four image graph"></div><p class="graph-caption" id="graphCaption">Each circle is a pixel; color suggests its appearance.</p></div></div>
-      <h2>Choosing an edge weight</h2>
-      <div class="grid"><article class="card"><h3>Similarity weight</h3><p><code>w(i,j) = exp(−||cᵢ−cⱼ||² / σ)</code>. Similar neighboring colors create large weights.</p></article><article class="card"><h3>Boundary weight</h3><p>A strong image gradient can become a high cutting cost or a low similarity, depending on the graph definition.</p></article></div>
-      <div class="callout warn"><strong>Scale matters:</strong> if every pixel connects to every other pixel, memory and eigensolver cost grow quickly. Real workflows often reduce the graph first.</div>
-    </section>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+      <div class="brand">
+        <div class="eyebrow">Computer Vision Codelab</div>
+        <h2>Graph-Theoretic Clustering</h2>
+        <p>Very simple OpenCV segmentation.</p>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+        <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+          aria-valuenow="0">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+      <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+    </aside>
 
-    <section class="view" data-step="2">
-      <header class="hero"><span class="eyebrow">Step 3 · Make the graph smaller</span><h1>Superpixels become region nodes</h1><p>SLIC groups nearby, similarly colored pixels into compact initial regions. A region-adjacency graph connects only superpixels that touch.</p></header>
-      <div class="pipeline"><div class="stage"><h3>Start with RGB</h3><p>The original image contains hundreds of thousands of pixels.</p></div><div class="stage"><h3>Run SLIC</h3><p>Produce a few hundred compact, connected superpixels.</p></div><div class="stage"><h3>Build the RAG</h3><p>One node per superpixel; edges only where regions meet.</p></div><div class="stage"><h3>Assign weights</h3><p>Compare mean colors across each neighboring pair.</p></div></div>
-      <h2>What the parameters mean</h2>
-      <div class="grid"><article class="card"><h3><code>n_segments</code></h3><p>The requested starting granularity. More superpixels retain detail but create a larger graph.</p></article><article class="card"><h3><code>compactness</code></h3><p>The trade-off between color similarity and spatially regular superpixel shapes.</p></article><article class="card"><h3><code>sigma</code></h3><p>How quickly graph similarity falls as mean colors differ.</p></article><article class="card"><h3>Connectivity</h3><p>Which touching patterns are allowed to form graph edges.</p></article></div>
-    </section>
+    <div class="mobile-bar">
+      <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation"
+        aria-expanded="false">☰</button>
+      <div class="mobile-title" id="mobileTitle">Graph-Theoretic Clustering</div>
+    </div>
 
-    <section class="view" data-step="3">
-      <header class="hero"><span class="eyebrow">Step 4 · Partition the graph</span><h1>Normalized cut balances separation and coherence</h1><p>A useful cut should remove weak connections between groups without isolating tiny nodes merely because they have few edges.</p></header>
-      <div class="grid"><article class="card"><span class="badge">Cut cost</span><h3>Separate dissimilar groups</h3><p>Add the weights of edges crossing from group A to group B. Lower cross-group similarity is easier to cut.</p></article><article class="card"><span class="badge">Association</span><h3>Keep coherent groups</h3><p>Normalize by each group’s connection to the whole graph so tiny fragments are not automatically preferred.</p></article></div>
-      <div class="callout blue"><strong>Normalized-cut idea:</strong> minimize the fraction of each group’s total association that must be broken. The algorithm recursively makes two-way cuts until no beneficial split remains.</div>
-      <div class="code-card"><div class="code-head"><strong>Current scikit-image workflow</strong><button class="copy-btn" data-copy="#ncutCode">Copy</button></div><pre id="ncutCode"><code>from skimage import color, data, graph, segmentation
+    <main>
+      <div class="content" id="content">
 
-image = data.coffee()
-superpixels = segmentation.slic(
-    image, compactness=30, n_segments=400, start_label=1)
-rag = graph.rag_mean_color(image, superpixels, mode="similarity")
-segments = graph.cut_normalized(superpixels, rag)
-result = color.label2rgb(segments, image, kind="avg", bg_label=0)</code></pre></div>
-      <p>Reference: <a href="https://scikit-image.org/docs/stable/auto_examples/segmentation/plot_ncut.html">scikit-image Normalized Cut example</a>.</p>
-    </section>
 
-    <section class="view" data-step="4">
-      <header class="hero"><span class="eyebrow">Step 5 · Tune the model</span><h1>Predict what changes before moving a slider</h1><p>This simulation uses a fixed scene and illustrates the expected trade-off as the number of initial superpixels changes.</p></header>
-      <div class="lab"><div class="lab-head"><strong>Explore · Graph resolution</strong><span class="mono">drag the slider</span></div><div class="lab-body"><div class="control-row"><label for="segmentsSlider">Starting superpixels</label><input id="segmentsSlider" type="range" min="1" max="4" value="2"><span class="readout" id="segmentsReadout">100</span></div><div class="graph-canvas cut" id="resolutionCanvas" aria-label="Simulated segmented regions"></div><p class="graph-caption" id="resolutionCaption"></p></div></div>
-      <div class="grid three"><article class="card"><h3>Too few</h3><p>Small objects and narrow boundaries disappear in the starting partition.</p></article><article class="card"><h3>Useful range</h3><p>Objects contain several superpixels but the graph remains manageable.</p></article><article class="card"><h3>Too many</h3><p>Detail improves while graph construction and normalized cutting cost more.</p></article></div>
-      <h2>Read the result critically</h2><ul><li>Every output label should form a meaningful connected region.</li><li>Compare boundaries against visible changes, not just region count.</li><li>Try altered lighting and textured objects.</li><li>Remember that unsupervised segments do not automatically have semantic names.</li></ul>
-    </section>
+        <section class="step-view" data-title="Basic idea">
+          <header class="step-header">
+            <span class="step-kicker">STEP 1 · BASIC IDEA</span>
+            <h1>What Is Graph-Theoretic Segmentation?</h1>
+            <p class="lede">It is a way of dividing an image into regions by thinking of the image as a graph.</p>
+          </header>
+          <div class="objective"><strong>Remember only this:</strong> Similar neighboring pixels are grouped together.
+            Very different neighboring pixels are separated.</div>
+          <div class="flow">Image<br>↓<br>Pixels become graph nodes<br>↓<br>Neighboring pixels are
+            connected<br>↓<br>Compare their colors<br>↓<br>Group similar pixels<br>↓<br>Segments</div>
+          <div class="panel yellow"><strong>Exam definition:</strong>
+            <p>Graph-theoretic image segmentation represents an image as a graph and groups similar connected pixels
+              into regions.</p>
+          </div>
+        </section>
 
-    <section class="view" data-step="5">
-      <header class="hero"><span class="eyebrow">Step 6 · Check & review</span><h1>Trace the complete data flow</h1><p>Image → superpixels → region-adjacency graph → weighted cut → output labels.</p></header>
-      <div class="quiz" data-answer="1"><h3>Why build a graph from superpixels instead of all pixels?</h3><div class="options"><button class="option">Superpixels assign semantic class names</button><button class="option">They greatly reduce the number of nodes while preserving local boundaries</button><button class="option">They remove the need for edge weights</button></div><p class="feedback">Superpixels compress many nearby pixels into a much smaller region graph.</p></div>
-      <div class="quiz" data-answer="2"><h3>What does a weak similarity edge suggest?</h3><div class="options"><button class="option">The regions must receive the same label</button><button class="option">The image file is corrupt</button><button class="option">The neighboring regions may lie on opposite sides of a useful cut</button></div><p class="feedback">Weak similarity is evidence that cutting between those neighbors may be inexpensive.</p></div>
-      <div class="callout good"><strong>Module mapping complete:</strong> this codelab covers “Segmentation by Graph-Theoretic Clustering.”</div>
-    </section>
-  </div></main>
-  <div class="bottom-nav"><button id="previous">← Previous</button><button class="next" id="next">Next →</button></div>
-  <script src="../module3.js"></script>
+        <section class="step-view" data-title="Image as a graph">
+          <header class="step-header">
+            <span class="step-kicker">STEP 2 · IMAGE → GRAPH</span>
+            <h1>Pixels Become Nodes</h1>
+            <p class="lede">Imagine every pixel is a point in a graph.</p>
+          </header>
+          <div class="graph-box">Pixel A ─── Pixel
+            B<br>&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>Pixel C ─── Pixel D</div>
+          <div class="grid-2">
+            <div class="concept"><strong>Node</strong>
+              <p>A pixel in the image.</p>
+            </div>
+            <div class="concept"><strong>Edge</strong>
+              <p>A connection between neighboring pixels.</p>
+            </div>
+          </div>
+          <div class="panel blue"><strong>Simple idea:</strong>
+            <p>If neighboring pixels look similar, they probably belong to the same region.</p>
+          </div>
+          <div class="quiz" data-answer="0" data-correct="Correct. In this simple graph model, pixels are nodes.">
+            <h3>What does a graph node represent?</h3>
+            <div class="quiz-options"><button class="quiz-option">A pixel</button><button class="quiz-option">A
+                video</button><button class="quiz-option">A camera</button></div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Similarity and edges">
+          <header class="step-header">
+            <span class="step-kicker">STEP 3 · COMPARE NEIGHBORS</span>
+            <h1>Similar Pixels Stay Together</h1>
+            <p class="lede">The edge between two neighboring pixels can represent how different their colors are.</p>
+          </header>
+          <div class="graph-box">Blue pixel ─ small difference ─ Blue pixel<br><br>Blue pixel ─ large difference ─ Red
+            pixel</div>
+          <div class="grid-2">
+            <div class="concept"><strong>Small difference</strong>
+              <p>Pixels are similar → keep together.</p>
+            </div>
+            <div class="concept"><strong>Large difference</strong>
+              <p>Pixels are different → separate them.</p>
+            </div>
+          </div>
+          <div class="callout"><span class="label">EASIEST MEMORY</span>
+            <p><strong>Similar → join. Different → separate.</strong></p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Install OpenCV contrib">
+          <header class="step-header">
+            <span class="step-kicker">STEP 4 · SETUP</span>
+            <h1>Install the Correct OpenCV Package</h1>
+            <p class="lede">Graph segmentation is inside OpenCV's extra <code>ximgproc</code> module.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>pip install opencv-contrib-python numpy</code></pre>
+          </div>
+          <div class="panel pink"><strong>Important:</strong>
+            <p>Use <code>opencv-contrib-python</code> because <code>ximgproc</code> is an extra OpenCV module.</p>
+          </div>
+          <h2>Read an image</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import cv2
+
+image = cv2.imread("image.jpg")</code></pre>
+          </div>
+          <div class="panel yellow"><strong>Use an easy image:</strong>
+            <p>Choose an image with clear regions such as sky, grass, road, buildings, or colorful objects.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Create segmentor">
+          <header class="step-header">
+            <span class="step-kicker">STEP 5 · CREATE THE ALGORITHM</span>
+            <h1>Create a Graph Segmentor</h1>
+            <p class="lede">OpenCV already implements the graph-based segmentation algorithm for us.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>segmentor = cv2.ximgproc.segmentation.createGraphSegmentation(
+    sigma=0.5,
+    k=300,
+    min_size=100
+)</code></pre>
+          </div>
+          <div class="grid-3">
+            <div class="concept"><strong>sigma</strong>
+              <p>How much the image is smoothed first.</p>
+            </div>
+            <div class="concept"><strong>k</strong>
+              <p>Controls how easily regions are joined.</p>
+            </div>
+            <div class="concept"><strong>min_size</strong>
+              <p>Very tiny regions are merged.</p>
+            </div>
+          </div>
+          <div class="panel blue"><strong>For your first practical:</strong>
+            <p>Just start with <code>0.5, 300, 100</code>.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Segment the image">
+          <header class="step-header">
+            <span class="step-kicker">STEP 6 · RUN SEGMENTATION</span>
+            <h1>Call processImage()</h1>
+            <p class="lede">Give the image to the graph segmentation algorithm.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>labels = segmentor.processImage(image)</code></pre>
+          </div>
+          <div class="panel yellow"><strong>What are labels?</strong>
+            <p><code>labels</code> contains a segment number for every pixel.</p>
+          </div>
+          <div class="graph-box">0 0 0 1 1<br>0 0 0 1 1<br>2 2 2 1 1</div>
+          <ul>
+            <li>All pixels with label <code>0</code> belong to one segment.</li>
+            <li>All pixels with label <code>1</code> belong to another segment.</li>
+            <li>All pixels with label <code>2</code> belong to another segment.</li>
+          </ul>
+          <div class="callout"><span class="label">IMPORTANT</span>
+            <p><code>processImage()</code> returns segment IDs, not a colorful final image.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Show the segments">
+          <header class="step-header">
+            <span class="step-kicker">STEP 7 · VISUALIZE</span>
+            <h1>Give Each Segment One Color</h1>
+            <p class="lede">To make the result easy to see, fill each segment with its average color.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import numpy as np
+
+result = np.zeros_like(image)
+
+for label in np.unique(labels):
+
+    mask = labels == label
+
+    average_color = image[mask].mean(axis=0)
+
+    result[mask] = average_color</code></pre>
+          </div>
+          <div class="flow">Take one segment<br>↓<br>Find all its pixels<br>↓<br>Find their average color<br>↓<br>Paint
+            the whole segment<br>↓<br>Repeat</div>
+          <div class="panel mint"><strong>Why?</strong>
+            <p>This makes the segmented regions easy to see.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Complete practical">
+          <header class="step-header">
+            <span class="step-kicker">STEP 8 · COMPLETE PROGRAM</span>
+            <h1>Complete Graph Segmentation Practical</h1>
+            <p class="lede">This is the main program students need to understand.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import cv2
+import numpy as np
+
+# Read image
+image = cv2.imread("image.jpg")
+
+# Create graph segmentation algorithm
+segmentor = cv2.ximgproc.segmentation.createGraphSegmentation(
+    sigma=0.5,
+    k=300,
+    min_size=100
+)
+
+# Segment the image
+labels = segmentor.processImage(image)
+
+# Empty output image
+result = np.zeros_like(image)
+
+# Give each segment its average color
+for label in np.unique(labels):
+
+    mask = labels == label
+
+    average_color = image[mask].mean(axis=0)
+
+    result[mask] = average_color
+
+# Show result
+cv2.imshow("Original", image)
+cv2.imshow("Segmented", result)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()</code></pre>
+          </div>
+          <div class="flow">Read image<br>↓<br>Create GraphSegmentation<br>↓<br>processImage()<br>↓<br>Get
+            labels<br>↓<br>Color each segment<br>↓<br>Display</div>
+          <div class="challenge">
+            <h3>Try only these experiments</h3>
+            <ol>
+              <li>Run with <code>k=300</code>.</li>
+              <li>Change <code>k</code> to <code>500</code>.</li>
+              <li>See if regions become larger or merge more.</li>
+              <li>Change <code>min_size</code> from <code>100</code> to <code>200</code>.</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Parameters">
+          <header class="step-header">
+            <span class="step-kicker">STEP 9 · PARAMETERS</span>
+            <h1>Understand sigma, k and min_size</h1>
+            <p class="lede">You only need a basic understanding of these three values.</p>
+          </header>
+          <table class="comparison">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Simple meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>sigma</code></td>
+                <td>Smooths the image before segmentation.</td>
+              </tr>
+              <tr>
+                <td><code>k</code></td>
+                <td>Controls how easily regions are merged. Larger values generally give larger regions.</td>
+              </tr>
+              <tr>
+                <td><code>min_size</code></td>
+                <td>Minimum segment size. Tiny segments are merged.</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="panel yellow"><strong>Do not memorize exact values.</strong>
+            <p>The best values depend on the image. Just understand what each one controls.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Exam revision">
+          <header class="step-header">
+            <span class="step-kicker">STEP 10 · EXAM REVISION</span>
+            <h1>What You Need to Remember</h1>
+            <p class="lede">These short answers are enough for a basic college exam or viva.</p>
+          </header>
+          <div class="reveal">
+            <summary>1. What is graph-theoretic segmentation?</summary>
+            <div>It represents an image as a graph and groups similar connected pixels into regions.</div>
+          </div>
+          <div class="reveal">
+            <summary>2. What is a node?</summary>
+            <div>A node represents a pixel.</div>
+          </div>
+          <div class="reveal">
+            <summary>3. What is an edge?</summary>
+            <div>An edge connects neighboring pixels.</div>
+          </div>
+          <div class="reveal">
+            <summary>4. What does an edge weight represent?</summary>
+            <div>How similar or different two connected pixels are.</div>
+          </div>
+          <div class="reveal">
+            <summary>5. What is the main clustering idea?</summary>
+            <div>Similar neighboring pixels are grouped together, while very different pixels are separated.</div>
+          </div>
+          <div class="reveal">
+            <summary>6. Which OpenCV function creates the algorithm?</summary>
+            <div><code>cv2.ximgproc.segmentation.createGraphSegmentation()</code>.</div>
+          </div>
+          <div class="reveal">
+            <summary>7. What does processImage() return?</summary>
+            <div>A segment label for every pixel.</div>
+          </div>
+          <div class="reveal">
+            <summary>8. What does sigma do?</summary>
+            <div>It controls smoothing before segmentation.</div>
+          </div>
+          <div class="reveal">
+            <summary>9. What does k do?</summary>
+            <div>It controls how easily regions merge. Larger values generally make larger segments.</div>
+          </div>
+          <div class="reveal">
+            <summary>10. What does min_size do?</summary>
+            <div>It controls the minimum segment size.</div>
+          </div>
+          <div class="flow">Image → Graph → Compare neighbors → Group similar pixels → Segments</div>
+          <h2>Completion checklist</h2>
+          <ul class="checklist">
+            <li>I know what graph-theoretic segmentation means.</li>
+            <li>I know that pixels are nodes.</li>
+            <li>I know that edges connect neighboring pixels.</li>
+            <li>I understand similar → join, different → separate.</li>
+            <li>I can create GraphSegmentation in OpenCV.</li>
+            <li>I know what processImage() returns.</li>
+            <li>I understand sigma, k and min_size.</li>
+            <li>I can run the complete practical.</li>
+          </ul>
+          <div class="finish">
+            <h2>Codelab complete! 🎉</h2>
+            <p>You can now explain and demonstrate segmentation by graph-theoretic clustering using OpenCV.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
   <script>
     (() => {
-      function cells(target, count = 24) {
-        target.innerHTML = Array.from({length: count}, (_, i) => `<span class="node ${i % 6 > 3 ? 'b' : i > 16 ? 'c' : ''}">${i + 1}</span>`).join('');
+      const steps = [...document.querySelectorAll('.step-view')];
+      const titles = steps.map(step => step.dataset.title);
+      const nav = document.getElementById('stepNav');
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.getElementById('menuBtn');
+      const content = document.getElementById('content');
+      const completed = new Set();
+      let current = 0;
+
+      nav.innerHTML = titles.map((title, index) => `<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+
+      const getHashStep = () => {
+        const match = location.hash.match(/^#step-(\d+)$/);
+        const value = match ? Number(match[1]) - 1 : 0;
+        return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0
+      };
+
+      function render(updateHash = true) {
+        current = Math.max(0, Math.min(current, steps.length - 1));
+
+        steps.forEach((step, index) => {
+          const active = index === current;
+          step.classList.toggle('active', active);
+          step.setAttribute('aria-hidden', String(!active))
+        });
+
+        document.querySelectorAll('.step-link').forEach((button, index) => {
+          button.classList.toggle('active', index === current);
+          button.setAttribute('aria-current', index === current ? 'step' : 'false');
+          button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : ''
+        });
+
+        const percent = Math.round(((current + 1) / steps.length) * 100);
+        document.getElementById('progressBar').style.width = `${percent}%`;
+        document.getElementById('progressText').textContent = `${percent}%`;
+        document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+        document.getElementById('mobileTitle').textContent = titles[current];
+        document.getElementById('prevBtn').disabled = current === 0;
+        document.getElementById('nextBtn').disabled = current === steps.length - 1;
+        document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+
+        if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        sidebar.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
       }
-      const graphCanvas = document.querySelector('#graphCanvas'); cells(graphCanvas);
-      const graphCaptions = { pixels:'Each circle is a pixel; color suggests its appearance.', edges:'Edges connect immediate neighbors. Strong edges prefer to keep similar pixels together.', cut:'Weak cross-color relationships are removed, leaving three connected groups.' };
-      document.querySelectorAll('[data-graph]').forEach(button => button.addEventListener('click', () => {
-        document.querySelectorAll('[data-graph]').forEach(item => item.classList.toggle('active', item === button));
-        graphCanvas.className = `graph-canvas ${button.dataset.graph}`;
-        document.querySelector('#graphCaption').textContent = graphCaptions[button.dataset.graph];
-      }));
-      const resolution = document.querySelector('#resolutionCanvas');
-      const slider = document.querySelector('#segmentsSlider');
-      const values = [50,100,200,400];
-      function update() {
-        const index = Number(slider.value) - 1;
-        document.querySelector('#segmentsReadout').textContent = values[index];
-        cells(resolution, 12 + index * 6);
-        document.querySelector('#resolutionCaption').textContent = index === 0 ? 'Coarse: fast, but the narrow green region is poorly represented.' : index === 3 ? 'Fine: more boundary detail, with a larger graph to partition.' : 'Balanced: several nodes represent each visible area without an excessive graph.';
+
+      function goTo(index) {
+        if (index < 0 || index >= steps.length) return;
+        completed.add(current);
+        current = index;
+        render();
       }
-      slider.addEventListener('input', update); update();
+
+      const navRow = document.createElement('div');
+      navRow.className = 'nav-row';
+      navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';
+      content.appendChild(navRow);
+
+      document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+      document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+      nav.addEventListener('click', event => {
+        const button = event.target.closest('.step-link');
+        if (button) goTo(Number(button.dataset.step))
+      });
+
+      menuBtn.addEventListener('click', () => {
+        const open = sidebar.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', String(open))
+      });
+
+      document.addEventListener('click', async event => {
+        const copy = event.target.closest('.copy-btn');
+
+        if (copy) {
+          const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+          try {
+            await navigator.clipboard.writeText(code);
+            copy.textContent = 'Copied!'
+          } catch {
+            copy.textContent = 'Select & copy'
+          }
+
+          setTimeout(() => copy.textContent = 'Copy', 1200);
+          return;
+        }
+
+        const option = event.target.closest('.quiz-option');
+
+        if (option) {
+          const quiz = option.closest('.quiz');
+          if (quiz.dataset.answered) return;
+
+          const options = [...quiz.querySelectorAll('.quiz-option')];
+          const choice = options.indexOf(option);
+          const answer = Number(quiz.dataset.answer);
+
+          quiz.dataset.answered = 'true';
+          options.forEach(button => button.disabled = true);
+          option.classList.add(choice === answer ? 'correct' : 'wrong');
+
+          if (choice !== answer) {
+            options[answer].classList.add('correct');
+          }
+
+          const feedback = quiz.querySelector('.quiz-feedback');
+          feedback.textContent = choice === answer
+            ? quiz.dataset.correct
+            : `Not quite. ${quiz.dataset.correct}`;
+
+          feedback.classList.add('show');
+        }
+      });
+
+      window.addEventListener('popstate', () => {
+        current = getHashStep();
+        render(false)
+      });
+
+      window.addEventListener('hashchange', () => {
+        current = getHashStep();
+        render(false)
+      });
+
+      document.addEventListener('keydown', event => {
+        if (
+          event.altKey ||
+          event.ctrlKey ||
+          event.metaKey ||
+          ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)
+        ) return;
+
+        if (event.key === 'ArrowRight') goTo(current + 1);
+        if (event.key === 'ArrowLeft') goTo(current - 1);
+      });
+
+      current = getHashStep();
+      render(false);
     })();
   </script>
 </body>
+
 </html>
