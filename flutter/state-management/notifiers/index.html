@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flutter Notifiers — State Management Codelab</title>
+  <meta name="description"
+    content="Learn Flutter notifier-based state management using Listenable, ValueNotifier, ValueListenableBuilder, ChangeNotifier, notifyListeners, ListenableBuilder, listeners, and disposal.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+    :root {
+      --blue: #2856d8;
+      --blue-dark: #17348e;
+      --blue-light: #e4ebff;
+      --ink: #101010;
+      --paper: #f5f7fb;
+      --white: #fff;
+      --yellow: #ffd83d;
+      --mint: #75e6c5;
+      --pink: #ff9bb7;
+      --orange: #ffb866;
+      --border: 3px solid var(--ink);
+      --shadow: 6px 6px 0 var(--ink);
+      --shadow-sm: 4px 4px 0 var(--ink);
+      --sidebar: 292px
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: auto
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      line-height: 1.55
+    }
+
+    button,
+    a {
+      font: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    :focus-visible {
+      outline: 4px solid var(--yellow);
+      outline-offset: 3px
+    }
+
+    .app {
+      min-height: 100vh
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar);
+      padding: 22px 18px;
+      background: var(--blue);
+      border-right: var(--border);
+      overflow: auto;
+      z-index: 20
+    }
+
+    .brand {
+      padding: 16px;
+      margin-bottom: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .eyebrow,
+    .progress-meta,
+    .step-number,
+    .step-kicker,
+    .label,
+    .footer-note {
+      font-family: "DM Mono", monospace
+    }
+
+    .eyebrow {
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase
+    }
+
+    .brand h2 {
+      margin: 5px 0 3px;
+      font-size: 1.42rem;
+      line-height: 1.05
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: .85rem;
+      font-weight: 600
+    }
+
+    .progress-wrap {
+      margin: 0 2px 20px;
+      color: #fff
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+      font-size: .72rem
+    }
+
+    .progress-track {
+      height: 16px;
+      padding: 2px;
+      background: #fff;
+      border: var(--border)
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: var(--yellow);
+      transition: width .2s ease
+    }
+
+    .steps {
+      display: grid;
+      gap: 8px
+    }
+
+    .step-link {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 34px 1fr 18px;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 8px;
+      color: #fff;
+      background: transparent;
+      border: 3px solid transparent;
+      text-align: left;
+      font-weight: 700;
+      line-height: 1.15
+    }
+
+    .step-link:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .step-link.active {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--ink);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .step-number {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 2px solid currentColor;
+      font-size: .78rem
+    }
+
+    .step-status {
+      text-align: center
+    }
+
+    .mobile-bar {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: var(--blue);
+      border-bottom: var(--border)
+    }
+
+    .menu-btn,
+    .mobile-title {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .menu-btn {
+      width: 46px;
+      height: 42px;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .mobile-title {
+      flex: 1;
+      padding: 8px 10px;
+      font-weight: 800
+    }
+
+    main {
+      margin-left: var(--sidebar);
+      min-height: 100vh
+    }
+
+    .content {
+      width: min(980px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 42px 0 28px
+    }
+
+    .step-view {
+      display: none
+    }
+
+    .step-view.active {
+      display: block;
+      animation: stepIn .18s ease-out
+    }
+
+    @keyframes stepIn {
+      from {
+        opacity: .35;
+        transform: translateY(5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .step-header {
+      padding: 28px;
+      margin-bottom: 24px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .step-kicker {
+      display: inline-block;
+      margin-bottom: 13px;
+      padding: 5px 9px;
+      color: #fff;
+      background: var(--blue);
+      border: 2px solid var(--ink);
+      font-size: .72rem
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.08
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 5vw, 3.7rem);
+      letter-spacing: -.045em
+    }
+
+    h2 {
+      margin: 30px 0 12px;
+      font-size: clamp(1.5rem, 3vw, 2.15rem)
+    }
+
+    h3 {
+      margin: 22px 0 9px;
+      font-size: 1.15rem
+    }
+
+    .lede {
+      max-width: 780px;
+      margin: 0;
+      font-size: 1.08rem
+    }
+
+    .objective {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700
+    }
+
+    .panel,
+    .concept,
+    .quiz,
+    .reveal {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .panel {
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .panel.blue {
+      background: var(--blue-light)
+    }
+
+    .panel.mint {
+      background: var(--mint)
+    }
+
+    .panel.pink {
+      background: var(--pink)
+    }
+
+    .panel.yellow {
+      background: var(--yellow)
+    }
+
+    .panel.orange {
+      background: var(--orange)
+    }
+
+    .callout {
+      padding: 16px 18px;
+      margin: 20px 0;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .callout .label {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 3px 7px;
+      color: #fff;
+      background: var(--ink);
+      border: 2px solid var(--ink);
+      font-size: .72rem
+    }
+
+    .grid-2 {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    .concept {
+      padding: 18px
+    }
+
+    .concept strong {
+      font-size: 1.05rem
+    }
+
+    .concept p:last-child {
+      margin-bottom: 0
+    }
+
+    .code-wrap {
+      position: relative;
+      margin: 18px 0
+    }
+
+    pre {
+      margin: 0;
+      padding: 20px;
+      overflow: auto;
+      color: #f7f7f7;
+      background: #111;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", ui-monospace, monospace;
+      font-size: .84rem;
+      line-height: 1.62;
+      tab-size: 2
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      padding: 5px 9px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      font-size: .75rem;
+      font-weight: 800
+    }
+
+    code:not(pre code) {
+      padding: 1px 5px;
+      background: #e8edf7;
+      border: 1px solid #9da9bb;
+      font-family: "DM Mono", monospace;
+      font-size: .88em
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35rem
+    }
+
+    li {
+      margin: 7px 0
+    }
+
+    .comparison {
+      width: 100%;
+      margin: 18px 0;
+      background: #fff;
+      border: var(--border);
+      border-collapse: collapse
+    }
+
+    .comparison th,
+    .comparison td {
+      padding: 11px;
+      border: 2px solid var(--ink);
+      text-align: left;
+      vertical-align: top
+    }
+
+    .comparison th {
+      color: #fff;
+      background: var(--blue)
+    }
+
+    .quiz {
+      padding: 20px;
+      margin: 20px 0
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px
+    }
+
+    .quiz-option {
+      text-align: left;
+      padding: 11px 13px;
+      background: #fff;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-option:hover {
+      background: var(--blue-light)
+    }
+
+    .quiz-option.correct {
+      background: var(--mint)
+    }
+
+    .quiz-option.wrong {
+      background: var(--pink)
+    }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 13px;
+      padding: 10px;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-feedback.show {
+      display: block
+    }
+
+    .reveal {
+      margin: 18px 0
+    }
+
+    .reveal summary {
+      padding: 13px 16px;
+      cursor: pointer;
+      background: var(--blue-light);
+      font-weight: 800
+    }
+
+    .reveal>div {
+      padding: 15px 16px
+    }
+
+    .challenge {
+      padding: 22px;
+      margin: 24px 0;
+      color: #fff;
+      background: var(--ink);
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .challenge h3 {
+      margin-top: 0;
+      color: var(--yellow)
+    }
+
+    .flow {
+      margin: 20px 0;
+      padding: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", monospace;
+      line-height: 1.9;
+      overflow: auto
+    }
+
+    .screen-stack {
+      display: grid;
+      gap: 12px;
+      margin: 22px 0
+    }
+
+    .screen-card {
+      padding: 16px;
+      background: #fff;
+      border: 3px solid var(--ink);
+      box-shadow: var(--shadow-sm);
+      font-weight: 800
+    }
+
+    .screen-card.active {
+      background: var(--mint)
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 30px
+    }
+
+    .checklist li::before {
+      content: "□";
+      position: absolute;
+      left: 0;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: var(--border)
+    }
+
+    .nav-btn {
+      min-width: 130px;
+      padding: 12px 18px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 900
+    }
+
+    .nav-btn.primary {
+      color: #fff;
+      background: var(--blue)
+    }
+
+    .nav-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed
+    }
+
+    .finish {
+      padding: 20px;
+      margin-top: 24px;
+      background: var(--mint);
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .references a {
+      color: var(--blue-dark);
+      font-weight: 700
+    }
+
+    @media(max-width:850px) {
+      :root {
+        --sidebar: 270px;
+        --mobile-bar-height: 65px
+      }
+
+      .sidebar {
+        inset: var(--mobile-bar-height) auto 0 0;
+        transform: translateX(-100%);
+        transition: transform .2s ease
+      }
+
+      .sidebar.open {
+        transform: none
+      }
+
+      .mobile-bar {
+        display: flex;
+        height: var(--mobile-bar-height)
+      }
+
+      main {
+        margin-left: 0
+      }
+
+      .content {
+        width: min(940px, calc(100% - 28px));
+        padding-top: 24px
+      }
+    }
+
+    @media(max-width:680px) {
+      .grid-2 {
+        grid-template-columns: 1fr
+      }
+
+      .content {
+        width: calc(100% - 18px);
+        padding-top: 16px
+      }
+
+      .step-header {
+        padding: 20px 16px
+      }
+
+      .panel,
+      .concept,
+      .quiz {
+        padding: 16px
+      }
+
+      .nav-row {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        padding: 12px 0;
+        background: var(--paper)
+      }
+
+      .nav-btn {
+        min-width: 0;
+        flex: 1;
+        padding: 11px 10px
+      }
+
+      pre {
+        padding: 16px 12px;
+        font-size: .76rem
+      }
+
+      .copy-btn {
+        position: static;
+        align-self: flex-end;
+        margin-bottom: 6px
+      }
+
+      .code-wrap {
+        display: flex;
+        flex-direction: column
+      }
+
+      .code-wrap pre {
+        order: 2
+      }
+
+      .code-wrap .copy-btn {
+        order: 1
+      }
+
+      .comparison {
+        display: block;
+        overflow-x: auto
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+      <div class="brand">
+        <div class="eyebrow">Flutter State Management Codelab</div>
+        <h2>Notifiers in Flutter</h2>
+        <p>From ValueNotifier to ChangeNotifier.</p>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+        <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+          aria-valuenow="0">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+      <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+    </aside>
+
+    <div class="mobile-bar">
+      <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation"
+        aria-expanded="false">☰</button>
+      <div class="mobile-title" id="mobileTitle">Notifiers in Flutter</div>
+    </div>
+
+    <main>
+      <div class="content" id="content">
+
+        <section class="step-view" data-title="Why notifiers?">
+          <header class="step-header">
+            <span class="step-kicker">STEP 1 · WHY STATE LISTENERS?</span>
+            <h1>Why Do We Need Notifiers?</h1>
+            <p class="lede">setState() is great for local UI state. Notifiers help when we want an object to announce
+              that its data has changed.</p>
+          </header>
+
+          <div class="objective"><strong>By the end:</strong> Understand <code>Listenable</code>,
+            <code>ValueNotifier</code>, <code>ValueListenableBuilder</code>, <code>ChangeNotifier</code>,
+            <code>notifyListeners()</code>, <code>ListenableBuilder</code>, manual listeners, disposal, list state, and
+            how all of this leads naturally to Provider.</div>
+          <div class="grid-2">
+            <div class="concept"><strong>setState()</strong>
+              <p>The widget tells Flutter that its own local state changed.</p>
+            </div>
+            <div class="concept"><strong>Notifier</strong>
+              <p>A separate object tells its listeners that some state changed.</p>
+            </div>
+          </div>
+          <div class="flow">Data changes<br>↓<br>Notifier informs listeners<br>↓<br>Listening UI reacts</div>
+          <div class="panel yellow"><strong>Main idea:</strong>
+            <p>A notifier says, “Something inside me changed. Anyone listening should react now.”</p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="The listener model">
+          <header class="step-header">
+            <span class="step-kicker">STEP 2 · THE BASIC IDEA</span>
+            <h1>Understand the Listener Model First</h1>
+            <p class="lede">Before memorizing classes, understand the relationship between a notifier and its listeners.
+            </p>
+          </header>
+
+          <div class="flow">Notifier<br>├── Listener 1<br>├── Listener 2<br>└── Listener 3</div>
+          <div class="panel blue"><strong>Simple meaning:</strong>
+            <p>A listener is just something interested in knowing when another object changes.</p>
+          </div>
+          <h2>Think of a YouTube channel</h2>
+          <div class="grid-2">
+            <div class="concept"><strong>Channel</strong>
+              <p>The notifier.</p>
+            </div>
+            <div class="concept"><strong>Subscribers</strong>
+              <p>The listeners.</p>
+            </div>
+          </div>
+          <div class="callout"><span class="label">MENTAL MODEL</span>
+            <p>When the channel uploads something new, subscribers are informed. A Flutter notifier works in a similar
+              way.</p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Listenable">
+          <header class="step-header">
+            <span class="step-kicker">STEP 3 · FOUNDATION</span>
+            <h1>What Is Listenable?</h1>
+            <p class="lede">Listenable is the basic interface behind Flutter's listener-based objects.</p>
+          </header>
+
+          <div class="panel mint"><strong>You usually do not implement Listenable yourself.</strong>
+            <p>Flutter gives us easier classes that already support the listener pattern.</p>
+          </div>
+          <ul>
+            <li><code>ValueNotifier&lt;T&gt;</code></li>
+            <li><code>ChangeNotifier</code></li>
+            <li><code>TextEditingController</code></li>
+            <li><code>FocusNode</code></li>
+          </ul>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>// The low-level idea is simply:
+object.addListener(callback);
+
+// Later:
+object.removeListener(callback);</code></pre>
+          </div>
+          <div class="quiz" data-answer="1"
+            data-correct="Correct. A Listenable is something that can have listeners attached to it.">
+            <h3>What is the simplest meaning of Listenable?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option">A widget that always uses setState()</button>
+              <button class="quiz-option">An object that other code can listen to</button>
+              <button class="quiz-option">A routing class</button>
+            </div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="ValueNotifier">
+          <header class="step-header">
+            <span class="step-kicker">STEP 4 · SIMPLE STATE</span>
+            <h1>Meet ValueNotifier</h1>
+            <p class="lede">ValueNotifier is the easiest notifier to learn because it stores one value.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>final counter = ValueNotifier&lt;int&gt;(0);</code></pre>
+          </div>
+          <table class="comparison">
+            <thead>
+              <tr>
+                <th>Part</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>ValueNotifier</code></td>
+                <td>The notifier object.</td>
+              </tr>
+              <tr>
+                <td><code>&lt;int&gt;</code></td>
+                <td>The type of value stored.</td>
+              </tr>
+              <tr>
+                <td><code>0</code></td>
+                <td>The initial value.</td>
+              </tr>
+            </tbody>
+          </table>
+          <h2>Read the value</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>print(counter.value);</code></pre>
+          </div>
+          <h2>Change the value</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>counter.value = 10;
+
+counter.value++;</code></pre>
+          </div>
+          <div class="panel yellow"><strong>Important:</strong>
+            <p>Changing <code>.value</code> automatically notifies ValueNotifier's listeners.</p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="ValueListenableBuilder">
+          <header class="step-header">
+            <span class="step-kicker">STEP 5 · LISTEN IN THE UI</span>
+            <h1>Listen with ValueListenableBuilder</h1>
+            <p class="lede">ValueListenableBuilder rebuilds its builder whenever the notifier's value changes.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>ValueListenableBuilder&lt;int&gt;(
+  valueListenable: counter,
+  builder: (context, value, child) {
+    return Text(
+      '$value',
+      style: const TextStyle(fontSize: 40),
+    );
+  },
+)</code></pre>
+          </div>
+          <table class="comparison">
+            <thead>
+              <tr>
+                <th>Part</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>valueListenable</code></td>
+                <td>The ValueNotifier we want to observe.</td>
+              </tr>
+              <tr>
+                <td><code>value</code></td>
+                <td>The latest value inside the notifier.</td>
+              </tr>
+              <tr>
+                <td><code>builder</code></td>
+                <td>Runs again whenever the value changes.</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="flow">counter.value++<br>↓<br>ValueNotifier notifies<br>↓<br>builder runs again<br>↓<br>Text
+            updates</div>
+
+        </section>
+
+        <section class="step-view" data-title="Counter practical">
+          <header class="step-header">
+            <span class="step-kicker">STEP 6 · PRACTICAL 1</span>
+            <h1>Build a Counter Without setState()</h1>
+            <p class="lede">Use ValueNotifier and ValueListenableBuilder together in a complete page.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import 'package:flutter/material.dart';
+
+class CounterPage extends StatefulWidget {
+  const CounterPage({super.key});
+
+  @override
+  State&lt;CounterPage&gt; createState() =&gt; _CounterPageState();
+}
+
+class _CounterPageState extends State&lt;CounterPage&gt; {
+
+  final ValueNotifier&lt;int&gt; counter =
+      ValueNotifier&lt;int&gt;(0);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('ValueNotifier Counter'),
+      ),
+      body: Center(
+        child: ValueListenableBuilder&lt;int&gt;(
+          valueListenable: counter,
+          builder: (context, value, child) {
+            return Text(
+              '$value',
+              style: const TextStyle(fontSize: 50),
+            );
+          },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          counter.value++;
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    counter.dispose();
+    super.dispose();
+  }
+}</code></pre>
+          </div>
+          <div class="panel mint"><strong>Notice:</strong>
+            <p>There is no <code>setState()</code>. Changing <code>counter.value</code> is enough.</p>
+          </div>
+          <div class="challenge">
+            <h3>Try it yourself</h3>
+            <ol>
+              <li>Add a decrement button.</li>
+              <li>Add a reset button.</li>
+              <li>Print the value whenever it changes.</li>
+            </ol>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Boolean state">
+          <header class="step-header">
+            <span class="step-kicker">STEP 7 · PRACTICAL 2</span>
+            <h1>Use ValueNotifier with Boolean State</h1>
+            <p class="lede">The stored type does not have to be int. ValueNotifier works with any value type.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>final ValueNotifier&lt;bool&gt; isDark =
+    ValueNotifier&lt;bool&gt;(false);</code></pre>
+          </div>
+          <h2>Toggle the value</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>isDark.value = !isDark.value;</code></pre>
+          </div>
+          <h2>Listen using a Switch</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>ValueListenableBuilder&lt;bool&gt;(
+  valueListenable: isDark,
+  builder: (context, value, child) {
+    return Switch(
+      value: value,
+      onChanged: (newValue) {
+        isDark.value = newValue;
+      },
+    );
+  },
+)</code></pre>
+          </div>
+          <div class="grid-2">
+            <div class="concept"><strong>Good examples</strong>
+              <p>Password visibility, checkbox state, dark mode, loading state.</p>
+            </div>
+            <div class="concept"><strong>Another common example</strong>
+              <p>A selected tab index stored in <code>ValueNotifier&lt;int&gt;</code>.</p>
+            </div>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="ValueNotifier limits">
+          <header class="step-header">
+            <span class="step-kicker">STEP 8 · WHEN ONE VALUE IS NOT ENOUGH</span>
+            <h1>Where Does ValueNotifier Become Awkward?</h1>
+            <p class="lede">A separate ValueNotifier for every related field can become difficult to organize.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>final name =
+    ValueNotifier&lt;String&gt;('');
+
+final age =
+    ValueNotifier&lt;int&gt;(0);
+
+final isActive =
+    ValueNotifier&lt;bool&gt;(true);
+
+final students =
+    ValueNotifier&lt;List&lt;String&gt;&gt;([]);</code></pre>
+          </div>
+          <div class="panel orange"><strong>The problem:</strong>
+            <p>These values belong to one feature, but now state and business logic are scattered across many separate
+              notifier objects.</p>
+          </div>
+          <div class="flow">Many related values<br>↓<br>Need one state class<br>↓<br>ChangeNotifier</div>
+
+        </section>
+
+        <section class="step-view" data-title="ChangeNotifier">
+          <header class="step-header">
+            <span class="step-kicker">STEP 9 · COMPLEX STATE</span>
+            <h1>Create Your Own ChangeNotifier</h1>
+            <p class="lede">ChangeNotifier lets us create one class that owns related state and the methods that change
+              it.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import 'package:flutter/foundation.dart';
+
+class CounterNotifier extends ChangeNotifier {
+
+  int _count = 0;
+
+  int get count =&gt; _count;
+
+  void increment() {
+    _count++;
+    notifyListeners();
+  }
+
+  void decrement() {
+    _count--;
+    notifyListeners();
+  }
+}</code></pre>
+          </div>
+          <div class="grid-2">
+            <div class="concept"><strong>Private state</strong>
+              <p><code>_count</code> cannot be directly changed from outside the class.</p>
+            </div>
+            <div class="concept"><strong>Getter</strong>
+              <p><code>count</code> lets the UI read the current value safely.</p>
+            </div>
+          </div>
+          <div class="panel yellow"><strong>Most important line:</strong>
+            <p><code>notifyListeners()</code> tells every listener that the notifier's state has changed.</p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="notifyListeners()">
+          <header class="step-header">
+            <span class="step-kicker">STEP 10 · THE CORE METHOD</span>
+            <h1>Understand notifyListeners() Properly</h1>
+            <p class="lede">Changing a field inside ChangeNotifier does not automatically update listeners. You must
+              notify them.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>void increment() {
+  _count++;
+  notifyListeners();
+}</code></pre>
+          </div>
+          <div class="flow">increment()<br>↓<br>_count changes<br>↓<br>notifyListeners()<br>↓<br>listeners are informed
+          </div>
+          <div class="grid-2">
+            <div class="concept"><strong>If you call it</strong>
+              <p>Listening UI gets a chance to rebuild.</p>
+            </div>
+            <div class="concept"><strong>If you forget it</strong>
+              <p>The data changes internally, but listening UI may continue showing the old value.</p>
+            </div>
+          </div>
+          <div class="quiz" data-answer="2"
+            data-correct="Correct. notifyListeners() informs all registered listeners that the notifier changed.">
+            <h3>What does notifyListeners() do?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option">Creates a new widget</button>
+              <button class="quiz-option">Navigates to another page</button>
+              <button class="quiz-option">Informs registered listeners about a change</button>
+            </div>
+            <div class="quiz-feedback" aria-live="polite"></div>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="ListenableBuilder">
+          <header class="step-header">
+            <span class="step-kicker">STEP 11 · LISTEN TO CHANGENOTIFIER</span>
+            <h1>Rebuild UI with ListenableBuilder</h1>
+            <p class="lede">ChangeNotifier is a Listenable, so Flutter's ListenableBuilder can react to it.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>final CounterNotifier counterNotifier =
+    CounterNotifier();</code></pre>
+          </div>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>ListenableBuilder(
+  listenable: counterNotifier,
+  builder: (context, child) {
+    return Text(
+      '${counterNotifier.count}',
+      style: const TextStyle(fontSize: 50),
+    );
+  },
+)</code></pre>
+          </div>
+          <h2>Change the state</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>ElevatedButton(
+  onPressed: () {
+    counterNotifier.increment();
+  },
+  child: const Text('Increase'),
+)</code></pre>
+          </div>
+          <div class="panel blue"><strong>Very important:</strong>
+            <p>ChangeNotifier works without Provider. Provider is a separate package that helps us share and access the
+              notifier later.</p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Manual listeners">
+          <header class="step-header">
+            <span class="step-kicker">STEP 12 · ADDLISTENER</span>
+            <h1>Listen Without Rebuilding UI</h1>
+            <p class="lede">Sometimes we want to run code on a state change without building a widget.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>counterNotifier.addListener(() {
+  print('Counter changed');
+  print(counterNotifier.count);
+});</code></pre>
+          </div>
+          <h2>Use a named listener if you want to remove it later</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>void onCounterChanged() {
+  print(counterNotifier.count);
+}
+
+counterNotifier.addListener(
+  onCounterChanged,
+);
+
+// Later
+counterNotifier.removeListener(
+  onCounterChanged,
+);</code></pre>
+          </div>
+          <div class="panel yellow"><strong>Use manual listeners for:</strong>
+            <p>Logging, debugging, side effects, or reacting to controller changes. For normal UI updates, builder
+              widgets are usually cleaner.</p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="dispose()">
+          <header class="step-header">
+            <span class="step-kicker">STEP 13 · CLEANUP</span>
+            <h1>Dispose Objects You Own</h1>
+            <p class="lede">Notifier-style objects may keep listeners and resources. Clean them up when the owning
+              widget is removed.</p>
+          </header>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>@override
+void dispose() {
+  counterNotifier.dispose();
+  super.dispose();
+}</code></pre>
+          </div>
+          <div class="grid-2">
+            <div class="concept"><strong>Notifier</strong>
+              <p><code>counterNotifier.dispose()</code></p>
+            </div>
+            <div class="concept"><strong>Text controller</strong>
+              <p><code>controller.dispose()</code></p>
+            </div>
+            <div class="concept"><strong>Focus</strong>
+              <p><code>focusNode.dispose()</code></p>
+            </div>
+            <div class="concept"><strong>Animation</strong>
+              <p><code>animationController.dispose()</code></p>
+            </div>
+          </div>
+          <div class="callout"><span class="label">GOOD HABIT</span>
+            <p>If your widget creates an object, owns its lifetime, and that object exposes <code>dispose()</code>,
+              dispose it.</p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Student list practical">
+          <header class="step-header">
+            <span class="step-kicker">STEP 14 · PRACTICAL 3</span>
+            <h1>Manage a Student List with ChangeNotifier</h1>
+            <p class="lede">Now use ChangeNotifier for realistic state: a list that can add and remove students.</p>
+          </header>
+
+          <h2>1. Create StudentNotifier</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import 'package:flutter/foundation.dart';
+
+class StudentNotifier extends ChangeNotifier {
+
+  final List&lt;String&gt; _students = [];
+
+  List&lt;String&gt; get students =&gt; _students;
+
+  void addStudent(String name) {
+    _students.add(name);
+    notifyListeners();
+  }
+
+  void removeStudent(String name) {
+    _students.remove(name);
+    notifyListeners();
+  }
+}</code></pre>
+          </div>
+
+          <h2>2. Create the page</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class StudentsPage extends StatefulWidget {
+  const StudentsPage({super.key});
+
+  @override
+  State&lt;StudentsPage&gt; createState() {
+    return _StudentsPageState();
+  }
+}
+
+class _StudentsPageState extends State&lt;StudentsPage&gt; {
+
+  final StudentNotifier studentNotifier =
+      StudentNotifier();
+
+  final TextEditingController nameController =
+      TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Students'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Student Name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            ElevatedButton(
+              onPressed: () {
+                final name =
+                    nameController.text.trim();
+
+                if (name.isEmpty) {
+                  return;
+                }
+
+                studentNotifier.addStudent(name);
+                nameController.clear();
+              },
+              child: const Text('Add Student'),
+            ),
+
+            const SizedBox(height: 20),
+
+            Expanded(
+              child: ListenableBuilder(
+                listenable: studentNotifier,
+                builder: (context, child) {
+
+                  return ListView.builder(
+                    itemCount:
+                        studentNotifier.students.length,
+                    itemBuilder: (context, index) {
+
+                      final student =
+                          studentNotifier.students[index];
+
+                      return ListTile(
+                        title: Text(student),
+                        trailing: IconButton(
+                          icon:
+                              const Icon(Icons.delete),
+                          onPressed: () {
+                            studentNotifier
+                                .removeStudent(student);
+                          },
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    studentNotifier.dispose();
+    nameController.dispose();
+    super.dispose();
+  }
+}</code></pre>
+          </div>
+
+          <div class="grid-2">
+            <div class="concept"><strong>UI responsibility</strong>
+              <p>TextField, buttons, ListView, displaying current data.</p>
+            </div>
+            <div class="concept"><strong>Notifier responsibility</strong>
+              <p>Owning the list, adding/removing items, notifying listeners.</p>
+            </div>
+          </div>
+          <div class="challenge">
+            <h3>Extend this practical</h3>
+            <ol>
+              <li>Add an <code>updateStudent()</code> method.</li>
+              <li>Add <code>clearStudents()</code>.</li>
+              <li>Show the total number of students.</li>
+            </ol>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Existing Flutter notifiers">
+          <header class="step-header">
+            <span class="step-kicker">STEP 15 · YOU ALREADY USE THEM</span>
+            <h1>Flutter Already Uses the Notifier Pattern</h1>
+            <p class="lede">TextEditingController and FocusNode are familiar examples of objects that can notify
+              listeners.</p>
+          </header>
+
+          <h2>TextEditingController</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>final controller =
+    TextEditingController();
+
+controller.addListener(() {
+  print(controller.text);
+});</code></pre>
+          </div>
+
+          <h2>FocusNode</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>final focusNode = FocusNode();
+
+focusNode.addListener(() {
+  print(focusNode.hasFocus);
+});</code></pre>
+          </div>
+
+          <div class="panel mint"><strong>Big realization:</strong>
+            <p>The notifier/listener pattern is not something unusual added by Provider. Flutter already uses this
+              pattern throughout the framework.</p>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Compare notifiers">
+          <header class="step-header">
+            <span class="step-kicker">STEP 16 · CHOOSE THE RIGHT TOOL</span>
+            <h1>ValueNotifier vs ChangeNotifier</h1>
+            <p class="lede">Use the simplest notifier that fits the state you are managing.</p>
+          </header>
+
+          <table class="comparison">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>ValueNotifier</th>
+                <th>ChangeNotifier</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Best for</td>
+                <td>One simple value</td>
+                <td>Related state + methods</td>
+              </tr>
+              <tr>
+                <td>Examples</td>
+                <td>Counter, bool, selected index</td>
+                <td>Cart, students, login, profile</td>
+              </tr>
+              <tr>
+                <td>Update</td>
+                <td>Change <code>.value</code></td>
+                <td>Change fields and call <code>notifyListeners()</code></td>
+              </tr>
+              <tr>
+                <td>Common builder</td>
+                <td><code>ValueListenableBuilder</code></td>
+                <td><code>ListenableBuilder</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="panel yellow"><strong>Easy rule:</strong>
+            <p>One simple value? Start with ValueNotifier. A feature with multiple values and operations? Use
+              ChangeNotifier.</p>
+          </div>
+          <div class="reveal">
+            <summary>What about setState()?</summary>
+            <div><code>setState()</code> is still excellent for local widget state. Not every boolean or counter needs a
+              separate notifier.</div>
+          </div>
+
+        </section>
+
+        <section class="step-view" data-title="Provider comes next">
+          <header class="step-header">
+            <span class="step-kicker">STEP 17 · NEXT TOPIC</span>
+            <h1>Why Provider Comes Next</h1>
+            <p class="lede">Our notifier works, but sharing the same notifier across many screens manually becomes
+              repetitive.</p>
+          </header>
+
+          <div class="flow">DashboardPage<br>├── HomePage<br>├── StudentsPage<br>├── ProfilePage<br>└── SettingsPage
+          </div>
+
+          <p>Imagine all four screens need the same student state.</p>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>StudentsPage(
+  studentNotifier: studentNotifier,
+)</code></pre>
+          </div>
+
+          <p>Then pass it to another screen:</p>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>StudentDetailsPage(
+  studentNotifier: studentNotifier,
+)</code></pre>
+          </div>
+
+          <div class="panel orange"><strong>Problem:</strong>
+            <p>Passing the same object through many constructors becomes repetitive. This is often called prop drilling.
+            </p>
+          </div>
+
+          <h2>Provider will solve the sharing problem</h2>
+
+          <div class="flow">ChangeNotifier<br>+<br>Provider<br>↓<br>Easy access across the widget tree</div>
+
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>ChangeNotifierProvider(
+  create: (context) =&gt; StudentNotifier(),
+  child: const MyApp(),
+)</code></pre>
+          </div>
+
+          <div class="panel blue"><strong>Remember this distinction:</strong>
+            <p><code>ChangeNotifier</code> manages the state. <code>Provider</code> helps make that state available to
+              widgets.</p>
+          </div>
+
+          <h2>Final challenge</h2>
+          <div class="challenge">
+            <h3>Build a Todo Notifier</h3>
+            <ol>
+              <li>Create a list of todos.</li>
+              <li>Add a todo.</li>
+              <li>Remove a todo.</li>
+              <li>Clear all todos.</li>
+              <li>Show the total count.</li>
+              <li>Use only <code>ChangeNotifier</code> and <code>ListenableBuilder</code>.</li>
+            </ol>
+          </div>
+
+          <h2>Quick revision</h2>
+          <div class="reveal">
+            <summary>1. What is a notifier?</summary>
+            <div>An object that can inform listeners when its state changes.</div>
+          </div>
+          <div class="reveal">
+            <summary>2. What is ValueNotifier?</summary>
+            <div>A notifier designed to hold one value.</div>
+          </div>
+          <div class="reveal">
+            <summary>3. How do we read ValueNotifier state?</summary>
+            <div>Using its <code>.value</code> property.</div>
+          </div>
+          <div class="reveal">
+            <summary>4. Which widget commonly listens to ValueNotifier?</summary>
+            <div><code>ValueListenableBuilder</code>.</div>
+          </div>
+          <div class="reveal">
+            <summary>5. What is ChangeNotifier?</summary>
+            <div>A class that lets us create a custom state object and notify registered listeners.</div>
+          </div>
+          <div class="reveal">
+            <summary>6. Why call notifyListeners()?</summary>
+            <div>To inform listeners that the ChangeNotifier's state changed.</div>
+          </div>
+          <div class="reveal">
+            <summary>7. Which widget can listen to ChangeNotifier directly?</summary>
+            <div><code>ListenableBuilder</code>.</div>
+          </div>
+          <div class="reveal">
+            <summary>8. What does addListener() do?</summary>
+            <div>Registers a callback that runs when the notifier reports a change.</div>
+          </div>
+          <div class="reveal">
+            <summary>9. Why dispose a notifier?</summary>
+            <div>To clean up listeners/resources when the owner no longer needs it.</div>
+          </div>
+          <div class="reveal">
+            <summary>10. Why teach Provider next?</summary>
+            <div>Provider makes it easier to create, share, and access notifier state across the widget tree.</div>
+          </div>
+
+          <h2>Completion checklist</h2>
+          <ul class="checklist">
+            <li>I understand the listener/notifier model.</li>
+            <li>I can create a ValueNotifier.</li>
+            <li>I can use ValueListenableBuilder.</li>
+            <li>I can create a ChangeNotifier.</li>
+            <li>I understand notifyListeners().</li>
+            <li>I can use ListenableBuilder.</li>
+            <li>I understand addListener() and removeListener().</li>
+            <li>I remember to dispose objects I own.</li>
+            <li>I can manage a list using ChangeNotifier.</li>
+            <li>I understand why Provider comes next.</li>
+          </ul>
+
+          <div class="finish">
+            <h2>Codelab complete! 🎉</h2>
+            <p>You now understand Flutter's notifier-based state-management foundation and are ready to learn Provider.
+            </p>
+          </div>
+
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const steps = [...document.querySelectorAll('.step-view')];
+      const titles = steps.map(step => step.dataset.title);
+      const nav = document.getElementById('stepNav');
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.getElementById('menuBtn');
+      const content = document.getElementById('content');
+      const completed = new Set();
+      let current = 0;
+      nav.innerHTML = titles.map((title, index) => `<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+      const getHashStep = () => { const match = location.hash.match(/^#step-(\d+)$/); const value = match ? Number(match[1]) - 1 : 0; return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0 };
+      function render(updateHash = true) {
+        current = Math.max(0, Math.min(current, steps.length - 1));
+        steps.forEach((step, index) => { const active = index === current; step.classList.toggle('active', active); step.setAttribute('aria-hidden', String(!active)) });
+        document.querySelectorAll('.step-link').forEach((button, index) => { button.classList.toggle('active', index === current); button.setAttribute('aria-current', index === current ? 'step' : 'false'); button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '' });
+        const percent = Math.round(((current + 1) / steps.length) * 100);
+        document.getElementById('progressBar').style.width = `${percent}%`;
+        document.getElementById('progressText').textContent = `${percent}%`;
+        document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+        document.getElementById('mobileTitle').textContent = titles[current];
+        document.getElementById('prevBtn').disabled = current === 0;
+        document.getElementById('nextBtn').disabled = current === steps.length - 1;
+        document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+        if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+        window.scrollTo({ top: 0, behavior: 'auto' }); sidebar.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false');
+      }
+      function goTo(index) { if (index < 0 || index >= steps.length) return; completed.add(current); current = index; render(); }
+      const navRow = document.createElement('div'); navRow.className = 'nav-row'; navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>'; content.appendChild(navRow);
+      document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+      document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+      nav.addEventListener('click', event => { const button = event.target.closest('.step-link'); if (button) goTo(Number(button.dataset.step)) });
+      menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)) });
+      document.addEventListener('click', async event => { const copy = event.target.closest('.copy-btn'); if (copy) { const code = copy.parentElement.querySelector('pre code')?.textContent ?? ''; try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!' } catch { copy.textContent = 'Select & copy' } setTimeout(() => copy.textContent = 'Copy', 1200); return; } const option = event.target.closest('.quiz-option'); if (option) { const quiz = option.closest('.quiz'); if (quiz.dataset.answered) return; const options = [...quiz.querySelectorAll('.quiz-option')]; const choice = options.indexOf(option); const answer = Number(quiz.dataset.answer); quiz.dataset.answered = 'true'; options.forEach(button => button.disabled = true); option.classList.add(choice === answer ? 'correct' : 'wrong'); if (choice !== answer) options[answer].classList.add('correct'); const feedback = quiz.querySelector('.quiz-feedback'); feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`; feedback.classList.add('show'); } });
+      window.addEventListener('popstate', () => { current = getHashStep(); render(false) }); window.addEventListener('hashchange', () => { current = getHashStep(); render(false) });
+      document.addEventListener('keydown', event => { if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return; if (event.key === 'ArrowRight') goTo(current + 1); if (event.key === 'ArrowLeft') goTo(current - 1) });
+      current = getHashStep(); render(false);
+    })();
+  </script>
+</body>
+
+</html>
