@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Texture Extraction & Pedestrian Detection — OpenCV Codelab</title>
+    <meta name="description"
+        content="Step-by-step OpenCV codelab for texture extraction using GLCM and pedestrian object detection using HOG.">
+    <meta name="theme-color" content="#2856d8">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+        :root {
+            --blue: #2856d8;
+            --blue-dark: #17348e;
+            --blue-light: #e4ebff;
+            --ink: #101010;
+            --paper: #f5f7fb;
+            --white: #fff;
+            --yellow: #ffd83d;
+            --mint: #75e6c5;
+            --pink: #ff9bb7;
+            --orange: #ffb866;
+            --border: 3px solid var(--ink);
+            --shadow: 6px 6px 0 var(--ink);
+            --shadow-sm: 4px 4px 0 var(--ink);
+            --sidebar: 292px
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-behavior: auto
+        }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: "Space Grotesk", system-ui, sans-serif;
+            line-height: 1.55
+        }
+
+        button,
+        a {
+            font: inherit
+        }
+
+        button {
+            cursor: pointer
+        }
+
+        :focus-visible {
+            outline: 4px solid var(--yellow);
+            outline-offset: 3px
+        }
+
+        .app {
+            min-height: 100vh
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: var(--sidebar);
+            padding: 22px 18px;
+            background: var(--blue);
+            border-right: var(--border);
+            overflow: auto;
+            z-index: 20
+        }
+
+        .brand {
+            padding: 16px;
+            margin-bottom: 20px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .eyebrow,
+        .progress-meta,
+        .step-number,
+        .step-kicker,
+        .label,
+        .footer-note {
+            font-family: "DM Mono", monospace
+        }
+
+        .eyebrow {
+            font-size: .72rem;
+            font-weight: 500;
+            letter-spacing: .06em;
+            text-transform: uppercase
+        }
+
+        .brand h2 {
+            margin: 5px 0 3px;
+            font-size: 1.42rem;
+            line-height: 1.05
+        }
+
+        .brand p {
+            margin: 0;
+            font-size: .85rem;
+            font-weight: 600
+        }
+
+        .progress-wrap {
+            margin: 0 2px 20px;
+            color: #fff
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 7px;
+            font-size: .72rem
+        }
+
+        .progress-track {
+            height: 16px;
+            padding: 2px;
+            background: #fff;
+            border: var(--border)
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: var(--yellow);
+            transition: width .2s ease
+        }
+
+        .steps {
+            display: grid;
+            gap: 8px
+        }
+
+        .step-link {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 34px 1fr 18px;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 8px;
+            color: #fff;
+            background: transparent;
+            border: 3px solid transparent;
+            text-align: left;
+            font-weight: 700;
+            line-height: 1.15
+        }
+
+        .step-link:hover {
+            background: rgba(255, 255, 255, .14)
+        }
+
+        .step-link.active {
+            color: var(--ink);
+            background: #fff;
+            border-color: var(--ink);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            border: 2px solid currentColor;
+            font-size: .78rem
+        }
+
+        .step-status {
+            text-align: center
+        }
+
+        .mobile-bar {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--blue);
+            border-bottom: var(--border)
+        }
+
+        .menu-btn,
+        .mobile-title {
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .menu-btn {
+            width: 46px;
+            height: 42px;
+            font-size: 1.25rem;
+            font-weight: 900
+        }
+
+        .mobile-title {
+            flex: 1;
+            padding: 8px 10px;
+            font-weight: 800
+        }
+
+        main {
+            margin-left: var(--sidebar);
+            min-height: 100vh
+        }
+
+        .content {
+            width: min(980px, calc(100% - 48px));
+            margin: 0 auto;
+            padding: 42px 0 28px
+        }
+
+        .step-view {
+            display: none
+        }
+
+        .step-view.active {
+            display: block;
+            animation: stepIn .18s ease-out
+        }
+
+        @keyframes stepIn {
+            from {
+                opacity: .35;
+                transform: translateY(5px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .step-header {
+            padding: 28px;
+            margin-bottom: 24px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow)
+        }
+
+        .step-kicker {
+            display: inline-block;
+            margin-bottom: 13px;
+            padding: 5px 9px;
+            color: #fff;
+            background: var(--blue);
+            border: 2px solid var(--ink);
+            font-size: .72rem
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.08
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 5vw, 3.7rem);
+            letter-spacing: -.045em
+        }
+
+        h2 {
+            margin: 30px 0 12px;
+            font-size: clamp(1.5rem, 3vw, 2.15rem)
+        }
+
+        h3 {
+            margin: 22px 0 9px;
+            font-size: 1.15rem
+        }
+
+        .lede {
+            max-width: 780px;
+            margin: 0;
+            font-size: 1.08rem
+        }
+
+        .objective {
+            margin-top: 20px;
+            padding: 14px 16px;
+            background: var(--yellow);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 700
+        }
+
+        .panel,
+        .concept,
+        .quiz,
+        .reveal {
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .panel {
+            padding: 22px;
+            margin: 20px 0
+        }
+
+        .panel.blue {
+            background: var(--blue-light)
+        }
+
+        .panel.mint {
+            background: var(--mint)
+        }
+
+        .panel.pink {
+            background: var(--pink)
+        }
+
+        .panel.yellow {
+            background: var(--yellow)
+        }
+
+        .panel.orange {
+            background: var(--orange)
+        }
+
+        .callout {
+            padding: 16px 18px;
+            margin: 20px 0;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .callout .label {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 3px 7px;
+            color: #fff;
+            background: var(--ink);
+            border: 2px solid var(--ink);
+            font-size: .72rem
+        }
+
+        .grid-2 {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(2, minmax(0, 1fr))
+        }
+
+        .concept {
+            padding: 18px
+        }
+
+        .concept strong {
+            font-size: 1.05rem
+        }
+
+        .concept p:last-child {
+            margin-bottom: 0
+        }
+
+        .code-wrap {
+            position: relative;
+            margin: 18px 0
+        }
+
+        pre {
+            margin: 0;
+            padding: 20px;
+            overflow: auto;
+            color: #f7f7f7;
+            background: #111;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-family: "DM Mono", ui-monospace, monospace;
+            font-size: .84rem;
+            line-height: 1.62;
+            tab-size: 2
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 2;
+            padding: 5px 9px;
+            background: var(--yellow);
+            border: 2px solid var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+            font-size: .75rem;
+            font-weight: 800
+        }
+
+        code:not(pre code) {
+            padding: 1px 5px;
+            background: #e8edf7;
+            border: 1px solid #9da9bb;
+            font-family: "DM Mono", monospace;
+            font-size: .88em
+        }
+
+        ul,
+        ol {
+            padding-left: 1.35rem
+        }
+
+        li {
+            margin: 7px 0
+        }
+
+        .comparison {
+            width: 100%;
+            margin: 18px 0;
+            background: #fff;
+            border: var(--border);
+            border-collapse: collapse
+        }
+
+        .comparison th,
+        .comparison td {
+            padding: 11px;
+            border: 2px solid var(--ink);
+            text-align: left;
+            vertical-align: top
+        }
+
+        .comparison th {
+            color: #fff;
+            background: var(--blue)
+        }
+
+        .quiz {
+            padding: 20px;
+            margin: 20px 0
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 9px;
+            margin-top: 14px
+        }
+
+        .quiz-option {
+            text-align: left;
+            padding: 11px 13px;
+            background: #fff;
+            border: 2px solid var(--ink);
+            font-weight: 700
+        }
+
+        .quiz-option:hover {
+            background: var(--blue-light)
+        }
+
+        .quiz-option.correct {
+            background: var(--mint)
+        }
+
+        .quiz-option.wrong {
+            background: var(--pink)
+        }
+
+        .quiz-feedback {
+            display: none;
+            margin-top: 13px;
+            padding: 10px;
+            border: 2px solid var(--ink);
+            font-weight: 700
+        }
+
+        .quiz-feedback.show {
+            display: block
+        }
+
+        .reveal {
+            margin: 18px 0
+        }
+
+        .reveal summary {
+            padding: 13px 16px;
+            cursor: pointer;
+            background: var(--blue-light);
+            font-weight: 800
+        }
+
+        .reveal>div {
+            padding: 15px 16px
+        }
+
+        .challenge {
+            padding: 22px;
+            margin: 24px 0;
+            color: #fff;
+            background: var(--ink);
+            border: var(--border);
+            box-shadow: var(--shadow)
+        }
+
+        .challenge h3 {
+            margin-top: 0;
+            color: var(--yellow)
+        }
+
+        .flow {
+            margin: 20px 0;
+            padding: 20px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-family: "DM Mono", monospace;
+            line-height: 1.9;
+            overflow: auto
+        }
+
+        .screen-stack {
+            display: grid;
+            gap: 12px;
+            margin: 22px 0
+        }
+
+        .screen-card {
+            padding: 16px;
+            background: #fff;
+            border: 3px solid var(--ink);
+            box-shadow: var(--shadow-sm);
+            font-weight: 800
+        }
+
+        .screen-card.active {
+            background: var(--mint)
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0
+        }
+
+        .checklist li {
+            position: relative;
+            padding-left: 30px
+        }
+
+        .checklist li::before {
+            content: "□";
+            position: absolute;
+            left: 0;
+            font-size: 1.25rem;
+            font-weight: 900
+        }
+
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            margin-top: 34px;
+            padding-top: 20px;
+            border-top: var(--border)
+        }
+
+        .nav-btn {
+            min-width: 130px;
+            padding: 12px 18px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 900
+        }
+
+        .nav-btn.primary {
+            color: #fff;
+            background: var(--blue)
+        }
+
+        .nav-btn:disabled {
+            opacity: .35;
+            cursor: not-allowed
+        }
+
+        .finish {
+            padding: 20px;
+            margin-top: 24px;
+            background: var(--mint);
+            border: var(--border);
+            box-shadow: var(--shadow)
+        }
+
+        .references a {
+            color: var(--blue-dark);
+            font-weight: 700
+        }
+
+        @media(max-width:850px) {
+            :root {
+                --sidebar: 270px;
+                --mobile-bar-height: 65px
+            }
+
+            .sidebar {
+                inset: var(--mobile-bar-height) auto 0 0;
+                transform: translateX(-100%);
+                transition: transform .2s ease
+            }
+
+            .sidebar.open {
+                transform: none
+            }
+
+            .mobile-bar {
+                display: flex;
+                height: var(--mobile-bar-height)
+            }
+
+            main {
+                margin-left: 0
+            }
+
+            .content {
+                width: min(940px, calc(100% - 28px));
+                padding-top: 24px
+            }
+        }
+
+        @media(max-width:680px) {
+            .grid-2 {
+                grid-template-columns: 1fr
+            }
+
+            .content {
+                width: calc(100% - 18px);
+                padding-top: 16px
+            }
+
+            .step-header {
+                padding: 20px 16px
+            }
+
+            .panel,
+            .concept,
+            .quiz {
+                padding: 16px
+            }
+
+            .nav-row {
+                position: sticky;
+                bottom: 0;
+                z-index: 10;
+                padding: 12px 0;
+                background: var(--paper)
+            }
+
+            .nav-btn {
+                min-width: 0;
+                flex: 1;
+                padding: 11px 10px
+            }
+
+            pre {
+                padding: 16px 12px;
+                font-size: .76rem
+            }
+
+            .copy-btn {
+                position: static;
+                align-self: flex-end;
+                margin-bottom: 6px
+            }
+
+            .code-wrap {
+                display: flex;
+                flex-direction: column
+            }
+
+            .code-wrap pre {
+                order: 2
+            }
+
+            .code-wrap .copy-btn {
+                order: 1
+            }
+
+            .comparison {
+                display: block;
+                overflow-x: auto
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+            <div class="brand">
+                <div class="eyebrow">Computer Vision Codelab</div>
+                <h2>Texture & Object Detection</h2>
+                <p>Programs 7 and 8 · OpenCV</p>
+            </div>
+            <div class="progress-wrap">
+                <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+                <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                    aria-valuenow="0">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+            <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+        </aside>
+        <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation"
+                aria-expanded="false">☰</button>
+            <div class="mobile-title" id="mobileTitle">Texture & Object Detection</div>
+        </div>
+        <main>
+            <div class="content" id="content">
+
+                <section class="step-view" data-title="What we will build">
+                    <header class="step-header"><span class="step-kicker">STEP 1 · OVERVIEW</span>
+                        <h1>Texture Extraction & Pedestrian Detection</h1>
+                        <p class="lede">In this codelab we will create the two practical programs from your syllabus:
+                            texture extraction from an image and object detection by recognizing pedestrians.</p>
+                    </header>
+                    <div class="objective"><strong>By the end:</strong> You will be able to load images with OpenCV,
+                        extract simple GLCM texture features, detect pedestrians with HOG, draw bounding boxes, and
+                        explain every important line of both programs.</div>
+                    <div class="grid-2">
+                        <div class="concept"><strong>Program 7</strong>
+                            <p>Implement texture extraction of a given image.</p>
+                        </div>
+                        <div class="concept"><strong>Program 8</strong>
+                            <p>Implement object detection, for example recognizing pedestrians.</p>
+                        </div>
+                    </div>
+                    <div class="flow">Program 7<br>Image → Grayscale → GLCM → Texture numbers<br><br>Program 8<br>Image
+                        → HOG pedestrian detector → Bounding boxes → Detected people</div>
+                    <div class="panel yellow"><strong>Important:</strong>
+                        <p>This codelab focuses on the practical. We will learn only the amount of theory needed to
+                            understand and write the programs.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Install libraries">
+                    <header class="step-header"><span class="step-kicker">STEP 2 · SETUP</span>
+                        <h1>Install the Required Libraries</h1>
+                        <p class="lede">We will use OpenCV for image processing and scikit-image for the GLCM texture
+                            calculation.</p>
+                    </header>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>pip install opencv-python scikit-image</code></pre>
+                    </div>
+                    <table class="comparison">
+                        <thead>
+                            <tr>
+                                <th>Library</th>
+                                <th>Why we need it</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>opencv-python</code></td>
+                                <td>Reads images, displays images, resizes images, and draws rectangles.</td>
+                            </tr>
+                            <tr>
+                                <td><code>scikit-image</code></td>
+                                <td>Provides <code>graycomatrix()</code> and <code>graycoprops()</code> for texture
+                                    extraction.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="panel blue"><strong>Files to keep ready:</strong>
+                        <p>Put one texture image such as <code>texture.jpg</code> and one pedestrian image such as
+                            <code>pedestrians.jpg</code> in the same folder as your Python program.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Texture extraction idea">
+                    <header class="step-header"><span class="step-kicker">STEP 3 · PROGRAM 7</span>
+                        <h1>What Does Texture Extraction Mean?</h1>
+                        <p class="lede">Texture tells us whether an area looks smooth, rough, repetitive, irregular, or
+                            strongly patterned.</p>
+                    </header>
+                    <div class="flow">Image pixels<br>↓<br>Look at neighboring gray values<br>↓<br>Build a
+                        GLCM<br>↓<br>Calculate texture features</div>
+                    <div class="grid-2">
+                        <div class="concept"><strong>Contrast</strong>
+                            <p>How strongly neighboring pixels differ.</p>
+                        </div>
+                        <div class="concept"><strong>Homogeneity</strong>
+                            <p>How similar neighboring pixels are.</p>
+                        </div>
+                        <div class="concept"><strong>Energy</strong>
+                            <p>How uniform or orderly the texture is.</p>
+                        </div>
+                        <div class="concept"><strong>Correlation</strong>
+                            <p>How strongly neighboring gray levels are related.</p>
+                        </div>
+                    </div>
+                    <div class="panel mint"><strong>Easy memory:</strong>
+                        <p>We are converting the visual texture of an image into a few numerical values.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Read grayscale image">
+                    <header class="step-header"><span class="step-kicker">STEP 4 · LOAD THE IMAGE</span>
+                        <h1>Read the Image in Grayscale</h1>
+                        <p class="lede">A GLCM works with gray-level values, so the easiest approach is to load the
+                            image directly as grayscale.</p>
+                    </header>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>import cv2
+from skimage.feature import graycomatrix, graycoprops
+
+image = cv2.imread("texture.jpg", cv2.IMREAD_GRAYSCALE)</code></pre>
+                    </div>
+                    <table class="comparison">
+                        <thead>
+                            <tr>
+                                <th>Line</th>
+                                <th>Very simple meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>import cv2</code></td>
+                                <td>Loads OpenCV so we can work with images.</td>
+                            </tr>
+                            <tr>
+                                <td><code>from skimage.feature ...</code></td>
+                                <td>Imports the two functions we need for GLCM and texture features.</td>
+                            </tr>
+                            <tr>
+                                <td><code>cv2.imread(...)</code></td>
+                                <td>Reads the image from the computer.</td>
+                            </tr>
+                            <tr>
+                                <td><code>cv2.IMREAD_GRAYSCALE</code></td>
+                                <td>Loads it as one-channel grayscale instead of BGR color.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="callout"><span class="label">CHECKPOINT</span>
+                        <p>If <code>image</code> becomes <code>None</code>, the file name or path is wrong.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Create the GLCM">
+                    <header class="step-header"><span class="step-kicker">STEP 5 · BUILD THE MATRIX</span>
+                        <h1>Create the Gray-Level Co-occurrence Matrix</h1>
+                        <p class="lede">The GLCM counts how often one grayscale value appears next to another grayscale
+                            value.</p>
+                    </header>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>glcm = graycomatrix(
+    image,
+    distances=[1],
+    angles=[0],
+    levels=256,
+    symmetric=True,
+    normed=True
+)</code></pre>
+                    </div>
+                    <table class="comparison">
+                        <thead>
+                            <tr>
+                                <th>Part</th>
+                                <th>Meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>image</code></td>
+                                <td>The grayscale image whose texture we want to study.</td>
+                            </tr>
+                            <tr>
+                                <td><code>distances=[1]</code></td>
+                                <td>Compare each pixel with a neighbor one pixel away.</td>
+                            </tr>
+                            <tr>
+                                <td><code>angles=[0]</code></td>
+                                <td>Look at the neighbor to the right.</td>
+                            </tr>
+                            <tr>
+                                <td><code>levels=256</code></td>
+                                <td>Grayscale has values from 0 to 255, so there are 256 possible levels.</td>
+                            </tr>
+                            <tr>
+                                <td><code>symmetric=True</code></td>
+                                <td>Treat A-next-to-B and B-next-to-A as the same kind of relationship.</td>
+                            </tr>
+                            <tr>
+                                <td><code>normed=True</code></td>
+                                <td>Convert raw counts into normalized values so the matrix is easier to use.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="panel yellow"><strong>You do not need to print the whole GLCM.</strong>
+                        <p>It can be very large. Our goal is to extract useful numbers from it.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Extract texture features">
+                    <header class="step-header"><span class="step-kicker">STEP 6 · EXTRACT FEATURES</span>
+                        <h1>Calculate the Texture Values</h1>
+                        <p class="lede"><code>graycoprops()</code> reads the GLCM and calculates useful texture
+                            properties.</p>
+                    </header>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>contrast = graycoprops(glcm, "contrast")[0, 0]
+homogeneity = graycoprops(glcm, "homogeneity")[0, 0]
+energy = graycoprops(glcm, "energy")[0, 0]
+correlation = graycoprops(glcm, "correlation")[0, 0]
+
+print("Contrast:", contrast)
+print("Homogeneity:", homogeneity)
+print("Energy:", energy)
+print("Correlation:", correlation)</code></pre>
+                    </div>
+                    <table class="comparison">
+                        <thead>
+                            <tr>
+                                <th>Line</th>
+                                <th>Meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>graycoprops(glcm, "contrast")</code></td>
+                                <td>Calculates how different neighboring gray values are.</td>
+                            </tr>
+                            <tr>
+                                <td><code>[0, 0]</code></td>
+                                <td>We used one distance and one angle, so we take the first result.</td>
+                            </tr>
+                            <tr>
+                                <td><code>"homogeneity"</code></td>
+                                <td>Measures neighbor similarity.</td>
+                            </tr>
+                            <tr>
+                                <td><code>"energy"</code></td>
+                                <td>Measures texture uniformity/order.</td>
+                            </tr>
+                            <tr>
+                                <td><code>"correlation"</code></td>
+                                <td>Measures the relationship between neighboring gray levels.</td>
+                            </tr>
+                            <tr>
+                                <td><code>print(...)</code></td>
+                                <td>Shows the calculated values in the terminal.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="quiz" data-answer="1"
+                        data-correct="Correct. graycoprops() extracts numerical texture properties from the GLCM.">
+                        <h3>Which function calculates contrast, homogeneity, energy, and correlation?</h3>
+                        <div class="quiz-options"><button class="quiz-option">cv2.imread()</button><button
+                                class="quiz-option">graycoprops()</button><button
+                                class="quiz-option">cv2.rectangle()</button></div>
+                        <div class="quiz-feedback" aria-live="polite"></div>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Complete texture program">
+                    <header class="step-header"><span class="step-kicker">STEP 7 · COMPLETE PROGRAM</span>
+                        <h1>Program 7: Texture Extraction</h1>
+                        <p class="lede">Here is the complete practical in one file.</p>
+                    </header>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>import cv2
+from skimage.feature import graycomatrix, graycoprops
+
+image = cv2.imread("texture.jpg", cv2.IMREAD_GRAYSCALE)
+
+if image is None:
+    print("Image not found")
+    exit()
+
+glcm = graycomatrix(
+    image,
+    distances=[1],
+    angles=[0],
+    levels=256,
+    symmetric=True,
+    normed=True
+)
+
+contrast = graycoprops(glcm, "contrast")[0, 0]
+homogeneity = graycoprops(glcm, "homogeneity")[0, 0]
+energy = graycoprops(glcm, "energy")[0, 0]
+correlation = graycoprops(glcm, "correlation")[0, 0]
+
+print("Contrast:", contrast)
+print("Homogeneity:", homogeneity)
+print("Energy:", energy)
+print("Correlation:", correlation)
+
+cv2.imshow("Texture Image", image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()</code></pre>
+                    </div>
+                    <div class="panel mint"><strong>What happens when you run it?</strong>
+                        <p>The image opens in a window, and the terminal displays four numerical texture features.</p>
+                    </div>
+                    <div class="challenge">
+                        <h3>Try this</h3>
+                        <ol>
+                            <li>Run the program using an image of a smooth wall.</li>
+                            <li>Run it again using grass, fabric, or gravel.</li>
+                            <li>Compare the feature values.</li>
+                        </ol>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Program 7 line-by-line revision">
+                    <header class="step-header"><span class="step-kicker">STEP 8 · TRACE THE PROGRAM</span>
+                        <h1>What Happens in What Order?</h1>
+                        <p class="lede">Before moving to object detection, make sure the flow of Program 7 is clear.</p>
+                    </header>
+                    <div class="flow">1. Import libraries<br>↓<br>2. Read grayscale image<br>↓<br>3. Check whether image
+                        loaded<br>↓<br>4. Create GLCM<br>↓<br>5. Calculate texture features<br>↓<br>6. Print
+                        features<br>↓<br>7. Display image</div>
+                    <div class="reveal">
+                        <summary>Why grayscale?</summary>
+                        <div>GLCM studies gray-level relationships, so a grayscale image gives one intensity value per
+                            pixel.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>Why <code>distances=[1]</code>?</summary>
+                        <div>We compare each pixel with an immediately neighboring pixel.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>Why <code>[0, 0]</code> after <code>graycoprops()</code>?</summary>
+                        <div>Because our GLCM contains one distance and one angle, so the first row and first column
+                            contain the one value we need.</div>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Object detection idea">
+                    <header class="step-header"><span class="step-kicker">STEP 9 · PROGRAM 8</span>
+                        <h1>What Is Object Detection?</h1>
+                        <p class="lede">Object detection finds an object and also tells us where that object appears in
+                            the image.</p>
+                    </header>
+                    <div class="grid-2">
+                        <div class="concept"><strong>Classification</strong>
+                            <p>“There is a pedestrian in this image.”</p>
+                        </div>
+                        <div class="concept"><strong>Detection</strong>
+                            <p>“There is a pedestrian here,” and we draw a box around the person.</p>
+                        </div>
+                    </div>
+                    <div class="flow">Input image<br>↓<br>HOG features<br>↓<br>Pedestrian detector<br>↓<br>Coordinates
+                        of detected people<br>↓<br>Draw rectangles</div>
+                    <div class="panel yellow"><strong>For this practical:</strong>
+                        <p>We will use OpenCV's built-in HOG pedestrian detector. We do not need to train our own model.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Read pedestrian image">
+                    <header class="step-header"><span class="step-kicker">STEP 10 · LOAD INPUT</span>
+                        <h1>Read the Pedestrian Image</h1>
+                        <p class="lede">This time we keep the image in color because we want to display the detected
+                            people with colored boxes.</p>
+                    </header>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>import cv2
+
+image = cv2.imread("pedestrians.jpg")
+
+if image is None:
+    print("Image not found")
+    exit()</code></pre>
+                    </div>
+                    <table class="comparison">
+                        <thead>
+                            <tr>
+                                <th>Line</th>
+                                <th>Meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>import cv2</code></td>
+                                <td>Imports OpenCV.</td>
+                            </tr>
+                            <tr>
+                                <td><code>cv2.imread(...)</code></td>
+                                <td>Reads the image in OpenCV's normal BGR color format.</td>
+                            </tr>
+                            <tr>
+                                <td><code>if image is None</code></td>
+                                <td>Checks whether loading failed.</td>
+                            </tr>
+                            <tr>
+                                <td><code>exit()</code></td>
+                                <td>Stops the program if there is no valid image to process.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="step-view" data-title="Create HOG detector">
+                    <header class="step-header"><span class="step-kicker">STEP 11 · CREATE DETECTOR</span>
+                        <h1>Create the HOG Pedestrian Detector</h1>
+                        <p class="lede">HOG stands for Histogram of Oriented Gradients. It describes edge and shape
+                            patterns, which are useful for recognizing the shape of a person.</p>
+                    </header>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>hog = cv2.HOGDescriptor()
+hog.setSVMDetector(
+    cv2.HOGDescriptor_getDefaultPeopleDetector()
+)</code></pre>
+                    </div>
+                    <table class="comparison">
+                        <thead>
+                            <tr>
+                                <th>Line</th>
+                                <th>Very simple meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>cv2.HOGDescriptor()</code></td>
+                                <td>Creates an object that can calculate and use HOG features.</td>
+                            </tr>
+                            <tr>
+                                <td><code>getDefaultPeopleDetector()</code></td>
+                                <td>Gets OpenCV's already-trained detector for human pedestrians.</td>
+                            </tr>
+                            <tr>
+                                <td><code>setSVMDetector(...)</code></td>
+                                <td>Attaches that trained people detector to our HOG object.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="panel blue"><strong>Easy memory:</strong>
+                        <p><code>HOGDescriptor()</code> creates the detector machinery.
+                            <code>getDefaultPeopleDetector()</code> gives it knowledge of what a pedestrian looks like.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Detect pedestrians">
+                    <header class="step-header"><span class="step-kicker">STEP 12 · RUN DETECTION</span>
+                        <h1>Find People with detectMultiScale()</h1>
+                        <p class="lede">A pedestrian can appear at different sizes in an image, so OpenCV scans the
+                            image at multiple scales.</p>
+                    </header>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>boxes, weights = hog.detectMultiScale(
+    image,
+    winStride=(8, 8),
+    padding=(8, 8),
+    scale=1.05
+)</code></pre>
+                    </div>
+                    <table class="comparison">
+                        <thead>
+                            <tr>
+                                <th>Part</th>
+                                <th>Meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>detectMultiScale()</code></td>
+                                <td>Searches the image for pedestrians at different sizes.</td>
+                            </tr>
+                            <tr>
+                                <td><code>image</code></td>
+                                <td>The image to search.</td>
+                            </tr>
+                            <tr>
+                                <td><code>winStride=(8, 8)</code></td>
+                                <td>Moves the detection window across the image in small steps.</td>
+                            </tr>
+                            <tr>
+                                <td><code>padding=(8, 8)</code></td>
+                                <td>Adds a small extra area around scanning windows.</td>
+                            </tr>
+                            <tr>
+                                <td><code>scale=1.05</code></td>
+                                <td>Checks the image at gradually changing sizes.</td>
+                            </tr>
+                            <tr>
+                                <td><code>boxes</code></td>
+                                <td>Contains the position and size of every detected person.</td>
+                            </tr>
+                            <tr>
+                                <td><code>weights</code></td>
+                                <td>Contains confidence-like scores returned by the detector.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="callout"><span class="label">IMPORTANT</span>
+                        <p>Each item in <code>boxes</code> contains four numbers: <code>x, y, w, h</code>.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Draw bounding boxes">
+                    <header class="step-header"><span class="step-kicker">STEP 13 · SHOW RESULTS</span>
+                        <h1>Draw a Rectangle Around Every Person</h1>
+                        <p class="lede">The detector gives us coordinates. Now we turn those coordinates into visible
+                            bounding boxes.</p>
+                    </header>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>for (x, y, w, h) in boxes:
+    cv2.rectangle(
+        image,
+        (x, y),
+        (x + w, y + h),
+        (0, 255, 0),
+        2
+    )</code></pre>
+                    </div>
+                    <table class="comparison">
+                        <thead>
+                            <tr>
+                                <th>Part</th>
+                                <th>Meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>for ... in boxes</code></td>
+                                <td>Repeat once for every detected pedestrian.</td>
+                            </tr>
+                            <tr>
+                                <td><code>x, y</code></td>
+                                <td>Top-left position of the detected box.</td>
+                            </tr>
+                            <tr>
+                                <td><code>w, h</code></td>
+                                <td>Width and height of the detected box.</td>
+                            </tr>
+                            <tr>
+                                <td><code>(x, y)</code></td>
+                                <td>Top-left corner of the rectangle.</td>
+                            </tr>
+                            <tr>
+                                <td><code>(x + w, y + h)</code></td>
+                                <td>Bottom-right corner.</td>
+                            </tr>
+                            <tr>
+                                <td><code>(0, 255, 0)</code></td>
+                                <td>Green color in OpenCV BGR format.</td>
+                            </tr>
+                            <tr>
+                                <td><code>2</code></td>
+                                <td>Rectangle border thickness.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="quiz" data-answer="2"
+                        data-correct="Correct. x and y give the top-left position, while w and h give width and height.">
+                        <h3>What does <code>w</code> represent in <code>(x, y, w, h)</code>?</h3>
+                        <div class="quiz-options"><button class="quiz-option">Window color</button><button
+                                class="quiz-option">Weight score</button><button class="quiz-option">Width of the
+                                detected box</button></div>
+                        <div class="quiz-feedback" aria-live="polite"></div>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Complete pedestrian program">
+                    <header class="step-header"><span class="step-kicker">STEP 14 · COMPLETE PROGRAM</span>
+                        <h1>Program 8: Pedestrian Detection</h1>
+                        <p class="lede">Now combine every step into one working OpenCV program.</p>
+                    </header>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>import cv2
+
+image = cv2.imread("pedestrians.jpg")
+
+if image is None:
+    print("Image not found")
+    exit()
+
+hog = cv2.HOGDescriptor()
+hog.setSVMDetector(
+    cv2.HOGDescriptor_getDefaultPeopleDetector()
+)
+
+boxes, weights = hog.detectMultiScale(
+    image,
+    winStride=(8, 8),
+    padding=(8, 8),
+    scale=1.05
+)
+
+for (x, y, w, h) in boxes:
+    cv2.rectangle(
+        image,
+        (x, y),
+        (x + w, y + h),
+        (0, 255, 0),
+        2
+    )
+
+print("Pedestrians detected:", len(boxes))
+
+cv2.imshow("Pedestrian Detection", image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()</code></pre>
+                    </div>
+                    <div class="panel mint"><strong>Expected result:</strong>
+                        <p>The output window shows the original image with green rectangles around detected pedestrians.
+                            The terminal prints how many detections were returned.</p>
+                    </div>
+                    <div class="challenge">
+                        <h3>Try these changes</h3>
+                        <ol>
+                            <li>Change the rectangle color.</li>
+                            <li>Change thickness from <code>2</code> to <code>4</code>.</li>
+                            <li>Try an image with multiple people.</li>
+                            <li>Try an image with no people and observe <code>len(boxes)</code>.</li>
+                        </ol>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Program 8 line-by-line revision">
+                    <header class="step-header"><span class="step-kicker">STEP 15 · TRACE THE PROGRAM</span>
+                        <h1>What Happens During Pedestrian Detection?</h1>
+                        <p class="lede">Follow the program from top to bottom.</p>
+                    </header>
+                    <div class="flow">1. Import OpenCV<br>↓<br>2. Read image<br>↓<br>3. Create HOG descriptor<br>↓<br>4.
+                        Load default pedestrian detector<br>↓<br>5. Scan image with detectMultiScale()<br>↓<br>6. Get x,
+                        y, w, h boxes<br>↓<br>7. Draw rectangles<br>↓<br>8. Display result</div>
+                    <div class="reveal">
+                        <summary>What is HOG?</summary>
+                        <div>Histogram of Oriented Gradients. It describes the direction of edges and shapes inside
+                            image regions.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>Do we train the detector ourselves?</summary>
+                        <div>No. OpenCV gives us a built-in default pedestrian detector.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>Why detectMultiScale()?</summary>
+                        <div>Because a person may appear small, medium, or large depending on their distance from the
+                            camera.</div>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Compare both programs">
+                    <header class="step-header"><span class="step-kicker">STEP 16 · CONNECT THE IDEAS</span>
+                        <h1>Texture Extraction vs Object Detection</h1>
+                        <p class="lede">Both programs extract useful information from images, but the outputs are
+                            different.</p>
+                    </header>
+                    <table class="comparison">
+                        <thead>
+                            <tr>
+                                <th>Point</th>
+                                <th>Texture Extraction</th>
+                                <th>Pedestrian Detection</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Input</td>
+                                <td>Grayscale image</td>
+                                <td>Color image</td>
+                            </tr>
+                            <tr>
+                                <td>Main technique</td>
+                                <td>GLCM</td>
+                                <td>HOG + pedestrian detector</td>
+                            </tr>
+                            <tr>
+                                <td>Output</td>
+                                <td>Numerical texture features</td>
+                                <td>Bounding boxes around people</td>
+                            </tr>
+                            <tr>
+                                <td>Main library</td>
+                                <td>OpenCV + scikit-image</td>
+                                <td>OpenCV</td>
+                            </tr>
+                            <tr>
+                                <td>Example use</td>
+                                <td>Compare smooth and rough surfaces</td>
+                                <td>Recognize pedestrians</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="step-view" data-title="Viva and revision">
+                    <header class="step-header"><span class="step-kicker">STEP 17 · QUICK REVISION</span>
+                        <h1>Practical Viva Questions</h1>
+                        <p class="lede">Use these to revise before lab evaluation or viva.</p>
+                    </header>
+                    <div class="reveal">
+                        <summary>1. What is texture extraction?</summary>
+                        <div>It converts the visual texture of an image into numerical features that describe properties
+                            such as contrast and homogeneity.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>2. What is GLCM?</summary>
+                        <div>Gray-Level Co-occurrence Matrix. It describes how often different grayscale values occur
+                            next to each other.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>3. Why do we load the texture image as grayscale?</summary>
+                        <div>Because GLCM works with gray-level intensity relationships.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>4. What does graycoprops() do?</summary>
+                        <div>It extracts properties such as contrast, homogeneity, energy, and correlation from a GLCM.
+                        </div>
+                    </div>
+                    <div class="reveal">
+                        <summary>5. What is object detection?</summary>
+                        <div>It finds an object and also locates it in the image.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>6. What is HOG?</summary>
+                        <div>Histogram of Oriented Gradients, a feature descriptor based on edge directions.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>7. What does detectMultiScale() do?</summary>
+                        <div>It scans an image at multiple sizes and returns bounding boxes for detected objects.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>8. What are x, y, w, and h?</summary>
+                        <div>x and y are the top-left coordinates; w and h are the width and height of the detected
+                            rectangle.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>9. What does cv2.rectangle() do?</summary>
+                        <div>It draws a rectangle on an image.</div>
+                    </div>
+                    <h2>Completion checklist</h2>
+                    <ul class="checklist">
+                        <li>I can load a grayscale image.</li>
+                        <li>I can create a GLCM.</li>
+                        <li>I can extract contrast, homogeneity, energy, and correlation.</li>
+                        <li>I can explain every line of Program 7.</li>
+                        <li>I can create a HOG descriptor.</li>
+                        <li>I can use OpenCV's default people detector.</li>
+                        <li>I can use detectMultiScale().</li>
+                        <li>I understand x, y, w, and h.</li>
+                        <li>I can draw bounding boxes.</li>
+                        <li>I can explain every line of Program 8.</li>
+                    </ul>
+                    <div class="finish">
+                        <h2>Codelab complete! 🎉</h2>
+                        <p>You can now implement both syllabus practicals: texture extraction and pedestrian object
+                            detection.</p>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+    <script>
+        (() => {
+            const steps = [...document.querySelectorAll('.step-view')];
+            const titles = steps.map(step => step.dataset.title);
+            const nav = document.getElementById('stepNav');
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const content = document.getElementById('content');
+            const completed = new Set();
+            let current = 0;
+            nav.innerHTML = titles.map((title, index) => `<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+            const getHashStep = () => { const match = location.hash.match(/^#step-(\d+)$/); const value = match ? Number(match[1]) - 1 : 0; return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0 };
+            function render(updateHash = true) {
+                current = Math.max(0, Math.min(current, steps.length - 1));
+                steps.forEach((step, index) => { const active = index === current; step.classList.toggle('active', active); step.setAttribute('aria-hidden', String(!active)) });
+                document.querySelectorAll('.step-link').forEach((button, index) => { button.classList.toggle('active', index === current); button.setAttribute('aria-current', index === current ? 'step' : 'false'); button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '' });
+                const percent = Math.round(((current + 1) / steps.length) * 100);
+                document.getElementById('progressBar').style.width = `${percent}%`;
+                document.getElementById('progressText').textContent = `${percent}%`;
+                document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+                document.getElementById('mobileTitle').textContent = titles[current];
+                document.getElementById('prevBtn').disabled = current === 0;
+                document.getElementById('nextBtn').disabled = current === steps.length - 1;
+                document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+                if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+                window.scrollTo({ top: 0, behavior: 'auto' }); sidebar.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false');
+            }
+            function goTo(index) { if (index < 0 || index >= steps.length) return; completed.add(current); current = index; render(); }
+            const navRow = document.createElement('div'); navRow.className = 'nav-row'; navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>'; content.appendChild(navRow);
+            document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+            document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+            nav.addEventListener('click', event => { const button = event.target.closest('.step-link'); if (button) goTo(Number(button.dataset.step)) });
+            menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)) });
+            document.addEventListener('click', async event => { const copy = event.target.closest('.copy-btn'); if (copy) { const code = copy.parentElement.querySelector('pre code')?.textContent ?? ''; try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!' } catch { copy.textContent = 'Select & copy' } setTimeout(() => copy.textContent = 'Copy', 1200); return; } const option = event.target.closest('.quiz-option'); if (option) { const quiz = option.closest('.quiz'); if (quiz.dataset.answered) return; const options = [...quiz.querySelectorAll('.quiz-option')]; const choice = options.indexOf(option); const answer = Number(quiz.dataset.answer); quiz.dataset.answered = 'true'; options.forEach(button => button.disabled = true); option.classList.add(choice === answer ? 'correct' : 'wrong'); if (choice !== answer) options[answer].classList.add('correct'); const feedback = quiz.querySelector('.quiz-feedback'); feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`; feedback.classList.add('show'); } });
+            window.addEventListener('popstate', () => { current = getHashStep(); render(false) }); window.addEventListener('hashchange', () => { current = getHashStep(); render(false) });
+            document.addEventListener('keydown', event => { if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return; if (event.key === 'ArrowRight') goTo(current + 1); if (event.key === 'ArrowLeft') goTo(current - 1) });
+            current = getHashStep(); render(false);
+        })();
+    </script>
+</body>
+
+</html>
