@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>State Management with Provider — Flutter Codelab</title>
+  <meta name="description" content="Learn Flutter state management with Provider and ChangeNotifier.">
+  <meta name="theme-color" content="#2f7d32">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+    :root {
+      --green: #2f7d32;
+      --green-dark: #1d5120;
+      --green-light: #e4f4e5;
+      --ink: #101010;
+      --paper: #f5f7f4;
+      --white: #fff;
+      --yellow: #ffd83d;
+      --mint: #75e6c5;
+      --pink: #ff9bb7;
+      --orange: #ffb866;
+      --border: 3px solid var(--ink);
+      --shadow: 6px 6px 0 var(--ink);
+      --shadow-sm: 4px 4px 0 var(--ink);
+      --sidebar: 292px
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: auto
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      line-height: 1.55
+    }
+
+    button,
+    a {
+      font: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    :focus-visible {
+      outline: 4px solid var(--yellow);
+      outline-offset: 3px
+    }
+
+    .app {
+      min-height: 100vh
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar);
+      padding: 22px 18px;
+      background: var(--green);
+      border-right: var(--border);
+      overflow: auto;
+      z-index: 20
+    }
+
+    .brand {
+      padding: 16px;
+      margin-bottom: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .eyebrow,
+    .progress-meta,
+    .step-number,
+    .step-kicker,
+    .label,
+    .footer-note {
+      font-family: "DM Mono", monospace
+    }
+
+    .eyebrow {
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase
+    }
+
+    .brand h2 {
+      margin: 5px 0 3px;
+      font-size: 1.42rem;
+      line-height: 1.05
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: .85rem;
+      font-weight: 600
+    }
+
+    .progress-wrap {
+      margin: 0 2px 20px;
+      color: #fff
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+      font-size: .72rem
+    }
+
+    .progress-track {
+      height: 16px;
+      padding: 2px;
+      background: #fff;
+      border: var(--border)
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: var(--yellow);
+      transition: width .2s ease
+    }
+
+    .steps {
+      display: grid;
+      gap: 8px
+    }
+
+    .step-link {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 34px 1fr 18px;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 8px;
+      color: #fff;
+      background: transparent;
+      border: 3px solid transparent;
+      text-align: left;
+      font-weight: 700;
+      line-height: 1.15
+    }
+
+    .step-link:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .step-link.active {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--ink);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .step-number {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 2px solid currentColor;
+      font-size: .78rem
+    }
+
+    .step-status {
+      text-align: center
+    }
+
+    .mobile-bar {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: var(--green);
+      border-bottom: var(--border)
+    }
+
+    .menu-btn,
+    .mobile-title {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .menu-btn {
+      width: 46px;
+      height: 42px;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .mobile-title {
+      flex: 1;
+      padding: 8px 10px;
+      font-weight: 800
+    }
+
+    main {
+      margin-left: var(--sidebar);
+      min-height: 100vh
+    }
+
+    .content {
+      width: min(980px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 42px 0 28px
+    }
+
+    .step-view {
+      display: none
+    }
+
+    .step-view.active {
+      display: block;
+      animation: stepIn .18s ease-out
+    }
+
+    @keyframes stepIn {
+      from {
+        opacity: .35;
+        transform: translateY(5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .step-header {
+      padding: 28px;
+      margin-bottom: 24px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .step-kicker {
+      display: inline-block;
+      margin-bottom: 13px;
+      padding: 5px 9px;
+      color: #fff;
+      background: var(--green);
+      border: 2px solid var(--ink);
+      font-size: .72rem
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.08
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 5vw, 3.7rem);
+      letter-spacing: -.045em
+    }
+
+    h2 {
+      margin: 30px 0 12px;
+      font-size: clamp(1.5rem, 3vw, 2.15rem)
+    }
+
+    h3 {
+      margin: 22px 0 9px;
+      font-size: 1.15rem
+    }
+
+    .lede {
+      max-width: 800px;
+      margin: 0;
+      font-size: 1.08rem
+    }
+
+    .objective {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700
+    }
+
+    .panel,
+    .concept,
+    .quiz,
+    .reveal {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .panel {
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .panel.blue {
+      background: #e5efff
+    }
+
+    .panel.mint {
+      background: var(--mint)
+    }
+
+    .panel.pink {
+      background: var(--pink)
+    }
+
+    .panel.yellow {
+      background: var(--yellow)
+    }
+
+    .panel.orange {
+      background: var(--orange)
+    }
+
+    .panel.green {
+      background: var(--green-light)
+    }
+
+    .callout {
+      padding: 16px 18px;
+      margin: 20px 0;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .callout .label {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 3px 7px;
+      color: #fff;
+      background: var(--ink);
+      border: 2px solid var(--ink);
+      font-size: .72rem
+    }
+
+    .grid-2 {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    .grid-3 {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .concept {
+      padding: 18px
+    }
+
+    .concept strong {
+      font-size: 1.05rem
+    }
+
+    .concept p:last-child {
+      margin-bottom: 0
+    }
+
+    .code-wrap {
+      position: relative;
+      margin: 18px 0
+    }
+
+    pre {
+      margin: 0;
+      padding: 20px;
+      overflow: auto;
+      color: #f7f7f7;
+      background: #111;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", ui-monospace, monospace;
+      font-size: .84rem;
+      line-height: 1.62;
+      tab-size: 2
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      padding: 5px 9px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      font-size: .75rem;
+      font-weight: 800
+    }
+
+    code:not(pre code) {
+      padding: 1px 5px;
+      background: #e8edf7;
+      border: 1px solid #9da9bb;
+      font-family: "DM Mono", monospace;
+      font-size: .88em
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35rem
+    }
+
+    li {
+      margin: 7px 0
+    }
+
+    .comparison {
+      width: 100%;
+      margin: 18px 0;
+      background: #fff;
+      border: var(--border);
+      border-collapse: collapse
+    }
+
+    .comparison th,
+    .comparison td {
+      padding: 11px;
+      border: 2px solid var(--ink);
+      text-align: left;
+      vertical-align: top
+    }
+
+    .comparison th {
+      color: #fff;
+      background: var(--green)
+    }
+
+    .quiz {
+      padding: 20px;
+      margin: 20px 0
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px
+    }
+
+    .quiz-option {
+      text-align: left;
+      padding: 11px 13px;
+      background: #fff;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-option:hover {
+      background: var(--green-light)
+    }
+
+    .quiz-option.correct {
+      background: var(--mint)
+    }
+
+    .quiz-option.wrong {
+      background: var(--pink)
+    }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 13px;
+      padding: 10px;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-feedback.show {
+      display: block
+    }
+
+    .reveal {
+      margin: 18px 0
+    }
+
+    .reveal summary {
+      padding: 13px 16px;
+      cursor: pointer;
+      background: var(--green-light);
+      font-weight: 800
+    }
+
+    .reveal>div {
+      padding: 15px 16px
+    }
+
+    .challenge {
+      padding: 22px;
+      margin: 24px 0;
+      color: #fff;
+      background: var(--ink);
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .challenge h3 {
+      margin-top: 0;
+      color: var(--yellow)
+    }
+
+    .flow {
+      margin: 20px 0;
+      padding: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", monospace;
+      line-height: 1.9;
+      overflow: auto
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 30px
+    }
+
+    .checklist li::before {
+      content: "□";
+      position: absolute;
+      left: 0;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: var(--border)
+    }
+
+    .nav-btn {
+      min-width: 130px;
+      padding: 12px 18px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 900
+    }
+
+    .nav-btn.primary {
+      color: #fff;
+      background: var(--green)
+    }
+
+    .nav-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed
+    }
+
+    .finish {
+      padding: 20px;
+      margin-top: 24px;
+      background: var(--mint);
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .timebox {
+      display: inline-block;
+      margin: 6px 0 0;
+      padding: 4px 8px;
+      background: #fff;
+      border: 2px solid var(--ink);
+      font-family: "DM Mono", monospace;
+      font-weight: 700
+    }
+
+    @media(max-width:850px) {
+      :root {
+        --sidebar: 270px;
+        --mobile-bar-height: 65px
+      }
+
+      .sidebar {
+        inset: var(--mobile-bar-height) auto 0 0;
+        transform: translateX(-100%);
+        transition: transform .2s ease
+      }
+
+      .sidebar.open {
+        transform: none
+      }
+
+      .mobile-bar {
+        display: flex;
+        height: var(--mobile-bar-height)
+      }
+
+      main {
+        margin-left: 0
+      }
+
+      .content {
+        width: min(940px, calc(100% - 28px));
+        padding-top: 24px
+      }
+    }
+
+    @media(max-width:680px) {
+
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr
+      }
+
+      .content {
+        width: calc(100% - 18px);
+        padding-top: 16px
+      }
+
+      .step-header {
+        padding: 20px 16px
+      }
+
+      .panel,
+      .concept,
+      .quiz {
+        padding: 16px
+      }
+
+      .nav-row {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        padding: 12px 0;
+        background: var(--paper)
+      }
+
+      .nav-btn {
+        min-width: 0;
+        flex: 1;
+        padding: 11px 10px
+      }
+
+      pre {
+        padding: 16px 12px;
+        font-size: .76rem
+      }
+
+      .copy-btn {
+        position: static;
+        align-self: flex-end;
+        margin-bottom: 6px
+      }
+
+      .code-wrap {
+        display: flex;
+        flex-direction: column
+      }
+
+      .code-wrap pre {
+        order: 2
+      }
+
+      .code-wrap .copy-btn {
+        order: 1
+      }
+
+      .comparison {
+        display: block;
+        overflow-x: auto
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+      <div class="brand">
+        <div class="eyebrow">Flutter State Codelab</div>
+        <h2>Provider & ChangeNotifier</h2>
+        <p>Shared state made simple.</p>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+        <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+          aria-valuenow="0">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+      <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+    </aside>
+    <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation"
+        aria-expanded="false">☰</button>
+      <div class="mobile-title" id="mobileTitle">State Management with Provider</div>
+    </div>
+    <main>
+      <div class="content" id="content">
+        <section class="step-view" data-title="What we will build">
+          <header class="step-header"><span class="step-kicker">STEP 1 · INTRODUCTION</span>
+            <h1>State Management with Provider</h1>
+            <p class="lede">Learn how to keep shared Flutter state in one place and let many widgets read or update it.
+            </p>
+            <div class="timebox">Suggested time: 10 minutes</div>
+          </header>
+          <div class="objective"><strong>By the end:</strong> Use ChangeNotifier, ChangeNotifierProvider,
+            context.watch(), context.read(), Consumer, MultiProvider, provider scope, shared state across routes,
+            student management, and loading states.</div>
+          <div class="flow">ChangeNotifier<br>↓ stores state<br>Provider<br>↓ makes it available<br>Widgets<br>↓ watch /
+            read<br>UI updates</div>
+          <div class="panel green"><strong>Simple idea:</strong>
+            <p>Provider helps many widgets use the same state without passing it through every constructor.</p>
+          </div>
+        </section>
+        <section class="step-view" data-title="Why state management?">
+          <header class="step-header"><span class="step-kicker">STEP 2 · THE PROBLEM</span>
+            <h1>Why Do We Need Shared State?</h1>
+            <p class="lede">Sometimes many widgets need the same data.</p>
+          </header>
+          <div class="grid-2">
+            <div class="concept"><strong>Local state</strong>
+              <p>Used by one widget only.</p>
+            </div>
+            <div class="concept"><strong>Shared state</strong>
+              <p>Used by many widgets or screens, such as students, cart, theme, or logged-in user.</p>
+            </div>
+          </div>
+          <div class="panel yellow"><strong>Use Provider when:</strong>
+            <p>More than one widget needs to read or change the same data.</p>
+          </div>
+        </section>
+        <section class="step-view" data-title="Install Provider">
+          <header class="step-header"><span class="step-kicker">STEP 3 · SETUP</span>
+            <h1>Add the Provider Package</h1>
+            <p class="lede">Start with a normal Flutter project and install Provider.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>flutter create provider_demo
+cd provider_demo
+flutter pub add provider</code></pre>
+          </div>
+          <h2>Import it</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import 'package:provider/provider.dart';</code></pre>
+          </div>
+        </section>
+        <section class="step-view" data-title="Create ChangeNotifier">
+          <header class="step-header"><span class="step-kicker">STEP 4 · CREATE STATE</span>
+            <h1>Create a ChangeNotifier</h1>
+            <p class="lede">A ChangeNotifier stores state and can tell the UI when that state changes.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class CounterProvider extends ChangeNotifier {
+  int count = 0;
+
+  void increment() {
+    count++;
+    notifyListeners();
+  }
+}</code></pre>
+          </div>
+          <div class="grid-2">
+            <div class="concept"><strong>count</strong>
+              <p>This is the state.</p>
+            </div>
+            <div class="concept"><strong>notifyListeners()</strong>
+              <p>Tells listening widgets that state changed.</p>
+            </div>
+          </div>
+          <div class="panel mint"><strong>Core flow:</strong>
+            <p>Change value → notifyListeners() → listening widgets rebuild.</p>
+          </div>
+        </section>
+        <section class="step-view" data-title="Provide the state">
+          <header class="step-header"><span class="step-kicker">STEP 5 · CHANGENOTIFIERPROVIDER</span>
+            <h1>Make the State Available</h1>
+            <p class="lede">ChangeNotifierProvider creates the notifier and makes it available below it.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => CounterProvider(),
+      child: const MyApp(),
+    ),
+  );
+}</code></pre>
+          </div>
+          <div class="panel yellow"><strong>Scope:</strong>
+            <p>Only widgets below this provider can access it.</p>
+          </div>
+        </section>
+        <section class="step-view" data-title="context.watch()">
+          <header class="step-header"><span class="step-kicker">STEP 6 · WATCH STATE</span>
+            <h1>Read and React with context.watch()</h1>
+            <p class="lede">watch() reads the provider and rebuilds the widget when the provider changes.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>final counter =
+    context.watch&lt;CounterProvider&gt;();
+
+return Text(
+  'Count: ${counter.count}',
+);</code></pre>
+          </div>
+          <div class="panel green"><strong>Meaning:</strong>
+            <p>“Give me this provider and rebuild me when it changes.”</p>
+          </div>
+        </section>
+        <section class="step-view" data-title="context.read()">
+          <header class="step-header"><span class="step-kicker">STEP 7 · CALL METHODS</span>
+            <h1>Use context.read() for Actions</h1>
+            <p class="lede">read() gets the provider without listening for rebuilds.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>ElevatedButton(
+  onPressed: () {
+    context
+        .read&lt;CounterProvider&gt;()
+        .increment();
+  },
+  child: const Text('Increment'),
+)</code></pre>
+          </div>
+          <table class="comparison">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Use</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>watch()</code></td>
+                <td>Read and rebuild when state changes.</td>
+              </tr>
+              <tr>
+                <td><code>read()</code></td>
+                <td>Read once, usually to call a method.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="step-view" data-title="Consumer">
+          <header class="step-header"><span class="step-kicker">STEP 8 · CONSUMER</span>
+            <h1>Use Consumer</h1>
+            <p class="lede">Consumer is another way to listen to a provider.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>Consumer&lt;CounterProvider&gt;(
+  builder: (context, counter, child) {
+    return Text(
+      'Count: ${counter.count}',
+    );
+  },
+)</code></pre>
+          </div>
+          <div class="panel blue"><strong>Use Consumer when:</strong>
+            <p>Only a small part of the UI needs to rebuild.</p>
+          </div>
+        </section>
+        <section class="step-view" data-title="First complete example">
+          <header class="step-header"><span class="step-kicker">STEP 9 · COUNTER APP</span>
+            <h1>Complete Provider Counter</h1>
+            <p class="lede">Put ChangeNotifier, Provider, watch, and read together.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => CounterProvider(),
+      child: const MyApp(),
+    ),
+  );
+}
+
+class CounterProvider extends ChangeNotifier {
+  int count = 0;
+
+  void increment() {
+    count++;
+    notifyListeners();
+  }
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final counter =
+        context.watch&lt;CounterProvider&gt;();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Provider Demo'),
+      ),
+      body: Center(
+        child: Text(
+          'Count: ${counter.count}',
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context
+              .read&lt;CounterProvider&gt;()
+              .increment();
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+          <div class="flow">Tap button → read().increment() → count changes → notifyListeners() → watch() rebuilds UI
+          </div>
+        </section>
+        <section class="step-view" data-title="Student provider">
+          <header class="step-header"><span class="step-kicker">STEP 10 · PRACTICAL STATE</span>
+            <h1>Build a StudentProvider</h1>
+            <p class="lede">Now store a shared list instead of one number.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class StudentProvider extends ChangeNotifier {
+  final List&lt;String&gt; students = [
+    'Aman',
+    'Riya',
+  ];
+
+  void addStudent(String name) {
+    students.add(name);
+    notifyListeners();
+  }
+
+  void deleteStudent(int index) {
+    students.removeAt(index);
+    notifyListeners();
+  }
+}</code></pre>
+          </div>
+        </section>
+        <section class="step-view" data-title="Student management">
+          <header class="step-header"><span class="step-kicker">STEP 11 · STUDENT UI</span>
+            <h1>Add and Delete Students</h1>
+            <p class="lede">The screen watches the list and calls provider methods for actions.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class StudentsPage extends StatelessWidget {
+  const StudentsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final provider =
+        context.watch&lt;StudentProvider&gt;();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Students'),
+      ),
+      body: ListView.builder(
+        itemCount: provider.students.length,
+        itemBuilder: (context, index) {
+          final student =
+              provider.students[index];
+
+          return ListTile(
+            title: Text(student),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () {
+                context
+                    .read&lt;StudentProvider&gt;()
+                    .deleteStudent(index);
+              },
+            ),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context
+              .read&lt;StudentProvider&gt;()
+              .addStudent('John');
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+        </section>
+        <section class="step-view" data-title="Multiple providers">
+          <header class="step-header"><span class="step-kicker">STEP 12 · MULTIPROVIDER</span>
+            <h1>Use More Than One Provider</h1>
+            <p class="lede">Large apps usually have several pieces of shared state.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>MultiProvider(
+  providers: [
+    ChangeNotifierProvider(
+      create: (context) => CounterProvider(),
+    ),
+    ChangeNotifierProvider(
+      create: (context) => StudentProvider(),
+    ),
+  ],
+  child: const MyApp(),
+)</code></pre>
+          </div>
+          <div class="panel yellow"><strong>MultiProvider:</strong>
+            <p>It simply organizes multiple providers neatly.</p>
+          </div>
+        </section>
+        <section class="step-view" data-title="Provider scope">
+          <header class="step-header"><span class="step-kicker">STEP 13 · SCOPE</span>
+            <h1>Understand Provider Scope</h1>
+            <p class="lede">A provider is available only to widgets below it in the widget tree.</p>
+          </header>
+          <div class="flow">
+            ChangeNotifierProvider&lt;StudentProvider&gt;<br>↓<br>MaterialApp<br>↓<br>HomePage<br>↓<br>StudentsPage
+          </div>
+          <div class="panel mint"><strong>Below it:</strong>
+            <p>Can access the provider.</p>
+          </div>
+          <div class="panel pink"><strong>Above it:</strong>
+            <p>Cannot access the provider.</p>
+          </div>
+        </section>
+        <section class="step-view" data-title="State across routes">
+          <header class="step-header"><span class="step-kicker">STEP 14 · SHARE ACROSS ROUTES</span>
+            <h1>Share State Across Screens</h1>
+            <p class="lede">Put the provider above MaterialApp so multiple routes can use the same instance.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => StudentProvider(),
+      child: const MyApp(),
+    ),
+  );
+}</code></pre>
+          </div>
+          <div class="flow">StudentProvider<br>↓<br>MaterialApp<br>├── HomePage<br>└── StudentsPage</div>
+          <div class="panel green"><strong>Result:</strong>
+            <p>Both routes see the same student list.</p>
+          </div>
+        </section>
+        <section class="step-view" data-title="Loading state">
+          <header class="step-header"><span class="step-kicker">STEP 15 · LOADING</span>
+            <h1>Manage Loading State</h1>
+            <p class="lede">Providers can also store UI state such as whether data is loading.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>class StudentProvider extends ChangeNotifier {
+  bool isLoading = false;
+  final List&lt;String&gt; students = [];
+
+  Future&lt;void&gt; loadStudents() async {
+    isLoading = true;
+    notifyListeners();
+
+    await Future.delayed(
+      const Duration(seconds: 2),
+    );
+
+    students.addAll([
+      'Aman',
+      'Riya',
+      'John',
+    ]);
+
+    isLoading = false;
+    notifyListeners();
+  }
+}</code></pre>
+          </div>
+          <h2>Show the loading UI</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>final provider =
+    context.watch&lt;StudentProvider&gt;();
+
+if (provider.isLoading) {
+  return const Center(
+    child: CircularProgressIndicator(),
+  );
+}</code></pre>
+          </div>
+          <div class="flow">isLoading = true → notifyListeners() → spinner → load data → isLoading = false →
+            notifyListeners() → list</div>
+        </section>
+        <section class="step-view" data-title="Complete practical">
+          <header class="step-header"><span class="step-kicker">STEP 16 · COMPLETE APP</span>
+            <h1>Student Management with Provider</h1>
+            <p class="lede">Combine shared state, loading, add, delete, watch, and read.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => StudentProvider(),
+      child: const MyApp(),
+    ),
+  );
+}
+
+class StudentProvider extends ChangeNotifier {
+  final List&lt;String&gt; students = [];
+  bool isLoading = false;
+
+  Future&lt;void&gt; loadStudents() async {
+    isLoading = true;
+    notifyListeners();
+
+    await Future.delayed(
+      const Duration(seconds: 2),
+    );
+
+    students.clear();
+    students.addAll(['Aman', 'Riya', 'John']);
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  void addStudent(String name) {
+    students.add(name);
+    notifyListeners();
+  }
+
+  void deleteStudent(int index) {
+    students.removeAt(index);
+    notifyListeners();
+  }
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: StudentsPage(),
+    );
+  }
+}
+
+class StudentsPage extends StatelessWidget {
+  const StudentsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final provider =
+        context.watch&lt;StudentProvider&gt;();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Student Management'),
+      ),
+      body: provider.isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : ListView.builder(
+              itemCount: provider.students.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(
+                    provider.students[index],
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      context
+                          .read&lt;StudentProvider&gt;()
+                          .deleteStudent(index);
+                    },
+                  ),
+                );
+              },
+            ),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            heroTag: 'load',
+            onPressed: () {
+              context
+                  .read&lt;StudentProvider&gt;()
+                  .loadStudents();
+            },
+            child: const Icon(Icons.download),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton(
+            heroTag: 'add',
+            onPressed: () {
+              context
+                  .read&lt;StudentProvider&gt;()
+                  .addStudent('New Student');
+            },
+            child: const Icon(Icons.add),
+          ),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+        </section>
+        <section class="step-view" data-title="Revision & viva">
+          <header class="step-header"><span class="step-kicker">STEP 17 · REVISION</span>
+            <h1>Quick Revision and Viva Questions</h1>
+            <p class="lede">Review the key Provider ideas.</p>
+          </header>
+          <div class="reveal">
+            <summary>1. What is Provider?</summary>
+            <div>A package used to expose shared state to widgets in the widget tree.</div>
+          </div>
+          <div class="reveal">
+            <summary>2. What is ChangeNotifier?</summary>
+            <div>A class that stores state and can notify listening widgets.</div>
+          </div>
+          <div class="reveal">
+            <summary>3. Why call notifyListeners()?</summary>
+            <div>To tell listening widgets that state changed.</div>
+          </div>
+          <div class="reveal">
+            <summary>4. What does context.watch() do?</summary>
+            <div>Reads a provider and rebuilds when it changes.</div>
+          </div>
+          <div class="reveal">
+            <summary>5. What does context.read() do?</summary>
+            <div>Reads a provider without listening, usually to call a method.</div>
+          </div>
+          <div class="reveal">
+            <summary>6. What is Consumer?</summary>
+            <div>A widget that listens to a provider and rebuilds its builder.</div>
+          </div>
+          <div class="reveal">
+            <summary>7. What is MultiProvider?</summary>
+            <div>A clean way to provide multiple providers.</div>
+          </div>
+          <div class="reveal">
+            <summary>8. What is provider scope?</summary>
+            <div>A provider is available only to widgets below it.</div>
+          </div>
+          <div class="reveal">
+            <summary>9. Can state be shared across routes?</summary>
+            <div>Yes. Put the provider above the routes, such as above MaterialApp.</div>
+          </div>
+          <h2>Completion checklist</h2>
+          <ul class="checklist">
+            <li>I can create a ChangeNotifier.</li>
+            <li>I can call notifyListeners().</li>
+            <li>I can use ChangeNotifierProvider.</li>
+            <li>I can use context.watch().</li>
+            <li>I can use context.read().</li>
+            <li>I understand Consumer.</li>
+            <li>I can use MultiProvider.</li>
+            <li>I understand provider scope.</li>
+            <li>I can share state across routes.</li>
+            <li>I can manage students and loading state.</li>
+          </ul>
+          <div class="finish">
+            <h2>Codelab complete! 🎉</h2>
+            <p>You can now build shared Flutter state using Provider and ChangeNotifier.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script>
+    (() => {
+      const steps = [...document.querySelectorAll('.step-view')];
+      const titles = steps.map(step => step.dataset.title);
+      const nav = document.getElementById('stepNav');
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.getElementById('menuBtn');
+      const content = document.getElementById('content');
+      const completed = new Set();
+      let current = 0;
+
+      nav.innerHTML = titles.map((title, index) => `
+    <button class="step-link" data-step="${index}" type="button">
+      <span class="step-number">${String(index + 1).padStart(2, '0')}</span>
+      <span>${title}</span>
+      <span class="step-status" aria-hidden="true"></span>
+    </button>
+  `).join('');
+
+      const getHashStep = () => {
+        const match = location.hash.match(/^#step-(\d+)$/);
+        const value = match ? Number(match[1]) - 1 : 0;
+        return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0
+      };
+
+      function render(updateHash = true) {
+        current = Math.max(0, Math.min(current, steps.length - 1));
+        steps.forEach((step, index) => {
+          const active = index === current;
+          step.classList.toggle('active', active);
+          step.setAttribute('aria-hidden', String(!active));
+        });
+
+        document.querySelectorAll('.step-link').forEach((button, index) => {
+          button.classList.toggle('active', index === current);
+          button.setAttribute('aria-current', index === current ? 'step' : 'false');
+          button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '';
+        });
+
+        const percent = Math.round(((current + 1) / steps.length) * 100);
+        document.getElementById('progressBar').style.width = `${percent}%`;
+        document.getElementById('progressText').textContent = `${percent}%`;
+        document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+        document.getElementById('mobileTitle').textContent = titles[current];
+        document.getElementById('prevBtn').disabled = current === 0;
+        document.getElementById('nextBtn').disabled = current === steps.length - 1;
+        document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+
+        if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        sidebar.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+      }
+
+      function goTo(index) {
+        if (index < 0 || index >= steps.length) return;
+        completed.add(current);
+        current = index;
+        render();
+      }
+
+      const navRow = document.createElement('div');
+      navRow.className = 'nav-row';
+      navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';
+      content.appendChild(navRow);
+
+      document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+      document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+      nav.addEventListener('click', event => {
+        const button = event.target.closest('.step-link');
+        if (button) goTo(Number(button.dataset.step));
+      });
+
+      menuBtn.addEventListener('click', () => {
+        const open = sidebar.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', String(open));
+      });
+
+      document.addEventListener('click', async event => {
+        const copy = event.target.closest('.copy-btn');
+        if (copy) {
+          const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+          try {
+            await navigator.clipboard.writeText(code);
+            copy.textContent = 'Copied!';
+          } catch {
+            copy.textContent = 'Select & copy';
+          }
+          setTimeout(() => copy.textContent = 'Copy', 1200);
+          return;
+        }
+
+        const option = event.target.closest('.quiz-option');
+        if (option) {
+          const quiz = option.closest('.quiz');
+          if (quiz.dataset.answered) return;
+          const options = [...quiz.querySelectorAll('.quiz-option')];
+          const choice = options.indexOf(option);
+          const answer = Number(quiz.dataset.answer);
+          quiz.dataset.answered = 'true';
+          options.forEach(button => button.disabled = true);
+          option.classList.add(choice === answer ? 'correct' : 'wrong');
+          if (choice !== answer) options[answer].classList.add('correct');
+          const feedback = quiz.querySelector('.quiz-feedback');
+          feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
+          feedback.classList.add('show');
+        }
+      });
+
+      window.addEventListener('popstate', () => { current = getHashStep(); render(false) });
+      window.addEventListener('hashchange', () => { current = getHashStep(); render(false) });
+
+      document.addEventListener('keydown', event => {
+        if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+        if (event.key === 'ArrowRight') goTo(current + 1);
+        if (event.key === 'ArrowLeft') goTo(current - 1);
+      });
+
+      current = getHashStep();
+      render(false);
+    })();
+  </script>
+</body>
+
+</html>
