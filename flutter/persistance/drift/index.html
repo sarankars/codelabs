@@ -1,840 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SQLite with Drift in Flutter — Codelab</title>
-  <meta name="description" content="Beginner-friendly Flutter codelab for SQLite local databases using Drift.">
-  <meta name="theme-color" content="#2563eb">
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flutter Student CRUD — Drift, Provider & go_router Codelab</title>
+<meta name="description" content="Step-by-step Flutter Student CRUD codelab using Drift, Provider, ChangeNotifier, and go_router.">
+<meta name="theme-color" content="#2563eb">
+<style>
     @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
-
-    :root {
-      --green: #2563eb;
-      --green-dark: #1e3a8a;
-      --green-light: #dbeafe;
-      --ink: #101010;
-      --paper: #f5f7f4;
-      --white: #fff;
-      --yellow: #ffd83d;
-      --mint: #75e6c5;
-      --pink: #ff9bb7;
-      --orange: #ffb866;
-      --border: 3px solid var(--ink);
-      --shadow: 6px 6px 0 var(--ink);
-      --shadow-sm: 4px 4px 0 var(--ink);
-      --sidebar: 292px
-    }
-
-    * {
-      box-sizing: border-box
-    }
-
-    html {
-      scroll-behavior: auto
-    }
-
-    body {
-      margin: 0;
-      background: var(--paper);
-      color: var(--ink);
-      font-family: "Space Grotesk", system-ui, sans-serif;
-      line-height: 1.55
-    }
-
-    button,
-    a {
-      font: inherit
-    }
-
-    button {
-      cursor: pointer
-    }
-
-    :focus-visible {
-      outline: 4px solid var(--yellow);
-      outline-offset: 3px
-    }
-
-    .app {
-      min-height: 100vh
-    }
-
-    .sidebar {
-      position: fixed;
-      inset: 0 auto 0 0;
-      width: var(--sidebar);
-      padding: 22px 18px;
-      background: var(--green);
-      border-right: var(--border);
-      overflow: auto;
-      z-index: 20
-    }
-
-    .brand {
-      padding: 16px;
-      margin-bottom: 20px;
-      background: #fff;
-      border: var(--border);
-      box-shadow: var(--shadow-sm)
-    }
-
-    .eyebrow,
-    .progress-meta,
-    .step-number,
-    .step-kicker,
-    .label,
-    .footer-note {
-      font-family: "DM Mono", monospace
-    }
-
-    .eyebrow {
-      font-size: .72rem;
-      font-weight: 500;
-      letter-spacing: .06em;
-      text-transform: uppercase
-    }
-
-    .brand h2 {
-      margin: 5px 0 3px;
-      font-size: 1.42rem;
-      line-height: 1.05
-    }
-
-    .brand p {
-      margin: 0;
-      font-size: .85rem;
-      font-weight: 600
-    }
-
-    .progress-wrap {
-      margin: 0 2px 20px;
-      color: #fff
-    }
-
-    .progress-meta {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 7px;
-      font-size: .72rem
-    }
-
-    .progress-track {
-      height: 16px;
-      padding: 2px;
-      background: #fff;
-      border: var(--border)
-    }
-
-    .progress-bar {
-      height: 100%;
-      width: 0;
-      background: var(--yellow);
-      transition: width .2s ease
-    }
-
-    .steps {
-      display: grid;
-      gap: 8px
-    }
-
-    .step-link {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 34px 1fr 18px;
-      align-items: center;
-      gap: 9px;
-      padding: 9px 8px;
-      color: #fff;
-      background: transparent;
-      border: 3px solid transparent;
-      text-align: left;
-      font-weight: 700;
-      line-height: 1.15
-    }
-
-    .step-link:hover {
-      background: rgba(255, 255, 255, .14)
-    }
-
-    .step-link.active {
-      color: var(--ink);
-      background: #fff;
-      border-color: var(--ink);
-      box-shadow: var(--shadow-sm)
-    }
-
-    .step-number {
-      width: 30px;
-      height: 30px;
-      display: grid;
-      place-items: center;
-      border: 2px solid currentColor;
-      font-size: .78rem
-    }
-
-    .step-status {
-      text-align: center
-    }
-
-    .mobile-bar {
-      display: none;
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-      background: var(--green);
-      border-bottom: var(--border)
-    }
-
-    .menu-btn,
-    .mobile-title {
-      background: #fff;
-      border: var(--border);
-      box-shadow: var(--shadow-sm)
-    }
-
-    .menu-btn {
-      width: 46px;
-      height: 42px;
-      font-size: 1.25rem;
-      font-weight: 900
-    }
-
-    .mobile-title {
-      flex: 1;
-      padding: 8px 10px;
-      font-weight: 800
-    }
-
-    main {
-      margin-left: var(--sidebar);
-      min-height: 100vh
-    }
-
-    .content {
-      width: min(980px, calc(100% - 48px));
-      margin: 0 auto;
-      padding: 42px 0 28px
-    }
-
-    .step-view {
-      display: none
-    }
-
-    .step-view.active {
-      display: block;
-      animation: stepIn .18s ease-out
-    }
-
-    @keyframes stepIn {
-      from {
-        opacity: .35;
-        transform: translateY(5px)
-      }
-
-      to {
-        opacity: 1;
-        transform: none
-      }
-    }
-
-    .step-header {
-      padding: 28px;
-      margin-bottom: 24px;
-      background: #fff;
-      border: var(--border);
-      box-shadow: var(--shadow)
-    }
-
-    .step-kicker {
-      display: inline-block;
-      margin-bottom: 13px;
-      padding: 5px 9px;
-      color: #fff;
-      background: var(--green);
-      border: 2px solid var(--ink);
-      font-size: .72rem
-    }
-
-    h1,
-    h2,
-    h3 {
-      line-height: 1.08
-    }
-
-    h1 {
-      margin: 0 0 12px;
-      font-size: clamp(2rem, 5vw, 3.7rem);
-      letter-spacing: -.045em
-    }
-
-    h2 {
-      margin: 30px 0 12px;
-      font-size: clamp(1.5rem, 3vw, 2.15rem)
-    }
-
-    h3 {
-      margin: 22px 0 9px;
-      font-size: 1.15rem
-    }
-
-    .lede {
-      max-width: 800px;
-      margin: 0;
-      font-size: 1.08rem
-    }
-
-    .objective {
-      margin-top: 20px;
-      padding: 14px 16px;
-      background: var(--yellow);
-      border: var(--border);
-      box-shadow: var(--shadow-sm);
-      font-weight: 700
-    }
-
-    .panel,
-    .concept,
-    .quiz,
-    .reveal {
-      background: #fff;
-      border: var(--border);
-      box-shadow: var(--shadow-sm)
-    }
-
-    .panel {
-      padding: 22px;
-      margin: 20px 0
-    }
-
-    .panel.blue {
-      background: #e5efff
-    }
-
-    .panel.mint {
-      background: var(--mint)
-    }
-
-    .panel.pink {
-      background: var(--pink)
-    }
-
-    .panel.yellow {
-      background: var(--yellow)
-    }
-
-    .panel.orange {
-      background: var(--orange)
-    }
-
-    .panel.green {
-      background: var(--green-light)
-    }
-
-    .callout {
-      padding: 16px 18px;
-      margin: 20px 0;
-      background: #fff;
-      border: var(--border);
-      box-shadow: var(--shadow-sm)
-    }
-
-    .callout .label {
-      display: inline-block;
-      margin-bottom: 8px;
-      padding: 3px 7px;
-      color: #fff;
-      background: var(--ink);
-      border: 2px solid var(--ink);
-      font-size: .72rem
-    }
-
-    .grid-2 {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(2, minmax(0, 1fr))
-    }
-
-    .grid-3 {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(3, minmax(0, 1fr))
-    }
-
-    .concept {
-      padding: 18px
-    }
-
-    .concept strong {
-      font-size: 1.05rem
-    }
-
-    .concept p:last-child {
-      margin-bottom: 0
-    }
-
-    .code-wrap {
-      position: relative;
-      margin: 18px 0
-    }
-
-    pre {
-      margin: 0;
-      padding: 20px;
-      overflow: auto;
-      color: #f7f7f7;
-      background: #111;
-      border: var(--border);
-      box-shadow: var(--shadow-sm);
-      font-family: "DM Mono", ui-monospace, monospace;
-      font-size: .84rem;
-      line-height: 1.62;
-      tab-size: 2
-    }
-
-    .copy-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      z-index: 2;
-      padding: 5px 9px;
-      background: var(--yellow);
-      border: 2px solid var(--ink);
-      box-shadow: 3px 3px 0 var(--ink);
-      font-size: .75rem;
-      font-weight: 800
-    }
-
-    code:not(pre code) {
-      padding: 1px 5px;
-      background: #e8edf7;
-      border: 1px solid #9da9bb;
-      font-family: "DM Mono", monospace;
-      font-size: .88em
-    }
-
-    ul,
-    ol {
-      padding-left: 1.35rem
-    }
-
-    li {
-      margin: 7px 0
-    }
-
-    .comparison {
-      width: 100%;
-      margin: 18px 0;
-      background: #fff;
-      border: var(--border);
-      border-collapse: collapse
-    }
-
-    .comparison th,
-    .comparison td {
-      padding: 11px;
-      border: 2px solid var(--ink);
-      text-align: left;
-      vertical-align: top
-    }
-
-    .comparison th {
-      color: #fff;
-      background: var(--green)
-    }
-
-    .quiz {
-      padding: 20px;
-      margin: 20px 0
-    }
-
-    .quiz-options {
-      display: grid;
-      gap: 9px;
-      margin-top: 14px
-    }
-
-    .quiz-option {
-      text-align: left;
-      padding: 11px 13px;
-      background: #fff;
-      border: 2px solid var(--ink);
-      font-weight: 700
-    }
-
-    .quiz-option:hover {
-      background: var(--green-light)
-    }
-
-    .quiz-option.correct {
-      background: var(--mint)
-    }
-
-    .quiz-option.wrong {
-      background: var(--pink)
-    }
-
-    .quiz-feedback {
-      display: none;
-      margin-top: 13px;
-      padding: 10px;
-      border: 2px solid var(--ink);
-      font-weight: 700
-    }
-
-    .quiz-feedback.show {
-      display: block
-    }
-
-    .reveal {
-      margin: 18px 0
-    }
-
-    .reveal summary {
-      padding: 13px 16px;
-      cursor: pointer;
-      background: var(--green-light);
-      font-weight: 800
-    }
-
-    .reveal>div {
-      padding: 15px 16px
-    }
-
-    .challenge {
-      padding: 22px;
-      margin: 24px 0;
-      color: #fff;
-      background: var(--ink);
-      border: var(--border);
-      box-shadow: var(--shadow)
-    }
-
-    .challenge h3 {
-      margin-top: 0;
-      color: var(--yellow)
-    }
-
-    .flow {
-      margin: 20px 0;
-      padding: 20px;
-      background: #fff;
-      border: var(--border);
-      box-shadow: var(--shadow-sm);
-      font-family: "DM Mono", monospace;
-      line-height: 1.9;
-      overflow: auto
-    }
-
-    .checklist {
-      list-style: none;
-      padding: 0
-    }
-
-    .checklist li {
-      position: relative;
-      padding-left: 30px
-    }
-
-    .checklist li::before {
-      content: "□";
-      position: absolute;
-      left: 0;
-      font-size: 1.25rem;
-      font-weight: 900
-    }
-
-    .nav-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 14px;
-      margin-top: 34px;
-      padding-top: 20px;
-      border-top: var(--border)
-    }
-
-    .nav-btn {
-      min-width: 130px;
-      padding: 12px 18px;
-      background: #fff;
-      border: var(--border);
-      box-shadow: var(--shadow-sm);
-      font-weight: 900
-    }
-
-    .nav-btn.primary {
-      color: #fff;
-      background: var(--green)
-    }
-
-    .nav-btn:disabled {
-      opacity: .35;
-      cursor: not-allowed
-    }
-
-    .finish {
-      padding: 20px;
-      margin-top: 24px;
-      background: var(--mint);
-      border: var(--border);
-      box-shadow: var(--shadow)
-    }
-
-    .timebox {
-      display: inline-block;
-      margin: 6px 0 0;
-      padding: 4px 8px;
-      background: #fff;
-      border: 2px solid var(--ink);
-      font-family: "DM Mono", monospace;
-      font-weight: 700
-    }
-
-    @media(max-width:850px) {
-      :root {
-        --sidebar: 270px;
-        --mobile-bar-height: 65px
-      }
-
-      .sidebar {
-        inset: var(--mobile-bar-height) auto 0 0;
-        transform: translateX(-100%);
-        transition: transform .2s ease
-      }
-
-      .sidebar.open {
-        transform: none
-      }
-
-      .mobile-bar {
-        display: flex;
-        height: var(--mobile-bar-height)
-      }
-
-      main {
-        margin-left: 0
-      }
-
-      .content {
-        width: min(940px, calc(100% - 28px));
-        padding-top: 24px
-      }
-    }
-
-    @media(max-width:680px) {
-
-      .grid-2,
-      .grid-3 {
-        grid-template-columns: 1fr
-      }
-
-      .content {
-        width: calc(100% - 18px);
-        padding-top: 16px
-      }
-
-      .step-header {
-        padding: 20px 16px
-      }
-
-      .panel,
-      .concept,
-      .quiz {
-        padding: 16px
-      }
-
-      .nav-row {
-        position: sticky;
-        bottom: 0;
-        z-index: 10;
-        padding: 12px 0;
-        background: var(--paper)
-      }
-
-      .nav-btn {
-        min-width: 0;
-        flex: 1;
-        padding: 11px 10px
-      }
-
-      pre {
-        padding: 16px 12px;
-        font-size: .76rem
-      }
-
-      .copy-btn {
-        position: static;
-        align-self: flex-end;
-        margin-bottom: 6px
-      }
-
-      .code-wrap {
-        display: flex;
-        flex-direction: column
-      }
-
-      .code-wrap pre {
-        order: 2
-      }
-
-      .code-wrap .copy-btn {
-        order: 1
-      }
-
-      .comparison {
-        display: block;
-        overflow-x: auto
-      }
+    :root{
+      --green:#2563eb;
+      --green-dark:#1e3a8a;
+      --green-light:#dbeafe;
+      --ink:#101010;
+      --paper:#f5f7f4;
+      --white:#fff;
+      --yellow:#ffd83d;
+      --mint:#75e6c5;
+      --pink:#ff9bb7;
+      --orange:#ffb866;
+      --border:3px solid var(--ink);
+      --shadow:6px 6px 0 var(--ink);
+      --shadow-sm:4px 4px 0 var(--ink);
+      --sidebar:292px
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:auto}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}
+    button,a{font:inherit}
+    button{cursor:pointer}
+    :focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}
+    .sidebar{
+      position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;
+      background:var(--green);border-right:var(--border);overflow:auto;z-index:20
+    }
+    .brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+    .eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}
+    .eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+    .brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}
+    .brand p{margin:0;font-size:.85rem;font-weight:600}
+    .progress-wrap{margin:0 2px 20px;color:#fff}
+    .progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}
+    .progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}
+    .progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}
+    .steps{display:grid;gap:8px}
+    .step-link{
+      width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;
+      padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;
+      text-align:left;font-weight:700;line-height:1.15
+    }
+    .step-link:hover{background:rgba(255,255,255,.14)}
+    .step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}
+    .step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}
+    .step-status{text-align:center}
+    .mobile-bar{
+      display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;
+      background:var(--green);border-bottom:var(--border)
+    }
+    .menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+    .menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}
+    .mobile-title{flex:1;padding:8px 10px;font-weight:800}
+    main{margin-left:var(--sidebar);min-height:100vh}
+    .content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}
+    .step-view{display:none}
+    .step-view.active{display:block;animation:stepIn .18s ease-out}
+    @keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}
+    .step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--green);border:2px solid var(--ink);font-size:.72rem}
+    h1,h2,h3{line-height:1.08}
+    h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}
+    h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}
+    h3{margin:22px 0 9px;font-size:1.15rem}
+    .lede{max-width:800px;margin:0;font-size:1.08rem}
+    .objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+    .panel{padding:22px;margin:20px 0}
+    .panel.blue{background:#e5efff}
+    .panel.mint{background:var(--mint)}
+    .panel.pink{background:var(--pink)}
+    .panel.yellow{background:var(--yellow)}
+    .panel.orange{background:var(--orange)}
+    .panel.green{background:var(--green-light)}
+    .callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+    .callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}
+    .grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid-3{display:grid;gap:16px;grid-template-columns:repeat(3,minmax(0,1fr))}
+    .concept{padding:18px}
+    .concept strong{font-size:1.05rem}
+    .concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}
+    pre{
+      margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);
+      box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;
+      line-height:1.62;tab-size:2
+    }
+    .copy-btn{
+      position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);
+      border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800
+    }
+    code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}
+    ul,ol{padding-left:1.35rem}
+    li{margin:7px 0}
+    .comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}
+    .comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}
+    .comparison th{color:#fff;background:var(--green)}
+    .quiz{padding:20px;margin:20px 0}
+    .quiz-options{display:grid;gap:9px;margin-top:14px}
+    .quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}
+    .quiz-option:hover{background:var(--green-light)}
+    .quiz-option.correct{background:var(--mint)}
+    .quiz-option.wrong{background:var(--pink)}
+    .quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}
+    .quiz-feedback.show{display:block}
+    .reveal{margin:18px 0}
+    .reveal summary{padding:13px 16px;cursor:pointer;background:var(--green-light);font-weight:800}
+    .reveal>div{padding:15px 16px}
+    .challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}
+    .challenge h3{margin-top:0;color:var(--yellow)}
+    .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}
+    .checklist{list-style:none;padding:0}
+    .checklist li{position:relative;padding-left:30px}
+    .checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}
+    .nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}
+    .nav-btn.primary{color:#fff;background:var(--green)}
+    .nav-btn:disabled{opacity:.35;cursor:not-allowed}
+    .finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}
+    .timebox{display:inline-block;margin:6px 0 0;padding:4px 8px;background:#fff;border:2px solid var(--ink);font-family:"DM Mono",monospace;font-weight:700}
+    @media(max-width:850px){
+      :root{--sidebar:270px;--mobile-bar-height:65px}
+      .sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}
+      .sidebar.open{transform:none}
+      .mobile-bar{display:flex;height:var(--mobile-bar-height)}
+      main{margin-left:0}
+      .content{width:min(940px,calc(100% - 28px));padding-top:24px}
+    }
+    @media(max-width:680px){
+      .grid-2,.grid-3{grid-template-columns:1fr}
+      .content{width:calc(100% - 18px);padding-top:16px}
+      .step-header{padding:20px 16px}
+      .panel,.concept,.quiz{padding:16px}
+      .nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}
+      .nav-btn{min-width:0;flex:1;padding:11px 10px}
+      pre{padding:16px 12px;font-size:.76rem}
+      .copy-btn{position:static;align-self:flex-end;margin-bottom:6px}
+      .code-wrap{display:flex;flex-direction:column}
+      .code-wrap pre{order:2}
+      .code-wrap .copy-btn{order:1}
+      .comparison{display:block;overflow-x:auto}
     }
   </style>
 </head>
-
 <body>
-  <div class="app">
-    <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
-      <div class="brand">
-        <div class="eyebrow">Flutter Database Codelab</div>
-        <h2>SQLite + Drift</h2>
-        <p>Type-safe local databases.</p>
-      </div>
-      <div class="progress-wrap">
-        <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
-        <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
-          aria-valuenow="0">
-          <div class="progress-bar" id="progressBar"></div>
-        </div>
-      </div>
-      <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
-    </aside>
-    <div class="mobile-bar">
-      <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation"
-        aria-expanded="false">☰</button>
-      <div class="mobile-title" id="mobileTitle">SQLite with Drift</div>
-    </div>
-    <main>
-      <div class="content" id="content">
+<div class="app">
+<aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+  <div class="brand">
+    <div class="eyebrow">Flutter Architecture Codelab</div>
+    <h2>Student CRUD</h2>
+    <p>Drift + Provider + go_router</p>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+    <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div>
+  </div>
+  <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+</aside>
+<div class="mobile-bar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button>
+  <div class="mobile-title" id="mobileTitle">Student CRUD with Drift + Provider</div>
+</div>
+<main><div class="content" id="content">
 
-        <section class="step-view" data-title="What we will build">
-          <header class="step-header"><span class="step-kicker">STEP 1 · INTRODUCTION</span>
-            <h1>SQLite in Flutter with Drift</h1>
-            <p class="lede">Build a real local database where students can add, view, update, delete, search, and
-              automatically listen to saved records.</p>
-            <div class="timebox">Suggested time: 15 minutes</div>
-          </header>
-          <div class="objective"><strong>By the end:</strong> Understand SQLite, Drift, tables, generated code, database
-            classes, companions, CRUD, queries, sorting, filtering, streams, and schema versions.</div>
-          <div class="flow">Flutter UI<br>↓<br>Drift<br>↓<br>Type-safe Dart queries<br>↓<br>SQLite database file</div>
-          <div class="panel green"><strong>Simple idea:</strong>
-            <p>SQLite stores the data. Drift gives Flutter a clean, type-safe Dart API to work with SQLite.</p>
-          </div>
-        </section>
+<section class="step-view" data-title="What we will build">
+<header class="step-header"><span class="step-kicker">STEP 1 · GOAL</span>
+<h1>Student CRUD with Drift + Provider + go_router</h1>
+<p class="lede">Build a small Student Management app and use it to understand database persistence, ChangeNotifier state management, Provider, and declarative navigation.</p><div class="timebox">Suggested time: 10 minutes</div></header>
 
-        <section class="step-view" data-title="Why SQLite?">
-          <header class="step-header"><span class="step-kicker">STEP 2 · WHY DATABASES?</span>
-            <h1>Why Not Use SharedPreferences?</h1>
-            <p class="lede">Preferences are great for small settings. A database is better when the app has many
-              structured records.</p>
-          </header>
-          <table class="comparison">
-            <thead>
-              <tr>
-                <th>Need</th>
-                <th>SharedPreferences</th>
-                <th>SQLite</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Dark mode setting</td>
-                <td>✅ Good</td>
-                <td>Possible but unnecessary</td>
-              </tr>
-              <tr>
-                <td>One username</td>
-                <td>✅ Good</td>
-                <td>Possible but unnecessary</td>
-              </tr>
-              <tr>
-                <td>500 students</td>
-                <td>❌ Awkward</td>
-                <td>✅ Good</td>
-              </tr>
-              <tr>
-                <td>Search students</td>
-                <td>❌ Manual</td>
-                <td>✅ Query</td>
-              </tr>
-              <tr>
-                <td>Sort by age</td>
-                <td>❌ Manual</td>
-                <td>✅ Query</td>
-              </tr>
-              <tr>
-                <td>Update one record</td>
-                <td>❌ Awkward</td>
-                <td>✅ Good</td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="panel yellow"><strong>Rule:</strong>
-            <p>Small settings → preferences. Structured collections and queries → database.</p>
-          </div>
-        </section>
+<div class="objective"><strong>By the end:</strong> Create, read, update, and delete students in Drift; keep screen state inside a <code>ChangeNotifier</code>; expose it with Provider; and navigate between list, add, and edit screens using <code>go_router</code>.</div>
+<div class="flow">UI Screen<br>↓ user action<br>StudentProvider (ChangeNotifier)<br>↓ calls<br>AppDatabase (Drift)<br>↓ reads/writes<br>SQLite database<br>↓ result<br>StudentProvider → notifyListeners()<br>↓<br>UI rebuilds</div>
+<div class="panel green"><strong>Main rule:</strong><p>The screen should not directly write SQL or call Drift queries. The screen talks to the provider, and the provider talks to the database.</p></div>
 
-        <section class="step-view" data-title="What is Drift?">
-          <header class="step-header"><span class="step-kicker">STEP 3 · DRIFT</span>
-            <h1>What Does Drift Do?</h1>
-            <p class="lede">Drift sits between your Flutter code and SQLite.</p>
-          </header>
-          <div class="grid-3">
-            <div class="concept"><strong>SQLite</strong>
-              <p>The actual relational database engine that stores rows and tables.</p>
-            </div>
-            <div class="concept"><strong>Drift</strong>
-              <p>A Dart database library that generates strongly typed database code.</p>
-            </div>
-            <div class="concept"><strong>build_runner</strong>
-              <p>Runs Drift's generator and creates the Dart code your database class needs.</p>
-            </div>
-          </div>
-          <div class="flow">Students table<br>↓ Drift generator<br>Generated Student data class<br>↓<br>Dart insert /
-            select / update / delete</div>
-        </section>
+</section>
 
-        <section class="step-view" data-title="Create project">
-          <header class="step-header"><span class="step-kicker">STEP 4 · SETUP</span>
-            <h1>Create the Project</h1>
-            <p class="lede">Create a Flutter project and add Drift.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>flutter create drift_student_app
+<section class="step-view" data-title="Architecture first">
+<header class="step-header"><span class="step-kicker">STEP 2 · ARCHITECTURE</span>
+<h1>Understand the App Flow</h1>
+<p class="lede">Before writing code, separate the responsibilities of each layer.</p></header>
+
+<table class="comparison"><thead><tr><th>Part</th><th>Responsibility</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>Drift</code></td><td>Store and retrieve persistent records</td><td>Insert a student, fetch all students</td></tr>
+<tr><td><code>ChangeNotifier</code></td><td>Hold UI state and notify listeners when it changes</td><td>Keep the current student list</td></tr>
+<tr><td><code>Provider</code></td><td>Make the notifier available to widgets</td><td><code>context.watch&lt;StudentProvider&gt;()</code></td></tr>
+<tr><td><code>go_router</code></td><td>Decide which screen should be shown for a URL/path</td><td><code>/students/5/edit</code></td></tr>
+</tbody></table>
+<div class="panel yellow"><strong>Keep this distinction clear:</strong><p>Provider is how widgets <em>access</em> the state object. <code>ChangeNotifier</code> is the object that actually stores state and sends notifications.</p></div>
+
+</section>
+
+<section class="step-view" data-title="Create project &amp; packages">
+<header class="step-header"><span class="step-kicker">STEP 3 · SETUP</span>
+<h1>Create the Project and Add Packages</h1>
+<p class="lede">Start with a normal Flutter application and add Drift, Provider, and go_router.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>flutter create drift_student_app
 cd drift_student_app
 
-flutter pub add drift drift_flutter
-flutter pub add --dev drift_dev build_runner</code></pre>
-          </div>
-          <div class="panel blue"><strong>Packages:</strong>
-            <p><code>drift</code> contains the database API, <code>drift_flutter</code> opens the database correctly in
-              Flutter, and <code>drift_dev</code> + <code>build_runner</code> generate code.</p>
-          </div>
-        </section>
+flutter pub add drift
+flutter pub add drift_flutter
+flutter pub add provider
+flutter pub add go_router
 
-        <section class="step-view" data-title="Create students table">
-          <header class="step-header"><span class="step-kicker">STEP 5 · TABLE</span>
-            <h1>Define a Students Table</h1>
-            <p class="lede">In Drift, we describe our SQLite table using a Dart class.</p>
-          </header>
-          <p>Create <code>lib/database/app_database.dart</code>.</p>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>import &#x27;package:drift/drift.dart&#x27;;
-import &#x27;package:drift_flutter/drift_flutter.dart&#x27;;
+flutter pub add --dev drift_dev
+flutter pub add --dev build_runner</code></pre></div>
+<div class="panel mint"><strong>Why code generation?</strong><p>Drift reads your table/database definitions and generates strongly typed Dart classes such as <code>Student</code> and <code>StudentsCompanion</code>.</p></div>
 
-part &#x27;app_database.g.dart&#x27;;
+</section>
+
+<section class="step-view" data-title="Project structure">
+<header class="step-header"><span class="step-kicker">STEP 4 · STRUCTURE</span>
+<h1>Create a Simple Folder Structure</h1>
+<p class="lede">We will keep this codelab intentionally small so students can see the complete flow.</p></header>
+
+<div class="flow">lib/<br>├── database/<br>│   ├── app_database.dart<br>│   └── app_database.g.dart &nbsp; ← generated<br>├── models/<br>│   └── students.dart<br>├── providers/<br>│   └── student_provider.dart<br>├── screens/<br>│   ├── student_list_page.dart<br>│   └── student_form_page.dart<br>├── router/<br>│   └── app_router.dart<br>└── main.dart</div>
+<div class="panel green"><strong>Teaching note:</strong><p>Do not create a separate handwritten <code>Student</code> model yet. Drift will generate the row class for this table.</p></div>
+
+</section>
+
+<section class="step-view" data-title="Define Students table">
+<header class="step-header"><span class="step-kicker">STEP 5 · DRIFT TABLE</span>
+<h1>Create the Students Table</h1>
+<p class="lede">The table class describes the columns Drift should create in SQLite.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/models/students.dart
+import &#x27;package:drift/drift.dart&#x27;;
 
 class Students extends Table {
   IntColumn get id =&gt; integer().autoIncrement()();
@@ -844,1018 +241,634 @@ class Students extends Table {
   IntColumn get age =&gt; integer()();
 
   TextColumn get course =&gt; text()();
-}</code></pre>
-          </div>
-          <div class="grid-2">
-            <div class="concept"><strong>Students</strong>
-              <p>The table definition.</p>
-            </div>
-            <div class="concept"><strong>part ...g.dart</strong>
-              <p>Connects this file to code generated by Drift.</p>
-            </div>
-          </div>
-          <div class="panel yellow"><strong>Notice:</strong>
-            <p>You describe columns in Dart. Drift later generates strongly typed classes for them.</p>
-          </div>
-        </section>
+}</code></pre></div>
+<div class="grid-2"><div class="concept"><strong>Students</strong><p>This is the schema/table definition.</p></div><div class="concept"><strong>Student</strong><p>After generation, Drift creates a singular data class representing one database row.</p></div></div>
 
-        <section class="step-view" data-title="Column definitions">
-          <header class="step-header"><span class="step-kicker">STEP 6 · COLUMNS</span>
-            <h1>Understand Drift Columns</h1>
-            <p class="lede">Every getter inside a Drift table describes one SQLite column.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>IntColumn get id =&gt;
-    integer().autoIncrement()();
+</section>
 
-TextColumn get name =&gt;
-    text()();
+<section class="step-view" data-title="Create AppDatabase">
+<header class="step-header"><span class="step-kicker">STEP 6 · DATABASE</span>
+<h1>Configure Drift and Generate Code</h1>
+<p class="lede">Register the table in one Drift database class.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/database/app_database.dart
+import &#x27;package:drift/drift.dart&#x27;;
+import &#x27;package:drift_flutter/drift_flutter.dart&#x27;;
+import &#x27;package:drift_student_app/models/students.dart&#x27;;
 
-IntColumn get age =&gt;
-    integer()();
+part &#x27;app_database.g.dart&#x27;;
 
-TextColumn get course =&gt;
-    text()();</code></pre>
-          </div>
-          <table class="comparison">
-            <thead>
-              <tr>
-                <th>Drift</th>
-                <th>SQLite idea</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><code>IntColumn</code></td>
-                <td>INTEGER</td>
-              </tr>
-              <tr>
-                <td><code>TextColumn</code></td>
-                <td>TEXT</td>
-              </tr>
-              <tr>
-                <td><code>BoolColumn</code></td>
-                <td>Boolean-style value</td>
-              </tr>
-              <tr>
-                <td><code>RealColumn</code></td>
-                <td>REAL / decimal value</td>
-              </tr>
-              <tr>
-                <td><code>autoIncrement()</code></td>
-                <td>Automatically creates increasing primary-key IDs</td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
-
-        <section class="step-view" data-title="Create database class">
-          <header class="step-header"><span class="step-kicker">STEP 7 · DATABASE CLASS</span>
-            <h1>Create the AppDatabase</h1>
-            <p class="lede">Now tell Drift which tables belong to this database.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>@DriftDatabase(
-  tables: [Students],
-)
+@DriftDatabase(tables: [Students])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase()
-      : super(
-          driftDatabase(
-            name: &#x27;college_database&#x27;,
-          ),
-        );
+  AppDatabase() : super(
+    driftDatabase(name: &#x27;college_database&#x27;),
+  );
 
   @override
   int get schemaVersion =&gt; 1;
-}</code></pre>
-          </div>
-          <div class="flow">@DriftDatabase(tables: [Students])<br>↓<br>Drift knows Students belongs to
-            AppDatabase<br>↓<br>college_database.sqlite is opened for the app</div>
-          <div class="panel green"><strong>schemaVersion:</strong>
-            <p>Tracks the structure version of your database. We start at version 1.</p>
-          </div>
-        </section>
+}</code></pre></div><h2>Generate the Drift code</h2><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>dart run build_runner build</code></pre></div>
+<div class="panel yellow"><strong>Generated file:</strong><p>You need <code>app_database.g.dart</code>. You do not need a separate <code>students.g.dart</code> for this setup.</p></div>
 
-        <section class="step-view" data-title="Generate Drift code">
-          <header class="step-header"><span class="step-kicker">STEP 8 · CODE GENERATION</span>
-            <h1>Generate the Database Code</h1>
-            <p class="lede">The class <code>_$AppDatabase</code> does not exist until Drift generates it.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>dart run build_runner build --delete-conflicting-outputs</code></pre>
-          </div>
-          <div class="panel mint"><strong>After running:</strong>
-            <p>You should see <code>app_database.g.dart</code> next to <code>app_database.dart</code>.</p>
-          </div>
-          <div class="callout"><span class="label">COMMON ERROR</span>
-            <p>If Flutter says <code>_$AppDatabase</code> is undefined, the generated file probably has not been created
-              yet.</p>
-          </div>
-          <h2>Generate continuously while coding</h2>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>dart run build_runner watch --delete-conflicting-outputs</code></pre>
-          </div>
-        </section>
+</section>
 
-        <section class="step-view" data-title="Generated classes">
-          <header class="step-header"><span class="step-kicker">STEP 9 · GENERATED TYPES</span>
-            <h1>What Did Drift Generate?</h1>
-            <p class="lede">The generator turns the table definition into convenient Dart types.</p>
-          </header>
-          <div class="grid-2">
-            <div class="concept"><strong>Student</strong>
-              <p>Represents a complete row read from the <code>students</code> table.</p>
-            </div>
-            <div class="concept"><strong>StudentsCompanion</strong>
-              <p>Used when inserting or updating values, especially when some fields such as auto IDs are omitted.</p>
-            </div>
-          </div>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>Student(
-  id: 1,
-  name: &#x27;Aman&#x27;,
-  age: 20,
-  course: &#x27;CSE&#x27;,
-)</code></pre>
-          </div>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>StudentsCompanion.insert(
-  name: &#x27;Aman&#x27;,
-  age: 20,
-  course: &#x27;CSE&#x27;,
-)</code></pre>
-          </div>
-          <div class="panel yellow"><strong>Difference:</strong>
-            <p>A <code>Student</code> usually represents an existing row. A <code>StudentsCompanion</code> is convenient
-              when writing rows.</p>
-          </div>
-        </section>
+<section class="step-view" data-title="Add database CRUD">
+<header class="step-header"><span class="step-kicker">STEP 7 · DATABASE CRUD</span>
+<h1>Put CRUD Methods in AppDatabase</h1>
+<p class="lede">Now give the database a small API that the provider can call.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// Add inside AppDatabase
 
-        <section class="step-view" data-title="Insert student">
-          <header class="step-header"><span class="step-kicker">STEP 10 · CREATE</span>
-            <h1>Insert a Student</h1>
-            <p class="lede">CRUD begins with Create.</p>
-          </header>
-          <p>Add this method inside <code>AppDatabase</code>.</p>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>Future&lt;int&gt; addStudent({
+Future&lt;int&gt; addStudent(StudentsCompanion student) {
+  return into(students).insert(student);
+}
+
+Future&lt;List&lt;Student&gt;&gt; getAllStudents() {
+  return select(students).get();
+}
+
+Future&lt;bool&gt; updateStudent(Student student) {
+  return update(students).replace(student);
+}
+
+Future&lt;int&gt; deleteStudent(int id) {
+  return (delete(students)
+        ..where((student) =&gt; student.id.equals(id)))
+      .go();
+}</code></pre></div>
+<table class="comparison"><thead><tr><th>CRUD</th><th>Method</th><th>Result</th></tr></thead><tbody>
+<tr><td>Create</td><td><code>addStudent()</code></td><td>Inserts a new row</td></tr><tr><td>Read</td><td><code>getAllStudents()</code></td><td>Returns <code>List&lt;Student&gt;</code></td></tr><tr><td>Update</td><td><code>updateStudent()</code></td><td>Replaces the row having the same primary key</td></tr><tr><td>Delete</td><td><code>deleteStudent(id)</code></td><td>Deletes the matching id</td></tr>
+</tbody></table>
+
+</section>
+
+<section class="step-view" data-title="Why ChangeNotifier?">
+<header class="step-header"><span class="step-kicker">STEP 8 · STATE</span>
+<h1>Create the State Layer</h1>
+<p class="lede">The database stores data, but widgets still need a state object that tells them when to rebuild.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>class StudentProvider extends ChangeNotifier {
+  // state lives here
+
+  void somethingChanged() {
+    notifyListeners();
+  }
+}</code></pre></div>
+<div class="flow">StudentProvider changes its data<br>↓<br>notifyListeners()<br>↓<br>widgets using watch/Consumer are notified<br>↓<br>those widgets rebuild</div>
+<div class="panel mint"><strong>Important:</strong><p><code>notifyListeners()</code> does not navigate and it does not write to SQLite. It only tells listeners that this notifier's state changed.</p></div>
+
+</section>
+
+<section class="step-view" data-title="Build StudentProvider">
+<header class="step-header"><span class="step-kicker">STEP 9 · PROVIDER</span>
+<h1>Store Students Inside StudentProvider</h1>
+<p class="lede">Inject the database through the constructor and keep the current list in private state.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/providers/student_provider.dart
+import &#x27;package:flutter/material.dart&#x27;;
+import &#x27;package:drift_student_app/database/app_database.dart&#x27;;
+
+class StudentProvider extends ChangeNotifier {
+  final AppDatabase database;
+
+  StudentProvider(this.database);
+
+  List&lt;Student&gt; _students = [];
+  bool _isLoading = false;
+
+  List&lt;Student&gt; get students =&gt; _students;
+  bool get isLoading =&gt; _isLoading;
+
+  Future&lt;void&gt; loadStudents() async {
+    _isLoading = true;
+    notifyListeners();
+
+    _students = await database.getAllStudents();
+
+    _isLoading = false;
+    notifyListeners();
+  }
+}</code></pre></div>
+<div class="panel yellow"><strong>Why private fields?</strong><p>The UI can read <code>students</code>, but it should not directly replace <code>_students</code>. Changes should go through provider methods.</p></div>
+
+</section>
+
+<section class="step-view" data-title="Create through provider">
+<header class="step-header"><span class="step-kicker">STEP 10 · CREATE</span>
+<h1>Add a Student</h1>
+<p class="lede">The provider converts form values into the Drift companion required for an insert.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Future&lt;void&gt; addStudent({
   required String name,
   required int age,
   required String course,
-}) {
-  return into(students).insert(
+}) async {
+  await database.addStudent(
     StudentsCompanion.insert(
       name: name,
       age: age,
       course: course,
     ),
   );
-}</code></pre>
-          </div>
-          <div class="flow">StudentsCompanion.insert()<br>↓<br>into(students).insert()<br>↓<br>SQLite INSERT<br>↓<br>new
-            row saved permanently</div>
-          <div class="panel mint"><strong>Return value:</strong>
-            <p>The returned <code>int</code> is the ID of the inserted row.</p>
-          </div>
-        </section>
 
-        <section class="step-view" data-title="Read all students">
-          <header class="step-header"><span class="step-kicker">STEP 11 · READ</span>
-            <h1>Read All Students</h1>
-            <p class="lede">Use <code>select()</code> to query a table.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>Future&lt;List&lt;Student&gt;&gt; getAllStudents() {
-  return select(students).get();
-}</code></pre>
-          </div>
-          <div class="grid-2">
-            <div class="concept"><strong>select(students)</strong>
-              <p>Creates a query for the students table.</p>
-            </div>
-            <div class="concept"><strong>get()</strong>
-              <p>Executes the query once and returns a Future containing the rows.</p>
-            </div>
-          </div>
-          <h2>Use it</h2>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>final students =
-    await database.getAllStudents();
+  await loadStudents();
+}</code></pre></div>
+<div class="flow">Form values<br>↓<br>provider.addStudent(...)<br>↓<br>StudentsCompanion.insert(...)<br>↓<br>database.addStudent(...)<br>↓<br>loadStudents()<br>↓<br>notifyListeners()</div>
+<div class="panel green"><strong>Why a Companion?</strong><p>For an insert, Drift's companion lets the database handle generated/default values such as the auto-incrementing <code>id</code>.</p></div>
 
-for (final student in students) {
-  print(student.name);
-}</code></pre>
-          </div>
-        </section>
+</section>
 
-        <section class="step-view" data-title="Read one student">
-          <header class="step-header"><span class="step-kicker">STEP 12 · WHERE</span>
-            <h1>Find a Student by ID</h1>
-            <p class="lede">A WHERE condition filters rows.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>Future&lt;Student?&gt; getStudentById(int studentId) {
-  return (
-    select(students)
-      ..where(
-        (student) =&gt;
-            student.id.equals(studentId),
-      )
-  ).getSingleOrNull();
-}</code></pre>
-          </div>
-          <div class="flow">SELECT students<br>↓<br>WHERE id = studentId<br>↓<br>one Student or null</div>
-          <div class="panel yellow"><strong>Why nullable?</strong>
-            <p>The requested ID might not exist, so the result type is <code>Student?</code>.</p>
-          </div>
-        </section>
+<section class="step-view" data-title="Update &amp; delete provider">
+<header class="step-header"><span class="step-kicker">STEP 11 · UPDATE / DELETE</span>
+<h1>Complete the Provider CRUD Methods</h1>
+<p class="lede">Update needs the existing id; delete only needs the id.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Future&lt;void&gt; updateExistingStudent({
+  required int id,
+  required String name,
+  required int age,
+  required String course,
+}) async {
+  await database.updateStudent(
+    Student(
+      id: id,
+      name: name,
+      age: age,
+      course: course,
+    ),
+  );
 
-        <section class="step-view" data-title="Update student">
-          <header class="step-header"><span class="step-kicker">STEP 13 · UPDATE</span>
-            <h1>Update a Student</h1>
-            <p class="lede">Drift can update the row represented by a generated data class.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>Future&lt;bool&gt; updateStudent(
-  Student student,
-) {
-  return update(students).replace(student);
-}</code></pre>
-          </div>
-          <h2>Create an updated copy</h2>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>final updatedStudent =
-    student.copyWith(
-      name: &#x27;Riya Sharma&#x27;,
-      age: 21,
-    );
-
-await database.updateStudent(
-  updatedStudent,
-);</code></pre>
-          </div>
-          <div class="panel green"><strong>Why <code>copyWith()</code>?</strong>
-            <p>Generated row classes are immutable. Instead of changing fields directly, create a new copy with selected
-              fields replaced.</p>
-          </div>
-        </section>
-
-        <section class="step-view" data-title="Delete student">
-          <header class="step-header"><span class="step-kicker">STEP 14 · DELETE</span>
-            <h1>Delete a Student</h1>
-            <p class="lede">Delete one row using its generated object.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>Future&lt;int&gt; deleteStudent(
-  Student student,
-) {
-  return delete(students).delete(student);
-}</code></pre>
-          </div>
-          <h2>Or delete using an ID</h2>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>Future&lt;int&gt; deleteStudentById(int id) {
-  return (
-    delete(students)
-      ..where(
-        (student) =&gt;
-            student.id.equals(id),
-      )
-  ).go();
-}</code></pre>
-          </div>
-          <div class="panel pink"><strong>Careful:</strong>
-            <p>Always use a WHERE clause when you intend to delete only selected rows.</p>
-          </div>
-        </section>
-
-        <section class="step-view" data-title="Watch database changes">
-          <header class="step-header"><span class="step-kicker">STEP 15 · STREAMS</span>
-            <h1>Let the UI Update Automatically</h1>
-            <p class="lede">One of Drift's nicest Flutter features is watching a query as a Stream.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>Stream&lt;List&lt;Student&gt;&gt; watchAllStudents() {
-  return select(students).watch();
-}</code></pre>
-          </div>
-          <table class="comparison">
-            <thead>
-              <tr>
-                <th>Method</th>
-                <th>Behavior</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><code>get()</code></td>
-                <td>Run the query once.</td>
-              </tr>
-              <tr>
-                <td><code>watch()</code></td>
-                <td>Keep listening and emit new results when relevant database rows change.</td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="flow">Insert / Update / Delete<br>↓<br>Database changes<br>↓<br>watch() emits new
-            list<br>↓<br>StreamBuilder rebuilds UI</div>
-        </section>
-
-        <section class="step-view" data-title="StreamBuilder UI">
-          <header class="step-header"><span class="step-kicker">STEP 16 · LIVE UI</span>
-            <h1>Show Students with StreamBuilder</h1>
-            <p class="lede">The screen can listen directly to the database stream.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>StreamBuilder&lt;List&lt;Student&gt;&gt;(
-  stream: database.watchAllStudents(),
-  builder: (context, snapshot) {
-    if (!snapshot.hasData) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
-    final students = snapshot.data!;
-
-    if (students.isEmpty) {
-      return const Center(
-        child: Text(&#x27;No students yet&#x27;),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: students.length,
-      itemBuilder: (context, index) {
-        final student = students[index];
-
-        return ListTile(
-          title: Text(student.name),
-          subtitle: Text(
-            &#x27;${student.course} • Age ${student.age}&#x27;,
-          ),
-        );
-      },
-    );
-  },
-)</code></pre>
-          </div>
-          <div class="panel mint"><strong>Result:</strong>
-            <p>You do not manually reload the list after each insert or delete. The watched query emits updated results.
-            </p>
-          </div>
-        </section>
-
-        <section class="step-view" data-title="Sort students">
-          <header class="step-header"><span class="step-kicker">STEP 17 · ORDER BY</span>
-            <h1>Sort Query Results</h1>
-            <p class="lede">SQLite databases can sort data before it reaches the UI.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>Future&lt;List&lt;Student&gt;&gt; getStudentsByName() {
-  return (
-    select(students)
-      ..orderBy([
-        (student) =&gt;
-            OrderingTerm.asc(student.name),
-      ])
-  ).get();
-}</code></pre>
-          </div>
-          <h2>Age descending</h2>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>Future&lt;List&lt;Student&gt;&gt; getStudentsByAge() {
-  return (
-    select(students)
-      ..orderBy([
-        (student) =&gt;
-            OrderingTerm.desc(student.age),
-      ])
-  ).get();
-}</code></pre>
-          </div>
-          <div class="panel yellow"><strong>Better design:</strong>
-            <p>Ask the database to sort when possible instead of loading everything and sorting large datasets in Dart.
-            </p>
-          </div>
-        </section>
-
-        <section class="step-view" data-title="Search students">
-          <header class="step-header"><span class="step-kicker">STEP 18 · SEARCH</span>
-            <h1>Search by Name</h1>
-            <p class="lede">Use a WHERE expression to search rows.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>Future&lt;List&lt;Student&gt;&gt; searchStudents(
-  String query,
-) {
-  return (
-    select(students)
-      ..where(
-        (student) =&gt;
-            student.name.contains(query),
-      )
-  ).get();
-}</code></pre>
-          </div>
-          <h2>Filter by course</h2>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>Future&lt;List&lt;Student&gt;&gt; getStudentsByCourse(
-  String course,
-) {
-  return (
-    select(students)
-      ..where(
-        (student) =&gt;
-            student.course.equals(course),
-      )
-  ).get();
-}</code></pre>
-          </div>
-          <div class="flow">User types "Am"<br>↓<br>WHERE name contains "Am"<br>↓<br>Matching rows returned</div>
-        </section>
-
-        <section class="step-view" data-title="Database file">
-          <header class="step-header"><span class="step-kicker">STEP 19 · PERSISTENCE</span>
-            <h1>Where Is the Data Actually Stored?</h1>
-            <p class="lede"><code>drift_flutter</code> opens a persistent SQLite database file for the application.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>AppDatabase()
-    : super(
-        driftDatabase(
-          name: &#x27;college_database&#x27;,
-        ),
-      );</code></pre>
-          </div>
-          <div class="panel blue"><strong>Important:</strong>
-            <p>The database survives normal widget rebuilds and application restarts because the rows live in SQLite,
-              not only in Dart variables.</p>
-          </div>
-          <div class="panel yellow"><strong>App uninstall:</strong>
-            <p>Local application data is normally removed when the app itself is uninstalled.</p>
-          </div>
-        </section>
-
-        <section class="step-view" data-title="Schema versions">
-          <header class="step-header"><span class="step-kicker">STEP 20 · SCHEMA</span>
-            <h1>What Is schemaVersion?</h1>
-            <p class="lede">Database structure changes over time. Drift uses a schema version to help manage those
-              changes.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>@override
-int get schemaVersion =&gt; 1;</code></pre>
-          </div>
-          <h2>Later you may change the table</h2>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>class Students extends Table {
-  IntColumn get id =&gt; integer().autoIncrement()();
-  TextColumn get name =&gt; text()();
-  IntColumn get age =&gt; integer()();
-  TextColumn get course =&gt; text()();
-
-  // New column added later
-  TextColumn get email =&gt;
-      text().nullable()();
-}</code></pre>
-          </div>
-          <div class="panel orange"><strong>Do not simply ignore this in production:</strong>
-            <p>After releasing an app, changing an existing database schema requires a proper migration so users keep
-              their old data.</p>
-          </div>
-          <div class="panel green"><strong>For this beginner codelab:</strong>
-            <p>We stay at schema version 1 and focus first on CRUD and queries.</p>
-          </div>
-        </section>
-
-        <section class="step-view" data-title="Complete database file">
-          <header class="step-header"><span class="step-kicker">STEP 21 · DATABASE FILE</span>
-            <h1>Complete AppDatabase</h1>
-            <p class="lede">Put the database concepts together in one file.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>import &#x27;package:drift/drift.dart&#x27;;
-import &#x27;package:drift_flutter/drift_flutter.dart&#x27;;
-
-part &#x27;app_database.g.dart&#x27;;
-
-class Students extends Table {
-  IntColumn get id =&gt; integer().autoIncrement()();
-  TextColumn get name =&gt; text()();
-  IntColumn get age =&gt; integer()();
-  TextColumn get course =&gt; text()();
+  await loadStudents();
 }
 
-@DriftDatabase(
-  tables: [Students],
-)
-class AppDatabase extends _$AppDatabase {
-  AppDatabase()
-      : super(
-          driftDatabase(
-            name: &#x27;college_database&#x27;,
-          ),
-        );
+Future&lt;void&gt; deleteStudent(int id) async {
+  await database.deleteStudent(id);
+  await loadStudents();
+}
 
-  @override
-  int get schemaVersion =&gt; 1;
-
-  Future&lt;int&gt; addStudent({
-    required String name,
-    required int age,
-    required String course,
-  }) {
-    return into(students).insert(
-      StudentsCompanion.insert(
-        name: name,
-        age: age,
-        course: course,
-      ),
-    );
+Student? findById(int id) {
+  for (final student in _students) {
+    if (student.id == id) return student;
   }
+  return null;
+}</code></pre></div>
+<div class="panel pink"><strong>Common mistake:</strong><p>If you update without preserving the original <code>id</code>, Drift will not know which existing row you mean.</p></div>
 
-  Future&lt;List&lt;Student&gt;&gt; getAllStudents() {
-    return select(students).get();
-  }
+</section>
 
-  Stream&lt;List&lt;Student&gt;&gt; watchAllStudents() {
-    return (
-      select(students)
-        ..orderBy([
-          (student) =&gt;
-              OrderingTerm.asc(student.name),
-        ])
-    ).watch();
-  }
+<section class="step-view" data-title="Provider read vs watch">
+<header class="step-header"><span class="step-kicker">STEP 12 · PROVIDER API</span>
+<h1>Understand read(), watch(), and Consumer</h1>
+<p class="lede">Use listening only where a widget actually needs to rebuild.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// Rebuild this widget when StudentProvider changes
+final provider = context.watch&lt;StudentProvider&gt;();
 
-  Future&lt;Student?&gt; getStudentById(int id) {
-    return (
-      select(students)
-        ..where(
-          (student) =&gt;
-              student.id.equals(id),
-        )
-    ).getSingleOrNull();
-  }
+// Get the provider once; do not rebuild because of this line
+final provider = context.read&lt;StudentProvider&gt;();
 
-  Future&lt;bool&gt; updateStudent(
-    Student student,
-  ) {
-    return update(students).replace(student);
-  }
+// Another listening style
+Consumer&lt;StudentProvider&gt;(
+  builder: (context, provider, child) {
+    return Text(&#x27;${provider.students.length}&#x27;);
+  },
+);</code></pre></div>
+<table class="comparison"><thead><tr><th>API</th><th>Use it when...</th></tr></thead><tbody><tr><td><code>watch</code></td><td>The widget displays provider state and should rebuild when it changes.</td></tr><tr><td><code>read</code></td><td>A callback only wants to call a provider method, such as Save or Delete.</td></tr><tr><td><code>Consumer</code></td><td>You want to make the listening/rebuild area visually explicit.</td></tr></tbody></table>
 
-  Future&lt;int&gt; deleteStudent(
-    Student student,
-  ) {
-    return delete(students).delete(student);
-  }
+</section>
 
-  Future&lt;List&lt;Student&gt;&gt; searchStudents(
-    String query,
-  ) {
-    return (
-      select(students)
-        ..where(
-          (student) =&gt;
-              student.name.contains(query),
-        )
-    ).get();
-  }
-}</code></pre>
-          </div>
-          <div class="panel mint"><strong>After saving this file:</strong>
-            <p>Run the build runner command again so generated types stay synchronized with your table definitions.</p>
-          </div>
-        </section>
+<section class="step-view" data-title="Configure go_router">
+<header class="step-header"><span class="step-kicker">STEP 13 · ROUTING</span>
+<h1>Create the App Router</h1>
+<p class="lede">We need routes for the list, creating a new student, and editing an existing student.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/router/app_router.dart
+import &#x27;package:flutter/material.dart&#x27;;
+import &#x27;package:go_router/go_router.dart&#x27;;
+import &#x27;package:drift_student_app/screens/student_form_page.dart&#x27;;
+import &#x27;package:drift_student_app/screens/student_list_page.dart&#x27;;
 
-        <section class="step-view" data-title="Complete Flutter app">
-          <header class="step-header"><span class="step-kicker">STEP 22 · COMPLETE APP</span>
-            <h1>Student Management App</h1>
-            <p class="lede">Now use the database from Flutter and let a StreamBuilder keep the list synchronized.</p>
-          </header>
-          <div class="code-wrap"><button class="copy-btn">Copy</button>
-            <pre><code>import &#x27;package:flutter/material.dart&#x27;;
-import &#x27;database/app_database.dart&#x27;;
+final GoRouter appRouter = GoRouter(
+  initialLocation: &#x27;/students&#x27;,
+  routes: [
+    GoRoute(
+      path: &#x27;/students&#x27;,
+      builder: (context, state) =&gt; const StudentListPage(),
+    ),
+    GoRoute(
+      path: &#x27;/students/add&#x27;,
+      builder: (context, state) =&gt; const StudentFormPage(),
+    ),
+    GoRoute(
+      path: &#x27;/students/:id/edit&#x27;,
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters[&#x27;id&#x27;]!);
+        return StudentFormPage(studentId: id);
+      },
+    ),
+  ],
+);</code></pre></div>
+<div class="flow">/students → list<br>/students/add → create form<br>/students/7/edit → edit student whose id is 7</div>
+<div class="panel mint"><strong>Path parameter:</strong><p><code>:id</code> is dynamic. go_router puts the actual value into <code>state.pathParameters</code>.</p></div>
+
+</section>
+
+<section class="step-view" data-title="Provide state at app root">
+<header class="step-header"><span class="step-kicker">STEP 14 · MAIN</span>
+<h1>Wire Database, Provider, and Router Together</h1>
+<p class="lede">Create one database, create one StudentProvider above MaterialApp.router, and load the initial data.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/main.dart
+import &#x27;package:flutter/material.dart&#x27;;
+import &#x27;package:provider/provider.dart&#x27;;
+import &#x27;package:drift_student_app/database/app_database.dart&#x27;;
+import &#x27;package:drift_student_app/providers/student_provider.dart&#x27;;
+import &#x27;package:drift_student_app/router/app_router.dart&#x27;;
 
 void main() {
   final database = AppDatabase();
 
   runApp(
-    MyApp(database: database),
+    ChangeNotifierProvider(
+      create: (_) =&gt; StudentProvider(database)..loadStudents(),
+      child: const MyApp(),
+    ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  final AppDatabase database;
-
-  const MyApp({
-    super.key,
-    required this.database,
-  });
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      home: StudentsPage(
-        database: database,
+      title: &#x27;Student CRUD&#x27;,
+      routerConfig: appRouter,
+    );
+  }
+}</code></pre></div>
+<div class="panel green"><strong>Why above <code>MaterialApp.router</code>?</strong><p>Every routed page appears below this provider, so list/add/edit screens can all access the same <code>StudentProvider</code>.</p></div>
+
+</section>
+
+<section class="step-view" data-title="Build student list">
+<header class="step-header"><span class="step-kicker">STEP 15 · READ UI</span>
+<h1>Show All Students</h1>
+<p class="lede">The list screen watches the provider because it must rebuild after CRUD operations.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/screens/student_list_page.dart
+import &#x27;package:flutter/material.dart&#x27;;
+import &#x27;package:go_router/go_router.dart&#x27;;
+import &#x27;package:provider/provider.dart&#x27;;
+import &#x27;package:drift_student_app/providers/student_provider.dart&#x27;;
+
+class StudentListPage extends StatelessWidget {
+  const StudentListPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch&lt;StudentProvider&gt;();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(&#x27;Students&#x27;),
+      ),
+      body: provider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : provider.students.isEmpty
+              ? const Center(child: Text(&#x27;No students yet&#x27;))
+              : ListView.builder(
+                  itemCount: provider.students.length,
+                  itemBuilder: (context, index) {
+                    final student = provider.students[index];
+
+                    return ListTile(
+                      title: Text(student.name),
+                      subtitle: Text(
+                        &#x27;${student.age} years • ${student.course}&#x27;,
+                      ),
+                      onTap: () {
+                        context.push(&#x27;/students/${student.id}/edit&#x27;);
+                      },
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          context
+                              .read&lt;StudentProvider&gt;()
+                              .deleteStudent(student.id);
+                        },
+                      ),
+                    );
+                  },
+                ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () =&gt; context.push(&#x27;/students/add&#x27;),
+        child: const Icon(Icons.add),
       ),
     );
   }
-}
+}</code></pre></div>
+<div class="panel yellow"><strong>Notice both APIs:</strong><p>The page uses <code>watch</code> to display the list, but the delete button uses <code>read</code> because its callback only triggers an action.</p></div>
 
-class StudentsPage extends StatefulWidget {
-  final AppDatabase database;
+</section>
 
-  const StudentsPage({
+<section class="step-view" data-title="Build reusable form">
+<header class="step-header"><span class="step-kicker">STEP 16 · FORM UI</span>
+<h1>Use One Screen for Add and Edit</h1>
+<p class="lede">If <code>studentId</code> is null, the form creates. If an id exists, it loads that student and updates it.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/screens/student_form_page.dart
+import &#x27;package:flutter/material.dart&#x27;;
+import &#x27;package:go_router/go_router.dart&#x27;;
+import &#x27;package:provider/provider.dart&#x27;;
+import &#x27;package:drift_student_app/providers/student_provider.dart&#x27;;
+
+class StudentFormPage extends StatefulWidget {
+  final int? studentId;
+
+  const StudentFormPage({
     super.key,
-    required this.database,
+    this.studentId,
   });
 
   @override
-  State&lt;StudentsPage&gt; createState() =&gt;
-      _StudentsPageState();
+  State&lt;StudentFormPage&gt; createState() =&gt; _StudentFormPageState();
 }
 
-class _StudentsPageState
-    extends State&lt;StudentsPage&gt; {
-  final nameController =
-      TextEditingController();
+class _StudentFormPageState extends State&lt;StudentFormPage&gt; {
+  final formKey = GlobalKey&lt;FormState&gt;();
+  final nameController = TextEditingController();
+  final ageController = TextEditingController();
+  final courseController = TextEditingController();
 
-  final ageController =
-      TextEditingController();
+  bool get isEditing =&gt; widget.studentId != null;
 
-  final courseController =
-      TextEditingController();
+  @override
+  void initState() {
+    super.initState();
 
-  Future&lt;void&gt; addStudent() async {
-    final name =
-        nameController.text.trim();
+    if (isEditing) {
+      final provider = context.read&lt;StudentProvider&gt;();
+      final student = provider.findById(widget.studentId!);
 
-    final age =
-        int.tryParse(ageController.text);
-
-    final course =
-        courseController.text.trim();
-
-    if (name.isEmpty ||
-        age == null ||
-        course.isEmpty) {
-      return;
+      if (student != null) {
+        nameController.text = student.name;
+        ageController.text = student.age.toString();
+        courseController.text = student.course;
+      }
     }
+  }
 
-    await widget.database.addStudent(
-      name: name,
-      age: age,
-      course: course,
-    );
-
-    nameController.clear();
-    ageController.clear();
-    courseController.clear();
+  @override
+  void dispose() {
+    nameController.dispose();
+    ageController.dispose();
+    courseController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          &#x27;Drift Student Database&#x27;,
-        ),
+        title: Text(isEditing ? &#x27;Edit Student&#x27; : &#x27;Add Student&#x27;),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration:
-                      const InputDecoration(
-                    labelText: &#x27;Name&#x27;,
-                  ),
-                ),
-                TextField(
-                  controller: ageController,
-                  keyboardType:
-                      TextInputType.number,
-                  decoration:
-                      const InputDecoration(
-                    labelText: &#x27;Age&#x27;,
-                  ),
-                ),
-                TextField(
-                  controller:
-                      courseController,
-                  decoration:
-                      const InputDecoration(
-                    labelText: &#x27;Course&#x27;,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: addStudent,
-                  child:
-                      const Text(&#x27;Add Student&#x27;),
-                ),
-              ],
-            ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: &#x27;Name&#x27;),
+                validator: (value) =&gt; value == null || value.trim().isEmpty
+                    ? &#x27;Enter a name&#x27;
+                    : null,
+              ),
+              TextFormField(
+                controller: ageController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: &#x27;Age&#x27;),
+                validator: (value) =&gt; int.tryParse(value ?? &#x27;&#x27;) == null
+                    ? &#x27;Enter a valid age&#x27;
+                    : null,
+              ),
+              TextFormField(
+                controller: courseController,
+                decoration: const InputDecoration(labelText: &#x27;Course&#x27;),
+                validator: (value) =&gt; value == null || value.trim().isEmpty
+                    ? &#x27;Enter a course&#x27;
+                    : null,
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: saveStudent,
+                child: Text(isEditing ? &#x27;Update&#x27; : &#x27;Save&#x27;),
+              ),
+            ],
           ),
-          Expanded(
-            child: StreamBuilder&lt;List&lt;Student&gt;&gt;(
-              stream: widget.database
-                  .watchAllStudents(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(
-                    child:
-                        CircularProgressIndicator(),
-                  );
-                }
-
-                final students =
-                    snapshot.data!;
-
-                if (students.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      &#x27;No students yet&#x27;,
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  itemCount: students.length,
-                  itemBuilder:
-                      (context, index) {
-                    final student =
-                        students[index];
-
-                    return ListTile(
-                      title:
-                          Text(student.name),
-                      subtitle: Text(
-                        &#x27;${student.course} • Age ${student.age}&#x27;,
-                      ),
-                      leading: CircleAvatar(
-                        child: Text(
-                          &#x27;${student.id}&#x27;,
-                        ),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(
-                          Icons.delete,
-                        ),
-                        onPressed: () {
-                          widget.database
-                              .deleteStudent(
-                                student,
-                              );
-                        },
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
-}</code></pre>
-          </div>
-          <div class="flow">Form → addStudent()<br>↓<br>Drift INSERT<br>↓<br>SQLite changes<br>↓<br>watchAllStudents()
-            emits<br>↓<br>StreamBuilder updates automatically</div>
-        </section>
 
-        <section class="step-view" data-title="Class challenges">
-          <header class="step-header"><span class="step-kicker">STEP 23 · PRACTICE</span>
-            <h1>Student Challenges</h1>
-            <p class="lede">Let students extend the working application.</p>
-          </header>
-          <div class="challenge">
-            <h3>Challenge 1 · Easy</h3>
-            <p>Add an <code>email</code> field to the student form and table.</p>
-          </div>
-          <div class="challenge">
-            <h3>Challenge 2 · Medium</h3>
-            <p>Add an edit button. When tapped, update the student's name or course.</p>
-          </div>
-          <div class="challenge">
-            <h3>Challenge 3 · Medium</h3>
-            <p>Add a search field that finds students by name.</p>
-          </div>
-          <div class="challenge">
-            <h3>Challenge 4 · Advanced</h3>
-            <p>Create another table called <code>Courses</code> and start thinking about how students and courses could
-              be related.</p>
-          </div>
-        </section>
+  Future&lt;void&gt; saveStudent() async {
+    if (!formKey.currentState!.validate()) return;
 
-        <section class="step-view" data-title="Revision & viva">
-          <header class="step-header"><span class="step-kicker">STEP 24 · REVISION</span>
-            <h1>Quick Revision and Viva Questions</h1>
-            <p class="lede">Review the complete SQLite + Drift flow.</p>
-          </header>
+    final provider = context.read&lt;StudentProvider&gt;();
+    final name = nameController.text.trim();
+    final age = int.parse(ageController.text);
+    final course = courseController.text.trim();
 
-          <div class="reveal">
-            <summary>1. What is SQLite?</summary>
-            <div>A lightweight relational database stored locally with the application.</div>
-          </div>
-          <div class="reveal">
-            <summary>2. What is Drift?</summary>
-            <div>A Dart database library that provides a type-safe API and generated code for working with databases
-              such as SQLite.</div>
-          </div>
-          <div class="reveal">
-            <summary>3. Why do we use build_runner?</summary>
-            <div>To run Drift's code generator and create classes based on our table and database definitions.</div>
-          </div>
-          <div class="reveal">
-            <summary>4. What does a Table class represent?</summary>
-            <div>The schema of a database table and its columns.</div>
-          </div>
-          <div class="reveal">
-            <summary>5. What is StudentsCompanion?</summary>
-            <div>A generated helper type used to provide values for inserts and updates.</div>
-          </div>
-          <div class="reveal">
-            <summary>6. What is the difference between get() and watch()?</summary>
-            <div><code>get()</code> executes once. <code>watch()</code> returns a Stream that emits again when relevant
-              database data changes.</div>
-          </div>
-          <div class="reveal">
-            <summary>7. How do we insert a row?</summary>
-            <div>Use <code>into(table).insert(...)</code>.</div>
-          </div>
-          <div class="reveal">
-            <summary>8. How do we filter rows?</summary>
-            <div>Use a query with a <code>where()</code> expression.</div>
-          </div>
-          <div class="reveal">
-            <summary>9. Why use SQLite instead of SharedPreferences?</summary>
-            <div>SQLite is designed for larger structured datasets and database queries such as filtering, sorting, and
-              updating records.</div>
-          </div>
-          <div class="reveal">
-            <summary>10. What is schemaVersion?</summary>
-            <div>A version number representing the current database schema, used when managing schema changes and
-              migrations.</div>
-          </div>
+    if (isEditing) {
+      await provider.updateExistingStudent(
+        id: widget.studentId!,
+        name: name,
+        age: age,
+        course: course,
+      );
+    } else {
+      await provider.addStudent(
+        name: name,
+        age: age,
+        course: course,
+      );
+    }
 
-          <h2>Completion checklist</h2>
-          <ul class="checklist">
-            <li>I understand SQLite versus SharedPreferences.</li>
-            <li>I understand Drift's role.</li>
-            <li>I can define a Drift table.</li>
-            <li>I can run code generation.</li>
-            <li>I understand generated data and companion classes.</li>
-            <li>I can insert records.</li>
-            <li>I can read records.</li>
-            <li>I can update records.</li>
-            <li>I can delete records.</li>
-            <li>I can use WHERE conditions.</li>
-            <li>I can sort query results.</li>
-            <li>I can use watch() and StreamBuilder.</li>
-            <li>I understand why schema versions matter.</li>
-          </ul>
+    if (mounted) context.pop();
+  }
+}</code></pre></div>
+<div class="panel orange"><strong>Why <code>mounted</code>?</strong><p>The database call is asynchronous. Before using <code>context</code> after <code>await</code>, make sure this State is still mounted.</p></div>
 
-          <div class="finish">
-            <h2>Codelab complete! 🎉</h2>
-            <p>You can now build a persistent Flutter CRUD application backed by SQLite and Drift.</p>
-          </div>
-        </section>
+</section>
 
-      </div>
-    </main>
-  </div>
-  <script>
-    (() => {
-      const steps = [...document.querySelectorAll('.step-view')];
-      const titles = steps.map(step => step.dataset.title);
-      const nav = document.getElementById('stepNav');
-      const sidebar = document.getElementById('sidebar');
-      const menuBtn = document.getElementById('menuBtn');
-      const content = document.getElementById('content');
-      const completed = new Set();
-      let current = 0;
+<section class="step-view" data-title="Trace CREATE">
+<header class="step-header"><span class="step-kicker">STEP 17 · FLOW</span>
+<h1>Trace the Create Flow</h1>
+<p class="lede">Follow one button press through every layer.</p></header>
 
-      nav.innerHTML = titles.map((title, index) => `
+<div class="flow">1. User taps +<br>↓<br>2. go_router pushes /students/add<br>↓<br>3. User fills form and taps Save<br>↓<br>4. context.read&lt;StudentProvider&gt;().addStudent(...)<br>↓<br>5. Provider creates StudentsCompanion.insert(...)<br>↓<br>6. AppDatabase inserts into SQLite<br>↓<br>7. Provider calls loadStudents()<br>↓<br>8. Provider calls notifyListeners()<br>↓<br>9. StudentListPage was using watch(), so it rebuilds<br>↓<br>10. context.pop() returns to the updated list</div>
+<div class="challenge"><h3>Class question</h3><p>If we remove <code>notifyListeners()</code>, would the database still contain the new row? Yes. The persistence layer can succeed while the current UI remains stale until something else rebuilds it.</p></div>
+
+</section>
+
+<section class="step-view" data-title="Trace UPDATE &amp; DELETE">
+<header class="step-header"><span class="step-kicker">STEP 18 · FLOW</span>
+<h1>Trace Update and Delete</h1>
+<p class="lede">CRUD becomes much easier once students can narrate the direction of data.</p></header>
+
+<h2>Update</h2><div class="flow">Tap student → /students/:id/edit → form finds student → controllers are pre-filled → Update → provider → database.replace → reload list → notify → pop</div>
+<h2>Delete</h2><div class="flow">Tap delete → provider.deleteStudent(id) → database delete WHERE id = ... → reload list → notifyListeners() → ListView rebuilds</div>
+<div class="panel pink"><strong>Separation test:</strong><p>If you see <code>delete(students)</code> inside a widget, your UI knows too much about persistence. Move that work into the database/provider layers.</p></div>
+
+</section>
+
+<section class="step-view" data-title="Common mistakes">
+<header class="step-header"><span class="step-kicker">STEP 19 · DEBUGGING</span>
+<h1>Common Mistakes to Watch For</h1>
+<p class="lede">Most beginner problems happen at the boundary between generation, Provider scope, and navigation.</p></header>
+
+<div class="reveal"><summary>Undefined class _$AppDatabase</summary><div>Check <code>part 'app_database.g.dart';</code>, then run <code>dart run build_runner build</code>.</div></div>
+<div class="reveal"><summary>ProviderNotFoundException</summary><div>Make sure <code>ChangeNotifierProvider</code> is above <code>MaterialApp.router</code> so every routed screen can reach it.</div></div>
+<div class="reveal"><summary>Database changed but UI did not</summary><div>Reload/update the provider state and call <code>notifyListeners()</code>. Also make sure the displaying widget uses <code>watch</code> or <code>Consumer</code>.</div></div>
+<div class="reveal"><summary>Edit page is empty</summary><div>Verify the route id parses correctly and <code>findById()</code> can find the student in the already-loaded provider list.</div></div>
+<div class="reveal"><summary>build_runner conflict</summary><div>During practice, try <code>dart run build_runner build --delete-conflicting-outputs</code> if stale generated outputs are blocking generation.</div></div>
+
+</section>
+
+<section class="step-view" data-title="Revision &amp; challenge">
+<header class="step-header"><span class="step-kicker">STEP 20 · REVISION</span>
+<h1>Revision, Viva, and Practice Challenge</h1>
+<p class="lede">Finish by making students explain the architecture, not just copy the code.</p></header>
+
+<div class="reveal"><summary>1. What does Drift do?</summary><div>It manages persistent relational data and gives us type-safe Dart APIs around the database.</div></div>
+<div class="reveal"><summary>2. What does ChangeNotifier do?</summary><div>It holds state and can notify listeners when that state changes.</div></div>
+<div class="reveal"><summary>3. What does Provider do here?</summary><div>It exposes <code>StudentProvider</code> to descendant widgets and provides APIs such as <code>read</code> and <code>watch</code>.</div></div>
+<div class="reveal"><summary>4. read vs watch?</summary><div><code>read</code> accesses without listening; <code>watch</code> listens and rebuilds the widget when the provider notifies.</div></div>
+<div class="reveal"><summary>5. Why use StudentsCompanion.insert for create?</summary><div>It represents insert values while allowing generated/default columns such as an auto-increment id to be omitted.</div></div>
+<div class="reveal"><summary>6. Why does update need the id?</summary><div>The primary key identifies which existing database row should be replaced.</div></div>
+<div class="reveal"><summary>7. What is :id in /students/:id/edit?</summary><div>A dynamic go_router path parameter.</div></div>
+<div class="reveal"><summary>8. Why is Provider above MaterialApp.router?</summary><div>So every page created by the router is below the same provider scope.</div></div>
+<h2>Completion checklist</h2><ul class="checklist"><li>I can define a Drift table.</li><li>I can generate Drift code.</li><li>I can write database CRUD methods.</li><li>I understand ChangeNotifier and notifyListeners().</li><li>I know when to use context.read and context.watch.</li><li>I can provide state above routed screens.</li><li>I can create list/add/edit routes with go_router.</li><li>I can trace create, read, update, and delete from UI to SQLite and back.</li></ul>
+<div class="challenge"><h3>Student challenge</h3><p>Add a search box that filters students by name without querying SQLite on every keystroke. Then add a confirmation dialog before delete. Finally, add a new <code>email</code> column and perform the required Drift schema migration.</p></div>
+<div class="finish"><h2>Codelab complete! 🎉</h2><p>You now have a complete beginner-friendly CRUD architecture using Drift for persistence, ChangeNotifier + Provider for state, and go_router for navigation.</p></div>
+
+</section>
+
+</div></main>
+</div>
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+
+  nav.innerHTML=titles.map((title,index)=>`
     <button class="step-link" data-step="${index}" type="button">
-      <span class="step-number">${String(index + 1).padStart(2, '0')}</span>
+      <span class="step-number">${String(index+1).padStart(2,'0')}</span>
       <span>${title}</span>
       <span class="step-status" aria-hidden="true"></span>
     </button>
   `).join('');
 
-      const getHashStep = () => {
-        const match = location.hash.match(/^#step-(\d+)$/);
-        const value = match ? Number(match[1]) - 1 : 0;
-        return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0
-      };
+  const getHashStep=()=>{
+    const match=location.hash.match(/^#step-(\d+)$/);
+    const value=match?Number(match[1])-1:0;
+    return Number.isInteger(value)&&value>=0&&value<steps.length?value:0
+  };
 
-      function render(updateHash = true) {
-        current = Math.max(0, Math.min(current, steps.length - 1));
-        steps.forEach((step, index) => {
-          const active = index === current;
-          step.classList.toggle('active', active);
-          step.setAttribute('aria-hidden', String(!active));
-        });
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{
+      const active=index===current;
+      step.classList.toggle('active',active);
+      step.setAttribute('aria-hidden',String(!active));
+    });
 
-        document.querySelectorAll('.step-link').forEach((button, index) => {
-          button.classList.toggle('active', index === current);
-          button.setAttribute('aria-current', index === current ? 'step' : 'false');
-          button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '';
-        });
+    document.querySelectorAll('.step-link').forEach((button,index)=>{
+      button.classList.toggle('active',index===current);
+      button.setAttribute('aria-current',index===current?'step':'false');
+      button.querySelector('.step-status').textContent=completed.has(index)?'✓':'';
+    });
 
-        const percent = Math.round(((current + 1) / steps.length) * 100);
-        document.getElementById('progressBar').style.width = `${percent}%`;
-        document.getElementById('progressText').textContent = `${percent}%`;
-        document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
-        document.getElementById('mobileTitle').textContent = titles[current];
-        document.getElementById('prevBtn').disabled = current === 0;
-        document.getElementById('nextBtn').disabled = current === steps.length - 1;
-        document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
 
-        if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
-        window.scrollTo({ top: 0, behavior: 'auto' });
-        sidebar.classList.remove('open');
-        menuBtn.setAttribute('aria-expanded', 'false');
+    if(updateHash) history.pushState({step:current},'',`#step-${current+1}`);
+    window.scrollTo({top:0,behavior:'auto'});
+    sidebar.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded','false');
+  }
+
+  function goTo(index){
+    if(index<0||index>=steps.length)return;
+    completed.add(current);
+    current=index;
+    render();
+  }
+
+  const navRow=document.createElement('div');
+  navRow.className='nav-row';
+  navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';
+  content.appendChild(navRow);
+
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+
+  nav.addEventListener('click',event=>{
+    const button=event.target.closest('.step-link');
+    if(button)goTo(Number(button.dataset.step));
+  });
+
+  menuBtn.addEventListener('click',()=>{
+    const open=sidebar.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded',String(open));
+  });
+
+  document.addEventListener('click',async event=>{
+    const copy=event.target.closest('.copy-btn');
+    if(copy){
+      const code=copy.parentElement.querySelector('pre code')?.textContent??'';
+      try{
+        await navigator.clipboard.writeText(code);
+        copy.textContent='Copied!';
+      }catch{
+        copy.textContent='Select & copy';
       }
+      setTimeout(()=>copy.textContent='Copy',1200);
+      return;
+    }
 
-      function goTo(index) {
-        if (index < 0 || index >= steps.length) return;
-        completed.add(current);
-        current = index;
-        render();
-      }
+    const option=event.target.closest('.quiz-option');
+    if(option){
+      const quiz=option.closest('.quiz');
+      if(quiz.dataset.answered)return;
+      const options=[...quiz.querySelectorAll('.quiz-option')];
+      const choice=options.indexOf(option);
+      const answer=Number(quiz.dataset.answer);
+      quiz.dataset.answered='true';
+      options.forEach(button=>button.disabled=true);
+      option.classList.add(choice===answer?'correct':'wrong');
+      if(choice!==answer)options[answer].classList.add('correct');
+      const feedback=quiz.querySelector('.quiz-feedback');
+      feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;
+      feedback.classList.add('show');
+    }
+  });
 
-      const navRow = document.createElement('div');
-      navRow.className = 'nav-row';
-      navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';
-      content.appendChild(navRow);
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});
+  window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
 
-      document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
-      document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+  document.addEventListener('keydown',event=>{
+    if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;
+    if(event.key==='ArrowRight')goTo(current+1);
+    if(event.key==='ArrowLeft')goTo(current-1);
+  });
 
-      nav.addEventListener('click', event => {
-        const button = event.target.closest('.step-link');
-        if (button) goTo(Number(button.dataset.step));
-      });
-
-      menuBtn.addEventListener('click', () => {
-        const open = sidebar.classList.toggle('open');
-        menuBtn.setAttribute('aria-expanded', String(open));
-      });
-
-      document.addEventListener('click', async event => {
-        const copy = event.target.closest('.copy-btn');
-        if (copy) {
-          const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
-          try {
-            await navigator.clipboard.writeText(code);
-            copy.textContent = 'Copied!';
-          } catch {
-            copy.textContent = 'Select & copy';
-          }
-          setTimeout(() => copy.textContent = 'Copy', 1200);
-          return;
-        }
-
-        const option = event.target.closest('.quiz-option');
-        if (option) {
-          const quiz = option.closest('.quiz');
-          if (quiz.dataset.answered) return;
-          const options = [...quiz.querySelectorAll('.quiz-option')];
-          const choice = options.indexOf(option);
-          const answer = Number(quiz.dataset.answer);
-          quiz.dataset.answered = 'true';
-          options.forEach(button => button.disabled = true);
-          option.classList.add(choice === answer ? 'correct' : 'wrong');
-          if (choice !== answer) options[answer].classList.add('correct');
-          const feedback = quiz.querySelector('.quiz-feedback');
-          feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
-          feedback.classList.add('show');
-        }
-      });
-
-      window.addEventListener('popstate', () => { current = getHashStep(); render(false) });
-      window.addEventListener('hashchange', () => { current = getHashStep(); render(false) });
-
-      document.addEventListener('keydown', event => {
-        if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
-        if (event.key === 'ArrowRight') goTo(current + 1);
-        if (event.key === 'ArrowLeft') goTo(current - 1);
-      });
-
-      current = getHashStep();
-      render(false);
-    })();
-  </script>
+  current=getHashStep();
+  render(false);
+})();
+</script>
 </body>
-
 </html>
