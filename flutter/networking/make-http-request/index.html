@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fetching Data from REST APIs in Flutter — Flutter Codelab</title>
+  <meta name="description" content="Make your first REST API request from Flutter with the http package. Learn Uri.parse, GET requests, status codes, response bodies, JSON decoding, exceptions, and loading, success, and error UI states.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}
+    .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}.screen-stack{display:grid;gap:12px;margin:22px 0}.screen-card{padding:16px;background:#fff;border:3px solid var(--ink);box-shadow:var(--shadow-sm);font-weight:800}.screen-card.active{background:var(--mint)}.checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.references a{color:var(--blue-dark);font-weight:700}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter Networking Codelab</div><h2>Fetch REST API Data</h2><p>Make your first real HTTP request.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">Fetch REST API Data</div></div>
+  <main><div class="content" id="content">
+
+<section class="step-view" data-title="From REST theory to Flutter">
+<header class="step-header"><span class="step-kicker">STEP 1 · CONNECT THE PIECES</span><h1>Now Make Flutter Call the API</h1><p class="lede">In the previous codelab, you learned what a client, server, REST API, endpoint, request, response, status code, and JSON are. Now Flutter becomes the client.</p></header>
+<div class="objective"><strong>By the end:</strong> Add the <code>http</code> package, create a URL with <code>Uri.parse()</code>, send a GET request, inspect <code>statusCode</code> and <code>body</code>, decode JSON, handle failures, and display products with loading, success, and error states.</div>
+<div class="flow">Flutter App<br>↓ http.get()<br>GET https://dummyjson.com/products?limit=10<br>↓<br>DummyJSON Products API<br>↓ 200 + JSON<br>Flutter decodes JSON<br>↓<br>Products appear on screen</div>
+<div class="panel yellow"><strong>Same API, next skill:</strong><p>We will continue using DummyJSON so the networking concepts stay connected. This time, the request comes from Dart code inside a Flutter app.</p></div>
+</section>
+
+<section class="step-view" data-title="Create the Flutter project">
+<header class="step-header"><span class="step-kicker">STEP 2 · PROJECT SETUP</span><h1>Create a Small Products App</h1><p class="lede">Start with a fresh Flutter project so the networking code is easy to see.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>flutter create products_api_app
+cd products_api_app</code></pre></div>
+<div class="panel blue"><strong>Goal:</strong><p>Our first screen will download products from DummyJSON and show their title and price.</p></div>
+<div class="flow">products_api_app<br>└── lib/<br>&nbsp;&nbsp;&nbsp;&nbsp;└── main.dart</div>
+</section>
+
+<section class="step-view" data-title="Add the http package">
+<header class="step-header"><span class="step-kicker">STEP 3 · INSTALL HTTP</span><h1>Add the http Package</h1><p class="lede">Dart's <code>http</code> package gives us simple functions for making HTTP requests.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>flutter pub add http</code></pre></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import 'package:http/http.dart' as http;</code></pre></div>
+<div class="panel mint"><strong>Why <code>as http</code>?</strong><p>It gives the package a clear prefix. We can write <code>http.get()</code>, <code>http.post()</code>, and so on, making it obvious that the function belongs to the HTTP package.</p></div>
+<div class="quiz" data-answer="1" data-correct="Correct. The http package provides convenient APIs for making HTTP requests from Dart and Flutter."><h3>Why are we adding the http package?</h3><div class="quiz-options"><button class="quiz-option">To build Flutter widgets</button><button class="quiz-option">To send HTTP requests</button><button class="quiz-option">To create a local SQLite database</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+</section>
+
+<section class="step-view" data-title="Create a URL with Uri.parse">
+<header class="step-header"><span class="step-kicker">STEP 4 · CREATE THE URL</span><h1>Turn the API Address into a Uri</h1><p class="lede"><code>http.get()</code> expects a <code>Uri</code>, not just an ordinary String.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final url = Uri.parse(
+  'https://dummyjson.com/products?limit=10',
+);</code></pre></div>
+<table class="comparison"><thead><tr><th>Part</th><th>Meaning</th></tr></thead><tbody><tr><td><code>Uri.parse(...)</code></td><td>Parses a URL string into a Uri object Dart can work with.</td></tr><tr><td><code>/products</code></td><td>The products resource.</td></tr><tr><td><code>?limit=10</code></td><td>A query parameter asking for 10 products.</td></tr></tbody></table>
+<div class="panel yellow"><strong>Remember:</strong><p><code>String</code> is text. <code>Uri</code> is Dart's structured representation of a URI/URL.</p></div>
+</section>
+
+<section class="step-view" data-title="Send your first GET request">
+<header class="step-header"><span class="step-kicker">STEP 5 · HTTP GET</span><h1>Send the Request with http.get()</h1><p class="lede">A GET request asks the server to return data.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final response = await http.get(url);</code></pre></div>
+<div class="flow">http.get(url)<br>↓<br>GET /products?limit=10<br>↓<br>DummyJSON<br>↓<br>http.Response</div>
+<div class="panel blue"><strong>Why <code>await</code>?</strong><p>The network request takes time. <code>http.get()</code> returns a <code>Future&lt;http.Response&gt;</code>, so we await the response instead of blocking the UI thread.</p></div>
+<div class="quiz" data-answer="2" data-correct="Correct. A network request completes in the future, so http.get() returns a Future."><h3>Why does http.get() work asynchronously?</h3><div class="quiz-options"><button class="quiz-option">Because JSON is always a List</button><button class="quiz-option">Because Flutter cannot use URLs directly</button><button class="quiz-option">Because the network response takes time to arrive</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+</section>
+
+<section class="step-view" data-title="Make a simple fetch function">
+<header class="step-header"><span class="step-kicker">STEP 6 · FIRST FUNCTION</span><h1>Put the Request Inside an async Function</h1><p class="lede">Let's make the smallest useful function and inspect what comes back.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Future&lt;void&gt; fetchProducts() async {
+  final url = Uri.parse(
+    'https://dummyjson.com/products?limit=10',
+  );
+
+  final response = await http.get(url);
+
+  print(response.statusCode);
+  print(response.body);
+}</code></pre></div>
+<div class="panel mint"><strong>Two things to inspect first:</strong><p><code>response.statusCode</code> tells us how the request went. <code>response.body</code> contains the response body as text.</p></div>
+</section>
+
+<section class="step-view" data-title="Inspect the status code">
+<header class="step-header"><span class="step-kicker">STEP 7 · STATUS CODE</span><h1>Did the Request Succeed?</h1><p class="lede">The server uses an HTTP status code to tell the client the result of the request.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>if (response.statusCode == 200) {
+  print('Request successful');
+} else {
+  print('Request failed');
+}</code></pre></div>
+<table class="comparison"><thead><tr><th>Status</th><th>Simple meaning</th></tr></thead><tbody><tr><td><code>200</code></td><td>The GET request succeeded.</td></tr><tr><td><code>404</code></td><td>The requested resource was not found.</td></tr><tr><td><code>500</code></td><td>The server encountered an error.</td></tr></tbody></table>
+<div class="callout"><span class="label">GOOD HABIT</span><p>Do not assume that receiving a response means the request was successful. Always inspect the status code.</p></div>
+</section>
+
+<section class="step-view" data-title="Inspect the response body">
+<header class="step-header"><span class="step-kicker">STEP 8 · RESPONSE BODY</span><h1>response.body Is Still a String</h1><p class="lede">The API sends JSON, but the HTTP package initially gives the body to us as text.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>print(response.body);</code></pre></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>{
+  "products": [
+    {
+      "id": 1,
+      "title": "Essence Mascara Lash Princess",
+      "price": 9.99
+    }
+  ],
+  "total": 194,
+  "skip": 0,
+  "limit": 10
+}</code></pre></div>
+<div class="panel yellow"><strong>Important:</strong><p>Even though it <em>looks</em> like a Dart map, <code>response.body</code> is a <code>String</code>. We need to decode the JSON before accessing fields like <code>products</code>.</p></div>
+</section>
+
+<section class="step-view" data-title="Decode JSON">
+<header class="step-header"><span class="step-kicker">STEP 9 · JSON DECODING</span><h1>Convert JSON Text into Dart Data</h1><p class="lede">Use <code>jsonDecode()</code> from <code>dart:convert</code>.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import 'dart:convert';</code></pre></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final data = jsonDecode(response.body);</code></pre></div>
+<div class="flow">response.body<br>String containing JSON<br>↓ jsonDecode()<br>Map&lt;String, dynamic&gt;<br>↓<br>data['products']</div>
+<div class="panel blue"><strong>For this response:</strong><p>The top-level JSON value is an object, so after decoding it behaves like a Dart map containing keys such as <code>products</code>, <code>total</code>, <code>skip</code>, and <code>limit</code>.</p></div>
+</section>
+
+<section class="step-view" data-title="Read the products list">
+<header class="step-header"><span class="step-kicker">STEP 10 · READ THE DATA</span><h1>Extract products from the Decoded JSON</h1><p class="lede">The API wraps the product array inside a <code>products</code> field.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final data = jsonDecode(response.body);
+final products = data['products'];
+
+print(products.length);
+print(products[0]['title']);
+print(products[0]['price']);</code></pre></div>
+<div class="panel orange"><strong>For now, we are using dynamic JSON.</strong><p>In the next codelab, <strong>JSON Parsing and Dart Models</strong>, we will replace these raw maps with proper <code>Product</code> objects.</p></div>
+<div class="quiz" data-answer="0" data-correct="Correct. DummyJSON returns an object whose products key contains the list of product objects."><h3>Where is the list of products in the decoded response?</h3><div class="quiz-options"><button class="quiz-option">data['products']</button><button class="quiz-option">data['statusCode']</button><button class="quiz-option">data['body']</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+</section>
+
+<section class="step-view" data-title="Handle unsuccessful responses">
+<header class="step-header"><span class="step-kicker">STEP 11 · HTTP FAILURES</span><h1>Throw an Error When the Server Says No</h1><p class="lede">If the status code is not what we expect, do not continue parsing the response as successful data.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Future&lt;List&lt;dynamic&gt;&gt; fetchProducts() async {
+  final url = Uri.parse(
+    'https://dummyjson.com/products?limit=10',
+  );
+
+  final response = await http.get(url);
+
+  if (response.statusCode != 200) {
+    throw Exception(
+      'Failed to load products: ${response.statusCode}',
+    );
+  }
+
+  final data = jsonDecode(response.body);
+  return data['products'];
+}</code></pre></div>
+<div class="panel yellow"><strong>Why throw?</strong><p>Throwing an exception moves the program into its error path. The UI can then show an error message instead of pretending the data loaded correctly.</p></div>
+</section>
+
+<section class="step-view" data-title="Handle network exceptions">
+<header class="step-header"><span class="step-kicker">STEP 12 · EXCEPTIONS</span><h1>The Request Itself Can Fail</h1><p class="lede">Sometimes there is no usable HTTP response at all—for example, because the device has no connection or the request cannot reach the server.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>try {
+  final products = await fetchProducts();
+  print(products);
+} catch (error) {
+  print('Something went wrong: $error');
+}</code></pre></div>
+<div class="grid-2"><div class="concept"><strong>HTTP failure</strong><p>The server responds, but the status code indicates failure.</p></div><div class="concept"><strong>Request exception</strong><p>The request may fail before a useful response is received.</p></div></div>
+<div class="panel mint"><strong>One UI idea:</strong><p>Both kinds of failure can lead to the same visible <strong>Error state</strong>, while you can still log or inspect the technical reason separately.</p></div>
+</section>
+
+<section class="step-view" data-title="Design the three UI states">
+<header class="step-header"><span class="step-kicker">STEP 13 · UI STATES</span><h1>Every Remote Screen Needs More than Data</h1><p class="lede">A network screen should not only think about the successful list. It should represent what is happening while the request runs and what happens if it fails.</p></header>
+<div class="screen-stack"><div class="screen-card">LOADING → Request is still running</div><div class="screen-card active">SUCCESS → Products are available</div><div class="screen-card">ERROR → Products could not be loaded</div></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>bool isLoading = true;
+String? errorMessage;
+List&lt;dynamic&gt; products = [];</code></pre></div>
+<table class="comparison"><thead><tr><th>State</th><th>Example UI</th></tr></thead><tbody><tr><td>Loading</td><td><code>CircularProgressIndicator()</code></td></tr><tr><td>Success</td><td><code>ListView</code> of products</td></tr><tr><td>Error</td><td>Error message + retry button</td></tr></tbody></table>
+</section>
+
+<section class="step-view" data-title="Load data in initState">
+<header class="step-header"><span class="step-kicker">STEP 14 · START THE REQUEST</span><h1>Fetch Products When the Screen Opens</h1><p class="lede">A <code>StatefulWidget</code> can start the request from <code>initState()</code>.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>@override
+void initState() {
+  super.initState();
+  loadProducts();
+}</code></pre></div>
+<div class="panel blue"><strong>Why not await directly in initState()?</strong><p><code>initState()</code> itself is not marked <code>async</code>. Instead, call an async method such as <code>loadProducts()</code> from it.</p></div>
+</section>
+
+<section class="step-view" data-title="Implement loadProducts">
+<header class="step-header"><span class="step-kicker">STEP 15 · UPDATE STATE</span><h1>Move from Loading to Success or Error</h1><p class="lede">The request changes the state of the screen, so update the fields and rebuild the UI with <code>setState()</code>.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Future&lt;void&gt; loadProducts() async {
+  setState(() {
+    isLoading = true;
+    errorMessage = null;
+  });
+
+  try {
+    final result = await fetchProducts();
+
+    setState(() {
+      products = result;
+      isLoading = false;
+    });
+  } catch (error) {
+    setState(() {
+      errorMessage = error.toString();
+      isLoading = false;
+    });
+  }
+}</code></pre></div>
+<div class="flow">loadProducts()<br>↓<br>isLoading = true<br>↓ await fetchProducts()<br>SUCCESS → products = result<br>or<br>ERROR → errorMessage = ...<br>↓<br>isLoading = false</div>
+</section>
+
+<section class="step-view" data-title="Build loading and error UI">
+<header class="step-header"><span class="step-kicker">STEP 16 · CONDITIONAL UI</span><h1>Show the Correct State</h1><p class="lede">The <code>build()</code> method can return different widgets depending on the current state.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>if (isLoading) {
+  return const Center(
+    child: CircularProgressIndicator(),
+  );
+}
+
+if (errorMessage != null) {
+  return Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(errorMessage!),
+        const SizedBox(height: 12),
+        ElevatedButton(
+          onPressed: loadProducts,
+          child: const Text('Retry'),
+        ),
+      ],
+    ),
+  );
+}</code></pre></div>
+<div class="panel yellow"><strong>Retry matters:</strong><p>Network failures can be temporary. A retry button lets the user run the same request again without restarting the app.</p></div>
+</section>
+
+<section class="step-view" data-title="Display the products">
+<header class="step-header"><span class="step-kicker">STEP 17 · SUCCESS UI</span><h1>Render the Remote Products in a ListView</h1><p class="lede">Once loading is finished and there is no error, we can safely show the downloaded products.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>return ListView.separated(
+  padding: const EdgeInsets.all(16),
+  itemCount: products.length,
+  separatorBuilder: (context, index) {
+    return const Divider();
+  },
+  itemBuilder: (context, index) {
+    final product = products[index];
+
+    return ListTile(
+      title: Text(product['title']),
+      subtitle: Text(product['category']),
+      trailing: Text('\$${product['price']}'),
+    );
+  },
+);</code></pre></div>
+<div class="panel mint"><strong>You now have remote UI.</strong><p>The values shown by the widgets did not come from hard-coded Dart data or a local database. They came from a server over HTTP.</p></div>
+</section>
+
+<section class="step-view" data-title="Complete working example">
+<header class="step-header"><span class="step-kicker">STEP 18 · PUT IT TOGETHER</span><h1>Complete Products API Example</h1><p class="lede">This version combines the request, status-code check, JSON decoding, exception handling, and all three UI states.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorSchemeSeed: Colors.blue,
+      ),
+      home: const ProductsPage(),
+    );
+  }
+}
+
+class ProductsPage extends StatefulWidget {
+  const ProductsPage({super.key});
+
+  @override
+  State&lt;ProductsPage&gt; createState() {
+    return _ProductsPageState();
+  }
+}
+
+class _ProductsPageState extends State&lt;ProductsPage&gt; {
+  bool isLoading = true;
+  String? errorMessage;
+  List&lt;dynamic&gt; products = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadProducts();
+  }
+
+  Future&lt;List&lt;dynamic&gt;&gt; fetchProducts() async {
+    final url = Uri.parse(
+      'https://dummyjson.com/products?limit=10',
+    );
+
+    final response = await http.get(url);
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Failed to load products: ${response.statusCode}',
+      );
+    }
+
+    final data = jsonDecode(response.body);
+    return data['products'];
+  }
+
+  Future&lt;void&gt; loadProducts() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      final result = await fetchProducts();
+
+      if (!mounted) return;
+
+      setState(() {
+        products = result;
+        isLoading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        errorMessage = error.toString();
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Products'),
+      ),
+      body: buildBody(),
+    );
+  }
+
+  Widget buildBody() {
+    if (isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Could not load products'),
+            const SizedBox(height: 8),
+            Text(errorMessage!),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: loadProducts,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: products.length,
+      separatorBuilder: (context, index) {
+        return const Divider();
+      },
+      itemBuilder: (context, index) {
+        final product = products[index];
+
+        return ListTile(
+          title: Text(product['title']),
+          subtitle: Text(product['category']),
+          trailing: Text('\$${product['price']}'),
+        );
+      },
+    );
+  }
+}</code></pre></div>
+<div class="challenge"><h3>Try these changes</h3><ol><li>Change <code>limit=10</code> to <code>limit=5</code>.</li><li>Display the product's <code>rating</code> below its category.</li><li>Temporarily change the URL to an invalid endpoint and observe the error UI.</li><li>Add <code>RefreshIndicator</code> around the list and call <code>loadProducts()</code> when the user pulls to refresh.</li></ol></div>
+</section>
+
+<section class="step-view" data-title="Understand the complete flow">
+<header class="step-header"><span class="step-kicker">STEP 19 · TRACE THE REQUEST</span><h1>Follow One Request from Screen to Server and Back</h1><p class="lede">Being able to trace this flow is more important than memorizing individual lines of code.</p></header>
+<div class="flow">ProductsPage opens<br>↓ initState()<br>loadProducts()<br>↓<br>isLoading = true<br>↓<br>fetchProducts()<br>↓<br>Uri.parse(url)<br>↓<br>await http.get(url)<br>↓<br>DummyJSON server<br>↓<br>HTTP 200 + JSON body<br>↓<br>jsonDecode(response.body)<br>↓<br>data['products']<br>↓<br>products = result<br>↓ setState()<br>ListView rebuilds<br>↓<br>User sees products</div>
+<div class="grid-2"><div class="concept"><strong>If it succeeds</strong><p>The decoded product list becomes UI.</p></div><div class="concept"><strong>If it fails</strong><p>An exception reaches <code>catch</code>, and the page displays its error state.</p></div></div>
+</section>
+
+<section class="step-view" data-title="Common networking mistakes">
+<header class="step-header"><span class="step-kicker">STEP 20 · DEBUG SMARTER</span><h1>Common First-API Mistakes</h1><p class="lede">Most beginner networking bugs come from a small set of misunderstandings.</p></header>
+<table class="comparison"><thead><tr><th>Mistake</th><th>Why it fails</th><th>Fix</th></tr></thead><tbody><tr><td>Passing a String directly to <code>http.get()</code></td><td>The method expects a Uri.</td><td>Use <code>Uri.parse(...)</code>.</td></tr><tr><td>Using <code>response.body['products']</code></td><td><code>body</code> is a String.</td><td>Run <code>jsonDecode(response.body)</code> first.</td></tr><tr><td>Ignoring <code>statusCode</code></td><td>Error responses may be treated like successful data.</td><td>Check the expected success status before parsing.</td></tr><tr><td>No loading state</td><td>The screen can appear empty while the request runs.</td><td>Track <code>isLoading</code>.</td></tr><tr><td>No try/catch</td><td>A request exception is not represented in the UI.</td><td>Catch it and show an error state.</td></tr><tr><td>Calling setState after disposal</td><td>The async request may finish after the widget leaves the tree.</td><td>Check <code>mounted</code> before updating state after awaits.</td></tr></tbody></table>
+<div class="panel orange"><strong>Platform note:</strong><p>If a request works on one platform but not another, also check the platform's networking configuration and browser CORS rules. The Dart code can be correct while a platform policy blocks the request.</p></div>
+</section>
+
+<section class="step-view" data-title="Revision">
+<header class="step-header"><span class="step-kicker">STEP 21 · QUICK REVISION</span><h1>Fetching REST API Data Revision</h1><p class="lede">Use these questions for class revision, viva practice, or a quick knowledge check.</p></header>
+<div class="reveal"><summary>1. Why do we use the http package?</summary><div>To send HTTP requests and receive HTTP responses from Dart and Flutter applications.</div></div>
+<div class="reveal"><summary>2. What does Uri.parse() do?</summary><div>It converts a URI/URL string into a <code>Uri</code> object that networking APIs can use.</div></div>
+<div class="reveal"><summary>3. What does http.get() return?</summary><div>A <code>Future&lt;http.Response&gt;</code>.</div></div>
+<div class="reveal"><summary>4. Why do we use await?</summary><div>Because the network request completes asynchronously in the future.</div></div>
+<div class="reveal"><summary>5. What is response.statusCode?</summary><div>The HTTP status code returned by the server, such as <code>200</code>.</div></div>
+<div class="reveal"><summary>6. What is response.body?</summary><div>The response body as a String.</div></div>
+<div class="reveal"><summary>7. Why is jsonDecode() needed?</summary><div>It converts JSON text into Dart data structures such as maps and lists.</div></div>
+<div class="reveal"><summary>8. Where are the products in the DummyJSON response?</summary><div>Inside the decoded value at <code>data['products']</code>.</div></div>
+<div class="reveal"><summary>9. Why check the status code before using the data?</summary><div>Because the server may return an error response instead of the successful resource we expect.</div></div>
+<div class="reveal"><summary>10. Why use try/catch around networking?</summary><div>Because network operations can fail, and the app should turn those failures into a controlled error state.</div></div>
+<div class="reveal"><summary>11. What three states should a basic remote-data screen represent?</summary><div>Loading, success, and error.</div></div>
+<div class="reveal"><summary>12. Why check mounted after await?</summary><div>The widget might have been removed from the tree while the asynchronous request was running.</div></div>
+<h2>Completion checklist</h2>
+<ul class="checklist"><li>I can add and import the http package.</li><li>I can create a Uri with Uri.parse().</li><li>I can send a GET request with http.get().</li><li>I understand why the request uses Future and await.</li><li>I can inspect statusCode and body.</li><li>I can decode JSON using jsonDecode().</li><li>I can read the products list from the response.</li><li>I can reject unsuccessful status codes.</li><li>I can handle request exceptions.</li><li>I can show loading, success, and error UI states.</li><li>I can retry a failed request.</li><li>I can trace the complete request-response flow.</li></ul>
+<div class="panel references"><h3>Official references</h3><p><a href="https://pub.dev/packages/http" target="_blank" rel="noopener">Dart http package</a>, <a href="https://pub.dev/documentation/http/latest/" target="_blank" rel="noopener">http API documentation</a>, and <a href="https://dummyjson.com/docs/products" target="_blank" rel="noopener">DummyJSON Products documentation</a>.</p></div>
+<div class="finish"><h2>Codelab complete! 🎉</h2><p>You can now make a GET request from Flutter, inspect the HTTP response, decode JSON, handle failures, and turn remote API data into loading, success, and error UI states. Next: convert raw JSON maps into proper Dart model classes.</p></div>
+</section>
+
+  </div></main>
+</div>
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});
+    document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+    if(updateHash) history.pushState({step:current},'',`#step-${current+1}`);
+    window.scrollTo({top:0,behavior:'auto'});sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');
+  }
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render();}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+  nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});
+  menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+  document.addEventListener('click',async event=>{const copy=event.target.closest('.copy-btn');if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1200);return;}const option=event.target.closest('.quiz-option');if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show');}});
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+  document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});
+  current=getHashStep();render(false);
+})();
+</script>
+</body>
+</html>

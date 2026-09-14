@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Understanding APIs, HTTP and REST with DummyJSON — Flutter Codelab</title>
+  <meta name="description" content="Learn clients and servers, APIs, REST, endpoints, URLs, HTTP requests and responses, methods, status codes, headers, request bodies, JSON, and the complete networking flow before writing Flutter networking code.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}
+    .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}.screen-stack{display:grid;gap:12px;margin:22px 0}.screen-card{padding:16px;background:#fff;border:3px solid var(--ink);box-shadow:var(--shadow-sm);font-weight:800}.screen-card.active{background:var(--mint)}.checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.references a{color:var(--blue-dark);font-weight:700}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter Networking Codelab</div><h2>APIs, HTTP &amp; REST</h2><p>Understand the network before writing the code.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">APIs, HTTP &amp; REST</div></div>
+  <main><div class="content" id="content">
+
+<section class="step-view" data-title="The networking big picture">
+<header class="step-header"><span class="step-kicker">STEP 1 · THE BIG PICTURE</span><h1>How Does a Flutter App Get Data from the Internet?</h1><p class="lede">Most useful apps need data that does not live inside the app itself. The app sends an HTTP request to a server and receives an HTTP response.</p></header>
+<div class="objective"><strong>By the end:</strong> Explain clients, servers, APIs, REST, endpoints, URLs, HTTP requests and responses, methods, status codes, headers, request bodies, and JSON by exploring a real public Products API.</div>
+<div class="flow">Flutter App<br>↓ sends HTTP request<br>Internet<br>↓<br>DummyJSON Products API<br>↓<br>Server prepares product data<br>↓ sends HTTP response<br>Flutter App<br>↓<br>Products appear in the UI</div>
+<div class="panel yellow"><strong>Important:</strong><p>We are <em>not</em> building a REST API in this course. We are learning how a Flutter app consumes an existing API. In the next codelab, we will call this same API from Flutter.</p></div>
+</section>
+
+<section class="step-view" data-title="Meet the public Products API">
+<header class="step-header"><span class="step-kicker">STEP 2 · OUR API</span><h1>Use DummyJSON Products as Our Real Example</h1><p class="lede">Instead of inventing endpoints, we will learn every networking concept using a public API that already provides product data.</p></header>
+<div class="panel mint"><strong>API:</strong><p><a href="https://dummyjson.com/docs/products" target="_blank" rel="noopener">DummyJSON Products</a></p><strong>Base URL:</strong><p><code>https://dummyjson.com</code></p></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>https://dummyjson.com/products</code></pre></div>
+<div class="grid-2"><div class="concept"><strong>Why this API?</strong><p>It provides products, prices, categories, descriptions, ratings, stock and images—perfect for a Flutter shopping/product-list example.</p></div><div class="concept"><strong>What can we practice?</strong><p>GET, POST, PUT/PATCH, DELETE, search, category filtering, pagination, headers, JSON and status codes.</p></div></div>
+<div class="callout"><span class="label">TRY IT</span><p>Open <a href="https://dummyjson.com/products" target="_blank" rel="noopener">https://dummyjson.com/products</a> in your browser. You are directly calling a REST API.</p></div>
+</section>
+
+<section class="step-view" data-title="Client and server">
+<header class="step-header"><span class="step-kicker">STEP 3 · CLIENT AND SERVER</span><h1>Who Is Asking and Who Is Answering?</h1><p class="lede">Networking starts with two roles: a client sends a request and a server returns a response.</p></header>
+<div class="grid-2"><div class="concept"><strong>Client</strong><p>Your Flutter application. It asks the API for products.</p></div><div class="concept"><strong>Server</strong><p>DummyJSON's server. It receives the request and returns product data.</p></div></div>
+<div class="flow">Flutter App<br>“Give me the products”<br>↓<br>DummyJSON Server<br>↓<br>JSON containing products</div>
+<div class="quiz" data-answer="0" data-correct="Correct. The Flutter application is the client because it sends requests to the API server."><h3>When our Flutter app requests products from DummyJSON, what is Flutter?</h3><div class="quiz-options"><button class="quiz-option">Client</button><button class="quiz-option">Server</button><button class="quiz-option">Database</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+</section>
+
+<section class="step-view" data-title="What is an API?">
+<header class="step-header"><span class="step-kicker">STEP 4 · API</span><h1>What Is an API?</h1><p class="lede">An API is a defined way for one software system to communicate with another.</p></header>
+<div class="panel blue"><strong>Easy definition:</strong><p>An API tells our Flutter app where it can request data, which operations are available, what data it can send, and what response it will receive.</p></div>
+<div class="flow">Flutter App<br>↓ uses API<br>GET /products<br>GET /products/1<br>GET /products/search?q=phone<br>↓<br>DummyJSON</div>
+<div class="callout"><span class="label">KEY IDEA</span><p>Our Flutter app does not need to know how DummyJSON stores its products internally. It only needs to understand the API contract.</p></div>
+</section>
+
+<section class="step-view" data-title="What is REST?">
+<header class="step-header"><span class="step-kicker">STEP 5 · REST</span><h1>Understand REST by Looking at Products</h1><p class="lede">REST is a common architectural style for web APIs. From the client side, the important idea is that data is exposed as resources and standard HTTP methods are used to interact with those resources.</p></header>
+<div class="grid-2"><div class="concept"><strong>Resource</strong><p>A thing exposed by the API. Here, our main resource is <code>products</code>.</p></div><div class="concept"><strong>Representation</strong><p>The server sends a representation of a product, usually as JSON.</p></div></div>
+<div class="flow">GET /products → get products<br>GET /products/1 → get product 1<br>POST /products/add → simulate adding a product<br>PATCH /products/1 → simulate updating product 1<br>DELETE /products/1 → simulate deleting product 1</div>
+<div class="panel mint"><strong>REST is not a Flutter feature.</strong><p>Flutter is simply one client. A website, native Android app, iOS app, or another server could call the same endpoints.</p></div>
+</section>
+
+<section class="step-view" data-title="URLs and endpoints">
+<header class="step-header"><span class="step-kicker">STEP 6 · URLS AND ENDPOINTS</span><h1>Where Does a Request Go?</h1><p class="lede">Every HTTP request needs a URL. The URL tells the client which server and which resource it wants.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>https://dummyjson.com/products/1</code></pre></div>
+<table class="comparison"><thead><tr><th>Part</th><th>Example</th><th>Meaning</th></tr></thead><tbody><tr><td>Scheme</td><td><code>https</code></td><td>Secure HTTP communication.</td></tr><tr><td>Host</td><td><code>dummyjson.com</code></td><td>The server address.</td></tr><tr><td>Path</td><td><code>/products/1</code></td><td>The requested resource.</td></tr></tbody></table>
+<div class="panel yellow"><strong>Base URL:</strong><p><code>https://dummyjson.com</code></p><strong>Example endpoint:</strong><p><code>GET /products/1</code></p></div>
+<div class="flow">Base URL + Path<br>↓<br>https://dummyjson.com + /products/1<br>↓<br>https://dummyjson.com/products/1</div>
+</section>
+
+<section class="step-view" data-title="HTTP request anatomy">
+<header class="step-header"><span class="step-kicker">STEP 7 · HTTP REQUEST</span><h1>What Does the Client Send?</h1><p class="lede">An HTTP request contains the information the server needs to understand what the client wants.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>GET /products/1 HTTP/1.1
+Host: dummyjson.com
+Accept: application/json</code></pre></div>
+<table class="comparison"><thead><tr><th>Part</th><th>Purpose</th></tr></thead><tbody><tr><td>Method</td><td>Describes the action, such as GET or POST.</td></tr><tr><td>URL / Path</td><td>Identifies the resource.</td></tr><tr><td>Headers</td><td>Extra information about the request.</td></tr><tr><td>Body</td><td>Optional data, often used with POST, PUT or PATCH.</td></tr></tbody></table>
+<div class="panel blue"><strong>Notice:</strong><p>A simple GET request usually does not need a request body.</p></div>
+</section>
+
+<section class="step-view" data-title="HTTP response anatomy">
+<header class="step-header"><span class="step-kicker">STEP 8 · HTTP RESPONSE</span><h1>What Does the Server Send Back?</h1><p class="lede">The server processes the request and returns a response containing a status, headers and usually some data.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": 1,
+  "title": "Essence Mascara Lash Princess",
+  "category": "beauty",
+  "price": 9.99,
+  "rating": 4.94
+}</code></pre></div>
+<div class="grid-2"><div class="concept"><strong>Status code</strong><p>Tells the app whether the request succeeded or failed.</p></div><div class="concept"><strong>Response body</strong><p>Contains the returned data, commonly as JSON.</p></div></div>
+</section>
+
+<section class="step-view" data-title="HTTP methods overview">
+<header class="step-header"><span class="step-kicker">STEP 9 · HTTP METHODS</span><h1>Different Methods Express Different Actions</h1><p class="lede">The HTTP method tells the API what type of operation the client wants to perform.</p></header>
+<table class="comparison"><thead><tr><th>Method</th><th>Typical meaning</th><th>DummyJSON example</th></tr></thead><tbody><tr><td><code>GET</code></td><td>Read data</td><td><code>GET /products</code></td></tr><tr><td><code>POST</code></td><td>Create/submit data</td><td><code>POST /products/add</code></td></tr><tr><td><code>PUT</code></td><td>Update/replace data</td><td><code>PUT /products/1</code></td></tr><tr><td><code>PATCH</code></td><td>Partially update data</td><td><code>PATCH /products/1</code></td></tr><tr><td><code>DELETE</code></td><td>Remove data</td><td><code>DELETE /products/1</code></td></tr></tbody></table>
+<div class="panel orange"><strong>Memory trick:</strong><p>GET = read, POST = create, PUT/PATCH = update, DELETE = remove.</p></div>
+</section>
+
+<section class="step-view" data-title="GET products">
+<header class="step-header"><span class="step-kicker">STEP 10 · GET</span><h1>Read Product Data with GET</h1><p class="lede"><code>GET</code> is the method we will use most in the next Flutter codelab.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>GET https://dummyjson.com/products</code></pre></div>
+<div class="flow">Flutter App<br>↓ GET /products<br>DummyJSON<br>↓ 200 OK<br>{ products: [...], total: ..., skip: ..., limit: ... }<br>↓<br>Flutter displays product cards</div>
+<h2>Get one product</h2>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>GET https://dummyjson.com/products/1</code></pre></div>
+<div class="panel mint"><strong>Try both:</strong><p><a href="https://dummyjson.com/products" target="_blank" rel="noopener">All products</a> · <a href="https://dummyjson.com/products/1" target="_blank" rel="noopener">Product 1</a></p></div>
+</section>
+
+<section class="step-view" data-title="POST products">
+<header class="step-header"><span class="step-kicker">STEP 11 · POST</span><h1>Understand POST with a Product Example</h1><p class="lede"><code>POST</code> sends data to the API. DummyJSON provides an endpoint that simulates creating a new product.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>POST https://dummyjson.com/products/add
+Content-Type: application/json
+
+{
+  "title": "Flutter Course T-Shirt",
+  "price": 799
+}</code></pre></div>
+<div class="panel yellow"><strong>Important for this API:</strong><p>DummyJSON simulates the create operation and returns a new product with an ID, but it does not permanently add that product to the server.</p></div>
+<div class="quiz" data-answer="1" data-correct="Correct. POST is commonly used when the client wants to send new data or create a resource."><h3>Which method would we use with <code>/products/add</code>?</h3><div class="quiz-options"><button class="quiz-option">GET</button><button class="quiz-option">POST</button><button class="quiz-option">DELETE</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+</section>
+
+<section class="step-view" data-title="PUT and PATCH products">
+<header class="step-header"><span class="step-kicker">STEP 12 · PUT AND PATCH</span><h1>Understand Product Updates</h1><p class="lede">Both PUT and PATCH can update data. PATCH is especially useful when you only want to change part of a resource.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>PATCH https://dummyjson.com/products/1
+Content-Type: application/json
+
+{
+  "title": "Updated Product Title"
+}</code></pre></div>
+<table class="comparison"><thead><tr><th>Method</th><th>Practical idea</th></tr></thead><tbody><tr><td><code>PUT</code></td><td>Often used for a full replacement/update.</td></tr><tr><td><code>PATCH</code></td><td>Often used to update only selected fields.</td></tr></tbody></table>
+<div class="panel yellow"><strong>DummyJSON note:</strong><p>PUT/PATCH responses are simulated. The server returns the updated-looking product, but the stored public dataset is not permanently changed.</p></div>
+</section>
+
+<section class="step-view" data-title="DELETE products">
+<header class="step-header"><span class="step-kicker">STEP 13 · DELETE</span><h1>Understand DELETE with a Product</h1><p class="lede"><code>DELETE</code> requests removal of a resource.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>DELETE https://dummyjson.com/products/1</code></pre></div>
+<div class="flow">Client<br>↓ DELETE /products/1<br>DummyJSON<br>↓<br>Returns the product with deletion information</div>
+<div class="panel orange"><strong>Again, this is simulated:</strong><p>DummyJSON does not permanently delete the public product. This lets students safely repeat the same exercise.</p></div>
+</section>
+
+<section class="step-view" data-title="HTTP status codes">
+<header class="step-header"><span class="step-kicker">STEP 14 · STATUS CODES</span><h1>How Does the App Know What Happened?</h1><p class="lede">HTTP status codes summarize the result of a request.</p></header>
+<table class="comparison"><thead><tr><th>Range / Code</th><th>Meaning</th><th>Example</th></tr></thead><tbody><tr><td><code>200</code></td><td>Success</td><td>A product was returned.</td></tr><tr><td><code>201</code></td><td>Created</td><td>A create request succeeded.</td></tr><tr><td><code>400</code></td><td>Bad request</td><td>The request is invalid.</td></tr><tr><td><code>401</code></td><td>Unauthorized</td><td>Authentication is required or invalid.</td></tr><tr><td><code>404</code></td><td>Not found</td><td>The requested resource does not exist.</td></tr><tr><td><code>500</code></td><td>Server error</td><td>The server failed while processing the request.</td></tr></tbody></table>
+<div class="panel blue"><strong>Useful practice:</strong><p>DummyJSON also exposes HTTP test routes, such as <code>https://dummyjson.com/http/404</code>, which can be useful later for practicing error handling.</p></div>
+</section>
+
+<section class="step-view" data-title="Headers and body">
+<header class="step-header"><span class="step-kicker">STEP 15 · HEADERS AND BODY</span><h1>Extra Information Around the Data</h1><p class="lede">Headers carry metadata. The request body carries the main data we want to send.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>POST /products/add
+Content-Type: application/json
+
+{
+  "title": "Flutter Hoodie",
+  "price": 1299
+}</code></pre></div>
+<div class="grid-2"><div class="concept"><strong>Header</strong><p><code>Content-Type: application/json</code> tells the server that the body contains JSON.</p></div><div class="concept"><strong>Body</strong><p>The JSON object contains the product data being sent.</p></div></div>
+<div class="panel pink"><strong>Later:</strong><p>Authentication APIs may also use an <code>Authorization</code> header, commonly with a bearer token.</p></div>
+</section>
+
+<section class="step-view" data-title="Read JSON product data">
+<header class="step-header"><span class="step-kicker">STEP 16 · JSON</span><h1>Learn to Read the Product Response</h1><p class="lede">JSON is the text format our Flutter app will receive and decode.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>{
+  "products": [
+    {
+      "id": 1,
+      "title": "Essence Mascara Lash Princess",
+      "category": "beauty",
+      "price": 9.99,
+      "rating": 4.94,
+      "thumbnail": "..."
+    }
+  ],
+  "total": 194,
+  "skip": 0,
+  "limit": 30
+}</code></pre></div>
+<table class="comparison"><thead><tr><th>JSON</th><th>What you are seeing</th></tr></thead><tbody><tr><td><code>{ }</code></td><td>An object</td></tr><tr><td><code>[ ]</code></td><td>An array/list</td></tr><tr><td><code>"title": "..."</code></td><td>A string value</td></tr><tr><td><code>"price": 9.99</code></td><td>A number</td></tr></tbody></table>
+<div class="panel yellow"><strong>Next codelab connection:</strong><p>We will decode this response in Dart, read the <code>products</code> array, and display fields such as <code>title</code>, <code>price</code>, and <code>thumbnail</code>.</p></div>
+</section>
+
+<section class="step-view" data-title="Path and query parameters">
+<header class="step-header"><span class="step-kicker">STEP 17 · DATA IN THE URL</span><h1>Identify Products, Search and Paginate</h1><p class="lede">REST APIs frequently place values in the path or query string.</p></header>
+<table class="comparison"><thead><tr><th>Purpose</th><th>DummyJSON example</th></tr></thead><tbody><tr><td>Specific product</td><td><code>/products/1</code></td></tr><tr><td>Search</td><td><code>/products/search?q=phone</code></td></tr><tr><td>Pagination</td><td><code>/products?limit=10&amp;skip=10</code></td></tr><tr><td>Select fields</td><td><code>/products?select=title,price</code></td></tr><tr><td>Category</td><td><code>/products/category/smartphones</code></td></tr></tbody></table>
+<div class="flow">https://dummyjson.com/products?limit=10&amp;skip=10<br>↓<br>path = /products<br>limit = 10<br>skip = 10</div>
+<div class="panel mint"><strong>Connection to go_router:</strong><p>You already learned path and query parameters for navigation. HTTP APIs use the same URL concepts to identify and filter remote data.</p></div>
+</section>
+
+<section class="step-view" data-title="Follow a real product request">
+<header class="step-header"><span class="step-kicker">STEP 18 · FOLLOW THE DATA</span><h1>Trace the Request We Will Build in Flutter</h1><p class="lede">This is the exact mental model you should have before writing <code>http.get()</code>.</p></header>
+<div class="flow">1. User opens Products screen<br>↓<br>2. Flutter needs remote product data<br>↓<br>3. Flutter sends GET https://dummyjson.com/products<br>↓<br>4. DummyJSON receives the request<br>↓<br>5. Server prepares product data<br>↓<br>6. Server returns 200 OK + JSON<br>↓<br>7. Flutter receives the response body<br>↓<br>8. Flutter decodes JSON<br>↓<br>9. Flutter creates/uses product data<br>↓<br>10. ListView/GridView displays products</div>
+<div class="challenge"><h3>Read these API requests</h3><ol><li><code>GET /products/1</code> — what should it return?</li><li><code>GET /products/search?q=phone</code> — what is <code>q</code> doing?</li><li><code>GET /products?limit=10&amp;skip=10</code> — why might an app use this?</li><li><code>GET /products/category/smartphones</code> — what products should come back?</li></ol></div>
+</section>
+
+<section class="step-view" data-title="Common mistakes">
+<header class="step-header"><span class="step-kicker">STEP 19 · COMMON MISTAKES</span><h1>Avoid These Networking Confusions</h1><p class="lede">Keep the responsibilities of the client, API, request and response separate.</p></header>
+<div class="grid-2"><div class="concept"><strong>Mistake: API = server</strong><p>The API is the interface exposed by the server.</p></div><div class="concept"><strong>Mistake: JSON = Dart Map</strong><p>JSON is text. Flutter later decodes it into Dart values.</p></div><div class="concept"><strong>Mistake: every API has the same shape</strong><p>Always read the API documentation before parsing its response.</p></div><div class="concept"><strong>Mistake: POST means permanent here</strong><p>DummyJSON's write operations are simulations for testing and learning.</p></div></div>
+<div class="panel orange"><strong>Most important habit:</strong><p>Before writing Flutter code, open the API documentation and understand the endpoint, method, parameters, headers and response JSON.</p></div>
+</section>
+
+<section class="step-view" data-title="Revision">
+<header class="step-header"><span class="step-kicker">STEP 20 · QUICK REVISION</span><h1>HTTP, REST and DummyJSON Revision</h1><p class="lede">Review the concepts you need before making the first network request from Flutter.</p></header>
+<div class="reveal"><summary>1. What is the client in our example?</summary><div>The Flutter application.</div></div>
+<div class="reveal"><summary>2. What is the server?</summary><div>The remote system at <code>dummyjson.com</code> that receives our HTTP requests and sends responses.</div></div>
+<div class="reveal"><summary>3. What is an API?</summary><div>A defined interface that allows one software system to communicate with another.</div></div>
+<div class="reveal"><summary>4. What is REST?</summary><div>A common architectural style for web APIs that exposes resources and uses HTTP concepts to interact with them.</div></div>
+<div class="reveal"><summary>5. What is our base URL?</summary><div><code>https://dummyjson.com</code></div></div>
+<div class="reveal"><summary>6. What does GET /products do?</summary><div>Requests the products collection.</div></div>
+<div class="reveal"><summary>7. How do we request one product?</summary><div>Use a URL such as <code>GET /products/1</code>.</div></div>
+<div class="reveal"><summary>8. How can we search products?</summary><div>Use a query such as <code>/products/search?q=phone</code>.</div></div>
+<div class="reveal"><summary>9. What do limit and skip help with?</summary><div>Pagination—requesting a smaller section of a larger collection.</div></div>
+<div class="reveal"><summary>10. What is a status code?</summary><div>A numeric result such as 200 or 404 that summarizes the outcome of an HTTP request.</div></div>
+<div class="reveal"><summary>11. What is Content-Type?</summary><div>A header that describes the format of the request or response body, such as <code>application/json</code>.</div></div>
+<div class="reveal"><summary>12. What is JSON?</summary><div>A text format commonly used by REST APIs to exchange structured data.</div></div>
+<div class="reveal"><summary>13. Are DummyJSON POST/PATCH/DELETE changes permanent?</summary><div>No. They are simulated operations intended for testing and prototyping.</div></div>
+<div class="reveal"><summary>14. What will we do next?</summary><div>Use Flutter's networking code to call <code>https://dummyjson.com/products</code>, decode the response, and display products in the UI.</div></div>
+<h2>Completion checklist</h2>
+<ul class="checklist"><li>I can explain client and server.</li><li>I know what an API is.</li><li>I understand REST at a practical client-side level.</li><li>I know the DummyJSON base URL.</li><li>I can identify an endpoint.</li><li>I understand HTTP requests and responses.</li><li>I know GET, POST, PUT/PATCH and DELETE.</li><li>I recognize common HTTP status codes.</li><li>I understand headers and request bodies.</li><li>I can read basic product JSON.</li><li>I understand path and query parameters.</li><li>I can trace a product request from Flutter to the server and back.</li></ul>
+<div class="panel references"><h3>References used in this codelab</h3><p><a href="https://dummyjson.com/docs/products" target="_blank" rel="noopener">DummyJSON Products documentation</a> · <a href="https://dummyjson.com/docs" target="_blank" rel="noopener">DummyJSON documentation</a></p></div>
+<div class="panel references"><h3>Next codelab</h3><p><strong>Fetching Data from REST APIs in Flutter</strong> — use the <code>http</code> package to call <code>https://dummyjson.com/products</code>, handle the response, decode JSON, and display a real product list.</p></div>
+<div class="finish"><h2>Codelab complete! 🎉</h2><p>You now understand the networking concepts behind the real Products API that we will integrate into Flutter next.</p></div>
+</section>
+  </div></main>
+</div>
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});
+    document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+    if(updateHash) history.pushState({step:current},'',`#step-${current+1}`);
+    window.scrollTo({top:0,behavior:'auto'});sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');
+  }
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render();}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+  nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});
+  menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+  document.addEventListener('click',async event=>{const copy=event.target.closest('.copy-btn');if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1200);return;}const option=event.target.closest('.quiz-option');if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show');}});
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+  document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});
+  current=getHashStep();render(false);
+})();
+</script>
+</body>
+</html>
