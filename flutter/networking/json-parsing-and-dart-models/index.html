@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Parsing and Dart Models — Flutter Codelab</title>
+  <meta name="description" content="Learn how Flutter transforms JSON API responses into structured Dart models using jsonDecode, jsonEncode, Map, List, fromJson, toJson, list conversion, nullable fields, and safe defaults.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}
+    .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}.screen-stack{display:grid;gap:12px;margin:22px 0}.screen-card{padding:16px;background:#fff;border:3px solid var(--ink);box-shadow:var(--shadow-sm);font-weight:800}.screen-card.active{background:var(--mint)}.checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.references a{color:var(--blue-dark);font-weight:700}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}}
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter Networking Codelab</div><h2>JSON & Dart Models</h2><p>Turn raw API data into typed objects.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">JSON & Dart Models</div></div>
+  <main><div class="content" id="content">
+
+<section class="step-view" data-title="Why models?">
+<header class="step-header"><span class="step-kicker">STEP 1 · FROM JSON TO OBJECTS</span><h1>Raw JSON Works — Until Your App Grows</h1><p class="lede">In the previous codelab, we fetched products and accessed values directly from decoded JSON. Now we will turn that unstructured data into proper Dart objects.</p></header>
+<div class="objective"><strong>By the end:</strong> Understand JSON objects and arrays, use <code>jsonDecode()</code> and <code>jsonEncode()</code>, work with <code>Map&lt;String, dynamic&gt;</code> and <code>List&lt;dynamic&gt;</code>, build a <code>Product</code> model, write <code>fromJson()</code> and <code>toJson()</code>, convert lists of JSON objects into <code>List&lt;Product&gt;</code>, and safely handle missing or nullable fields.</div>
+<div class="flow">JSON text from API<br>↓ jsonDecode()<br>Map / List in Dart<br>↓ Product.fromJson()<br>Product object<br>↓<br>Typed Flutter UI</div>
+<div class="grid-2"><div class="concept"><strong>Raw JSON approach</strong><p><code>product['title']</code><br><code>product['price']</code></p></div><div class="concept"><strong>Model approach</strong><p><code>product.title</code><br><code>product.price</code></p></div></div>
+</section>
+
+<section class="step-view" data-title="Review the API response">
+<header class="step-header"><span class="step-kicker">STEP 2 · LOOK AT THE DATA</span><h1>Inspect the DummyJSON Products Response</h1><p class="lede">Before creating a model, first understand the shape of the JSON returned by the API.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>{
+  "products": [
+    {
+      "id": 1,
+      "title": "Essence Mascara Lash Princess",
+      "description": "The Essence Mascara Lash Princess...",
+      "category": "beauty",
+      "price": 9.99,
+      "rating": 4.94,
+      "stock": 5,
+      "thumbnail": "https://..."
+    }
+  ],
+  "total": 194,
+  "skip": 0,
+  "limit": 30
+}</code></pre></div>
+<div class="panel yellow"><strong>Important:</strong><p>The top-level value is a JSON object. Inside it, <code>products</code> contains a JSON array. Each item inside that array is another JSON object.</p></div>
+</section>
+
+<section class="step-view" data-title="JSON objects and arrays">
+<header class="step-header"><span class="step-kicker">STEP 3 · JSON STRUCTURE</span><h1>Know Objects, Arrays and Values</h1><p class="lede">JSON is built from a small set of value types. Two structures matter most when working with APIs: objects and arrays.</p></header>
+<table class="comparison"><thead><tr><th>JSON</th><th>Example</th><th>Typical Dart result</th></tr></thead><tbody><tr><td>Object</td><td><code>{"name":"Phone"}</code></td><td><code>Map&lt;String, dynamic&gt;</code></td></tr><tr><td>Array</td><td><code>[1,2,3]</code></td><td><code>List&lt;dynamic&gt;</code></td></tr><tr><td>String</td><td><code>"beauty"</code></td><td><code>String</code></td></tr><tr><td>Number</td><td><code>9.99</code></td><td><code>num</code>, <code>int</code>, or <code>double</code></td></tr><tr><td>Boolean</td><td><code>true</code></td><td><code>bool</code></td></tr><tr><td>null</td><td><code>null</code></td><td><code>null</code></td></tr></tbody></table>
+<div class="quiz" data-answer="0" data-correct="Correct. A JSON object is commonly decoded into a Map<String, dynamic> in Dart."><h3>What does a JSON object normally become after decoding in Dart?</h3><div class="quiz-options"><button class="quiz-option">Map&lt;String, dynamic&gt;</button><button class="quiz-option">List&lt;String&gt;</button><button class="quiz-option">Widget</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+</section>
+
+<section class="step-view" data-title="Decode JSON text">
+<header class="step-header"><span class="step-kicker">STEP 4 · jsonDecode()</span><h1>Convert JSON Text into Dart Data</h1><p class="lede"><code>response.body</code> is a String. <code>jsonDecode()</code> parses that text into Dart values.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import 'dart:convert';
+
+final data = jsonDecode(response.body);</code></pre></div>
+<div class="flow">response.body<br>String containing JSON<br>↓ jsonDecode()<br>Dart Map / List / primitive values</div>
+<div class="panel blue"><strong>Remember:</strong><p><code>jsonDecode()</code> does not automatically create your custom <code>Product</code> class. It only converts JSON text into normal Dart maps, lists, strings, numbers, booleans, and null.</p></div>
+</section>
+
+<section class="step-view" data-title="Use Map<String, dynamic>">
+<header class="step-header"><span class="step-kicker">STEP 5 · JSON OBJECT IN DART</span><h1>Work with Map&lt;String, dynamic&gt;</h1><p class="lede">A map stores key-value pairs. The key is a String, while the value can have different types.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final Map&lt;String, dynamic&gt; productJson = {
+  'id': 1,
+  'title': 'Laptop',
+  'price': 799.99,
+  'stock': 12,
+};
+
+print(productJson['title']);
+print(productJson['price']);</code></pre></div>
+<div class="panel yellow"><strong>Why <code>dynamic</code>?</strong><p>One JSON object may contain a String, int, double, bool, List, another Map, or null. The value type therefore needs to allow multiple possibilities.</p></div>
+</section>
+
+<section class="step-view" data-title="Use List<dynamic>">
+<header class="step-header"><span class="step-kicker">STEP 6 · JSON ARRAY IN DART</span><h1>Work with List&lt;dynamic&gt;</h1><p class="lede">A JSON array becomes a Dart List. For the products endpoint, each item in the list is a decoded product map.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final Map&lt;String, dynamic&gt; data =
+    jsonDecode(response.body);
+
+final List&lt;dynamic&gt; products = data['products'];
+
+for (final product in products) {
+  print(product['title']);
+}</code></pre></div>
+<div class="flow">data<br>↓ data['products']<br>List&lt;dynamic&gt;<br>↓ each item<br>Map&lt;String, dynamic&gt;</div>
+<div class="panel orange"><strong>This works, but...</strong><p>Dart cannot strongly check properties like <code>product['titel']</code>. A misspelled key may only fail at runtime. Models improve this.</p></div>
+</section>
+
+<section class="step-view" data-title="Create the Product model">
+<header class="step-header"><span class="step-kicker">STEP 7 · MODEL CLASS</span><h1>Create a Product Class</h1><p class="lede">A model represents the data your app works with using normal Dart fields and types.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>class Product {
+  final int id;
+  final String title;
+  final String description;
+  final String category;
+  final double price;
+  final double rating;
+  final int stock;
+  final String thumbnail;
+
+  const Product({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.category,
+    required this.price,
+    required this.rating,
+    required this.stock,
+    required this.thumbnail,
+  });
+}</code></pre></div>
+<div class="panel mint"><strong>Now Flutter gets types:</strong><p><code>product.title</code> is known to be a String, <code>product.stock</code> is known to be an int, and <code>product.price</code> is known to be a double.</p></div>
+</section>
+
+<section class="step-view" data-title="Why fromJson()?">
+<header class="step-header"><span class="step-kicker">STEP 8 · CONVERSION</span><h1>We Need a Bridge from Map to Product</h1><p class="lede">After <code>jsonDecode()</code>, we still have maps. A <code>fromJson()</code> factory constructor converts one map into one Product object.</p></header>
+<div class="flow">Map&lt;String, dynamic&gt;<br>{ id: 1, title: ..., price: ... }<br>↓ Product.fromJson()<br>Product(id: 1, title: ..., price: ...)</div>
+<div class="grid-2"><div class="concept"><strong>Without a model</strong><p><code>map['title']</code></p></div><div class="concept"><strong>With a model</strong><p><code>product.title</code></p></div></div>
+</section>
+
+<section class="step-view" data-title="Write fromJson()">
+<header class="step-header"><span class="step-kicker">STEP 9 · PARSE ONE PRODUCT</span><h1>Create Product.fromJson()</h1><p class="lede">Read each field from the JSON map and pass it into the Product constructor.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>factory Product.fromJson(
+  Map&lt;String, dynamic&gt; json,
+) {
+  return Product(
+    id: json['id'],
+    title: json['title'],
+    description: json['description'],
+    category: json['category'],
+    price: (json['price'] as num).toDouble(),
+    rating: (json['rating'] as num).toDouble(),
+    stock: json['stock'],
+    thumbnail: json['thumbnail'],
+  );
+}</code></pre></div>
+<div class="panel yellow"><strong>Why <code>num</code> then <code>toDouble()</code>?</strong><p>JSON numbers may decode as either <code>int</code> or <code>double</code>. Reading through <code>num</code> and converting with <code>toDouble()</code> makes numeric parsing safer.</p></div>
+</section>
+
+<section class="step-view" data-title="Parse one product">
+<header class="step-header"><span class="step-kicker">STEP 10 · USE THE FACTORY</span><h1>Convert One JSON Object</h1><p class="lede">Once the factory exists, turning a decoded map into a model is simple.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final Map&lt;String, dynamic&gt; json = {
+  'id': 1,
+  'title': 'Laptop',
+  'description': 'A fast laptop',
+  'category': 'electronics',
+  'price': 799.99,
+  'rating': 4.7,
+  'stock': 8,
+  'thumbnail': 'https://example.com/laptop.jpg',
+};
+
+final product = Product.fromJson(json);
+
+print(product.title);
+print(product.price);</code></pre></div>
+<div class="quiz" data-answer="1" data-correct="Correct. fromJson() converts a decoded JSON map into a Product object."><h3>What is the job of Product.fromJson()?</h3><div class="quiz-options"><button class="quiz-option">Send an HTTP request</button><button class="quiz-option">Convert a JSON map into a Product</button><button class="quiz-option">Build a ListView</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+</section>
+
+<section class="step-view" data-title="Convert the products list">
+<header class="step-header"><span class="step-kicker">STEP 11 · PARSE MANY PRODUCTS</span><h1>Turn the JSON Array into List&lt;Product&gt;</h1><p class="lede">The API gives us many product maps. Use <code>map()</code> to convert each map with <code>Product.fromJson()</code>.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final Map&lt;String, dynamic&gt; data =
+    jsonDecode(response.body);
+
+final List&lt;dynamic&gt; productList =
+    data['products'];
+
+final List&lt;Product&gt; products = productList
+    .map(
+      (json) =&gt; Product.fromJson(
+        json as Map&lt;String, dynamic&gt;,
+      ),
+    )
+    .toList();</code></pre></div>
+<div class="flow">List&lt;dynamic&gt;<br>↓ map(...Product.fromJson...)<br>Iterable&lt;Product&gt;<br>↓ toList()<br>List&lt;Product&gt;</div>
+<div class="panel blue"><strong>The important jump:</strong><p>Before this line, the app has raw maps. After it, the app has a strongly typed <code>List&lt;Product&gt;</code>.</p></div>
+</section>
+
+<section class="step-view" data-title="Use typed products in UI">
+<header class="step-header"><span class="step-kicker">STEP 12 · CLEANER FLUTTER UI</span><h1>Use Product Objects in Widgets</h1><p class="lede">Your widgets no longer need to understand JSON keys.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>ListView.builder(
+  itemCount: products.length,
+  itemBuilder: (context, index) {
+    final product = products[index];
+
+    return ListTile(
+      leading: Image.network(
+        product.thumbnail,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+      ),
+      title: Text(product.title),
+      subtitle: Text(product.category),
+      trailing: Text(
+        '\$${product.price.toStringAsFixed(2)}',
+      ),
+    );
+  },
+)</code></pre></div>
+<div class="grid-2"><div class="concept"><strong>Old</strong><p><code>product['title']</code></p></div><div class="concept"><strong>Better</strong><p><code>product.title</code></p></div></div>
+</section>
+
+<section class="step-view" data-title="Create toJson()">
+<header class="step-header"><span class="step-kicker">STEP 13 · OBJECT BACK TO JSON</span><h1>Create toJson()</h1><p class="lede">Sometimes you need to send a Dart object back to an API. <code>toJson()</code> performs the reverse conversion.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Map&lt;String, dynamic&gt; toJson() {
+  return {
+    'id': id,
+    'title': title,
+    'description': description,
+    'category': category,
+    'price': price,
+    'rating': rating,
+    'stock': stock,
+    'thumbnail': thumbnail,
+  };
+}</code></pre></div>
+<div class="flow">Product object<br>↓ product.toJson()<br>Map&lt;String, dynamic&gt;<br>↓ jsonEncode()<br>JSON text</div>
+</section>
+
+<section class="step-view" data-title="Encode JSON">
+<header class="step-header"><span class="step-kicker">STEP 14 · jsonEncode()</span><h1>Convert Dart Data into JSON Text</h1><p class="lede"><code>jsonEncode()</code> serializes a Dart map or list into a JSON String.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final product = Product(
+  id: 1,
+  title: 'Laptop',
+  description: 'A fast laptop',
+  category: 'electronics',
+  price: 799.99,
+  rating: 4.7,
+  stock: 8,
+  thumbnail: 'https://example.com/laptop.jpg',
+);
+
+final jsonString = jsonEncode(
+  product.toJson(),
+);
+
+print(jsonString);</code></pre></div>
+<div class="panel mint"><strong>Easy memory trick:</strong><p><code>decode</code>: JSON text → Dart data. <code>encode</code>: Dart data → JSON text.</p></div>
+<div class="quiz" data-answer="2" data-correct="Correct. jsonEncode() converts Dart structures into JSON text."><h3>What does jsonEncode() produce?</h3><div class="quiz-options"><button class="quiz-option">A Flutter Widget</button><button class="quiz-option">An HTTP Response</button><button class="quiz-option">A JSON String</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+</section>
+
+<section class="step-view" data-title="Nullable and missing fields">
+<header class="step-header"><span class="step-kicker">STEP 15 · REAL API SAFETY</span><h1>What If a Field Is Missing or null?</h1><p class="lede">Real APIs are not always perfect. Some properties can be optional, missing, or explicitly null.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>class Product {
+  final int id;
+  final String title;
+  final String? brand;
+
+  const Product({
+    required this.id,
+    required this.title,
+    this.brand,
+  });
+
+  factory Product.fromJson(
+    Map&lt;String, dynamic&gt; json,
+  ) {
+    return Product(
+      id: json['id'],
+      title: json['title'],
+      brand: json['brand'] as String?,
+    );
+  }
+}</code></pre></div>
+<div class="panel yellow"><strong><code>String?</code> means:</strong><p>The field may contain a String or <code>null</code>.</p></div>
+</section>
+
+<section class="step-view" data-title="Provide fallback values">
+<header class="step-header"><span class="step-kicker">STEP 16 · DEFAULT VALUES</span><h1>Use Safe Fallbacks When Appropriate</h1><p class="lede">If your app needs a non-null value even when the API omits a field, provide a sensible fallback.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>factory Product.fromJson(
+  Map&lt;String, dynamic&gt; json,
+) {
+  return Product(
+    id: json['id'] as int? ?? 0,
+    title: json['title'] as String? ?? 'Unknown Product',
+    description:
+        json['description'] as String? ?? '',
+    category:
+        json['category'] as String? ?? 'unknown',
+    price:
+        (json['price'] as num?)?.toDouble() ?? 0.0,
+    rating:
+        (json['rating'] as num?)?.toDouble() ?? 0.0,
+    stock: json['stock'] as int? ?? 0,
+    thumbnail:
+        json['thumbnail'] as String? ?? '',
+  );
+}</code></pre></div>
+<div class="callout"><span class="label">IMPORTANT</span><p>Do not blindly hide bad server data with defaults. Use defaults when they make sense for your application. If a field is essential, you may prefer to treat missing data as an error.</p></div>
+</section>
+
+<section class="step-view" data-title="Put model in its own file">
+<header class="step-header"><span class="step-kicker">STEP 17 · ORGANIZE THE PROJECT</span><h1>Move Product into models/product.dart</h1><p class="lede">Keeping model classes separate makes networking code and widgets easier to read.</p></header>
+<div class="flow">lib/<br>├── main.dart<br>└── models/<br>&nbsp;&nbsp;&nbsp;&nbsp;└── product.dart</div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import 'models/product.dart';</code></pre></div>
+<div class="panel blue"><strong>Responsibility:</strong><p><code>product.dart</code> should describe product data and how that data converts to and from JSON. It should not contain UI widgets.</p></div>
+</section>
+
+<section class="step-view" data-title="Update fetchProducts()">
+<header class="step-header"><span class="step-kicker">STEP 18 · CONNECT MODEL + API</span><h1>Return List&lt;Product&gt; from the API</h1><p class="lede">Now combine the previous HTTP lesson with the model you created in this lesson.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Future&lt;List&lt;Product&gt;&gt; fetchProducts() async {
+  final url = Uri.parse(
+    'https://dummyjson.com/products?limit=10',
+  );
+
+  final response = await http.get(url);
+
+  if (response.statusCode != 200) {
+    throw Exception(
+      'Failed to load products',
+    );
+  }
+
+  final Map&lt;String, dynamic&gt; data =
+      jsonDecode(response.body);
+
+  final List&lt;dynamic&gt; items =
+      data['products'];
+
+  return items
+      .map(
+        (json) =&gt; Product.fromJson(
+          json as Map&lt;String, dynamic&gt;,
+        ),
+      )
+      .toList();
+}</code></pre></div>
+<div class="flow">http.get()<br>↓ response.body<br>jsonDecode()<br>↓ data['products']<br>List&lt;dynamic&gt;<br>↓ Product.fromJson()<br>List&lt;Product&gt;</div>
+</section>
+
+<section class="step-view" data-title="Complete example">
+<header class="step-header"><span class="step-kicker">STEP 19 · PUT IT TOGETHER</span><h1>Complete Product Model + Fetch Example</h1><p class="lede">Here is the important networking and parsing code together in one place.</p></header>
+<h2>models/product.dart</h2>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>class Product {
+  final int id;
+  final String title;
+  final String description;
+  final String category;
+  final double price;
+  final double rating;
+  final int stock;
+  final String thumbnail;
+
+  const Product({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.category,
+    required this.price,
+    required this.rating,
+    required this.stock,
+    required this.thumbnail,
+  });
+
+  factory Product.fromJson(
+    Map&lt;String, dynamic&gt; json,
+  ) {
+    return Product(
+      id: json['id'] as int? ?? 0,
+      title:
+          json['title'] as String? ?? 'Unknown Product',
+      description:
+          json['description'] as String? ?? '',
+      category:
+          json['category'] as String? ?? 'unknown',
+      price:
+          (json['price'] as num?)?.toDouble() ?? 0.0,
+      rating:
+          (json['rating'] as num?)?.toDouble() ?? 0.0,
+      stock: json['stock'] as int? ?? 0,
+      thumbnail:
+          json['thumbnail'] as String? ?? '',
+    );
+  }
+
+  Map&lt;String, dynamic&gt; toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'category': category,
+      'price': price,
+      'rating': rating,
+      'stock': stock,
+      'thumbnail': thumbnail,
+    };
+  }
+}</code></pre></div>
+<h2>Fetch and parse</h2>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Future&lt;List&lt;Product&gt;&gt; fetchProducts() async {
+  final response = await http.get(
+    Uri.parse(
+      'https://dummyjson.com/products?limit=10',
+    ),
+  );
+
+  if (response.statusCode != 200) {
+    throw Exception('Failed to load products');
+  }
+
+  final Map&lt;String, dynamic&gt; data =
+      jsonDecode(response.body);
+
+  final List&lt;dynamic&gt; productJsonList =
+      data['products'];
+
+  return productJsonList
+      .map(
+        (json) =&gt; Product.fromJson(
+          json as Map&lt;String, dynamic&gt;,
+        ),
+      )
+      .toList();
+}</code></pre></div>
+<div class="challenge"><h3>Try these changes</h3><ol><li>Add <code>discountPercentage</code> to the Product model.</li><li>Add an optional <code>brand</code> property using <code>String?</code>.</li><li>Print <code>products.first.title</code> after fetching.</li><li>Use <code>toJson()</code> and <code>jsonEncode()</code> to print one Product as JSON.</li></ol></div>
+</section>
+
+<section class="step-view" data-title="Revision">
+<header class="step-header"><span class="step-kicker">STEP 20 · QUICK REVISION</span><h1>JSON & Dart Models Revision</h1><p class="lede">Review the concepts you should remember before moving to complete CRUD operations.</p></header>
+<div class="reveal"><summary>1. What does jsonDecode() do?</summary><div>It parses JSON text and converts it into Dart values such as maps, lists, strings, numbers, booleans, and null.</div></div>
+<div class="reveal"><summary>2. What does a JSON object usually become in Dart?</summary><div><code>Map&lt;String, dynamic&gt;</code>.</div></div>
+<div class="reveal"><summary>3. What does a JSON array usually become in Dart?</summary><div><code>List&lt;dynamic&gt;</code>.</div></div>
+<div class="reveal"><summary>4. Why create a model class?</summary><div>Models give API data meaningful fields, stronger typing, better autocomplete, and cleaner UI code.</div></div>
+<div class="reveal"><summary>5. What does fromJson() do?</summary><div>It converts a decoded JSON map into an instance of your model class.</div></div>
+<div class="reveal"><summary>6. What does toJson() do?</summary><div>It converts a model object into a Dart map that can later be encoded as JSON.</div></div>
+<div class="reveal"><summary>7. What does jsonEncode() do?</summary><div>It converts compatible Dart data such as maps and lists into JSON text.</div></div>
+<div class="reveal"><summary>8. How do we convert many product maps?</summary><div>Use <code>map()</code> with <code>Product.fromJson()</code>, then call <code>toList()</code>.</div></div>
+<div class="reveal"><summary>9. What does String? mean?</summary><div>The field is nullable: it may contain a String or null.</div></div>
+<div class="reveal"><summary>10. Why use (json['price'] as num?)?.toDouble()?</summary><div>JSON numbers can decode as int or double. Reading them as num first lets us safely convert either representation into a double.</div></div>
+<h2>Completion checklist</h2>
+<ul class="checklist"><li>I understand JSON objects and arrays.</li><li>I can use jsonDecode().</li><li>I can work with Map&lt;String, dynamic&gt;.</li><li>I can work with List&lt;dynamic&gt;.</li><li>I can create a Dart model class.</li><li>I can write fromJson().</li><li>I can write toJson().</li><li>I can use jsonEncode().</li><li>I can convert List&lt;dynamic&gt; into List&lt;Product&gt;.</li><li>I understand nullable fields.</li><li>I can provide safe fallback values.</li><li>I can connect API fetching to strongly typed models.</li></ul>
+<div class="finish"><h2>Codelab complete! 🎉</h2><p>You can now transform raw REST API JSON into clean, strongly typed Dart model objects. You are ready to use these models in complete create, read, update, and delete API operations.</p></div>
+</section>
+
+  </div></main>
+</div>
+
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});
+    document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+    if(updateHash) history.pushState({step:current},'',`#step-${current+1}`);
+    window.scrollTo({top:0,behavior:'auto'});sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');
+  }
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render();}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+  nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});
+  menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+  document.addEventListener('click',async event=>{const copy=event.target.closest('.copy-btn');if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1200);return;}const option=event.target.closest('.quiz-option');if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show');}});
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+  document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});
+  current=getHashStep();render(false);
+})();
+</script>
+</body>
+</html>
