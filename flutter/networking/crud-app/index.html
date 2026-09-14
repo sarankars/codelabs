@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Building a REST API CRUD App in Flutter — Flutter Codelab</title>
+  <meta name="description" content="Build a complete Flutter CRUD app with a REST API using GET, POST, PATCH, DELETE, JSON request bodies, headers, route parameters, forms, response handling, and refresh logic.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}
+    .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}.screen-stack{display:grid;gap:12px;margin:22px 0}.screen-card{padding:16px;background:#fff;border:3px solid var(--ink);box-shadow:var(--shadow-sm);font-weight:800}.screen-card.active{background:var(--mint)}.checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.references a{color:var(--blue-dark);font-weight:700}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}}
+  </style>
+</head>
+
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+    <div class="brand"><div class="eyebrow">Flutter Networking Codelab</div><h2>REST API CRUD App</h2><p>Create, read, update and delete remote data.</p></div>
+    <div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div>
+    <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+  </aside>
+  <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">REST API CRUD App</div></div>
+  <main><div class="content" id="content">
+
+<section class="step-view" data-title="CRUD goal">
+<header class="step-header"><span class="step-kicker">STEP 1 · BUILD THE FULL FLOW</span><h1>Turn the Products App into CRUD</h1><p class="lede">You already know how to fetch JSON and convert it into Dart models. Now you will use the same REST API to create, read, update, and delete products from a Flutter interface.</p></header>
+<div class="objective"><strong>By the end:</strong> Use GET, POST, PATCH, and DELETE; send JSON request bodies; add Content-Type headers; use product IDs in URLs; connect API calls to Flutter forms; handle success and failure responses; and keep the visible list in sync after operations.</div>
+<div class="flow">Flutter UI<br>↓<br>HTTP request<br>↓<br>DummyJSON Products API<br>↓<br>HTTP response + JSON<br>↓<br>Dart model<br>↓<br>Update Flutter UI</div>
+<div class="panel orange"><strong>Classroom API note:</strong><p>DummyJSON simulates create, update, and delete operations. It returns realistic responses, but those changes are not permanently stored on its public server.</p></div>
+</section>
+
+<section class="step-view" data-title="CRUD and HTTP methods">
+<header class="step-header"><span class="step-kicker">STEP 2 · MAP CRUD TO HTTP</span><h1>CRUD Is Just a Small Set of HTTP Operations</h1><p class="lede">Each CRUD action maps naturally to an HTTP method.</p></header>
+<table class="comparison"><thead><tr><th>CRUD</th><th>HTTP</th><th>DummyJSON example</th></tr></thead><tbody><tr><td>Create</td><td><code>POST</code></td><td><code>/products/add</code></td></tr><tr><td>Read</td><td><code>GET</code></td><td><code>/products</code> or <code>/products/1</code></td></tr><tr><td>Update</td><td><code>PATCH</code> / <code>PUT</code></td><td><code>/products/1</code></td></tr><tr><td>Delete</td><td><code>DELETE</code></td><td><code>/products/1</code></td></tr></tbody></table>
+<div class="quiz" data-answer="2" data-correct="Correct. PATCH is commonly used when you want to update only part of an existing resource."><h3>Which method is a good choice for updating only a product title?</h3><div class="quiz-options"><button class="quiz-option">GET</button><button class="quiz-option">POST</button><button class="quiz-option">PATCH</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+</section>
+
+<section class="step-view" data-title="Project structure">
+<header class="step-header"><span class="step-kicker">STEP 3 · ORGANIZE THE APP</span><h1>Use a Simple CRUD Project Structure</h1><p class="lede">Keep the model, API code, and screens separate so every file has one clear responsibility.</p></header>
+<div class="flow">lib/<br>├── main.dart<br>├── models/<br>│   └── product.dart<br>├── services/<br>│   └── product_api.dart<br>└── screens/<br>&nbsp;&nbsp;&nbsp;&nbsp;├── products_page.dart<br>&nbsp;&nbsp;&nbsp;&nbsp;└── product_form_page.dart</div>
+<div class="panel blue"><strong>Why this matters:</strong><p>Your widgets should focus on interface and interaction. The service class should focus on HTTP.</p></div>
+</section>
+
+<section class="step-view" data-title="Product model">
+<header class="step-header"><span class="step-kicker">STEP 4 · REUSE THE MODEL</span><h1>Use the Product Model from the Previous Codelab</h1><p class="lede">We will use a small model containing only the fields needed for this CRUD exercise.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>class Product {
+  final int? id;
+  final String title;
+  final double price;
+
+  const Product({
+    this.id,
+    required this.title,
+    required this.price,
+  });
+
+  factory Product.fromJson(Map&lt;String, dynamic&gt; json) {
+    return Product(
+      id: json['id'] as int?,
+      title: json['title'] as String? ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0,
+    );
+  }
+
+  Map&lt;String, dynamic&gt; toJson() {
+    return {
+      'title': title,
+      'price': price,
+    };
+  }
+}</code></pre></div>
+<div class="panel yellow"><strong>Why is <code>id</code> nullable?</strong><p>Before a new product is sent to the server, it may not have an ID yet. The server response supplies one.</p></div>
+</section>
+
+<section class="step-view" data-title="Create the API service">
+<header class="step-header"><span class="step-kicker">STEP 5 · CENTRALIZE NETWORKING</span><h1>Create ProductApi</h1><p class="lede">Put every REST call in one service class.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../models/product.dart';
+
+class ProductApi {
+  static const String baseUrl =
+      'https://dummyjson.com/products';
+}</code></pre></div>
+<div class="panel mint"><strong>Benefit:</strong><p>If the API URL or networking logic changes later, you update one place instead of many widgets.</p></div>
+</section>
+
+<section class="step-view" data-title="GET all products">
+<header class="step-header"><span class="step-kicker">STEP 6 · READ MANY</span><h1>Fetch the Product List with GET</h1><p class="lede">Start with the READ part of CRUD.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>static Future&lt;List&lt;Product&gt;&gt; getProducts() async {
+  final uri = Uri.parse('$baseUrl?limit=10');
+  final response = await http.get(uri);
+
+  if (response.statusCode != 200) {
+    throw Exception('Failed to load products');
+  }
+
+  final data = jsonDecode(response.body)
+      as Map&lt;String, dynamic&gt;;
+
+  final list = data['products'] as List&lt;dynamic&gt;;
+
+  return list
+      .map((json) =&gt; Product.fromJson(
+            json as Map&lt;String, dynamic&gt;,
+          ))
+      .toList();
+}</code></pre></div>
+</section>
+
+<section class="step-view" data-title="GET one product">
+<header class="step-header"><span class="step-kicker">STEP 7 · ROUTE PARAMETER</span><h1>Fetch One Product by ID</h1><p class="lede">The product ID becomes part of the URL path.</p></header>
+<div class="flow">Product ID = 7<br>↓<br>https://dummyjson.com/products/7</div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>static Future&lt;Product&gt; getProduct(int id) async {
+  final uri = Uri.parse('$baseUrl/$id');
+  final response = await http.get(uri);
+
+  if (response.statusCode != 200) {
+    throw Exception('Product not found');
+  }
+
+  return Product.fromJson(
+    jsonDecode(response.body) as Map&lt;String, dynamic&gt;,
+  );
+}</code></pre></div>
+<div class="callout"><span class="label">REST POINT</span><p>The <code>7</code> in <code>/products/7</code> identifies which product resource the client wants.</p></div>
+</section>
+
+<section class="step-view" data-title="POST create product">
+<header class="step-header"><span class="step-kicker">STEP 8 · CREATE</span><h1>Create a Product with POST</h1><p class="lede">POST sends new data to the server. DummyJSON uses <code>/products/add</code> for this operation.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>static Future&lt;Product&gt; createProduct(
+  Product product,
+) async {
+  final uri = Uri.parse('$baseUrl/add');
+
+  final response = await http.post(
+    uri,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode(product.toJson()),
+  );
+
+  if (response.statusCode != 200 &&
+      response.statusCode != 201) {
+    throw Exception('Failed to create product');
+  }
+
+  return Product.fromJson(
+    jsonDecode(response.body) as Map&lt;String, dynamic&gt;,
+  );
+}</code></pre></div>
+</section>
+
+<section class="step-view" data-title="Headers and body">
+<header class="step-header"><span class="step-kicker">STEP 9 · UNDERSTAND POST</span><h1>Why Do We Need Headers and a Body?</h1><p class="lede">The request body contains the data. The header tells the server what format that data uses.</p></header>
+<div class="grid-2"><div class="concept"><strong>Header</strong><p><code>Content-Type: application/json</code><br><br>“The request body is JSON.”</p></div><div class="concept"><strong>Body</strong><p><code>jsonEncode(product.toJson())</code><br><br>The actual product data being sent.</p></div></div>
+<div class="flow">Product object<br>↓ toJson()<br>Map&lt;String, dynamic&gt;<br>↓ jsonEncode()<br>JSON String<br>↓ HTTP request body</div>
+</section>
+
+<section class="step-view" data-title="PATCH update product">
+<header class="step-header"><span class="step-kicker">STEP 10 · UPDATE</span><h1>Update a Product with PATCH</h1><p class="lede">Use the product ID in the path and send only the fields you want to change.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>static Future&lt;Product&gt; updateProduct(
+  Product product,
+) async {
+  if (product.id == null) {
+    throw Exception('Product ID is required');
+  }
+
+  final uri = Uri.parse('$baseUrl/${product.id}');
+
+  final response = await http.patch(
+    uri,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode(product.toJson()),
+  );
+
+  if (response.statusCode != 200) {
+    throw Exception('Failed to update product');
+  }
+
+  return Product.fromJson(
+    jsonDecode(response.body) as Map&lt;String, dynamic&gt;,
+  );
+}</code></pre></div>
+<div class="panel yellow"><strong>PATCH vs PUT:</strong><p>PATCH is commonly used for partial changes. PUT is commonly used when replacing a full representation. DummyJSON accepts either for product updates.</p></div>
+</section>
+
+<section class="step-view" data-title="DELETE product">
+<header class="step-header"><span class="step-kicker">STEP 11 · DELETE</span><h1>Delete a Product by ID</h1><p class="lede">DELETE normally identifies the target resource using its ID in the URL.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>static Future&lt;void&gt; deleteProduct(int id) async {
+  final uri = Uri.parse('$baseUrl/$id');
+  final response = await http.delete(uri);
+
+  if (response.statusCode != 200) {
+    throw Exception('Failed to delete product');
+  }
+}</code></pre></div>
+<div class="panel orange"><strong>DummyJSON behavior:</strong><p>The response reports the product as deleted, but the public server does not permanently remove it.</p></div>
+</section>
+
+<section class="step-view" data-title="Build product form">
+<header class="step-header"><span class="step-kicker">STEP 12 · CONNECT A FORM</span><h1>Create a Form for Product Input</h1><p class="lede">The same form can be used for creating a new product or editing an existing one.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final titleController = TextEditingController();
+final priceController = TextEditingController();
+
+Form(
+  key: formKey,
+  child: Column(
+    children: [
+      TextFormField(
+        controller: titleController,
+        decoration: const InputDecoration(
+          labelText: 'Title',
+        ),
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return 'Enter a title';
+          }
+          return null;
+        },
+      ),
+      TextFormField(
+        controller: priceController,
+        keyboardType: TextInputType.number,
+        decoration: const InputDecoration(
+          labelText: 'Price',
+        ),
+      ),
+    ],
+  ),
+)</code></pre></div>
+</section>
+
+<section class="step-view" data-title="Submit create form">
+<header class="step-header"><span class="step-kicker">STEP 13 · FORM → POST</span><h1>Create a Product from Form Values</h1><p class="lede">Validate the form, convert text into a Product object, then call the API.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Future&lt;void&gt; createProduct() async {
+  if (!formKey.currentState!.validate()) {
+    return;
+  }
+
+  final product = Product(
+    title: titleController.text.trim(),
+    price: double.parse(priceController.text),
+  );
+
+  try {
+    final created =
+        await ProductApi.createProduct(product);
+
+    if (!mounted) return;
+    Navigator.pop(context, created);
+  } catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.toString())),
+    );
+  }
+}</code></pre></div>
+</section>
+
+<section class="step-view" data-title="Edit existing product">
+<header class="step-header"><span class="step-kicker">STEP 14 · FORM → PATCH</span><h1>Pre-fill the Form for Editing</h1><p class="lede">When editing, place the existing values into the controllers first.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>@override
+void initState() {
+  super.initState();
+
+  final product = widget.product;
+
+  if (product != null) {
+    titleController.text = product.title;
+    priceController.text = product.price.toString();
+  }
+}</code></pre></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final updated = Product(
+  id: widget.product!.id,
+  title: titleController.text.trim(),
+  price: double.parse(priceController.text),
+);
+
+final result =
+    await ProductApi.updateProduct(updated);</code></pre></div>
+</section>
+
+<section class="step-view" data-title="Load and display products">
+<header class="step-header"><span class="step-kicker">STEP 15 · PRODUCTS SCREEN</span><h1>Load Remote Products into the UI</h1><p class="lede">Use loading, success, and error state exactly as in the previous networking codelab.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>List&lt;Product&gt; products = [];
+bool isLoading = false;
+String? error;
+
+Future&lt;void&gt; loadProducts() async {
+  setState(() {
+    isLoading = true;
+    error = null;
+  });
+
+  try {
+    final result = await ProductApi.getProducts();
+
+    setState(() {
+      products = result;
+    });
+  } catch (e) {
+    setState(() {
+      error = e.toString();
+    });
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
+  }
+}</code></pre></div>
+</section>
+
+<section class="step-view" data-title="Refresh after create">
+<header class="step-header"><span class="step-kicker">STEP 16 · REFRESH AFTER CHANGE</span><h1>What Should Happen After Create?</h1><p class="lede">With a real persistent API, you can usually reload the remote list. With DummyJSON, writes are simulated, so re-fetching will return the original public dataset.</p></header>
+<div class="panel yellow"><strong>Important classroom detail:</strong><p>For this API, use the returned product to update your local Flutter list so students can immediately see the result of their POST request.</p></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final created = await Navigator.push&lt;Product&gt;(
+  context,
+  MaterialPageRoute(
+    builder: (_) =&gt; const ProductFormPage(),
+  ),
+);
+
+if (created != null) {
+  setState(() {
+    products.insert(0, created);
+  });
+}</code></pre></div>
+<div class="flow">POST request<br>↓<br>API returns created Product<br>↓<br>Navigator.pop(created)<br>↓<br>ProductsPage receives it<br>↓<br>Insert into local list</div>
+</section>
+
+<section class="step-view" data-title="Refresh after update">
+<header class="step-header"><span class="step-kicker">STEP 17 · UPDATE THE LIST</span><h1>Replace the Edited Product Locally</h1><p class="lede">Find the matching product by ID and replace it with the API response.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final index = products.indexWhere(
+  (item) =&gt; item.id == updated.id,
+);
+
+if (index != -1) {
+  setState(() {
+    products[index] = updated;
+  });
+}</code></pre></div>
+<div class="panel blue"><strong>Why use the response?</strong><p>The server may normalize or add fields. Prefer the product returned by the API over assuming the submitted object is the final version.</p></div>
+</section>
+
+<section class="step-view" data-title="Refresh after delete">
+<header class="step-header"><span class="step-kicker">STEP 18 · REMOVE FROM UI</span><h1>Delete Remotely, Then Remove Locally</h1><p class="lede">Only remove the product from the visible list after the DELETE request succeeds.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Future&lt;void&gt; removeProduct(Product product) async {
+  try {
+    await ProductApi.deleteProduct(product.id!);
+
+    setState(() {
+      products.removeWhere(
+        (item) =&gt; item.id == product.id,
+      );
+    });
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.toString())),
+    );
+  }
+}</code></pre></div>
+<div class="quiz" data-answer="1" data-correct="Correct. Wait for the server operation to succeed before removing the item from the visible list."><h3>When should the UI remove a product?</h3><div class="quiz-options"><button class="quiz-option">Before sending DELETE</button><button class="quiz-option">After DELETE succeeds</button><button class="quiz-option">Only after restarting the app</button></div><div class="quiz-feedback" aria-live="polite"></div></div>
+</section>
+
+<section class="step-view" data-title="Build the product list UI">
+<header class="step-header"><span class="step-kicker">STEP 19 · CONNECT CRUD BUTTONS</span><h1>Add Edit and Delete Actions</h1><p class="lede">Each product row can now open the edit form or trigger the delete request.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>ListView.builder(
+  itemCount: products.length,
+  itemBuilder: (context, index) {
+    final product = products[index];
+
+    return ListTile(
+      title: Text(product.title),
+      subtitle: Text('₹${product.price}'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () =&gt; editProduct(product),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () =&gt; removeProduct(product),
+          ),
+        ],
+      ),
+    );
+  },
+)</code></pre></div>
+</section>
+
+<section class="step-view" data-title="Complete API service">
+<header class="step-header"><span class="step-kicker">STEP 20 · PUT THE SERVICE TOGETHER</span><h1>Complete ProductApi</h1><p class="lede">This service now contains every CRUD operation used by the application.</p></header>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>class ProductApi {
+  static const baseUrl =
+      'https://dummyjson.com/products';
+
+  static Future&lt;List&lt;Product&gt;&gt; getProducts() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl?limit=10'),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load products');
+    }
+
+    final data = jsonDecode(response.body)
+        as Map&lt;String, dynamic&gt;;
+
+    return (data['products'] as List&lt;dynamic&gt;)
+        .map((json) =&gt; Product.fromJson(
+              json as Map&lt;String, dynamic&gt;,
+            ))
+        .toList();
+  }
+
+  static Future&lt;Product&gt; createProduct(
+    Product product,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/add'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(product.toJson()),
+    );
+
+    if (response.statusCode != 200 &&
+        response.statusCode != 201) {
+      throw Exception('Create failed');
+    }
+
+    return Product.fromJson(
+      jsonDecode(response.body),
+    );
+  }
+
+  static Future&lt;Product&gt; updateProduct(
+    Product product,
+  ) async {
+    final response = await http.patch(
+      Uri.parse('$baseUrl/${product.id}'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(product.toJson()),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Update failed');
+    }
+
+    return Product.fromJson(
+      jsonDecode(response.body),
+    );
+  }
+
+  static Future&lt;void&gt; deleteProduct(int id) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/$id'),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Delete failed');
+    }
+  }
+}</code></pre></div>
+</section>
+
+<section class="step-view" data-title="Response handling">
+<header class="step-header"><span class="step-kicker">STEP 21 · NEVER ASSUME SUCCESS</span><h1>Handle Success and Failure Responses</h1><p class="lede">An HTTP request completing does not automatically mean the operation succeeded.</p></header>
+<table class="comparison"><thead><tr><th>Situation</th><th>What to do</th></tr></thead><tbody><tr><td>Expected success code</td><td>Decode response and update UI.</td></tr><tr><td>Unexpected status code</td><td>Throw or return an application error.</td></tr><tr><td>No internet / timeout</td><td>Catch the exception and show retry/error UI.</td></tr><tr><td>Invalid form input</td><td>Stop before making the request.</td></tr></tbody></table>
+<div class="panel pink"><strong>Important:</strong><p><code>try/catch</code> handles thrown failures. Checking <code>statusCode</code> handles valid HTTP responses that still represent failure.</p></div>
+</section>
+
+<section class="step-view" data-title="Complete request flow">
+<header class="step-header"><span class="step-kicker">STEP 22 · FOLLOW ONE CREATE REQUEST</span><h1>Trace the Full Create Operation</h1><p class="lede">Follow the entire journey from a form field to a visible product.</p></header>
+<div class="flow">User fills form<br>↓ validate()<br>Create Product object<br>↓ toJson()<br>Map&lt;String, dynamic&gt;<br>↓ jsonEncode()<br>JSON request body<br>↓ http.post()<br>POST /products/add<br>↓ server response<br>JSON product<br>↓ jsonDecode()<br>Map<br>↓ Product.fromJson()<br>Product object<br>↓ Navigator.pop(product)<br>↓ insert into list<br>UI updates</div>
+</section>
+
+<section class="step-view" data-title="Practice challenge">
+<header class="step-header"><span class="step-kicker">STEP 23 · PRACTICE</span><h1>Extend the CRUD App</h1><p class="lede">Make the app slightly more realistic without changing the architecture.</p></header>
+<div class="challenge"><h3>Try these changes</h3><ol><li>Add a <code>description</code> field to Product and the form.</li><li>Add a confirmation dialog before DELETE.</li><li>Disable the Save button while POST/PATCH is running.</li><li>Show a CircularProgressIndicator inside the form during submission.</li><li>Add pull-to-refresh for the GET list.</li><li>Show a SnackBar after successful create, update, and delete operations.</li></ol></div>
+</section>
+
+<section class="step-view" data-title="Revision">
+<header class="step-header"><span class="step-kicker">STEP 24 · QUICK REVISION</span><h1>REST CRUD Revision</h1><p class="lede">These are the ideas you should be able to explain before moving to Provider integration.</p></header>
+<div class="reveal"><summary>1. Which method reads resources?</summary><div><code>GET</code>.</div></div>
+<div class="reveal"><summary>2. Which method creates a resource?</summary><div><code>POST</code>.</div></div>
+<div class="reveal"><summary>3. Which method can partially update a resource?</summary><div><code>PATCH</code>.</div></div>
+<div class="reveal"><summary>4. Which method removes a resource?</summary><div><code>DELETE</code>.</div></div>
+<div class="reveal"><summary>5. Why send Content-Type: application/json?</summary><div>It tells the server that the request body contains JSON.</div></div>
+<div class="reveal"><summary>6. Why call jsonEncode()?</summary><div>The HTTP request body needs JSON text, while the model's <code>toJson()</code> produces a Dart map.</div></div>
+<div class="reveal"><summary>7. Where is the ID used for update/delete?</summary><div>Usually in the URL path, for example <code>/products/7</code>.</div></div>
+<div class="reveal"><summary>8. Why check statusCode?</summary><div>Because receiving an HTTP response does not guarantee that the operation succeeded.</div></div>
+<div class="reveal"><summary>9. Why update the local list after a successful mutation?</summary><div>So the interface immediately reflects the result returned by the API.</div></div>
+<div class="reveal"><summary>10. Why does DummyJSON need special explanation after writes?</summary><div>Its POST/PATCH/DELETE endpoints simulate the operation and return realistic responses, but they do not permanently change the public dataset.</div></div>
+<h2>Completion checklist</h2>
+<ul class="checklist"><li>I can fetch a product list with GET.</li><li>I can fetch one product using an ID path parameter.</li><li>I can create data with POST.</li><li>I can update data with PATCH.</li><li>I can delete data with DELETE.</li><li>I can send Content-Type headers.</li><li>I can send JSON request bodies.</li><li>I can connect a Flutter Form to an API request.</li><li>I can inspect response status codes.</li><li>I can catch networking exceptions.</li><li>I can update the UI after CRUD operations.</li><li>I understand DummyJSON's simulated write behavior.</li></ul>
+<div class="finish"><h2>Codelab complete! 🎉</h2><p>You can now build a Flutter screen that performs complete CRUD operations against a REST API. Next, you can move this networking state out of widgets and manage it cleanly with Provider and ChangeNotifier.</p></div>
+</section>
+
+  </div></main>
+</div>
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});
+    document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+    if(updateHash) history.pushState({step:current},'',`#step-${current+1}`);
+    window.scrollTo({top:0,behavior:'auto'});sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');
+  }
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render();}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+  nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});
+  menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+  document.addEventListener('click',async event=>{const copy=event.target.closest('.copy-btn');if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1200);return;}const option=event.target.closest('.quiz-option');if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show');}});
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+  document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});
+  current=getHashStep();render(false);
+})();
+</script>
+</body>
+</html>
