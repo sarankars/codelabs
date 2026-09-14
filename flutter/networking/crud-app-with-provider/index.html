@@ -1,0 +1,284 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Building a Complete API App with Provider — Flutter Codelab</title><meta name="description" content="Build a structured Flutter REST API app with Provider, ChangeNotifier, service classes, CRUD, loading and error states, and pull-to-refresh."><meta name="theme-color" content="#2856d8"><style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}
+    .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}.screen-stack{display:grid;gap:12px;margin:22px 0}.screen-card{padding:16px;background:#fff;border:3px solid var(--ink);box-shadow:var(--shadow-sm);font-weight:800}.screen-card.active{background:var(--mint)}.checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.references a{color:var(--blue-dark);font-weight:700}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}}
+  </style></head><body><div class="app"><aside class="sidebar" id="sidebar" aria-label="Codelab navigation"><div class="brand"><div class="eyebrow">Flutter Networking Codelab</div><h2>API App with Provider</h2><p>Structured remote state and CRUD.</p></div><div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div><nav class="steps" id="stepNav" aria-label="Lesson steps"></nav></aside><div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">API App with Provider</div></div><main><div class="content" id="content"><section class="step-view" data-title="Why Provider?"><header class="step-header"><span class="step-kicker">STEP 1 · ARCHITECTURE</span><h1>Move API State Out of Widgets</h1><p class="lede">The CRUD app works, but widgets should not own HTTP calls, loading flags, errors, and business actions at the same time.</p></header><div class="objective"><strong>By the end:</strong> Build a complete Flutter products app using models, a REST service, Provider + ChangeNotifier, loading/success/empty/error states, CRUD, pull-to-refresh, and a maintainable folder structure.</div><div class="flow">UI<br>↓ action<br>ProductProvider<br>↓ calls<br>ProductApiService<br>↓ HTTP<br>DummyJSON Products API<br>↓ response<br>Provider updates state<br>↓ notifyListeners()<br>UI rebuilds</div></section>
+<section class="step-view" data-title="Project structure"><header class="step-header"><span class="step-kicker">STEP 2 · ORGANIZE</span><h1>Create the App Layers</h1><p class="lede">Give each file one clear responsibility.</p></header><div class="flow">lib/<br>├── models/product.dart<br>├── services/product_api_service.dart<br>├── providers/product_provider.dart<br>├── screens/products_page.dart<br>├── screens/product_form_page.dart<br>└── main.dart</div><table class="comparison"><tr><th>Layer</th><th>Job</th></tr><tr><td>Model</td><td>Represent typed product data.</td></tr><tr><td>Service</td><td>Talk to the REST API.</td></tr><tr><td>Provider</td><td>Own remote state and actions.</td></tr><tr><td>Screen</td><td>Render UI and collect user input.</td></tr></table></section>
+<section class="step-view" data-title="Setup"><header class="step-header"><span class="step-kicker">STEP 3 · SETUP</span><h1>Add http and provider</h1><p class="lede">Create the project and install both packages.</p></header><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>flutter create provider_api_app
+cd provider_api_app
+flutter pub add http provider</code></pre></div></section>
+<section class="step-view" data-title="Product model"><header class="step-header"><span class="step-kicker">STEP 4 · MODEL</span><h1>Create Product</h1><p class="lede">Use the typed model from the JSON parsing lesson.</p></header><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>class Product {
+  final int id;
+  final String title;
+  final double price;
+  final String? thumbnail;
+
+  const Product({
+    required this.id,
+    required this.title,
+    required this.price,
+    this.thumbnail,
+  });
+
+  factory Product.fromJson(Map&lt;String, dynamic&gt; json) {
+    return Product(
+      id: json[&#x27;id&#x27;] as int,
+      title: json[&#x27;title&#x27;] as String? ?? &#x27;Untitled&#x27;,
+      price: (json[&#x27;price&#x27;] as num? ?? 0).toDouble(),
+      thumbnail: json[&#x27;thumbnail&#x27;] as String?,
+    );
+  }
+}</code></pre></div></section>
+<section class="step-view" data-title="Service layer"><header class="step-header"><span class="step-kicker">STEP 5 · SERVICE</span><h1>Create ProductApiService</h1><p class="lede">Networking code belongs in a service, not in widgets.</p></header><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>class ProductApiService {
+  static const baseUrl = &#x27;https://dummyjson.com&#x27;;
+
+  Future&lt;List&lt;Product&gt;&gt; fetchProducts() async {
+    final response = await http.get(
+      Uri.parse(&#x27;$baseUrl/products?limit=20&#x27;),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(&#x27;Failed to load products&#x27;);
+    }
+
+    final data = jsonDecode(response.body) as Map&lt;String, dynamic&gt;;
+    final list = data[&#x27;products&#x27;] as List&lt;dynamic&gt;;
+
+    return list
+        .map((item) =&gt; Product.fromJson(item as Map&lt;String, dynamic&gt;))
+        .toList();
+  }
+}</code></pre></div><div class="panel blue"><strong>Rule:</strong><p>The service returns Dart data or throws an exception. It never calls <code>setState()</code> or <code>notifyListeners()</code>.</p></div></section>
+<section class="step-view" data-title="Create provider"><header class="step-header"><span class="step-kicker">STEP 6 · REMOTE STATE</span><h1>Create ProductProvider</h1><p class="lede">The provider becomes the single source of truth for products and request state.</p></header><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>class ProductProvider extends ChangeNotifier {
+  ProductProvider(this._service);
+
+  final ProductApiService _service;
+
+  List&lt;Product&gt; _products = [];
+  bool _isLoading = false;
+  bool _isMutating = false;
+  String? _error;
+
+  List&lt;Product&gt; get products =&gt; List.unmodifiable(_products);
+  bool get isLoading =&gt; _isLoading;
+  bool get isMutating =&gt; _isMutating;
+  String? get error =&gt; _error;
+}</code></pre></div></section>
+<section class="step-view" data-title="Fetch products"><header class="step-header"><span class="step-kicker">STEP 7 · GET</span><h1>Load Remote Data Through Provider</h1><p class="lede">The provider controls loading, success, and failure around the service call.</p></header><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Future&lt;void&gt; fetchProducts() async {
+  _isLoading = true;
+  _error = null;
+  notifyListeners();
+
+  try {
+    _products = await _service.fetchProducts();
+  } catch (e) {
+    _error = e.toString();
+  } finally {
+    _isLoading = false;
+    notifyListeners();
+  }
+}</code></pre></div><div class="flow">loading=true → notifyListeners() → service GET → products/error → loading=false → notifyListeners()</div></section>
+<section class="step-view" data-title="Provide state"><header class="step-header"><span class="step-kicker">STEP 8 · PROVIDE</span><h1>Wrap the App with ChangeNotifierProvider</h1><p class="lede">Create the provider above the screens that use it.</p></header><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) =&gt; ProductProvider(
+        ProductApiService(),
+      )..fetchProducts(),
+      child: const MyApp(),
+    ),
+  );
+}</code></pre></div><div class="panel yellow"><strong>Notice:</strong><p><code>..fetchProducts()</code> starts the first request immediately after creating the provider.</p></div></section>
+<section class="step-view" data-title="watch vs read"><header class="step-header"><span class="step-kicker">STEP 9 · CONSUME</span><h1>context.watch() vs context.read()</h1><p class="lede">Use watch for reactive UI and read for actions.</p></header><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final provider = context.watch&lt;ProductProvider&gt;();
+
+Text(&#x27;${provider.products.length} products&#x27;);
+
+// Inside a button / callback:
+context.read&lt;ProductProvider&gt;().fetchProducts();</code></pre></div><table class="comparison"><tr><th>Method</th><th>Use</th></tr><tr><td><code>watch()</code></td><td>Read state and rebuild after <code>notifyListeners()</code>.</td></tr><tr><td><code>read()</code></td><td>Trigger an action without subscribing.</td></tr></table><div class="quiz" data-answer="1" data-correct="Correct. Event callbacks normally use context.read()."><h3>Which should a Refresh button use?</h3><div class="quiz-options"><button class="quiz-option">context.watch()</button><button class="quiz-option">context.read()</button><button class="quiz-option">setState()</button></div><div class="quiz-feedback"></div></div></section>
+<section class="step-view" data-title="UI states"><header class="step-header"><span class="step-kicker">STEP 10 · RENDER</span><h1>Loading, Error, Empty, Success</h1><p class="lede">Remote screens should deliberately handle all four states.</p></header><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Widget buildBody(ProductProvider provider) {
+  if (provider.isLoading &amp;&amp; provider.products.isEmpty) {
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  if (provider.error != null &amp;&amp; provider.products.isEmpty) {
+    return Center(child: Text(provider.error!));
+  }
+
+  if (provider.products.isEmpty) {
+    return const Center(child: Text(&#x27;No products found&#x27;));
+  }
+
+  return ProductsList(products: provider.products);
+}</code></pre></div></section>
+<section class="step-view" data-title="Products screen"><header class="step-header"><span class="step-kicker">STEP 11 · SCREEN</span><h1>Build ProductsPage</h1><p class="lede">The screen watches state; it does not perform HTTP requests itself.</p></header><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>class ProductsPage extends StatelessWidget {
+  const ProductsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch&lt;ProductProvider&gt;();
+
+    return Scaffold(
+      appBar: AppBar(title: const Text(&#x27;Products&#x27;)),
+      body: buildBody(provider),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Open create form
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}</code></pre></div></section>
+<section class="step-view" data-title="Pull to refresh"><header class="step-header"><span class="step-kicker">STEP 12 · REFRESH</span><h1>Add RefreshIndicator</h1><p class="lede">The gesture stays in the UI, but fetching stays in the provider.</p></header><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>RefreshIndicator(
+  onRefresh: () {
+    return context
+        .read&lt;ProductProvider&gt;()
+        .fetchProducts();
+  },
+  child: ListView.builder(
+    physics: const AlwaysScrollableScrollPhysics(),
+    itemCount: provider.products.length,
+    itemBuilder: (context, index) {
+      final product = provider.products[index];
+      return ListTile(
+        title: Text(product.title),
+        subtitle: Text(&#x27;Price: ${product.price}&#x27;),
+      );
+    },
+  ),
+)</code></pre></div></section>
+<section class="step-view" data-title="Create"><header class="step-header"><span class="step-kicker">STEP 13 · POST</span><h1>Create Through Service and Provider</h1><p class="lede">The service performs POST. The provider updates its local list and notifies the UI.</p></header><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Future&lt;Product&gt; createProduct({
+  required String title,
+  required double price,
+}) async {
+  final response = await http.post(
+    Uri.parse(&#x27;$baseUrl/products/add&#x27;),
+    headers: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;},
+    body: jsonEncode({&#x27;title&#x27;: title, &#x27;price&#x27;: price}),
+  );
+
+  if (response.statusCode != 201) {
+    throw Exception(&#x27;Failed to create product&#x27;);
+  }
+
+  return Product.fromJson(
+    jsonDecode(response.body) as Map&lt;String, dynamic&gt;,
+  );
+}</code></pre></div><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Future&lt;bool&gt; createProduct({
+  required String title,
+  required double price,
+}) async {
+  _isMutating = true;
+  _error = null;
+  notifyListeners();
+
+  try {
+    final product = await _service.createProduct(
+      title: title,
+      price: price,
+    );
+    _products = [product, ..._products];
+    return true;
+  } catch (e) {
+    _error = e.toString();
+    return false;
+  } finally {
+    _isMutating = false;
+    notifyListeners();
+  }
+}</code></pre></div><div class="panel orange"><strong>DummyJSON:</strong><p>Writes are simulated, so the provider updates its own list to make the classroom app behave like a real CRUD app.</p></div></section>
+<section class="step-view" data-title="Form submit"><header class="step-header"><span class="step-kicker">STEP 14 · FORM</span><h1>Submit Through context.read()</h1><p class="lede">The form validates input and delegates the operation.</p></header><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>final success = await context
+    .read&lt;ProductProvider&gt;()
+    .createProduct(
+      title: titleController.text.trim(),
+      price: double.parse(priceController.text),
+    );
+
+if (!context.mounted) return;
+
+if (success) {
+  Navigator.pop(context);
+}</code></pre></div><div class="panel mint"><strong>Clean boundary:</strong><p>The form knows nothing about URLs, headers, status codes, or JSON.</p></div></section>
+<section class="step-view" data-title="Update and delete"><header class="step-header"><span class="step-kicker">STEP 15 · PATCH + DELETE</span><h1>Keep CRUD State in Provider</h1><p class="lede">PATCH replaces the matching product. DELETE removes it from the list.</p></header><div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Future&lt;bool&gt; updateProduct(Product updated) async {
+  _isMutating = true;
+  notifyListeners();
+
+  try {
+    final saved = await _service.updateProduct(updated);
+    final index = _products.indexWhere((p) =&gt; p.id == saved.id);
+    if (index != -1) _products[index] = saved;
+    return true;
+  } catch (e) {
+    _error = e.toString();
+    return false;
+  } finally {
+    _isMutating = false;
+    notifyListeners();
+  }
+}
+
+Future&lt;bool&gt; deleteProduct(int id) async {
+  _isMutating = true;
+  notifyListeners();
+
+  try {
+    await _service.deleteProduct(id);
+    _products.removeWhere((p) =&gt; p.id == id);
+    return true;
+  } catch (e) {
+    _error = e.toString();
+    return false;
+  } finally {
+    _isMutating = false;
+    notifyListeners();
+  }
+}</code></pre></div></section>
+<section class="step-view" data-title="Better error UX"><header class="step-header"><span class="step-kicker">STEP 16 · RESILIENCE</span><h1>Keep Existing Data if Refresh Fails</h1><p class="lede">A failed refresh should not necessarily erase products that were already useful.</p></header><div class="grid-2"><div class="concept"><strong>First load fails</strong><p>No cached products exist, so show the full error state with Retry.</p></div><div class="concept"><strong>Refresh fails</strong><p>Keep the old products visible and show a SnackBar/banner explaining that refresh failed.</p></div></div><div class="callout"><span class="label">STATE DESIGN</span><p>Loading and error are not just booleans. Think about what data already exists when the event occurs.</p></div></section>
+<section class="step-view" data-title="Complete architecture"><header class="step-header"><span class="step-kicker">STEP 17 · TRACE IT</span><h1>Follow One Delete End-to-End</h1><p class="lede">Trace the complete responsibility chain.</p></header><div class="flow">User taps Delete<br>↓<br>ProductsPage → context.read&lt;ProductProvider&gt;()<br>↓<br>ProductProvider.deleteProduct(id)<br>↓<br>ProductApiService.deleteProduct(id)<br>↓<br>DELETE /products/{id}<br>↓<br>response checked<br>↓<br>provider removes product locally<br>↓<br>notifyListeners()<br>↓<br>context.watch() rebuilds ProductsPage</div><div class="challenge"><h3>Practice</h3><ol><li>Add a confirmation dialog before delete.</li><li>Disable Save while <code>isMutating</code> is true.</li><li>Show a SnackBar after successful create/update/delete.</li><li>Add local search without putting HTTP code in the screen.</li><li>Extract each product row into a reusable widget.</li></ol></div></section>
+<section class="step-view" data-title="Revision"><header class="step-header"><span class="step-kicker">STEP 18 · FINAL REVISION</span><h1>Provider + REST API Revision</h1><p class="lede">Finish the networking module with the key ideas.</p></header><div class="reveal"><summary>Why a service class?</summary><div>It isolates endpoints, HTTP methods, headers, JSON parsing, and response validation.</div></div><div class="reveal"><summary>Why ChangeNotifier?</summary><div>It owns changing application state and tells listening widgets when to rebuild.</div></div><div class="reveal"><summary>watch vs read?</summary><div><code>watch()</code> subscribes and rebuilds; <code>read()</code> triggers actions without subscribing.</div></div><div class="reveal"><summary>Why separate isLoading and isMutating?</summary><div>Initial page loading and CRUD button operations are different UX states.</div></div><div class="reveal"><summary>Why update locally with DummyJSON?</summary><div>Its write endpoints are simulated and do not permanently alter the shared public dataset.</div></div><div class="reveal"><summary>What is the final architecture?</summary><div>Screen → Provider → Service → REST API, with typed Models shared between layers.</div></div><h2>Completion checklist</h2><ul class="checklist"><li>I can organize models, services, providers, and screens.</li><li>I can create a ChangeNotifier for remote state.</li><li>I can use ChangeNotifierProvider.</li><li>I understand context.watch() and context.read().</li><li>I can render loading, error, empty, and success states.</li><li>I can perform CRUD through a provider.</li><li>I can implement pull-to-refresh.</li><li>I can keep API code out of widgets.</li><li>I understand local updates vs refetching.</li></ul><div class="finish"><h2>Networking module complete! 🎉</h2><p>You can now consume REST APIs, parse JSON into Dart models, perform CRUD, and manage remote state in a structured Flutter application using Provider and ChangeNotifier.</p></div></section></div></main></div><script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});
+    document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+    if(updateHash) history.pushState({step:current},'',`#step-${current+1}`);
+    window.scrollTo({top:0,behavior:'auto'});sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');
+  }
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render();}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+  nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});
+  menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+  document.addEventListener('click',async event=>{const copy=event.target.closest('.copy-btn');if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1200);return;}const option=event.target.closest('.quiz-option');if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show');}});
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+  document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});
+  current=getHashStep();render(false);
+})();
+</script></body></html>
