@@ -778,7 +778,8 @@
                     </ol>
                     <div class="panel yellow"><strong>Why Spring Web?</strong>
                         <p>It gives us the tools required to create REST endpoints such as <code>@RestController</code>,
-                            <code>@GetMapping</code>, <code>@PostMapping</code>, and an embedded web server.</p>
+                            <code>@GetMapping</code>, <code>@PostMapping</code>, and an embedded web server.
+                        </p>
                     </div>
                 </section>
 
@@ -816,11 +817,7 @@
                         <p class="lede">Before writing APIs, confirm that the generated project runs.</p>
                     </header>
                     <div class="code-wrap"><button class="copy-btn">Copy</button>
-                        <pre><code>./mvnw spring-boot:run</code></pre>
-                    </div>
-                    <p>On Windows use:</p>
-                    <div class="code-wrap"><button class="copy-btn">Copy</button>
-                        <pre><code>mvnw.cmd spring-boot:run</code></pre>
+                        <pre><code>mvn spring-boot:run</code></pre>
                     </div>
                     <div class="panel mint"><strong>Expected result</strong>
                         <p>The terminal should show that Tomcat started, normally on port <code>8080</code>. Keep the
@@ -1010,7 +1007,8 @@ public List&lt;Student&gt; getAllStudents() {
                     <header class="step-header"><span class="step-kicker">STEP 10 · FIND ONE</span>
                         <h1>GET One Student by ID</h1>
                         <p class="lede">The value inside the URL becomes a Java method parameter using
-                            <code>@PathVariable</code>.</p>
+                            <code>@PathVariable</code>.
+                        </p>
                     </header>
                     <div class="code-wrap"><button class="copy-btn">Copy</button>
                         <pre><code>@GetMapping("/{id}")
@@ -1365,7 +1363,8 @@ public class StudentController {
                     <div class="reveal">
                         <summary>Where are students stored?</summary>
                         <div>Inside an in-memory <code>ArrayList&lt;Student&gt;</code> declared directly in
-                            <code>StudentController</code>.</div>
+                            <code>StudentController</code>.
+                        </div>
                     </div>
                     <div class="reveal">
                         <summary>Why does data disappear after restart?</summary>
