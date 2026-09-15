@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattern Classification Fundamentals — Module 4.1 Codelab</title>
+  <meta name="description"
+    content="Interactive beginner codelab for Pattern Analysis, Classification, Discriminant Functions, and supervised, unsupervised, and semi-supervised learning.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+    :root {
+      --blue: #2856d8;
+      --blue-dark: #17348e;
+      --blue-light: #e4ebff;
+      --ink: #101010;
+      --paper: #f5f7fb;
+      --white: #fff;
+      --yellow: #ffd83d;
+      --mint: #75e6c5;
+      --pink: #ff9bb7;
+      --orange: #ffb866;
+      --border: 3px solid var(--ink);
+      --shadow: 6px 6px 0 var(--ink);
+      --shadow-sm: 4px 4px 0 var(--ink);
+      --sidebar: 292px
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: auto
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      line-height: 1.55
+    }
+
+    button,
+    a {
+      font: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    :focus-visible {
+      outline: 4px solid var(--yellow);
+      outline-offset: 3px
+    }
+
+    .app {
+      min-height: 100vh
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar);
+      padding: 22px 18px;
+      background: var(--blue);
+      border-right: var(--border);
+      overflow: auto;
+      z-index: 20
+    }
+
+    .brand {
+      padding: 16px;
+      margin-bottom: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .eyebrow,
+    .progress-meta,
+    .step-number,
+    .step-kicker,
+    .label,
+    .footer-note {
+      font-family: "DM Mono", monospace
+    }
+
+    .eyebrow {
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase
+    }
+
+    .brand h2 {
+      margin: 5px 0 3px;
+      font-size: 1.42rem;
+      line-height: 1.05
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: .85rem;
+      font-weight: 600
+    }
+
+    .progress-wrap {
+      margin: 0 2px 20px;
+      color: #fff
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+      font-size: .72rem
+    }
+
+    .progress-track {
+      height: 16px;
+      padding: 2px;
+      background: #fff;
+      border: var(--border)
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: var(--yellow);
+      transition: width .2s ease
+    }
+
+    .steps {
+      display: grid;
+      gap: 8px
+    }
+
+    .step-link {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 34px 1fr 18px;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 8px;
+      color: #fff;
+      background: transparent;
+      border: 3px solid transparent;
+      text-align: left;
+      font-weight: 700;
+      line-height: 1.15
+    }
+
+    .step-link:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .step-link.active {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--ink);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .step-number {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 2px solid currentColor;
+      font-size: .78rem
+    }
+
+    .step-status {
+      text-align: center
+    }
+
+    .mobile-bar {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: var(--blue);
+      border-bottom: var(--border)
+    }
+
+    .menu-btn,
+    .mobile-title {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .menu-btn {
+      width: 46px;
+      height: 42px;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .mobile-title {
+      flex: 1;
+      padding: 8px 10px;
+      font-weight: 800
+    }
+
+    main {
+      margin-left: var(--sidebar);
+      min-height: 100vh
+    }
+
+    .content {
+      width: min(980px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 42px 0 28px
+    }
+
+    .step-view {
+      display: none
+    }
+
+    .step-view.active {
+      display: block;
+      animation: stepIn .18s ease-out
+    }
+
+    @keyframes stepIn {
+      from {
+        opacity: .35;
+        transform: translateY(5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .step-header {
+      padding: 28px;
+      margin-bottom: 24px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .step-kicker {
+      display: inline-block;
+      margin-bottom: 13px;
+      padding: 5px 9px;
+      color: #fff;
+      background: var(--blue);
+      border: 2px solid var(--ink);
+      font-size: .72rem
+    }
+
+    h1,
+    h2,
+    h3 {
+      line-height: 1.08
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 5vw, 3.7rem);
+      letter-spacing: -.045em
+    }
+
+    h2 {
+      margin: 30px 0 12px;
+      font-size: clamp(1.5rem, 3vw, 2.15rem)
+    }
+
+    h3 {
+      margin: 22px 0 9px;
+      font-size: 1.15rem
+    }
+
+    .lede {
+      max-width: 780px;
+      margin: 0;
+      font-size: 1.08rem
+    }
+
+    .objective {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700
+    }
+
+    .panel,
+    .concept,
+    .quiz,
+    .reveal {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .panel {
+      padding: 22px;
+      margin: 20px 0
+    }
+
+    .panel.blue {
+      background: var(--blue-light)
+    }
+
+    .panel.mint {
+      background: var(--mint)
+    }
+
+    .panel.pink {
+      background: var(--pink)
+    }
+
+    .panel.yellow {
+      background: var(--yellow)
+    }
+
+    .panel.orange {
+      background: var(--orange)
+    }
+
+    .callout {
+      padding: 16px 18px;
+      margin: 20px 0;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm)
+    }
+
+    .callout .label {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 3px 7px;
+      color: #fff;
+      background: var(--ink);
+      border: 2px solid var(--ink);
+      font-size: .72rem
+    }
+
+    .grid-2 {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    .concept {
+      padding: 18px
+    }
+
+    .concept strong {
+      font-size: 1.05rem
+    }
+
+    .concept p:last-child {
+      margin-bottom: 0
+    }
+
+    .code-wrap {
+      position: relative;
+      margin: 18px 0
+    }
+
+    pre {
+      margin: 0;
+      padding: 20px;
+      overflow: auto;
+      color: #f7f7f7;
+      background: #111;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", ui-monospace, monospace;
+      font-size: .84rem;
+      line-height: 1.62;
+      tab-size: 2
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      padding: 5px 9px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      font-size: .75rem;
+      font-weight: 800
+    }
+
+    code:not(pre code) {
+      padding: 1px 5px;
+      background: #e8edf7;
+      border: 1px solid #9da9bb;
+      font-family: "DM Mono", monospace;
+      font-size: .88em
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35rem
+    }
+
+    li {
+      margin: 7px 0
+    }
+
+    .comparison {
+      width: 100%;
+      margin: 18px 0;
+      background: #fff;
+      border: var(--border);
+      border-collapse: collapse
+    }
+
+    .comparison th,
+    .comparison td {
+      padding: 11px;
+      border: 2px solid var(--ink);
+      text-align: left;
+      vertical-align: top
+    }
+
+    .comparison th {
+      color: #fff;
+      background: var(--blue)
+    }
+
+    .quiz {
+      padding: 20px;
+      margin: 20px 0
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px
+    }
+
+    .quiz-option {
+      text-align: left;
+      padding: 11px 13px;
+      background: #fff;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-option:hover {
+      background: var(--blue-light)
+    }
+
+    .quiz-option.correct {
+      background: var(--mint)
+    }
+
+    .quiz-option.wrong {
+      background: var(--pink)
+    }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 13px;
+      padding: 10px;
+      border: 2px solid var(--ink);
+      font-weight: 700
+    }
+
+    .quiz-feedback.show {
+      display: block
+    }
+
+    .reveal {
+      margin: 18px 0
+    }
+
+    .reveal summary {
+      padding: 13px 16px;
+      cursor: pointer;
+      background: var(--blue-light);
+      font-weight: 800
+    }
+
+    .reveal>div {
+      padding: 15px 16px
+    }
+
+    .challenge {
+      padding: 22px;
+      margin: 24px 0;
+      color: #fff;
+      background: var(--ink);
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .challenge h3 {
+      margin-top: 0;
+      color: var(--yellow)
+    }
+
+    .flow {
+      margin: 20px 0;
+      padding: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", monospace;
+      line-height: 1.9;
+      overflow: auto
+    }
+
+    .screen-stack {
+      display: grid;
+      gap: 12px;
+      margin: 22px 0
+    }
+
+    .screen-card {
+      padding: 16px;
+      background: #fff;
+      border: 3px solid var(--ink);
+      box-shadow: var(--shadow-sm);
+      font-weight: 800
+    }
+
+    .screen-card.active {
+      background: var(--mint)
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 30px
+    }
+
+    .checklist li::before {
+      content: "□";
+      position: absolute;
+      left: 0;
+      font-size: 1.25rem;
+      font-weight: 900
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: var(--border)
+    }
+
+    .nav-btn {
+      min-width: 130px;
+      padding: 12px 18px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 900
+    }
+
+    .nav-btn.primary {
+      color: #fff;
+      background: var(--blue)
+    }
+
+    .nav-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed
+    }
+
+    .finish {
+      padding: 20px;
+      margin-top: 24px;
+      background: var(--mint);
+      border: var(--border);
+      box-shadow: var(--shadow)
+    }
+
+    .references a {
+      color: var(--blue-dark);
+      font-weight: 700
+    }
+
+    @media(max-width:850px) {
+      :root {
+        --sidebar: 270px;
+        --mobile-bar-height: 65px
+      }
+
+      .sidebar {
+        inset: var(--mobile-bar-height) auto 0 0;
+        transform: translateX(-100%);
+        transition: transform .2s ease
+      }
+
+      .sidebar.open {
+        transform: none
+      }
+
+      .mobile-bar {
+        display: flex;
+        height: var(--mobile-bar-height)
+      }
+
+      main {
+        margin-left: 0
+      }
+
+      .content {
+        width: min(940px, calc(100% - 28px));
+        padding-top: 24px
+      }
+    }
+
+    @media(max-width:680px) {
+      .grid-2 {
+        grid-template-columns: 1fr
+      }
+
+      .content {
+        width: calc(100% - 18px);
+        padding-top: 16px
+      }
+
+      .step-header {
+        padding: 20px 16px
+      }
+
+      .panel,
+      .concept,
+      .quiz {
+        padding: 16px
+      }
+
+      .nav-row {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        padding: 12px 0;
+        background: var(--paper)
+      }
+
+      .nav-btn {
+        min-width: 0;
+        flex: 1;
+        padding: 11px 10px
+      }
+
+      pre {
+        padding: 16px 12px;
+        font-size: .76rem
+      }
+
+      .copy-btn {
+        position: static;
+        align-self: flex-end;
+        margin-bottom: 6px
+      }
+
+      .code-wrap {
+        display: flex;
+        flex-direction: column
+      }
+
+      .code-wrap pre {
+        order: 2
+      }
+
+      .code-wrap .copy-btn {
+        order: 1
+      }
+
+      .comparison {
+        display: block;
+        overflow-x: auto
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+      <div class="brand">
+        <div class="eyebrow">Computer Vision · Module 4</div>
+        <h2>Pattern Classification</h2>
+        <p>Codelab 4.1 · Fundamentals</p>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+        <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+          aria-valuenow="0">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+      <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+    </aside>
+
+    <div class="mobile-bar">
+      <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation"
+        aria-expanded="false">☰</button>
+      <div class="mobile-title" id="mobileTitle">Pattern Classification</div>
+    </div>
+
+    <main>
+      <div class="content" id="content">
+
+        <section class="step-view" data-title="What we will learn">
+          <header class="step-header">
+            <span class="step-kicker">STEP 1 · GOAL</span>
+            <h1>Pattern Classification Fundamentals</h1>
+            <p class="lede">In this codelab, we will understand how machines identify patterns, represent objects using
+              features, and learn to classify data using supervised, unsupervised, and semi-supervised learning.</p>
+          </header>
+          <div class="objective"><strong>By the end:</strong> Explain pattern analysis, classification, feature vectors,
+            discriminant functions, decision boundaries, and the difference between supervised, unsupervised, and
+            semi-supervised learning.</div>
+          <div class="flow">Real-world object<br>↓<br>Data / Image<br>↓<br>Feature extraction<br>↓<br>Feature
+            vector<br>↓<br>Pattern analysis<br>↓<br>Classification decision</div>
+          <div class="panel mint"><strong>Module 4.1</strong>
+            <p>This lesson builds the foundation for later topics such as PCA, LDA, ICA, K-Means, K-Medoids, and
+              Gaussian Mixture Models.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Pattern analysis">
+          <header class="step-header">
+            <span class="step-kicker">STEP 2 · CONCEPT</span>
+            <h1>What is Pattern Analysis?</h1>
+            <p class="lede">Pattern analysis means finding meaningful similarities, differences, and structures in data
+              so that a machine can make decisions.</p>
+          </header>
+          <h2>What is a pattern?</h2>
+          <p>A <strong>pattern</strong> is a measurable representation of an object or event.</p>
+          <div class="grid-2">
+            <div class="concept"><strong>Object</strong>
+              <p>A fruit, face, handwritten digit, pedestrian, vehicle, medical scan, or any other item we want to
+                analyze.</p>
+            </div>
+            <div class="concept"><strong>Features</strong>
+              <p>Measurable properties such as color, height, width, texture, shape, area, weight, or pixel intensity.
+              </p>
+            </div>
+          </div>
+          <h2>Example: Fruit recognition</h2>
+          <table class="comparison">
+            <tr>
+              <th>Fruit</th>
+              <th>Weight</th>
+              <th>Redness</th>
+              <th>Length</th>
+            </tr>
+            <tr>
+              <td>Apple</td>
+              <td>150 g</td>
+              <td>0.90</td>
+              <td>7 cm</td>
+            </tr>
+            <tr>
+              <td>Orange</td>
+              <td>180 g</td>
+              <td>0.40</td>
+              <td>8 cm</td>
+            </tr>
+            <tr>
+              <td>Banana</td>
+              <td>120 g</td>
+              <td>0.10</td>
+              <td>18 cm</td>
+            </tr>
+          </table>
+          <div class="panel yellow"><strong>Key idea</strong>
+            <p>The computer does not understand “apple” directly. It works with numerical features that describe the
+              apple.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Feature vectors">
+          <header class="step-header">
+            <span class="step-kicker">STEP 3 · REPRESENTATION</span>
+            <h1>Represent Objects as Feature Vectors</h1>
+            <p class="lede">Machine-learning algorithms usually work with numbers, so we represent each object using a
+              vector of features.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>X = [150, 0.90, 7]
+
+# 150  -> weight in grams
+# 0.90 -> redness score
+# 7    -> length in cm</code></pre>
+          </div>
+          <p>This is called a <strong>feature vector</strong>.</p>
+          <div class="flow">Apple<br>↓ extract measurable properties<br>[weight, redness, length]<br>↓<br>[150, 0.90, 7]
+          </div>
+          <div class="callout"><span class="label">REMEMBER</span>
+            <p>A feature vector is simply a list of numerical values used to describe one sample.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Classification">
+          <header class="step-header">
+            <span class="step-kicker">STEP 4 · CLASSIFY</span>
+            <h1>What is Classification?</h1>
+            <p class="lede">Classification assigns an input sample to one of several predefined categories.</p>
+          </header>
+          <div class="flow">Input image<br>↓<br>Feature extraction<br>↓<br>Classifier<br>↓<br>Cat / Dog / Bird</div>
+          <h2>Example</h2>
+          <p>Suppose we already know two possible classes:</p>
+          <div class="grid-2">
+            <div class="concept"><strong>Class 0</strong>
+              <p>Cat</p>
+            </div>
+            <div class="concept"><strong>Class 1</strong>
+              <p>Dog</p>
+            </div>
+          </div>
+          <p>The classifier receives a new input and decides which predefined class it belongs to.</p>
+          <div class="panel blue"><strong>Classification vs recognition</strong>
+            <p>Recognition identifies what an object is. Classification is the decision process that assigns it to a
+              known category.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Feature space">
+          <header class="step-header">
+            <span class="step-kicker">STEP 5 · VISUALIZE</span>
+            <h1>Understand Feature Space</h1>
+            <p class="lede">When we use two features, every sample can be visualized as a point on a 2D graph.</p>
+          </header>
+          <div class="flow">Feature 1 = Height<br>Feature 2 = Weight<br><br>Each person → one point in 2D feature space
+          </div>
+          <pre><code>Weight ↑
+
+80 |                    ●
+75 |                 ●
+70 |              ●
+65 |
+60 |       ○
+55 |    ○
+50 | ○
+   +----------------------------→ Height
+
+○ = Class A
+● = Class B</code></pre>
+          <p>The complete region containing all possible feature values is called the <strong>feature space</strong>.
+          </p>
+          <div class="panel mint"><strong>Why this matters</strong>
+            <p>Classification becomes the problem of deciding which region of the feature space a new point belongs to.
+            </p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Discriminant function">
+          <header class="step-header">
+            <span class="step-kicker">STEP 6 · DECISION</span>
+            <h1>Discriminant Function</h1>
+            <p class="lede">A discriminant function gives a score to each class. The class with the highest score is
+              selected.</p>
+          </header>
+          <h2>Two-class example</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>g_cat(x) = score for Cat
+g_dog(x) = score for Dog
+
+if g_dog(x) > g_cat(x):
+    prediction = "Dog"</code></pre>
+          </div>
+          <div class="grid-2">
+            <div class="concept"><strong>Cat score</strong>
+              <p>0.35</p>
+            </div>
+            <div class="concept"><strong>Dog score</strong>
+              <p>0.82</p>
+            </div>
+          </div>
+          <p>Since <code>0.82 &gt; 0.35</code>, the sample is classified as <strong>Dog</strong>.</p>
+          <h2>Linear discriminant function</h2>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>g(x) = wᵀx + b</code></pre>
+          </div>
+          <table class="comparison">
+            <tr>
+              <th>Symbol</th>
+              <th>Meaning</th>
+            </tr>
+            <tr>
+              <td><code>x</code></td>
+              <td>Feature vector of the input sample.</td>
+            </tr>
+            <tr>
+              <td><code>w</code></td>
+              <td>Weights that determine the importance of each feature.</td>
+            </tr>
+            <tr>
+              <td><code>b</code></td>
+              <td>Bias term that shifts the decision boundary.</td>
+            </tr>
+            <tr>
+              <td><code>g(x)</code></td>
+              <td>Discriminant score used for the decision.</td>
+            </tr>
+          </table>
+        </section>
+
+        <section class="step-view" data-title="Decision boundary">
+          <header class="step-header">
+            <span class="step-kicker">STEP 7 · SEPARATE</span>
+            <h1>Decision Boundary</h1>
+            <p class="lede">A decision boundary separates regions belonging to different classes.</p>
+          </header>
+          <pre><code>        DOGS
+
+      ● ● ●
+    ● ● ●
+
+----------------------  ← Decision Boundary
+
+   ○ ○ ○
+ ○ ○
+
+        CATS</code></pre>
+          <p>A new point above the boundary may be classified as Dog, while a point below it may be classified as Cat.
+          </p>
+          <div class="panel orange"><strong>Connection to discriminant functions</strong>
+            <p>The decision boundary is often the location where two class scores become equal.</p>
+          </div>
+          <div class="quiz" data-answer="1"
+            data-correct="Correct. The boundary separates regions assigned to different classes.">
+            <h3>What does a decision boundary do?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option">Stores the training data</button>
+              <button class="quiz-option">Separates classes in feature space</button>
+              <button class="quiz-option">Removes all features</button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Supervised learning">
+          <header class="step-header">
+            <span class="step-kicker">STEP 8 · LABELED DATA</span>
+            <h1>Supervised Learning</h1>
+            <p class="lede">In supervised learning, every training sample is provided together with its correct answer
+              or label.</p>
+          </header>
+          <table class="comparison">
+            <tr>
+              <th>Input</th>
+              <th>Label</th>
+            </tr>
+            <tr>
+              <td>Cat image</td>
+              <td>Cat</td>
+            </tr>
+            <tr>
+              <td>Dog image</td>
+              <td>Dog</td>
+            </tr>
+            <tr>
+              <td>Cat image</td>
+              <td>Cat</td>
+            </tr>
+            <tr>
+              <td>Dog image</td>
+              <td>Dog</td>
+            </tr>
+          </table>
+          <div class="flow">Labeled training data<br>↓<br>Learning algorithm<br>↓<br>Trained model<br>↓<br>New
+            sample<br>↓<br>Predicted class</div>
+          <h2>Common supervised tasks</h2>
+          <ul>
+            <li>Cat vs dog classification</li>
+            <li>Spam vs not spam</li>
+            <li>Pedestrian vs non-pedestrian</li>
+            <li>Normal vs abnormal medical image</li>
+          </ul>
+          <div class="panel mint"><strong>Keyword</strong>
+            <p>Supervised learning = <strong>labeled training data</strong>.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Small supervised example">
+          <header class="step-header">
+            <span class="step-kicker">STEP 9 · PRACTICAL</span>
+            <h1>A Tiny Supervised Classifier</h1>
+            <p class="lede">Use K-Nearest Neighbors only as a simple demonstration of how labeled samples can classify a
+              new point.</p>
+          </header>
+          <div class="code-wrap"><button class="copy-btn">Copy</button>
+            <pre><code>from sklearn.neighbors import KNeighborsClassifier
+
+# Two features for each sample
+X = [
+    [1, 1],
+    [1, 2],
+    [2, 1],
+    [8, 8],
+    [8, 9],
+    [9, 8]
+]
+
+# Correct labels
+y = [
+    "Class A",
+    "Class A",
+    "Class A",
+    "Class B",
+    "Class B",
+    "Class B"
+]
+
+model = KNeighborsClassifier(n_neighbors=3)
+model.fit(X, y)
+
+prediction = model.predict([[2, 2]])
+print(prediction)</code></pre>
+          </div>
+          <div class="flow">X = training features<br>y = known labels<br>↓ model.fit(X, y)<br>model learns from labeled
+            examples<br>↓ model.predict([[2, 2]])<br>↓ predicted class</div>
+          <div class="callout"><span class="label">NOTE</span>
+            <p>KNN itself will be discussed later under non-parametric methods. Here, it is only being used to
+              demonstrate supervised learning.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Unsupervised learning">
+          <header class="step-header">
+            <span class="step-kicker">STEP 10 · NO LABELS</span>
+            <h1>Unsupervised Learning</h1>
+            <p class="lede">In unsupervised learning, the algorithm receives data without correct labels and tries to
+              discover structure by itself.</p>
+          </header>
+          <div class="flow">Unlabeled data<br>↓<br>Learning algorithm<br>↓<br>Discover similarities<br>↓<br>Groups /
+            clusters / structure</div>
+          <h2>Example</h2>
+          <pre><code>Input points:
+
+● ● ●
+
+            ● ●
+          ●
+
+     ● ●
+
+No labels are provided.
+
+The algorithm may discover:
+Cluster 1
+Cluster 2
+Cluster 3</code></pre>
+          <div class="panel yellow"><strong>Important distinction</strong>
+            <p>Classification usually uses known class labels. Clustering discovers groups when labels are not given.
+            </p>
+          </div>
+          <div class="quiz" data-answer="0"
+            data-correct="Correct. Unsupervised learning works with unlabeled data and discovers structure.">
+            <h3>Which type of data is used in unsupervised learning?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option">Unlabeled data</button>
+              <button class="quiz-option">Only labeled data</button>
+              <button class="quiz-option">No data at all</button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Semi-supervised learning">
+          <header class="step-header">
+            <span class="step-kicker">STEP 11 · MIX BOTH</span>
+            <h1>Semi-Supervised Learning</h1>
+            <p class="lede">Semi-supervised learning combines a small amount of labeled data with a much larger amount
+              of unlabeled data.</p>
+          </header>
+          <div class="flow">Small labeled dataset ─┐<br> ├→ Semi-supervised learning → Model<br>Large unlabeled dataset
+            ┘</div>
+          <h2>Why is it useful?</h2>
+          <p>Collecting data can be easy, but labeling it can be expensive and time-consuming.</p>
+          <div class="grid-2">
+            <div class="concept"><strong>1,000 images</strong>
+              <p>Manually labeled by experts.</p>
+            </div>
+            <div class="concept"><strong>50,000 images</strong>
+              <p>Available but unlabeled.</p>
+            </div>
+          </div>
+          <p>A semi-supervised approach tries to learn from both.</p>
+          <div class="panel blue"><strong>Computer vision example</strong>
+            <p>A hospital may have thousands of scans, but only a smaller subset has been carefully labeled by doctors.
+            </p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Compare learning types">
+          <header class="step-header">
+            <span class="step-kicker">STEP 12 · COMPARE</span>
+            <h1>Supervised vs Unsupervised vs Semi-Supervised</h1>
+            <p class="lede">These three terms mainly differ in how much labeled information is available during
+              training.</p>
+          </header>
+          <table class="comparison">
+            <tr>
+              <th>Type</th>
+              <th>Labels</th>
+              <th>Main Goal</th>
+              <th>Example</th>
+            </tr>
+            <tr>
+              <td>Supervised</td>
+              <td>Yes</td>
+              <td>Predict known classes</td>
+              <td>Cat vs Dog</td>
+            </tr>
+            <tr>
+              <td>Unsupervised</td>
+              <td>No</td>
+              <td>Discover hidden structure</td>
+              <td>Grouping similar pixels</td>
+            </tr>
+            <tr>
+              <td>Semi-Supervised</td>
+              <td>Some</td>
+              <td>Learn from labeled + unlabeled data</td>
+              <td>Medical image classification</td>
+            </tr>
+          </table>
+          <div class="reveal">
+            <summary>Easy memory trick</summary>
+            <div><strong>Supervised:</strong> teacher gives answers.<br><strong>Unsupervised:</strong> no teacher,
+              discover patterns.<br><strong>Semi-supervised:</strong> teacher gives only some answers.</div>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Classification pipeline">
+          <header class="step-header">
+            <span class="step-kicker">STEP 13 · CONNECT IT ALL</span>
+            <h1>Pattern Classification Pipeline</h1>
+            <p class="lede">Now connect all the concepts into one end-to-end flow.</p>
+          </header>
+          <div class="flow">1. Capture data / image<br>↓<br>2. Preprocess data<br>↓<br>3. Extract useful
+            features<br>↓<br>4. Build a feature vector<br>↓<br>5. Feed it to a classifier<br>↓<br>6. Calculate class
+            scores / discriminant functions<br>↓<br>7. Compare scores<br>↓<br>8. Cross a decision boundary<br>↓<br>9.
+            Output predicted class</div>
+          <div class="panel mint"><strong>Example</strong>
+            <p>An image of a pedestrian can be converted into features, passed to a trained model, scored against
+              possible classes, and finally classified as “Pedestrian” or “Not Pedestrian”.</p>
+          </div>
+        </section>
+
+        <section class="step-view" data-title="Revision">
+          <header class="step-header">
+            <span class="step-kicker">STEP 14 · REVISION</span>
+            <h1>Pattern Classification Revision</h1>
+            <p class="lede">Review the core definitions before moving to dimensionality reduction.</p>
+          </header>
+
+          <div class="reveal">
+            <summary>What is pattern analysis?</summary>
+            <div>The process of identifying meaningful structures, similarities, and differences in data so that a
+              machine can make decisions.</div>
+          </div>
+          <div class="reveal">
+            <summary>What is a feature?</summary>
+            <div>A measurable property used to describe an object, such as color, texture, height, width, shape, or
+              intensity.</div>
+          </div>
+          <div class="reveal">
+            <summary>What is a feature vector?</summary>
+            <div>A numerical list containing the features of one sample.</div>
+          </div>
+          <div class="reveal">
+            <summary>What is classification?</summary>
+            <div>The process of assigning a sample to one of several predefined classes.</div>
+          </div>
+          <div class="reveal">
+            <summary>What is a discriminant function?</summary>
+            <div>A function that produces a score for a class. The score is used to decide which class the sample
+              belongs to.</div>
+          </div>
+          <div class="reveal">
+            <summary>What is a decision boundary?</summary>
+            <div>A boundary in feature space that separates regions assigned to different classes.</div>
+          </div>
+          <div class="reveal">
+            <summary>What is supervised learning?</summary>
+            <div>Learning from labeled training examples.</div>
+          </div>
+          <div class="reveal">
+            <summary>What is unsupervised learning?</summary>
+            <div>Learning structure or groups from unlabeled data.</div>
+          </div>
+          <div class="reveal">
+            <summary>What is semi-supervised learning?</summary>
+            <div>Learning from a mixture of labeled and unlabeled data.</div>
+          </div>
+
+          <h2>Completion checklist</h2>
+          <ul class="checklist">
+            <li>I can explain pattern analysis.</li>
+            <li>I know what a feature and feature vector are.</li>
+            <li>I can explain classification.</li>
+            <li>I understand feature space.</li>
+            <li>I understand a discriminant function.</li>
+            <li>I understand a decision boundary.</li>
+            <li>I can distinguish supervised, unsupervised, and semi-supervised learning.</li>
+            <li>I understand how these ideas connect in a classification pipeline.</li>
+          </ul>
+
+          <div class="challenge">
+            <h3>Practice</h3>
+            <ol>
+              <li>Choose any real-world classification problem and list at least four useful features.</li>
+              <li>Explain whether your problem should use supervised, unsupervised, or semi-supervised learning.</li>
+              <li>Draw a simple 2D feature-space diagram containing two classes and a decision boundary.</li>
+              <li>For a three-class problem, write three imaginary discriminant scores and decide the predicted class.
+              </li>
+            </ol>
+          </div>
+
+          <div class="finish">
+            <h2>Module 4.1 complete! 🎉</h2>
+            <p>You now have the foundation required for the next codelab: dimensionality reduction using PCA, LDA, and
+              ICA.</p>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+  <script>
+    (() => {
+      const steps = [...document.querySelectorAll('.step-view')];
+      const titles = steps.map(step => step.dataset.title);
+      const nav = document.getElementById('stepNav');
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.getElementById('menuBtn');
+      const content = document.getElementById('content');
+      const completed = new Set();
+      let current = 0;
+      nav.innerHTML = titles.map((title, index) => `<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+      const getHashStep = () => { const match = location.hash.match(/^#step-(\d+)$/); const value = match ? Number(match[1]) - 1 : 0; return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0 };
+      function render(updateHash = true) {
+        current = Math.max(0, Math.min(current, steps.length - 1));
+        steps.forEach((step, index) => { const active = index === current; step.classList.toggle('active', active); step.setAttribute('aria-hidden', String(!active)) });
+        document.querySelectorAll('.step-link').forEach((button, index) => { button.classList.toggle('active', index === current); button.setAttribute('aria-current', index === current ? 'step' : 'false'); button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '' });
+        const percent = Math.round(((current + 1) / steps.length) * 100);
+        document.getElementById('progressBar').style.width = `${percent}%`;
+        document.getElementById('progressText').textContent = `${percent}%`;
+        document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+        document.getElementById('mobileTitle').textContent = titles[current];
+        document.getElementById('prevBtn').disabled = current === 0;
+        document.getElementById('nextBtn').disabled = current === steps.length - 1;
+        document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+        if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+        window.scrollTo({ top: 0, behavior: 'auto' }); sidebar.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false');
+      }
+      function goTo(index) { if (index < 0 || index >= steps.length) return; completed.add(current); current = index; render(); }
+      const navRow = document.createElement('div'); navRow.className = 'nav-row'; navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>'; content.appendChild(navRow);
+      document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+      document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+      nav.addEventListener('click', event => { const button = event.target.closest('.step-link'); if (button) goTo(Number(button.dataset.step)) });
+      menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)) });
+      document.addEventListener('click', async event => { const copy = event.target.closest('.copy-btn'); if (copy) { const code = copy.parentElement.querySelector('pre code')?.textContent ?? ''; try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!' } catch { copy.textContent = 'Select & copy' } setTimeout(() => copy.textContent = 'Copy', 1200); return; } const option = event.target.closest('.quiz-option'); if (option) { const quiz = option.closest('.quiz'); if (quiz.dataset.answered) return; const options = [...quiz.querySelectorAll('.quiz-option')]; const choice = options.indexOf(option); const answer = Number(quiz.dataset.answer); quiz.dataset.answered = 'true'; options.forEach(button => button.disabled = true); option.classList.add(choice === answer ? 'correct' : 'wrong'); if (choice !== answer) options[answer].classList.add('correct'); const feedback = quiz.querySelector('.quiz-feedback'); feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`; feedback.classList.add('show'); } });
+      window.addEventListener('popstate', () => { current = getHashStep(); render(false) }); window.addEventListener('hashchange', () => { current = getHashStep(); render(false) });
+      document.addEventListener('keydown', event => { if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return; if (event.key === 'ArrowRight') goTo(current + 1); if (event.key === 'ArrowLeft') goTo(current - 1) });
+      current = getHashStep(); render(false);
+    })();
+  </script>
+</body>
+
+</html>
