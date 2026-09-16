@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dimensionality Reduction — Module 4.2 Codelab</title>
+<meta name="description" content="Interactive beginner codelab for the curse of dimensionality, feature reduction, PCA, LDA, ICA, and their comparison in computer vision.">
+<meta name="theme-color" content="#2856d8">
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}
+    .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}.screen-stack{display:grid;gap:12px;margin:22px 0}.screen-card{padding:16px;background:#fff;border:3px solid var(--ink);box-shadow:var(--shadow-sm);font-weight:800}.screen-card.active{background:var(--mint)}.checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.references a{color:var(--blue-dark);font-weight:700}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}}
+  </style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+  <div class="brand">
+    <div class="eyebrow">Computer Vision · Module 4</div>
+    <h2>Dimensionality Reduction</h2>
+    <p>Codelab 4.2 · PCA, LDA & ICA</p>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+    <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+  <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+</aside>
+
+<div class="mobile-bar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button>
+  <div class="mobile-title" id="mobileTitle">Dimensionality Reduction</div>
+</div>
+
+<main>
+<div class="content" id="content">
+
+<section class="step-view" data-title="What we will learn">
+  <header class="step-header">
+    <span class="step-kicker">STEP 1 · GOAL</span>
+    <h1>Dimensionality Reduction</h1>
+    <p class="lede">Images can contain thousands or millions of numerical features. In this codelab, we will learn why too many features can become a problem and how PCA, LDA, and ICA create smaller, more useful representations.</p>
+  </header>
+  <div class="objective"><strong>By the end:</strong> Explain the curse of dimensionality, distinguish feature selection from feature extraction, understand the intuition and workflow of PCA, LDA, and ICA, and choose the correct technique for a given problem.</div>
+  <div class="flow">Image / Data<br>↓<br>Many features<br>↓<br>High-dimensional feature space<br>↓<br>Dimensionality reduction<br>↓<br>Smaller useful representation<br>↓<br>Faster analysis / visualization / classification</div>
+  <div class="panel mint"><strong>Connection to Module 4.1</strong><p>Previously, we represented objects using feature vectors. Now we ask an important question: <strong>what happens when that feature vector becomes extremely large?</strong></p></div>
+</section>
+
+<section class="step-view" data-title="Dimensions and features">
+  <header class="step-header">
+    <span class="step-kicker">STEP 2 · FOUNDATION</span>
+    <h1>What Does “Dimension” Mean?</h1>
+    <p class="lede">In machine learning, each feature usually represents one dimension of the feature space.</p>
+  </header>
+  <h2>A tiny image example</h2>
+  <p>Consider a grayscale image of size <code>3 × 3</code>:</p>
+  <pre><code>10  12  11
+50  52  51
+90  91  92</code></pre>
+  <p>If we flatten it into a feature vector:</p>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>X = [10, 12, 11, 50, 52, 51, 90, 91, 92]</code></pre></div>
+  <p>There are <strong>9 values</strong>, therefore this simple representation has <strong>9 dimensions</strong>.</p>
+  <div class="grid-2">
+    <div class="concept"><strong>100 × 100 grayscale image</strong><p>10,000 pixel features → 10,000 dimensions.</p></div>
+    <div class="concept"><strong>1920 × 1080 RGB image</strong><p>More than 6 million channel values if every pixel channel is used directly.</p></div>
+  </div>
+  <div class="panel yellow"><strong>Key idea</strong><p>More features means a higher-dimensional feature space.</p></div>
+</section>
+
+<section class="step-view" data-title="Curse of dimensionality">
+  <header class="step-header">
+    <span class="step-kicker">STEP 3 · PROBLEM</span>
+    <h1>Curse of Dimensionality</h1>
+    <p class="lede">As the number of dimensions increases, data becomes harder to represent, learn from, compare, and visualize.</p>
+  </header>
+  <h2>Why is it called a “curse”?</h2>
+  <p>Imagine dividing every dimension into only 10 possible regions.</p>
+  <table class="comparison">
+    <tr><th>Dimensions</th><th>Possible regions</th></tr>
+    <tr><td>1D</td><td>10</td></tr>
+    <tr><td>2D</td><td>10² = 100</td></tr>
+    <tr><td>3D</td><td>10³ = 1,000</td></tr>
+    <tr><td>10D</td><td>10¹⁰ = 10,000,000,000</td></tr>
+  </table>
+  <div class="panel orange"><strong>Result</strong><p>The space grows extremely quickly, but the number of training samples usually does not. The data therefore becomes <strong>sparse</strong>.</p></div>
+  <h2>Main problems</h2>
+  <div class="grid-2">
+    <div class="concept"><strong>Sparse data</strong><p>Samples occupy only a tiny portion of the huge feature space.</p></div>
+    <div class="concept"><strong>More computation</strong><p>More values must be stored, processed, compared, and learned.</p></div>
+    <div class="concept"><strong>Overfitting</strong><p>A model can learn accidental patterns when the number of features is large compared with the number of samples.</p></div>
+    <div class="concept"><strong>Distance problems</strong><p>In very high dimensions, distances can become less useful for distinguishing samples.</p></div>
+  </div>
+  <div class="quiz" data-answer="2" data-correct="Correct. High-dimensional spaces become very large and sparse, so much more data is needed to represent them well.">
+    <h3>What is one major effect of increasing dimensionality?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">Every feature automatically becomes useful</button>
+      <button class="quiz-option">The dataset becomes perfectly balanced</button>
+      <button class="quiz-option">The feature space grows rapidly and becomes sparse</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="Feature reduction">
+  <header class="step-header">
+    <span class="step-kicker">STEP 4 · SOLUTION</span>
+    <h1>Feature Reduction</h1>
+    <p class="lede">Feature reduction means representing the data using fewer features while trying to preserve the information that matters.</p>
+  </header>
+  <div class="flow">Original feature vector<br>[x₁, x₂, x₃, x₄, x₅, ... x₁₀₀₀₀]<br>↓ feature reduction<br>[z₁, z₂, z₃, ... z₁₀₀]</div>
+  <h2>Why can features be reduced?</h2>
+  <p>Many features may be redundant, correlated, noisy, or unimportant.</p>
+  <div class="panel blue"><strong>Simple example</strong><p>If a dataset stores a person's height in centimeters, meters, and millimeters, those three columns mostly represent the same underlying information.</p></div>
+  <h2>Two common approaches</h2>
+  <div class="grid-2">
+    <div class="concept"><strong>Feature Selection</strong><p>Keep some of the original features and remove others.</p><pre><code>x1 x2 x3 x4 x5
+↓
+x1    x3    x5</code></pre></div>
+    <div class="concept"><strong>Feature Extraction</strong><p>Create new features by transforming or combining the original features.</p><pre><code>x1 x2 x3 x4 x5
+↓ transform
+z1 z2</code></pre></div>
+  </div>
+  <div class="callout"><span class="label">REMEMBER</span><p><strong>Selection chooses old features.</strong> <strong>Extraction creates new features.</strong> PCA, LDA, and ICA are mainly feature-extraction techniques.</p></div>
+</section>
+
+<section class="step-view" data-title="PCA intuition">
+  <header class="step-header">
+    <span class="step-kicker">STEP 5 · PCA</span>
+    <h1>Principal Component Analysis</h1>
+    <p class="lede">PCA finds new directions in the data where the samples vary the most.</p>
+  </header>
+  <div class="panel yellow"><strong>PCA asks:</strong><p>“Which directions contain the largest amount of variation in my data?”</p></div>
+  <h2>Imagine height and weight</h2>
+  <pre><code>Weight ↑
+
+80 |                 ●
+75 |              ●
+70 |           ●
+65 |        ●
+60 |     ●
+   +--------------------------→ Height</code></pre>
+  <p>Height and weight are correlated. Most of the variation lies along one diagonal direction.</p>
+  <div class="flow">Original axes: Height + Weight<br>↓ PCA finds a new direction<br>PC1 = direction of maximum variance<br>↓<br>Project points onto PC1<br>↓<br>2 dimensions → possibly 1 useful dimension</div>
+  <div class="panel mint"><strong>Principal component</strong><p>A principal component is a new feature formed as a weighted combination of the original features.</p></div>
+</section>
+
+<section class="step-view" data-title="How PCA works">
+  <header class="step-header">
+    <span class="step-kicker">STEP 6 · PCA WORKFLOW</span>
+    <h1>How PCA Works</h1>
+    <p class="lede">PCA centers the data, measures how features vary together, finds important directions, and projects the data onto those directions.</p>
+  </header>
+  <h2>Step 1 — Center the data</h2>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>X_centered = X - mean(X)</code></pre></div>
+  <p>The mean is moved to approximately zero so PCA focuses on variation around the center.</p>
+  <h2>Step 2 — Compute covariance</h2>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>covariance_matrix = covariance(X_centered)</code></pre></div>
+  <p>Covariance tells us how features change together.</p>
+  <h2>Step 3 — Find eigenvectors and eigenvalues</h2>
+  <table class="comparison">
+    <tr><th>Term</th><th>Intuition</th></tr>
+    <tr><td>Eigenvector</td><td>Which direction?</td></tr>
+    <tr><td>Eigenvalue</td><td>How much variance exists in that direction?</td></tr>
+  </table>
+  <h2>Step 4 — Sort and keep the strongest components</h2>
+  <pre><code>PC1 → largest eigenvalue
+PC2 → second largest eigenvalue
+PC3 → third largest eigenvalue
+...</code></pre>
+  <h2>Step 5 — Project the original data</h2>
+  <div class="flow">High-dimensional X<br>↓ choose top principal components<br>Projection<br>↓<br>Lower-dimensional Z</div>
+</section>
+
+<section class="step-view" data-title="PCA explained variance">
+  <header class="step-header">
+    <span class="step-kicker">STEP 7 · PCA INFORMATION</span>
+    <h1>Explained Variance</h1>
+    <p class="lede">Explained variance tells us how much of the dataset's variation is captured by each principal component.</p>
+  </header>
+  <p>If the eigenvalues correspond to:</p>
+  <table class="comparison">
+    <tr><th>Component</th><th>Explained variance</th></tr>
+    <tr><td>PC1</td><td>70%</td></tr>
+    <tr><td>PC2</td><td>20%</td></tr>
+    <tr><td>PC3</td><td>7%</td></tr>
+    <tr><td>PC4</td><td>3%</td></tr>
+  </table>
+  <p>Then the first two components preserve:</p>
+  <div class="panel mint"><strong>PC1 + PC2 = 90%</strong><p>We can reduce 4 dimensions to 2 dimensions while keeping about 90% of the variance.</p></div>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>explained_variance_ratio = eigenvalue_i / sum(all_eigenvalues)</code></pre></div>
+  <div class="quiz" data-answer="1" data-correct="Correct. PCA chooses directions that capture the greatest variance in the data.">
+    <h3>What does PCA try to preserve?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">Class labels</button>
+      <button class="quiz-option">Maximum variance</button>
+      <button class="quiz-option">Only the smallest values</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="PCA practical">
+  <header class="step-header">
+    <span class="step-kicker">STEP 8 · PRACTICAL</span>
+    <h1>PCA with Python</h1>
+    <p class="lede">Use scikit-learn to reduce a simple four-feature dataset to two principal components.</p>
+  </header>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import numpy as np
+from sklearn.decomposition import PCA
+
+X = np.array([
+    [2.5, 2.4, 1.2, 0.8],
+    [0.5, 0.7, 0.3, 0.2],
+    [2.2, 2.9, 1.1, 0.9],
+    [1.9, 2.2, 0.9, 0.7],
+    [3.1, 3.0, 1.5, 1.0],
+    [2.3, 2.7, 1.0, 0.8]
+])
+
+pca = PCA(n_components=2)
+X_reduced = pca.fit_transform(X)
+
+print("Original shape:", X.shape)
+print("Reduced shape:", X_reduced.shape)
+print("Explained variance:", pca.explained_variance_ratio_)</code></pre></div>
+  <div class="flow">6 samples × 4 features<br>↓ PCA(n_components=2)<br>6 samples × 2 principal components</div>
+  <h2>Important methods</h2>
+  <table class="comparison">
+    <tr><th>Code</th><th>Meaning</th></tr>
+    <tr><td><code>PCA(n_components=2)</code></td><td>Keep two principal components.</td></tr>
+    <tr><td><code>fit_transform(X)</code></td><td>Learn the PCA directions and transform the data.</td></tr>
+    <tr><td><code>explained_variance_ratio_</code></td><td>Shows how much variance each component preserves.</td></tr>
+  </table>
+</section>
+
+<section class="step-view" data-title="PCA in computer vision">
+  <header class="step-header">
+    <span class="step-kicker">STEP 9 · COMPUTER VISION</span>
+    <h1>PCA for Images and Eigenfaces</h1>
+    <p class="lede">An image can be flattened into a long vector, and PCA can compress that vector into a much smaller set of components.</p>
+  </header>
+  <div class="flow">100 × 100 face image<br>↓ flatten<br>10,000 pixel features<br>↓ PCA<br>100 principal components<br>↓<br>Compact face representation</div>
+  <h2>Eigenfaces</h2>
+  <p>When PCA is applied to a collection of face images, the principal directions can be visualized as face-like patterns often called <strong>eigenfaces</strong>.</p>
+  <div class="panel blue"><strong>Uses</strong><p>Historically, eigenfaces were used for face representation and recognition. PCA can also be useful for image compression, visualization, noise reduction, and preprocessing.</p></div>
+  <div class="callout"><span class="label">LIMITATION</span><p>PCA does <strong>not</strong> use class labels. It only cares about variance. The direction with maximum variance is not always the direction that best separates classes.</p></div>
+</section>
+
+<section class="step-view" data-title="LDA intuition">
+  <header class="step-header">
+    <span class="step-kicker">STEP 10 · LDA</span>
+    <h1>Linear Discriminant Analysis</h1>
+    <p class="lede">LDA finds directions that make different classes easier to separate.</p>
+  </header>
+  <div class="panel yellow"><strong>LDA asks:</strong><p>“Which direction separates my known classes the best?”</p></div>
+  <p>Suppose the data has two labeled classes:</p>
+  <pre><code>Class A: ● ● ● ●
+
+                         ○ ○ ○ ○ : Class B</code></pre>
+  <p>LDA looks for a projection where:</p>
+  <pre><code>● ● ● ●                  ○ ○ ○ ○
+
+compact Class A      compact Class B
+        ← large separation →</code></pre>
+  <div class="grid-2">
+    <div class="concept"><strong>Within-class scatter</strong><p>How spread out the samples are inside the same class. LDA tries to make this smaller.</p></div>
+    <div class="concept"><strong>Between-class scatter</strong><p>How far the class centers are from each other. LDA tries to make this larger.</p></div>
+  </div>
+  <div class="panel mint"><strong>Core idea</strong><p>LDA = <strong>maximize between-class separation</strong> and <strong>minimize within-class spread</strong>.</p></div>
+</section>
+
+<section class="step-view" data-title="How LDA works">
+  <header class="step-header">
+    <span class="step-kicker">STEP 11 · LDA WORKFLOW</span>
+    <h1>How LDA Works</h1>
+    <p class="lede">Unlike PCA, LDA needs class labels because its objective explicitly depends on class separation.</p>
+  </header>
+  <div class="flow">Features X + Labels y<br>↓<br>Calculate class means<br>↓<br>Measure within-class scatter Sᵂ<br>↓<br>Measure between-class scatter Sᵇ<br>↓<br>Find directions maximizing separation<br>↓<br>Project data onto discriminant components</div>
+  <h2>Objective intuition</h2>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>Large distance between class centers
+------------------------------------
+Small spread inside each class</code></pre></div>
+  <h2>Important limitation</h2>
+  <div class="panel orange"><strong>Maximum components = C − 1</strong><p>If there are <code>C</code> classes, classical LDA can produce at most <code>C - 1</code> discriminant components.</p></div>
+  <table class="comparison">
+    <tr><th>Classes</th><th>Maximum LDA components</th></tr>
+    <tr><td>2</td><td>1</td></tr>
+    <tr><td>3</td><td>2</td></tr>
+    <tr><td>10</td><td>9</td></tr>
+  </table>
+</section>
+
+<section class="step-view" data-title="LDA practical">
+  <header class="step-header">
+    <span class="step-kicker">STEP 12 · PRACTICAL</span>
+    <h1>LDA with Python</h1>
+    <p class="lede">Use the Iris dataset to reduce four input features to two discriminant components using known class labels.</p>
+  </header>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>from sklearn.datasets import load_iris
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+
+iris = load_iris()
+X = iris.data
+y = iris.target
+
+lda = LinearDiscriminantAnalysis(n_components=2)
+X_reduced = lda.fit_transform(X, y)
+
+print("Original shape:", X.shape)
+print("Reduced shape:", X_reduced.shape)</code></pre></div>
+  <div class="callout"><span class="label">NOTICE</span><p><code>fit_transform(X, y)</code> receives both the features <code>X</code> and labels <code>y</code>. This is the key difference from PCA.</p></div>
+  <div class="quiz" data-answer="0" data-correct="Correct. LDA is supervised because it uses known class labels while finding the projection.">
+    <h3>Why is LDA supervised?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">Because it uses class labels</button>
+      <button class="quiz-option">Because it always uses images</button>
+      <button class="quiz-option">Because it never transforms data</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="ICA intuition">
+  <header class="step-header">
+    <span class="step-kicker">STEP 13 · ICA</span>
+    <h1>Independent Component Analysis</h1>
+    <p class="lede">ICA tries to separate observed data into statistically independent underlying source signals.</p>
+  </header>
+  <h2>The cocktail-party problem</h2>
+  <p>Imagine two people speaking at the same time while two microphones record mixtures of both voices.</p>
+  <pre><code>Person A ─┐               ┌→ Microphone 1 = mixture
+          ├→ room mixing ┤
+Person B ─┘               └→ Microphone 2 = mixture</code></pre>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>x1 = 0.7 * voice_A + 0.3 * voice_B
+x2 = 0.4 * voice_A + 0.6 * voice_B</code></pre></div>
+  <p>ICA tries to recover the original independent sources:</p>
+  <div class="flow">Observed mixtures X<br>↓ ICA<br>Estimated independent components<br>↓<br>Source A + Source B</div>
+  <div class="panel mint"><strong>ICA keyword</strong><p><strong>Independence.</strong> ICA searches for components that are as statistically independent as possible.</p></div>
+</section>
+
+<section class="step-view" data-title="How ICA works">
+  <header class="step-header">
+    <span class="step-kicker">STEP 14 · ICA WORKFLOW</span>
+    <h1>ICA Model and Practical</h1>
+    <p class="lede">ICA assumes that the observed signals are mixtures of hidden independent sources.</p>
+  </header>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>X = A · S</code></pre></div>
+  <table class="comparison">
+    <tr><th>Symbol</th><th>Meaning</th></tr>
+    <tr><td><code>X</code></td><td>Observed mixed signals.</td></tr>
+    <tr><td><code>S</code></td><td>Unknown independent source signals.</td></tr>
+    <tr><td><code>A</code></td><td>Unknown mixing matrix.</td></tr>
+  </table>
+  <p>ICA tries to estimate an unmixing matrix <code>W</code> so that:</p>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>S_estimated = W · X</code></pre></div>
+  <h2>Python example</h2>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import numpy as np
+from sklearn.decomposition import FastICA
+
+X = np.array([
+    [1.0, 1.5],
+    [2.0, 1.0],
+    [3.0, 2.5],
+    [4.0, 2.0],
+    [5.0, 3.5]
+])
+
+ica = FastICA(n_components=2, random_state=0)
+S = ica.fit_transform(X)
+
+print(S)</code></pre></div>
+  <div class="callout"><span class="label">IMPORTANT</span><p>PCA creates <strong>uncorrelated</strong> components. ICA aims for the stronger condition of <strong>statistical independence</strong>.</p></div>
+</section>
+
+<section class="step-view" data-title="PCA vs LDA vs ICA">
+  <header class="step-header">
+    <span class="step-kicker">STEP 15 · COMPARE</span>
+    <h1>PCA vs LDA vs ICA</h1>
+    <p class="lede">All three create new representations, but they optimize very different objectives.</p>
+  </header>
+  <table class="comparison">
+    <tr><th>Property</th><th>PCA</th><th>LDA</th><th>ICA</th></tr>
+    <tr><td>Full name</td><td>Principal Component Analysis</td><td>Linear Discriminant Analysis</td><td>Independent Component Analysis</td></tr>
+    <tr><td>Main goal</td><td>Maximum variance</td><td>Maximum class separation</td><td>Independent components</td></tr>
+    <tr><td>Uses labels?</td><td>No</td><td>Yes</td><td>No</td></tr>
+    <tr><td>Learning style</td><td>Unsupervised</td><td>Supervised</td><td>Unsupervised</td></tr>
+    <tr><td>Component property</td><td>Orthogonal / uncorrelated directions</td><td>Discriminative directions</td><td>Statistically independent sources</td></tr>
+    <tr><td>Typical use</td><td>Compression, visualization, preprocessing</td><td>Classification preprocessing</td><td>Source separation</td></tr>
+  </table>
+  <div class="grid-2">
+    <div class="concept"><strong>PCA → Spread</strong><p>Find the directions where the data varies most.</p></div>
+    <div class="concept"><strong>LDA → Separate</strong><p>Find the directions where labeled classes separate best.</p></div>
+    <div class="concept"><strong>ICA → Sources</strong><p>Find independent hidden factors or signals.</p></div>
+  </div>
+  <div class="reveal"><summary>Easy memory trick</summary><div><strong>PCA = Variance</strong><br><strong>LDA = Labels</strong><br><strong>ICA = Independence</strong></div></div>
+</section>
+
+<section class="step-view" data-title="One problem, three methods">
+  <header class="step-header">
+    <span class="step-kicker">STEP 16 · APPLY</span>
+    <h1>One Face Dataset, Three Different Goals</h1>
+    <p class="lede">The best way to understand the difference is to imagine applying all three techniques to the same face dataset.</p>
+  </header>
+  <h2>Dataset</h2>
+  <div class="flow">100 × 100 face image<br>↓<br>10,000 pixel features<br>↓<br>Need a smaller representation</div>
+  <div class="grid-2">
+    <div class="concept"><strong>PCA</strong><p>Finds directions that explain the largest variations across all face images. It does not care who each person is.</p></div>
+    <div class="concept"><strong>LDA</strong><p>Uses identity labels and searches for directions that best separate Person A, Person B, Person C, and so on.</p></div>
+    <div class="concept"><strong>ICA</strong><p>Searches for statistically independent underlying patterns or source-like factors in the observations.</p></div>
+  </div>
+  <div class="quiz" data-answer="1" data-correct="Correct. If class labels are available and the goal is class separation, LDA directly optimizes that objective.">
+    <h3>You have labeled images of three people and want a projection that separates their identities. Which method directly targets that goal?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">PCA</button>
+      <button class="quiz-option">LDA</button>
+      <button class="quiz-option">ICA</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<section class="step-view" data-title="Revision">
+  <header class="step-header">
+    <span class="step-kicker">STEP 17 · REVISION</span>
+    <h1>Dimensionality Reduction Revision</h1>
+    <p class="lede">Review the core ideas before moving to non-parametric methods and clustering.</p>
+  </header>
+  <div class="reveal"><summary>What is dimensionality reduction?</summary><div>Representing data with fewer features or dimensions while trying to preserve useful information.</div></div>
+  <div class="reveal"><summary>What is the curse of dimensionality?</summary><div>Problems that arise as dimensions increase, including sparse data, higher computation, overfitting risk, and less meaningful distance relationships.</div></div>
+  <div class="reveal"><summary>Feature selection vs feature extraction?</summary><div>Feature selection keeps a subset of existing features. Feature extraction creates new transformed features from the originals.</div></div>
+  <div class="reveal"><summary>What does PCA optimize?</summary><div>PCA finds directions containing maximum variance.</div></div>
+  <div class="reveal"><summary>What does an eigenvector represent in PCA?</summary><div>A principal direction in feature space.</div></div>
+  <div class="reveal"><summary>What does an eigenvalue represent in PCA?</summary><div>The amount of variance captured along the corresponding eigenvector.</div></div>
+  <div class="reveal"><summary>What does LDA optimize?</summary><div>Large separation between classes and small spread within each class.</div></div>
+  <div class="reveal"><summary>Why does LDA need labels?</summary><div>Because it must know which samples belong to each class to calculate within-class and between-class scatter.</div></div>
+  <div class="reveal"><summary>What does ICA optimize?</summary><div>ICA searches for statistically independent components or source signals.</div></div>
+  <div class="reveal"><summary>PCA vs ICA?</summary><div>PCA finds uncorrelated directions with high variance. ICA tries to recover statistically independent components.</div></div>
+
+  <h2>Completion checklist</h2>
+  <ul class="checklist">
+    <li>I understand what a dimension means in feature space.</li>
+    <li>I can explain the curse of dimensionality.</li>
+    <li>I can distinguish feature selection and feature extraction.</li>
+    <li>I can explain PCA using variance, eigenvectors, and eigenvalues.</li>
+    <li>I understand explained variance.</li>
+    <li>I can explain why LDA is supervised.</li>
+    <li>I know the C − 1 component limit of LDA.</li>
+    <li>I understand ICA and blind source separation.</li>
+    <li>I can compare PCA, LDA, and ICA.</li>
+  </ul>
+
+  <div class="challenge">
+    <h3>Practice</h3>
+    <ol>
+      <li>A grayscale image is 200 × 200 pixels. If every pixel is one feature, how many dimensions does it have?</li>
+      <li>Give one example of redundant features in a real-world dataset.</li>
+      <li>Explain feature selection and feature extraction using your own example.</li>
+      <li>If PCA components explain 60%, 25%, 10%, and 5% variance, how much is preserved by the first two components?</li>
+      <li>A dataset has 5 labeled classes. What is the maximum number of classical LDA components?</li>
+      <li>For each scenario, choose PCA, LDA, or ICA: image compression; class separation; separating mixed audio sources.</li>
+    </ol>
+  </div>
+
+  <div class="finish">
+    <h2>Module 4.2 complete! 🎉</h2>
+    <p>You can now explain why dimensionality becomes a problem and how PCA, LDA, and ICA solve different representation problems.</p>
+  </div>
+</section>
+
+</div>
+</main>
+</div>
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});
+    document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+    if(updateHash) history.pushState({step:current},'',`#step-${current+1}`);
+    window.scrollTo({top:0,behavior:'auto'});sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');
+  }
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render();}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+  nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});
+  menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+  document.addEventListener('click',async event=>{const copy=event.target.closest('.copy-btn');if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1200);return;}const option=event.target.closest('.quiz-option');if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show');}});
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+  document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});
+  current=getHashStep();render(false);
+})();
+</script>
+</body>
+</html>
