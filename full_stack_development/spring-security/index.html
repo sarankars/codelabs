@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot Spring Security + JWT — Beginner Codelab</title>
+    <meta name="description"
+        content="Build a beginner Spring Boot REST API with Spring Security, BCrypt authentication, and JWT-protected Student CRUD endpoints.">
+    <meta name="theme-color" content="#2856d8">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+        :root {
+            --blue: #2856d8;
+            --blue-dark: #17348e;
+            --blue-light: #e4ebff;
+            --ink: #101010;
+            --paper: #f5f7fb;
+            --white: #fff;
+            --yellow: #ffd83d;
+            --mint: #75e6c5;
+            --pink: #ff9bb7;
+            --orange: #ffb866;
+            --border: 3px solid var(--ink);
+            --shadow: 6px 6px 0 var(--ink);
+            --shadow-sm: 4px 4px 0 var(--ink);
+            --sidebar: 292px
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-behavior: auto
+        }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: "Space Grotesk", system-ui, sans-serif;
+            line-height: 1.55
+        }
+
+        button,
+        a {
+            font: inherit
+        }
+
+        button {
+            cursor: pointer
+        }
+
+        :focus-visible {
+            outline: 4px solid var(--yellow);
+            outline-offset: 3px
+        }
+
+        .app {
+            min-height: 100vh
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: var(--sidebar);
+            padding: 22px 18px;
+            background: var(--blue);
+            border-right: var(--border);
+            overflow: auto;
+            z-index: 20
+        }
+
+        .brand {
+            padding: 16px;
+            margin-bottom: 20px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .eyebrow,
+        .progress-meta,
+        .step-number,
+        .step-kicker,
+        .label,
+        .footer-note {
+            font-family: "DM Mono", monospace
+        }
+
+        .eyebrow {
+            font-size: .72rem;
+            font-weight: 500;
+            letter-spacing: .06em;
+            text-transform: uppercase
+        }
+
+        .brand h2 {
+            margin: 5px 0 3px;
+            font-size: 1.42rem;
+            line-height: 1.05
+        }
+
+        .brand p {
+            margin: 0;
+            font-size: .85rem;
+            font-weight: 600
+        }
+
+        .progress-wrap {
+            margin: 0 2px 20px;
+            color: #fff
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 7px;
+            font-size: .72rem
+        }
+
+        .progress-track {
+            height: 16px;
+            padding: 2px;
+            background: #fff;
+            border: var(--border)
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: var(--yellow);
+            transition: width .2s ease
+        }
+
+        .steps {
+            display: grid;
+            gap: 8px
+        }
+
+        .step-link {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 34px 1fr 18px;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 8px;
+            color: #fff;
+            background: transparent;
+            border: 3px solid transparent;
+            text-align: left;
+            font-weight: 700;
+            line-height: 1.15
+        }
+
+        .step-link:hover {
+            background: rgba(255, 255, 255, .14)
+        }
+
+        .step-link.active {
+            color: var(--ink);
+            background: #fff;
+            border-color: var(--ink);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            border: 2px solid currentColor;
+            font-size: .78rem
+        }
+
+        .step-status {
+            text-align: center
+        }
+
+        .mobile-bar {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--blue);
+            border-bottom: var(--border)
+        }
+
+        .menu-btn,
+        .mobile-title {
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .menu-btn {
+            width: 46px;
+            height: 42px;
+            font-size: 1.25rem;
+            font-weight: 900
+        }
+
+        .mobile-title {
+            flex: 1;
+            padding: 8px 10px;
+            font-weight: 800
+        }
+
+        main {
+            margin-left: var(--sidebar);
+            min-height: 100vh
+        }
+
+        .content {
+            width: min(980px, calc(100% - 48px));
+            margin: 0 auto;
+            padding: 42px 0 28px
+        }
+
+        .step-view {
+            display: none
+        }
+
+        .step-view.active {
+            display: block;
+            animation: stepIn .18s ease-out
+        }
+
+        @keyframes stepIn {
+            from {
+                opacity: .35;
+                transform: translateY(5px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .step-header {
+            padding: 28px;
+            margin-bottom: 24px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow)
+        }
+
+        .step-kicker {
+            display: inline-block;
+            margin-bottom: 13px;
+            padding: 5px 9px;
+            color: #fff;
+            background: var(--blue);
+            border: 2px solid var(--ink);
+            font-size: .72rem
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.08
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 5vw, 3.7rem);
+            letter-spacing: -.045em
+        }
+
+        h2 {
+            margin: 30px 0 12px;
+            font-size: clamp(1.5rem, 3vw, 2.15rem)
+        }
+
+        h3 {
+            margin: 22px 0 9px;
+            font-size: 1.15rem
+        }
+
+        .lede {
+            max-width: 780px;
+            margin: 0;
+            font-size: 1.08rem
+        }
+
+        .objective {
+            margin-top: 20px;
+            padding: 14px 16px;
+            background: var(--yellow);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 700
+        }
+
+        .panel,
+        .concept,
+        .quiz,
+        .reveal {
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .panel {
+            padding: 22px;
+            margin: 20px 0
+        }
+
+        .panel.blue {
+            background: var(--blue-light)
+        }
+
+        .panel.mint {
+            background: var(--mint)
+        }
+
+        .panel.pink {
+            background: var(--pink)
+        }
+
+        .panel.yellow {
+            background: var(--yellow)
+        }
+
+        .panel.orange {
+            background: var(--orange)
+        }
+
+        .callout {
+            padding: 16px 18px;
+            margin: 20px 0;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .callout .label {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 3px 7px;
+            color: #fff;
+            background: var(--ink);
+            border: 2px solid var(--ink);
+            font-size: .72rem
+        }
+
+        .grid-2 {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(2, minmax(0, 1fr))
+        }
+
+        .concept {
+            padding: 18px
+        }
+
+        .concept strong {
+            font-size: 1.05rem
+        }
+
+        .concept p:last-child {
+            margin-bottom: 0
+        }
+
+        .code-wrap {
+            position: relative;
+            margin: 18px 0
+        }
+
+        pre {
+            margin: 0;
+            padding: 20px;
+            overflow: auto;
+            color: #f7f7f7;
+            background: #111;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-family: "DM Mono", ui-monospace, monospace;
+            font-size: .84rem;
+            line-height: 1.62;
+            tab-size: 2
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 2;
+            padding: 5px 9px;
+            background: var(--yellow);
+            border: 2px solid var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+            font-size: .75rem;
+            font-weight: 800
+        }
+
+        code:not(pre code) {
+            padding: 1px 5px;
+            background: #e8edf7;
+            border: 1px solid #9da9bb;
+            font-family: "DM Mono", monospace;
+            font-size: .88em
+        }
+
+        ul,
+        ol {
+            padding-left: 1.35rem
+        }
+
+        li {
+            margin: 7px 0
+        }
+
+        .comparison {
+            width: 100%;
+            margin: 18px 0;
+            background: #fff;
+            border: var(--border);
+            border-collapse: collapse
+        }
+
+        .comparison th,
+        .comparison td {
+            padding: 11px;
+            border: 2px solid var(--ink);
+            text-align: left;
+            vertical-align: top
+        }
+
+        .comparison th {
+            color: #fff;
+            background: var(--blue)
+        }
+
+        .quiz {
+            padding: 20px;
+            margin: 20px 0
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 9px;
+            margin-top: 14px
+        }
+
+        .quiz-option {
+            text-align: left;
+            padding: 11px 13px;
+            background: #fff;
+            border: 2px solid var(--ink);
+            font-weight: 700
+        }
+
+        .quiz-option:hover {
+            background: var(--blue-light)
+        }
+
+        .quiz-option.correct {
+            background: var(--mint)
+        }
+
+        .quiz-option.wrong {
+            background: var(--pink)
+        }
+
+        .quiz-feedback {
+            display: none;
+            margin-top: 13px;
+            padding: 10px;
+            border: 2px solid var(--ink);
+            font-weight: 700
+        }
+
+        .quiz-feedback.show {
+            display: block
+        }
+
+        .reveal {
+            margin: 18px 0
+        }
+
+        .reveal summary {
+            padding: 13px 16px;
+            cursor: pointer;
+            background: var(--blue-light);
+            font-weight: 800
+        }
+
+        .reveal>div {
+            padding: 15px 16px
+        }
+
+        .challenge {
+            padding: 22px;
+            margin: 24px 0;
+            color: #fff;
+            background: var(--ink);
+            border: var(--border);
+            box-shadow: var(--shadow)
+        }
+
+        .challenge h3 {
+            margin-top: 0;
+            color: var(--yellow)
+        }
+
+        .flow {
+            margin: 20px 0;
+            padding: 20px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-family: "DM Mono", monospace;
+            line-height: 1.9;
+            overflow: auto
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0
+        }
+
+        .checklist li {
+            position: relative;
+            padding-left: 30px
+        }
+
+        .checklist li::before {
+            content: "□";
+            position: absolute;
+            left: 0;
+            font-size: 1.25rem;
+            font-weight: 900
+        }
+
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            margin-top: 34px;
+            padding-top: 20px;
+            border-top: var(--border)
+        }
+
+        .nav-btn {
+            min-width: 130px;
+            padding: 12px 18px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 900
+        }
+
+        .nav-btn.primary {
+            color: #fff;
+            background: var(--blue)
+        }
+
+        .nav-btn:disabled {
+            opacity: .35;
+            cursor: not-allowed
+        }
+
+        .finish {
+            padding: 20px;
+            margin-top: 24px;
+            background: var(--mint);
+            border: var(--border);
+            box-shadow: var(--shadow)
+        }
+
+        .references a {
+            color: var(--blue-dark);
+            font-weight: 700
+        }
+
+        @media(max-width:850px) {
+            :root {
+                --sidebar: 270px;
+                --mobile-bar-height: 65px
+            }
+
+            .sidebar {
+                inset: var(--mobile-bar-height) auto 0 0;
+                transform: translateX(-100%);
+                transition: transform .2s ease
+            }
+
+            .sidebar.open {
+                transform: none
+            }
+
+            .mobile-bar {
+                display: flex;
+                height: var(--mobile-bar-height)
+            }
+
+            main {
+                margin-left: 0
+            }
+
+            .content {
+                width: min(940px, calc(100% - 28px));
+                padding-top: 24px
+            }
+        }
+
+        @media(max-width:680px) {
+            .grid-2 {
+                grid-template-columns: 1fr
+            }
+
+            .content {
+                width: calc(100% - 18px);
+                padding-top: 16px
+            }
+
+            .step-header {
+                padding: 20px 16px
+            }
+
+            .panel,
+            .concept,
+            .quiz {
+                padding: 16px
+            }
+
+            .nav-row {
+                position: sticky;
+                bottom: 0;
+                z-index: 10;
+                padding: 12px 0;
+                background: var(--paper)
+            }
+
+            .nav-btn {
+                min-width: 0;
+                flex: 1;
+                padding: 11px 10px
+            }
+
+            pre {
+                padding: 16px 12px;
+                font-size: .76rem
+            }
+
+            .copy-btn {
+                position: static;
+                align-self: flex-end;
+                margin-bottom: 6px
+            }
+
+            .code-wrap {
+                display: flex;
+                flex-direction: column
+            }
+
+            .code-wrap pre {
+                order: 2
+            }
+
+            .code-wrap .copy-btn {
+                order: 1
+            }
+
+            .comparison {
+                display: block;
+                overflow-x: auto
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+            <div class="brand">
+                <div class="eyebrow">Spring Boot Security Codelab</div>
+                <h2>JWT Authentication</h2>
+                <p>Secure the Student API.</p>
+            </div>
+            <div class="progress-wrap">
+                <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+                <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                    aria-valuenow="0">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+            <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+        </aside>
+        <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation"
+                aria-expanded="false">☰</button>
+            <div class="mobile-title" id="mobileTitle">JWT Authentication</div>
+        </div>
+        <main>
+            <div class="content" id="content">
+
+                <section class="step-view" data-title="What we will build">
+                    <header class="step-header"><span class="step-kicker">STEP 1 · GOAL</span>
+                        <h1>Add JWT Authentication to Spring Boot</h1>
+                        <p class="lede">We will take the beginner Student CRUD API and put Spring Security in front of
+                            it. A user will log in with a username and password, receive a JWT, and use that token to
+                            access protected student endpoints.</p>
+                    </header>
+                    <div class="objective"><strong>By the end:</strong> Add Spring Security, hash passwords with BCrypt,
+                        create a login endpoint, generate a signed JWT, validate the JWT on every protected request, and
+                        protect the Student CRUD API.</div>
+                    <div class="flow">Flutter / Postman<br>↓ POST /auth/login + username/password<br>AuthController<br>↓
+                        authenticate credentials<br>AuthenticationManager<br>↓<br>Spring Security + BCrypt<br>↓
+                        successful authentication<br>JwtService → signed JWT<br>↓<br>Client stores token<br><br>Client →
+                        Authorization: Bearer &lt;JWT&gt;<br>↓<br>JwtAuthenticationFilter<br>↓ validate
+                        token<br>SecurityContext<br>↓<br>StudentController</div>
+                    <div class="panel mint"><strong>Beginner-first design</strong>
+                        <p>We will keep the student data in the same in-memory <code>ArrayList</code> style as the
+                            previous codelab. Users are also stored in memory so we can focus on the authentication flow
+                            before introducing JPA and a real user table.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Prerequisites">
+                    <header class="step-header"><span class="step-kicker">STEP 2 · PREPARE</span>
+                        <h1>Start From the Student CRUD Project</h1>
+                        <p class="lede">This codelab assumes you already understand the basic Student REST API and can
+                            run a Spring Boot project.</p>
+                    </header>
+                    <h2>Required tools</h2>
+                    <ul>
+                        <li>JDK 17 or newer</li>
+                        <li>Visual Studio Code</li>
+                        <li>Extension Pack for Java</li>
+                        <li>Spring Boot Extension Pack</li>
+                        <li>Postman, Thunder Client, curl, or another HTTP client</li>
+                    </ul>
+                    <div class="panel yellow"><strong>Starting point</strong>
+                        <p>You can use the <code>spring_boot_student_crud_codelab.html</code> lesson as the previous
+                            step. Its Student API uses <code>/api/students</code> and keeps data in memory.</p>
+                    </div>
+                    <div class="callout"><span class="label">CHECK</span>
+                        <p>Run your existing project first. Make sure <code>GET /api/students</code> works before adding
+                            security.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Add dependencies">
+                    <header class="step-header"><span class="step-kicker">STEP 3 · MAVEN</span>
+                        <h1>Add Spring Security and JWT Dependencies</h1>
+                        <p class="lede">Spring Security handles authentication and authorization. A JWT library helps us
+                            create and verify signed JSON Web Tokens.</p>
+                    </header>
+                    <h2>Update <code>pom.xml</code></h2>
+                    <p>Keep your existing Spring Web dependency and add these dependencies:</p>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;io.jsonwebtoken&lt;/groupId&gt;
+    &lt;artifactId&gt;jjwt-api&lt;/artifactId&gt;
+    &lt;version&gt;0.12.6&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;io.jsonwebtoken&lt;/groupId&gt;
+    &lt;artifactId&gt;jjwt-impl&lt;/artifactId&gt;
+    &lt;version&gt;0.12.6&lt;/version&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;io.jsonwebtoken&lt;/groupId&gt;
+    &lt;artifactId&gt;jjwt-jackson&lt;/artifactId&gt;
+    &lt;version&gt;0.12.6&lt;/version&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+                    </div>
+                    <div class="panel orange"><strong>What each dependency does</strong>
+                        <table class="comparison">
+                            <tr>
+                                <th>Dependency</th>
+                                <th>Purpose</th>
+                            </tr>
+                            <tr>
+                                <td>Spring Security</td>
+                                <td>Authentication, authorization, password encoding, filters, and security
+                                    configuration.</td>
+                            </tr>
+                            <tr>
+                                <td><code>jjwt-api</code></td>
+                                <td>JWT API used by our Java code.</td>
+                            </tr>
+                            <tr>
+                                <td><code>jjwt-impl</code></td>
+                                <td>Runtime implementation of JWT operations.</td>
+                            </tr>
+                            <tr>
+                                <td><code>jjwt-jackson</code></td>
+                                <td>JSON support used by the JWT library.</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="callout"><span class="label">NOTE</span>
+                        <p>The example pins JJWT to <code>0.12.6</code> so the lesson is reproducible. If your project
+                            already uses another compatible JJWT version, keep all three JJWT artifacts on the same
+                            version.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="See default security">
+                    <header class="step-header"><span class="step-kicker">STEP 4 · UNDERSTAND</span>
+                        <h1>See What Spring Security Does Automatically</h1>
+                        <p class="lede">Run the application immediately after adding the Spring Security dependency.</p>
+                    </header>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>./mvnw spring-boot:run</code></pre>
+                    </div>
+                    <div class="panel pink"><strong>Something changed!</strong>
+                        <p>When Spring Security is on the classpath and we have not configured our own authentication
+                            yet, Spring Boot secures web requests by default. You may see a generated password in the
+                            startup logs and requests can redirect to or return a login response.</p>
+                    </div>
+                    <div class="flow">HTTP request<br>↓<br>Spring Security filter chain<br>↓<br>No authenticated
+                        user<br>↓<br>Request is rejected / login is required</div>
+                    <div class="panel blue"><strong>Why?</strong>
+                        <p>Spring Security is designed to fail securely. We now need to tell it exactly how our API
+                            should authenticate users and which endpoints are public or protected.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Authentication concepts">
+                    <header class="step-header"><span class="step-kicker">STEP 5 · CONCEPTS</span>
+                        <h1>Authentication vs Authorization</h1>
+                        <p class="lede">These two words sound similar, but they answer different questions.</p>
+                    </header>
+                    <div class="grid-2">
+                        <div class="concept"><strong>Authentication</strong>
+                            <p><strong>“Who are you?”</strong></p>
+                            <p>We verify the username and password and create an authenticated identity.</p>
+                        </div>
+                        <div class="concept"><strong>Authorization</strong>
+                            <p><strong>“Are you allowed to do this?”</strong></p>
+                            <p>After authentication, Spring Security decides whether the current request may access an
+                                endpoint.</p>
+                        </div>
+                    </div>
+                    <div class="panel yellow"><strong>Our API</strong>
+                        <p><code>POST /auth/login</code> is public because a user needs to log in before they have a
+                            token. <code>/api/students/**</code> will require authentication.</p>
+                    </div>
+                    <div class="quiz" data-answer="1"
+                        data-correct="Correct. Authentication verifies identity; authorization controls access.">
+                        <h3>Which question is authentication answering?</h3>
+                        <div class="quiz-options"><button class="quiz-option">What can this user access?</button><button
+                                class="quiz-option">Who is this user?</button><button class="quiz-option">Which database
+                                row should be deleted?</button></div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="What is a JWT?">
+                    <header class="step-header"><span class="step-kicker">STEP 6 · JWT</span>
+                        <h1>Understand the JWT</h1>
+                        <p class="lede">A JSON Web Token lets the server represent an authenticated identity in a
+                            compact signed token that the client can send with later requests.</p>
+                    </header>
+                    <div class="flow">HEADER<br>{ algorithm, token type }<br>.<br>PAYLOAD<br>{ subject, issued time,
+                        expiration, ... }<br>.<br>SIGNATURE<br>{ proves the token was signed with our secret/private key
+                        }</div>
+                    <div class="grid-2">
+                        <div class="concept"><strong>Header</strong>
+                            <p>Contains metadata such as the signing algorithm.</p>
+                        </div>
+                        <div class="concept"><strong>Payload</strong>
+                            <p>Contains claims such as the username and expiration time.</p>
+                        </div>
+                        <div class="concept"><strong>Signature</strong>
+                            <p>Allows the server to detect a token that has been modified or was not signed by the
+                                expected key.</p>
+                        </div>
+                        <div class="concept"><strong>Important</strong>
+                            <p>A normal signed JWT is <strong>not encrypted</strong>. Do not put passwords or secrets
+                                inside the payload.</p>
+                        </div>
+                    </div>
+                    <div class="panel orange"><strong>Bearer token</strong>
+                        <p>The client normally sends the JWT in the HTTP header:</p>
+                        <p><code>Authorization: Bearer eyJ...</code></p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Create UserDetailsService">
+                    <header class="step-header"><span class="step-kicker">STEP 7 · USERS</span>
+                        <h1>Create a Simple In-Memory User Store</h1>
+                        <p class="lede">For this lesson, we will create one user in memory. The password will be stored
+                            as a BCrypt hash, not plain text.</p>
+                    </header>
+                    <div class="flow">username +
+                        password<br>↓<br>AuthenticationManager<br>↓<br>UserDetailsService<br>↓<br>find
+                        username<br>↓<br>BCryptPasswordEncoder checks password</div>
+                    <h2><code>CustomUserDetailsService.java</code></h2>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>package com.example.studentapi;
+
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
+
+    private final PasswordEncoder passwordEncoder;
+
+    public CustomUserDetailsService(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
+
+        if (!username.equals("admin")) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        return User.withUsername("admin")
+                .password(passwordEncoder.encode("password123"))
+                .roles("USER")
+                .build();
+    }
+}</code></pre>
+                    </div>
+                    <div class="panel yellow"><strong>Demo credentials</strong>
+                        <p>Username: <code>admin</code><br>Password: <code>password123</code></p>
+                        <p>This is only for the codelab. In a real application, users and password hashes should
+                            normally come from a database or another identity provider.</p>
+                    </div>
+                    <div class="callout"><span class="label">WHY BCrypt?</span>
+                        <p>We never want to compare or store user passwords as plain text. BCrypt is a password hashing
+                            algorithm designed for password storage and verification.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Create security config">
+                    <header class="step-header"><span class="step-kicker">STEP 8 · CONFIGURATION</span>
+                        <h1>Create the Security Configuration</h1>
+                        <p class="lede">The <code>SecurityFilterChain</code> tells Spring Security which requests are
+                            public and which require authentication.</p>
+                    </header>
+                    <h2><code>SecurityConfig.java</code></h2>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>package com.example.studentapi;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+            throws Exception {
+
+        http
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/auth/login").permitAll()
+                .anyRequest().authenticated()
+            );
+
+        return http.build();
+    }
+}</code></pre>
+                    </div>
+                    <table class="comparison">
+                        <tr>
+                            <th>Code</th>
+                            <th>Why we need it</th>
+                        </tr>
+                        <tr>
+                            <td><code>BCryptPasswordEncoder</code></td>
+                            <td>Hashes and verifies passwords.</td>
+                        </tr>
+                        <tr>
+                            <td><code>AuthenticationManager</code></td>
+                            <td>Coordinates credential authentication.</td>
+                        </tr>
+                        <tr>
+                            <td><code>csrf.disable()</code></td>
+                            <td>Common for this stateless token-based API example; do not copy this decision blindly to
+                                browser/session applications.</td>
+                        </tr>
+                        <tr>
+                            <td><code>STATELESS</code></td>
+                            <td>Spring Security does not use an HTTP session to remember the authenticated API user.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>permitAll()</code></td>
+                            <td>Allows login without a JWT.</td>
+                        </tr>
+                        <tr>
+                            <td><code>authenticated()</code></td>
+                            <td>Requires an authenticated user for other requests.</td>
+                        </tr>
+                    </table>
+                </section>
+
+                <section class="step-view" data-title="Create JWT service">
+                    <header class="step-header"><span class="step-kicker">STEP 9 · TOKEN</span>
+                        <h1>Create a JwtService</h1>
+                        <p class="lede">This class has two jobs: create a signed JWT and validate/read a JWT later.</p>
+                    </header>
+                    <h2><code>JwtService.java</code></h2>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>package com.example.studentapi;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Service;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+@Service
+public class JwtService {
+
+    private static final String SECRET =
+        "change-this-demo-secret-key-to-a-long-random-value-123456789";
+
+    private static final long EXPIRATION = 1000 * 60 * 60; // 1 hour
+
+    private final SecretKey key = Keys.hmacShaKeyFor(
+        SECRET.getBytes(StandardCharsets.UTF_8)
+    );
+
+    public String generateToken(String username) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + EXPIRATION);
+
+        return Jwts.builder()
+                .subject(username)
+                .issuedAt(now)
+                .expiration(expiry)
+                .signWith(key)
+                .compact();
+    }
+
+    public String extractUsername(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    public boolean isTokenValid(String token, String username) {
+        try {
+            Claims claims = extractAllClaims(token);
+            return claims.getSubject().equals(username)
+                    && claims.getExpiration().after(new Date());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+}</code></pre>
+                    </div>
+                    <div class="panel pink"><strong>Never hard-code a production secret</strong>
+                        <p>The secret is hard-coded here only to make the first lesson easy. In a real application, load
+                            a strong secret from environment/configuration management and rotate it according to your
+                            security requirements.</p>
+                    </div>
+                    <div class="panel blue"><strong>Why does validation matter?</strong>
+                        <p>A client can send any text that looks like a JWT. The server must verify the signature and
+                            claims before treating the request as authenticated.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Create login endpoint">
+                    <header class="step-header"><span class="step-kicker">STEP 10 · LOGIN</span>
+                        <h1>Create the Login API</h1>
+                        <p class="lede">The client sends credentials. Spring Security checks them. If they are correct,
+                            our application creates a JWT.</p>
+                    </header>
+                    <h2><code>AuthController.java</code></h2>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>package com.example.studentapi;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
+
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+
+    public AuthController(
+            AuthenticationManager authenticationManager,
+            JwtService jwtService) {
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity&lt;LoginResponse&gt; login(
+            @RequestBody LoginRequest request) {
+
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                request.username(),
+                request.password()
+            )
+        );
+
+        String token = jwtService.generateToken(request.username());
+
+        return ResponseEntity.ok(new LoginResponse(token));
+    }
+
+    public record LoginRequest(String username, String password) {}
+
+    public record LoginResponse(String token) {}
+}</code></pre>
+                    </div>
+                    <h2>Login request</h2>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>POST /auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "password123"
+}</code></pre>
+                    </div>
+                    <h2>Successful response</h2>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>{
+  "token": "eyJhbGciOiJIUzI1NiJ9..."
+}</code></pre>
+                    </div>
+                    <div class="flow">Request credentials<br>↓<br>AuthenticationManager<br>↓<br>UserDetailsService finds
+                        admin<br>↓<br>BCrypt verifies password<br>↓<br>Authentication succeeds<br>↓<br>JwtService
+                        generates token<br>↓<br>200 OK + JWT</div>
+                </section>
+
+                <section class="step-view" data-title="Create JWT filter">
+                    <header class="step-header"><span class="step-kicker">STEP 11 · FILTER</span>
+                        <h1>Read the JWT on Every Request</h1>
+                        <p class="lede">After login, the client does not send the password again. It sends the JWT in
+                            the Authorization header.</p>
+                    </header>
+                    <h2><code>JwtAuthenticationFilter.java</code></h2>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>package com.example.studentapi;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+
+    public JwtAuthenticationFilter(
+            JwtService jwtService,
+            UserDetailsService userDetailsService) {
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
+    }
+
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain)
+            throws ServletException, IOException {
+
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String token = authHeader.substring(7);
+        String username;
+
+        try {
+            username = jwtService.extractUsername(token);
+        } catch (Exception e) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (username != null
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            UserDetails userDetails =
+                    userDetailsService.loadUserByUsername(username);
+
+            if (jwtService.isTokenValid(token, userDetails.getUsername())) {
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
+            }
+        }
+
+        filterChain.doFilter(request, response);
+    }
+}</code></pre>
+                    </div>
+                    <div class="panel yellow"><strong>What does the filter actually do?</strong>
+                        <ol>
+                            <li>Read the <code>Authorization</code> header.</li>
+                            <li>Check that it starts with <code>Bearer </code>.</li>
+                            <li>Extract the JWT.</li>
+                            <li>Read the username from the token.</li>
+                            <li>Load the user.</li>
+                            <li>Validate the token.</li>
+                            <li>Put an authenticated object into the <code>SecurityContext</code>.</li>
+                            <li>Continue the request.</li>
+                        </ol>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Register the filter">
+                    <header class="step-header"><span class="step-kicker">STEP 12 · FILTER CHAIN</span>
+                        <h1>Connect the JWT Filter to Spring Security</h1>
+                        <p class="lede">Creating the filter is not enough. Spring Security must execute it before the
+                            standard username/password authentication filter.</p>
+                    </header>
+                    <h2>Update <code>SecurityConfig.java</code></h2>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Bean
+public SecurityFilterChain securityFilterChain(
+        HttpSecurity http,
+        JwtAuthenticationFilter jwtAuthenticationFilter)
+        throws Exception {
+
+    http
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session ->
+            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/auth/login").permitAll()
+            .anyRequest().authenticated()
+        )
+        .addFilterBefore(
+            jwtAuthenticationFilter,
+            UsernamePasswordAuthenticationFilter.class
+        );
+
+    return http.build();
+}</code></pre>
+                    </div>
+                    <div class="flow">HTTP request<br>↓<br>JwtAuthenticationFilter<br>↓<br>JWT valid?<br>├── YES → put
+                        Authentication in SecurityContext<br>└── NO → continue without
+                        authentication<br>↓<br>Authorization rules<br>↓<br>/auth/login → public<br>/api/students/** →
+                        authenticated only</div>
+                    <div class="callout"><span class="label">KEY IDEA</span>
+                        <p>The filter does not decide whether an endpoint is public. It establishes the authenticated
+                            user when a valid token is present. The authorization configuration then decides whether the
+                            request may continue.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Protect the API">
+                    <header class="step-header"><span class="step-kicker">STEP 13 · PROTECTION</span>
+                        <h1>Protect the Student CRUD API</h1>
+                        <p class="lede">You do not need to rewrite the StudentController. The security filter chain sits
+                            before the controller.</p>
+                    </header>
+                    <div class="flow">GET /api/students<br>↓<br>JwtAuthenticationFilter<br>↓<br>SecurityContext contains
+                        authenticated admin<br>↓<br>Authorization permits authenticated
+                        request<br>↓<br>StudentController.getAllStudents()</div>
+                    <table class="comparison">
+                        <tr>
+                            <th>Endpoint</th>
+                            <th>Authentication</th>
+                            <th>Reason</th>
+                        </tr>
+                        <tr>
+                            <td><code>POST /auth/login</code></td>
+                            <td>Not required</td>
+                            <td>The user needs this endpoint to obtain a token.</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /api/students</code></td>
+                            <td>Required</td>
+                            <td>Student data is protected.</td>
+                        </tr>
+                        <tr>
+                            <td><code>POST /api/students</code></td>
+                            <td>Required</td>
+                            <td>Creating data is protected.</td>
+                        </tr>
+                        <tr>
+                            <td><code>PUT /api/students/{id}</code></td>
+                            <td>Required</td>
+                            <td>Updating data is protected.</td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE /api/students/{id}</code></td>
+                            <td>Required</td>
+                            <td>Deleting data is protected.</td>
+                        </tr>
+                    </table>
+                    <div class="quiz" data-answer="2"
+                        data-correct="Correct. The JWT filter establishes authentication before the request reaches the controller.">
+                        <h3>Where does JWT validation happen in this design?</h3>
+                        <div class="quiz-options"><button class="quiz-option">Inside StudentController
+                                only</button><button class="quiz-option">Inside the database</button><button
+                                class="quiz-option">Inside JwtAuthenticationFilter</button></div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Test login">
+                    <header class="step-header"><span class="step-kicker">STEP 14 · TEST</span>
+                        <h1>Get Your First JWT</h1>
+                        <p class="lede">Restart Spring Boot and test the public login endpoint.</p>
+                    </header>
+                    <h2>Using curl</h2>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"password123"}'</code></pre>
+                    </div>
+                    <div class="panel mint"><strong>Expected result</strong>
+                        <p>You should receive JSON containing a <code>token</code>. Copy that token. You will use it in
+                            the next request.</p>
+                    </div>
+                    <h2>What if the password is wrong?</h2>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"wrong"}'</code></pre>
+                    </div>
+                    <div class="panel pink"><strong>Authentication fails</strong>
+                        <p>Spring Security rejects the credentials instead of creating a JWT. The exact error response
+                            can vary with your exception handling configuration.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Call protected API">
+                    <header class="step-header"><span class="step-kicker">STEP 15 · BEARER TOKEN</span>
+                        <h1>Send the JWT to a Protected Endpoint</h1>
+                        <p class="lede">Now use the token from login to call the Student API.</p>
+                    </header>
+                    <h2>Without a token</h2>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>curl http://localhost:8080/api/students</code></pre>
+                    </div>
+                    <div class="panel pink"><strong>Rejected</strong>
+                        <p>The request has no authenticated user, so the protected endpoint is not accessible.</p>
+                    </div>
+                    <h2>With a token</h2>
+                    <div class="code-wrap"><button class="copy-btn">Copy</button>
+                        <pre><code>curl http://localhost:8080/api/students \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"</code></pre>
+                    </div>
+                    <div class="panel mint"><strong>Accepted</strong>
+                        <p>The JWT filter validates the token, establishes the authenticated user, and Spring Security
+                            allows the request to reach the StudentController.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Trace the complete flow">
+                    <header class="step-header"><span class="step-kicker">STEP 16 · TRACE IT</span>
+                        <h1>Understand Login → JWT → API</h1>
+                        <p class="lede">This is the most important flow to remember.</p>
+                    </header>
+                    <div class="flow">① Client sends username + password<br>↓<br>② POST /auth/login<br>↓<br>③
+                        AuthenticationManager authenticates the credentials<br>↓<br>④ UserDetailsService loads the
+                        user<br>↓<br>⑤ BCrypt verifies the password<br>↓<br>⑥ JwtService creates a signed JWT<br>↓<br>⑦
+                        Server returns JWT to client<br><br>⑧ Client stores the token<br>↓<br>⑨ Client calls
+                        /api/students with Authorization: Bearer JWT<br>↓<br>⑩ JwtAuthenticationFilter extracts and
+                        validates JWT<br>↓<br>⑪ SecurityContext receives the authenticated user<br>↓<br>⑫ Authorization
+                        rules allow the request<br>↓<br>⑬ StudentController executes<br>↓<br>⑭ Client receives the API
+                        response</div>
+                    <div class="panel orange"><strong>The password is not sent with every API request.</strong>
+                        <p>The login request uses the password. Later requests use the JWT instead.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Project structure">
+                    <header class="step-header"><span class="step-kicker">STEP 17 · ORGANIZE</span>
+                        <h1>See the Project Structure</h1>
+                        <p class="lede">We have intentionally split security responsibilities into small classes.</p>
+                    </header>
+                    <div class="flow">src/main/java/com/example/studentapi/<br>├── StudentapiApplication.java<br>├──
+                        StudentController.java<br>├── AuthController.java<br>├── CustomUserDetailsService.java<br>├──
+                        JwtAuthenticationFilter.java<br>├── JwtService.java<br>└── SecurityConfig.java</div>
+                    <table class="comparison">
+                        <tr>
+                            <th>Class</th>
+                            <th>Responsibility</th>
+                        </tr>
+                        <tr>
+                            <td><code>StudentController</code></td>
+                            <td>Student CRUD endpoints.</td>
+                        </tr>
+                        <tr>
+                            <td><code>AuthController</code></td>
+                            <td>Login endpoint and JWT response.</td>
+                        </tr>
+                        <tr>
+                            <td><code>CustomUserDetailsService</code></td>
+                            <td>Finds the user and supplies password/authorities to Spring Security.</td>
+                        </tr>
+                        <tr>
+                            <td><code>JwtService</code></td>
+                            <td>Creates and validates JWTs.</td>
+                        </tr>
+                        <tr>
+                            <td><code>JwtAuthenticationFilter</code></td>
+                            <td>Reads the Bearer token and establishes authentication for the request.</td>
+                        </tr>
+                        <tr>
+                            <td><code>SecurityConfig</code></td>
+                            <td>Defines password encoding, authentication manager, filter chain, and endpoint rules.
+                            </td>
+                        </tr>
+                    </table>
+                </section>
+
+                <section class="step-view" data-title="Common mistakes">
+                    <header class="step-header"><span class="step-kicker">STEP 18 · DEBUG</span>
+                        <h1>Common JWT Mistakes</h1>
+                        <p class="lede">When authentication does not work, check the flow instead of changing random
+                            lines.</p>
+                    </header>
+                    <div class="grid-2">
+                        <div class="concept"><strong>401 / unauthorized</strong>
+                            <p>Check whether the token exists, starts with <code>Bearer </code>, is valid, is not
+                                expired, and is signed with the same key used by the server.</p>
+                        </div>
+                        <div class="concept"><strong>Login fails</strong>
+                            <p>Check the username, password, <code>UserDetailsService</code>, and BCrypt encoder.</p>
+                        </div>
+                        <div class="concept"><strong>Filter never runs</strong>
+                            <p>Make sure the filter is a Spring bean, usually with <code>@Component</code>, and is
+                                registered using <code>addFilterBefore()</code>.</p>
+                        </div>
+                        <div class="concept"><strong>Everything is public</strong>
+                            <p>Check the authorization rules. <code>anyRequest().authenticated()</code> is what protects
+                                the remaining endpoints in this lesson.</p>
+                        </div>
+                        <div class="concept"><strong>JWT works after restart unexpectedly</strong>
+                            <p>Remember that the demo user is recreated in memory. A real database-backed user system
+                                behaves differently.</p>
+                        </div>
+                        <div class="concept"><strong>Secret changed</strong>
+                            <p>If you sign tokens with one key and later validate with a different key, old tokens
+                                cannot be verified.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Security checklist">
+                    <header class="step-header"><span class="step-kicker">STEP 19 · SECURITY</span>
+                        <h1>Important Production Differences</h1>
+                        <p class="lede">The codelab is deliberately small. A real application needs more security
+                            decisions.</p>
+                    </header>
+                    <ul class="checklist">
+                        <li>Do not hard-code the JWT secret in source code.</li>
+                        <li>Use a strong secret or appropriate asymmetric signing keys.</li>
+                        <li>Store password hashes, never plain-text passwords.</li>
+                        <li>Use HTTPS so credentials and tokens are protected in transit.</li>
+                        <li>Choose a sensible token expiration time.</li>
+                        <li>Plan token refresh/revocation if your application needs it.</li>
+                        <li>Validate request input and return controlled error responses.</li>
+                        <li>Do not put passwords, API keys, or other secrets in JWT claims.</li>
+                        <li>Use roles/authorities when different users need different permissions.</li>
+                        <li>Do not blindly disable CSRF in applications that use browser cookies/sessions; this lesson
+                            uses a stateless Bearer-token API.</li>
+                    </ul>
+                    <div class="panel yellow"><strong>JWT is not “security by itself.”</strong>
+                        <p>JWT is a token format. Spring Security supplies the authentication and authorization
+                            framework around it. Your application still has to protect keys, credentials, transport,
+                            endpoints, and user data.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Revision">
+                    <header class="step-header"><span class="step-kicker">STEP 20 · REVISION</span>
+                        <h1>JWT Authentication Revision</h1>
+                        <p class="lede">Review these questions before moving to database-backed authentication.</p>
+                    </header>
+                    <div class="reveal">
+                        <summary>Why is /auth/login public?</summary>
+                        <div>A user needs a way to authenticate before they have a JWT. After successful authentication,
+                            the endpoint returns the token.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>What does BCrypt do?</summary>
+                        <div>It hashes passwords for storage and can verify a submitted password against the stored
+                            hash.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>What is the SecurityContext?</summary>
+                        <div>Spring Security uses it to hold the authentication information for the current request.
+                        </div>
+                    </div>
+                    <div class="reveal">
+                        <summary>What does JwtAuthenticationFilter do?</summary>
+                        <div>It extracts the Bearer token, validates it, loads the user, and places an authenticated
+                            object into the SecurityContext when appropriate.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>Is a JWT encrypted?</summary>
+                        <div>Not by default. A normal signed JWT is readable by whoever possesses it. Its signature
+                            protects integrity/authenticity, not secrecy.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>Why is the API stateless?</summary>
+                        <div>The server does not use an HTTP session to remember the logged-in API user. Each protected
+                            request carries its authentication token.</div>
+                    </div>
+                    <h2>Completion checklist</h2>
+                    <ul class="checklist">
+                        <li>I understand authentication vs authorization.</li>
+                        <li>I understand the three parts of a JWT.</li>
+                        <li>I can add Spring Security to a Spring Boot project.</li>
+                        <li>I can configure a BCrypt password encoder.</li>
+                        <li>I can create a UserDetailsService.</li>
+                        <li>I can authenticate a login request with AuthenticationManager.</li>
+                        <li>I can generate a JWT after successful login.</li>
+                        <li>I can read a Bearer token from an HTTP request.</li>
+                        <li>I understand how the SecurityContext gets populated.</li>
+                        <li>I can protect my Student CRUD endpoints.</li>
+                        <li>I understand why JWT validation belongs before the controller.</li>
+                        <li>I know that the demo secret and in-memory user are not production-ready.</li>
+                    </ul>
+                    <div class="challenge">
+                        <h3>Practice</h3>
+                        <ol>
+                            <li>Add a second user such as <code>teacher</code>.</li>
+                            <li>Give users different roles.</li>
+                            <li>Create <code>/auth/me</code> that returns the authenticated username.</li>
+                            <li>Add a role-based rule so only an admin can delete students.</li>
+                            <li>Move users into a database using Spring Data JPA.</li>
+                            <li>Move the JWT secret into an environment variable.</li>
+                            <li>Connect the login endpoint to your Flutter app and attach the token to later API
+                                requests.</li>
+                        </ol>
+                    </div>
+                    <div class="finish">
+                        <h2>JWT authentication complete! 🎉</h2>
+                        <p>You now have the basic mental model: credentials are authenticated once, a signed JWT
+                            represents the authenticated identity, the JWT filter validates it on later requests, and
+                            Spring Security protects the API before the controller runs.</p>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+    <script>
+        (() => {
+            const steps = [...document.querySelectorAll('.step-view')];
+            const titles = steps.map(step => step.dataset.title);
+            const nav = document.getElementById('stepNav');
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const content = document.getElementById('content');
+            const completed = new Set();
+            let current = 0;
+            nav.innerHTML = titles.map((title, index) => `<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+            const getHashStep = () => { const match = location.hash.match(/^#step-(\d+)$/); const value = match ? Number(match[1]) - 1 : 0; return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0 };
+            function render(updateHash = true) {
+                current = Math.max(0, Math.min(current, steps.length - 1));
+                steps.forEach((step, index) => { const active = index === current; step.classList.toggle('active', active); step.setAttribute('aria-hidden', String(!active)) });
+                document.querySelectorAll('.step-link').forEach((button, index) => { button.classList.toggle('active', index === current); button.setAttribute('aria-current', index === current ? 'step' : 'false'); button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '' });
+                const percent = Math.round(((current + 1) / steps.length) * 100);
+                document.getElementById('progressBar').style.width = `${percent}%`;
+                document.getElementById('progressText').textContent = `${percent}%`;
+                document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+                document.getElementById('mobileTitle').textContent = titles[current];
+                document.getElementById('prevBtn').disabled = current === 0;
+                document.getElementById('nextBtn').disabled = current === steps.length - 1;
+                document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+                if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+                window.scrollTo({ top: 0, behavior: 'auto' }); sidebar.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false');
+            }
+            function goTo(index) { if (index < 0 || index >= steps.length) return; completed.add(current); current = index; render(); }
+            const navRow = document.createElement('div'); navRow.className = 'nav-row'; navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>'; content.appendChild(navRow);
+            document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+            document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+            nav.addEventListener('click', event => { const button = event.target.closest('.step-link'); if (button) goTo(Number(button.dataset.step)) });
+            menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)) });
+            document.addEventListener('click', async event => {
+                const copy = event.target.closest('.copy-btn');
+                if (copy) { const code = copy.parentElement.querySelector('pre code')?.textContent ?? ''; try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!' } catch { copy.textContent = 'Select & copy' } setTimeout(() => copy.textContent = 'Copy', 1200); return; }
+                const option = event.target.closest('.quiz-option');
+                if (option) { const quiz = option.closest('.quiz'); if (quiz.dataset.answered) return; const options = [...quiz.querySelectorAll('.quiz-option')]; const choice = options.indexOf(option); const answer = Number(quiz.dataset.answer); quiz.dataset.answered = 'true'; options.forEach(button => button.disabled = true); option.classList.add(choice === answer ? 'correct' : 'wrong'); if (choice !== answer) options[answer].classList.add('correct'); const feedback = quiz.querySelector('.quiz-feedback'); feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`; feedback.classList.add('show'); }
+            });
+            window.addEventListener('popstate', () => { current = getHashStep(); render(false) });
+            window.addEventListener('hashchange', () => { current = getHashStep(); render(false) });
+            document.addEventListener('keydown', event => { if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return; if (event.key === 'ArrowRight') goTo(current + 1); if (event.key === 'ArrowLeft') goTo(current - 1) });
+            current = getHashStep(); render(false);
+        })();
+    </script>
+</body>
+
+</html>
