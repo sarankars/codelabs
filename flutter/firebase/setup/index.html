@@ -1,0 +1,461 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Setting Up Firebase in Flutter with CLI — Flutter Codelab</title><meta name="description" content="Learn how to connect a Flutter application to Firebase using the official Firebase CLI, flutterfire configure, DefaultFirebaseOptions, and platform-specific setups for Android, iOS, and Web."><meta name="theme-color" content="#2856d8"><style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label,.footer-note{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.36rem;line-height:1.08}.brand p{margin:0;font-size:.84rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(1.9rem,4.5vw,3.4rem);letter-spacing:-.04em}h2{margin:30px 0 12px;font-size:clamp(1.4rem,2.8vw,2.1rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.06rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}
+    .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}.screen-stack{display:grid;gap:12px;margin:22px 0}.screen-card{padding:16px;background:#fff;border:3px solid var(--ink);box-shadow:var(--shadow-sm);font-weight:800}.screen-card.active{background:var(--mint)}.checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}.nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.references a{color:var(--blue-dark);font-weight:700}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}}
+  </style></head><body><div class="app"><aside class="sidebar" id="sidebar" aria-label="Codelab navigation"><div class="brand"><div class="eyebrow">Flutter Firebase Codelab</div><h2>Firebase CLI Setup</h2><p>Modern cross-platform workflow with FlutterFire.</p></div><div class="progress-wrap"><div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div><div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div></div><nav class="steps" id="stepNav" aria-label="Lesson steps"></nav></aside><div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button><div class="mobile-title" id="mobileTitle">Firebase CLI Setup</div></div><main><div class="content" id="content">
+
+<!-- STEP 1 -->
+<section class="step-view" data-title="What is Firebase?"><header class="step-header"><span class="step-kicker">STEP 1 · INTRODUCTION</span><h1>What is Firebase &amp; FlutterFire?</h1><p class="lede">Explore Google's Backend-as-a-Service ecosystem, official documentation hubs, and how FlutterFire simplifies cross-platform development.</p></header><div class="objective"><strong>By the end of this codelab:</strong> You will connect a Flutter application to Firebase across Android, iOS, and Web using the official Firebase CLI and FlutterFire CLI, auto-generate type-safe configurations, and verify initialization with a clean, minimal test app.</div>
+
+<h2>What is Firebase?</h2>
+<p><strong>Firebase</strong> is Google's comprehensive app development platform (Backend-as-a-Service / BaaS). Instead of provisioning and maintaining your own custom backend servers, API endpoints, authentication flows, and scaling infrastructure, Firebase provides managed cloud services ready to integrate into your client apps:</p>
+
+<div class="grid-2">
+  <div class="concept">
+    <strong>Backend-as-a-Service (BaaS)</strong>
+    <p>Provides managed cloud databases (Cloud Firestore, Realtime Database), cloud storage for user media, serverless compute (Cloud Functions), and authentication out-of-the-box.</p>
+  </div>
+  <div class="concept">
+    <strong>App Health &amp; Analytics</strong>
+    <p>Delivers real-time crash reporting (Crashlytics), performance monitoring, Google Analytics, and device attestation security (Firebase App Check).</p>
+  </div>
+</div>
+
+<h2>Official Firebase &amp; Flutter Resources</h2>
+<p>Bookmark these official portals and documentation references for your development workflow:</p>
+<table class="comparison">
+  <tr><th>Resource</th><th>Link</th><th>Description</th></tr>
+  <tr>
+    <td><strong>Firebase Official Website</strong></td>
+    <td><a href="https://firebase.google.com" target="_blank" rel="noopener">firebase.google.com</a></td>
+    <td>Product overviews, platform features, pricing, and architecture guides.</td>
+  </tr>
+  <tr>
+    <td><strong>Firebase Console</strong></td>
+    <td><a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a></td>
+    <td>Web dashboard to create projects, monitor usage, and configure backend services.</td>
+  </tr>
+  <tr>
+    <td><strong>Firebase Documentation</strong></td>
+    <td><a href="https://firebase.google.com/docs" target="_blank" rel="noopener">firebase.google.com/docs</a></td>
+    <td>Official developer guides, API references, best practices, and quickstarts.</td>
+  </tr>
+  <tr>
+    <td><strong>FlutterFire Official Docs</strong></td>
+    <td><a href="https://firebase.flutter.dev" target="_blank" rel="noopener">firebase.flutter.dev</a></td>
+    <td>Dedicated official guide for Flutter plugins for Firebase developed by Google.</td>
+  </tr>
+  <tr>
+    <td><strong>Flutter Docs (Firebase)</strong></td>
+    <td><a href="https://docs.flutter.dev/data-and-backend/firebase" target="_blank" rel="noopener">docs.flutter.dev/data-and-backend/firebase</a></td>
+    <td>Flutter team's official guide to integrating Firebase with Flutter applications.</td>
+  </tr>
+  <tr>
+    <td><strong>Firebase CLI Reference</strong></td>
+    <td><a href="https://firebase.google.com/docs/cli" target="_blank" rel="noopener">firebase.google.com/docs/cli</a></td>
+    <td>Complete command-line manual for installing and using <code>firebase-tools</code>.</td>
+  </tr>
+  <tr>
+    <td><strong>FlutterFire GitHub</strong></td>
+    <td><a href="https://github.com/firebase/flutterfire" target="_blank" rel="noopener">github.com/firebase/flutterfire</a></td>
+    <td>Open-source plugin repository, issue tracker, changelogs, and release notes.</td>
+  </tr>
+</table>
+
+<h2>Why FlutterFire CLI?</h2>
+<p class="lede">Say goodbye to manual JSON/plist downloads, gradle file hacking, and separate platform setup ceremonies.</p>
+<div class="flow">Old Manual Way (Fragile &amp; Error-Prone):<br>Download google-services.json → Put in android/app/<br>Download GoogleService-Info.plist → Add to Xcode manually<br>Copy JS config snippet → Paste in web/index.html<br>Edit 4+ build.gradle files → Pray sync passes<br><br>Modern FlutterFire CLI Way (Automated &amp; Repeatable):<br>Run `flutterfire configure`<br>↓<br>Auto-creates &amp; registers Android, iOS, &amp; Web apps<br>↓<br>Generates `lib/firebase_options.dart`<br>↓<br>Call `Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)`</div>
+<div class="grid-2"><div class="concept"><strong>Why the CLI matters</strong><p>Flutter targets multiple platforms from a single codebase. Managing credentials individually across Android, iOS, Web, macOS, and Windows causes drift, accidental credential loss, and build breakages.</p></div><div class="concept"><strong>Type-safe Dart options</strong><p>FlutterFire generates a single Dart file with <code>FirebaseOptions</code> for every selected platform, automatically selected at runtime via <code>TargetPlatform</code> and <code>kIsWeb</code>.</p></div></div>
+</section>
+
+<!-- STEP 2 -->
+<section class="step-view" data-title="Prerequisites"><header class="step-header"><span class="step-kicker">STEP 2 · ENVIRONMENT</span><h1>Check Your Prerequisites</h1><p class="lede">Verify that your development workstation has the required runtimes installed before configuring Firebase.</p></header>
+<table class="comparison"><tr><th>Requirement</th><th>Purpose</th><th>Minimum Recommended</th></tr><tr><td>Flutter SDK</td><td>Compiles and runs the Flutter multi-platform application.</td><td>Flutter 3.16+ (Dart 3.2+)</td></tr><tr><td>Node.js &amp; npm</td><td>Required runtime to execute the official Firebase CLI tools.</td><td>Node.js v18.0.0+ (LTS)</td></tr><tr><td>Google Account</td><td>Gives you access to the Firebase Console to host cloud services.</td><td>Any personal or workspace account</td></tr><tr><td>Xcode (macOS)</td><td>Required if targeting iOS or macOS platforms.</td><td>Xcode 15+ with CocoaPods installed</td></tr></table>
+<div class="callout"><span class="label">TERMINAL CHECK</span><p>Run these verification commands in your terminal to ensure your baseline environment is ready:</p></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code># Check Flutter and connected toolchains
+flutter doctor
+
+# Check Node.js and npm versions
+node -v
+npm -v</code></pre></div>
+<div class="panel yellow"><strong>Note:</strong><p>If you don't have Node.js installed, you can either install it from <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a> or use standalone binary installers provided by the Firebase documentation.</p></div>
+</section>
+
+<!-- STEP 3 -->
+<section class="step-view" data-title="Firebase CLI"><header class="step-header"><span class="step-kicker">STEP 3 · FIREBASE TOOLS</span><h1>Install &amp; Authenticate Firebase CLI</h1><p class="lede">The Firebase CLI (firebase-tools) connects your local terminal to your Google Cloud &amp; Firebase projects.</p></header>
+<p>Install the Firebase CLI globally on your system using npm:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>npm install -g firebase-tools</code></pre></div>
+<p>Once installed, authenticate with your Google account in your browser:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>firebase login</code></pre></div>
+<div class="flow">Terminal: `firebase login`<br>↓<br>Browser opens Google OAuth consent screen<br>↓<br>Grant Firebase CLI permission to manage projects<br>↓<br>Terminal output: "✔ Success! Logged in as user@example.com"</div>
+<div class="callout"><span class="label">VERIFY CONNECTION</span><p>List your active Firebase projects to confirm that your machine is authorized:</p></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>firebase projects:list</code></pre></div>
+<div class="quiz" data-answer="1" data-correct="Correct! 'firebase login' opens your browser to grant the CLI access to your Firebase account."><h3>Which command links your local command line to your Firebase Google account?</h3><div class="quiz-options"><button class="quiz-option">flutterfire auth</button><button class="quiz-option">firebase login</button><button class="quiz-option">flutter pub login</button></div><div class="quiz-feedback"></div></div>
+</section>
+
+<!-- STEP 4 -->
+<section class="step-view" data-title="FlutterFire CLI"><header class="step-header"><span class="step-kicker">STEP 4 · DART TOOLING</span><h1>Activate the FlutterFire CLI</h1><p class="lede">FlutterFire CLI is the specialized Dart utility that bridges Firebase projects to Flutter apps.</p></header>
+<p>Dart includes a global package manager. Activate the <code>flutterfire_cli</code> globally:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>dart pub global activate flutterfire_cli</code></pre></div>
+<div class="panel orange"><strong>Important PATH Setup:</strong><p>For your shell to recognize the <code>flutterfire</code> command, ensure Dart's global pub cache directory is added to your system <code>PATH</code>.</p></div>
+<div class="grid-2"><div class="concept"><strong>macOS &amp; Linux (zsh)</strong><p>Add to <code>~/.zshrc</code>:</p><code>export PATH="$PATH":"$HOME/.pub-cache/bin"</code></div><div class="concept"><strong>Windows (PowerShell)</strong><p>Ensure your User Path includes:</p><code>%LOCALAPPDATA%\Pub\Cache\bin</code></div></div>
+<p>Reload your shell and verify the installation:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>flutterfire --version</code></pre></div>
+<div class="panel mint"><strong>Success check:</strong><p>You should see a version string printed (e.g. <code>1.0.0</code> or higher). Now both CLI tools are operational!</p></div>
+</section>
+
+<!-- STEP 5 -->
+<section class="step-view" data-title="Create Firebase project"><header class="step-header"><span class="step-kicker">STEP 5 · CLOUD SETUP</span><h1>Create or Select a Firebase Project</h1><p class="lede">Every Flutter application connects to a backend Firebase project container.</p></header>
+<div class="grid-2"><div class="concept"><strong>Option A: Firebase Console (GUI)</strong><p>1. Navigate to <a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a>.<br>2. Click <strong>Add project</strong>.<br>3. Enter a project name (e.g. <code>flutter-fire-codelab</code>).<br>4. Configure Google Analytics (optional).<br>5. Click <strong>Create project</strong>.</p></div><div class="concept"><strong>Option B: Firebase CLI (Terminal)</strong><p>You can also provision a brand new project right from your terminal without opening a browser:</p><code>firebase projects:create codelab-flutter-demo --display-name="Flutter Demo"</code></div></div>
+<table class="comparison"><tr><th>Concept</th><th>What It Means</th></tr><tr><td>Project Name</td><td>The friendly display name visible in the Firebase console.</td></tr><tr><td>Project ID</td><td>A globally unique identifier (e.g. <code>my-flutter-app-9481a</code>). Used in CLI commands.</td></tr><tr><td>Spark Plan</td><td>Free tier plan supporting Firebase Auth, Cloud Firestore, Storage, Hosting, and Cloud Messaging.</td></tr></table>
+<div class="panel yellow"><strong>Note:</strong><p>Do NOT manually create iOS apps or Android apps in the Firebase Console yet! The FlutterFire CLI will register all of them automatically.</p></div>
+</section>
+
+<!-- STEP 6 -->
+<section class="step-view" data-title="Create Flutter app"><header class="step-header"><span class="step-kicker">STEP 6 · FLUTTER PROJECT</span><h1>Create App &amp; Add firebase_core</h1><p class="lede">Start with a clean Flutter project and install the foundational Firebase plugin.</p></header>
+<p>Create a fresh Flutter application with an explicit organization domain (which establishes your Android package name and iOS bundle identifier):</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code># Create project with custom bundle identifier prefix
+flutter create --org com.example firebase_cli_starter
+
+# Move into the project directory
+cd firebase_cli_starter</code></pre></div>
+<p>Add the mandatory <code>firebase_core</code> package to <code>pubspec.yaml</code>:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>flutter pub add firebase_core</code></pre></div>
+<div class="callout"><span class="label">FOUNDATION RULE</span><p><strong>firebase_core</strong> is the required engine for all FlutterFire plugins. No other Firebase plugin (such as <code>firebase_auth</code>, <code>cloud_firestore</code>, or <code>firebase_analytics</code>) will function without it.</p></div>
+<div class="flow">pubspec.yaml dependencies:<br>dependencies:<br>  flutter:<br>    sdk: flutter<br>  firebase_core: ^3.6.0  # &lt;-- Core initialization engine</div>
+</section>
+
+<!-- STEP 7 -->
+<section class="step-view" data-title="flutterfire configure"><header class="step-header"><span class="step-kicker">STEP 7 · AUTOMATION</span><h1>Run flutterfire configure</h1><p class="lede">The cornerstone command that connects your Flutter code to your cloud backend.</p></header>
+<p>From the root of your Flutter project, run:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>flutterfire configure</code></pre></div>
+<div class="panel blue"><strong>Interactive Prompts:</strong><p>The CLI will guide you through an interactive menu:</p>
+<ol><li><strong>Select a Firebase project:</strong> Use arrow keys to pick the project you created in Step 5.</li><li><strong>Which platforms should your configuration support?</strong> Spacebar to select (Android, iOS, Web, macOS, Windows), then press Enter.</li></ol></div>
+<div class="flow">What flutterfire configure does behind the scenes:<br>1. Inspects your Flutter app's bundle identifier / package name.<br>2. Communicates with Firebase API to register an Android app, iOS app, and Web app.<br>3. Generates the necessary Firebase credentials.<br>4. Automatically adds google-services classpath to Android Gradle scripts.<br>5. Generates `lib/firebase_options.dart` with platform-specific options.</div>
+<div class="callout"><span class="label">NON-INTERACTIVE AUTOMATION</span><p>For scripts or CI/CD pipelines, you can run non-interactively by specifying flags:</p></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>flutterfire configure \
+  --project=my-flutter-app-9481a \
+  --platforms=android,ios,web \
+  --yes</code></pre></div>
+</section>
+
+<!-- STEP 8 -->
+<section class="step-view" data-title="firebase_options.dart"><header class="step-header"><span class="step-kicker">STEP 8 · CODE WALKTHROUGH</span><h1>Explore firebase_options.dart</h1><p class="lede">Inspect the auto-generated file that makes multi-platform Firebase initialization possible in pure Dart.</p></header>
+<p>Open <code>lib/firebase_options.dart</code>. You will see code structured like this:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// File generated by FlutterFire CLI.
+// Do not manually modify unless you know what you are doing.
+import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
+
+class DefaultFirebaseOptions {
+  static FirebaseOptions get currentPlatform {
+    if (kIsWeb) {
+      return web;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return android;
+      case TargetPlatform.iOS:
+        return ios;
+      case TargetPlatform.macOS:
+        return macos;
+      case TargetPlatform.windows:
+        return windows;
+      case TargetPlatform.linux:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for linux - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
+      default:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions are not supported for this platform.',
+        );
+    }
+  }
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyA...',
+    appId: '1:1039...:web:d2...',
+    messagingSenderId: '103984...',
+    projectId: 'my-flutter-app-9481a',
+    authDomain: 'my-flutter-app-9481a.firebaseapp.com',
+    storageBucket: 'my-flutter-app-9481a.appspot.com',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyB...',
+    appId: '1:1039...:android:c1...',
+    messagingSenderId: '103984...',
+    projectId: 'my-flutter-app-9481a',
+    storageBucket: 'my-flutter-app-9481a.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyC...',
+    appId: '1:1039...:ios:a4...',
+    messagingSenderId: '103984...',
+    projectId: 'my-flutter-app-9481a',
+    storageBucket: 'my-flutter-app-9481a.appspot.com',
+    iosBundleId: 'com.example.firebaseCliStarter',
+  );
+}</code></pre></div>
+<div class="panel mint"><strong>Why this is revolutionary:</strong><p>Notice how `currentPlatform` dynamically inspects the environment at runtime. Web gets Web credentials, Android gets Android credentials, iOS gets iOS credentials — without any conditional native bridging code from you!</p></div>
+<div class="quiz" data-answer="2" data-correct="Correct! Firebase client API keys are public app identifiers used by Google APIs. Cloud security is enforced by Firebase Security Rules and App Check."><h3>Is it safe to commit `firebase_options.dart` to source control?</h3><div class="quiz-options"><button class="quiz-option">No, it contains confidential server database passwords.</button><button class="quiz-option">No, API keys must always be stored in encrypted backend servers.</button><button class="quiz-option">Yes, Firebase client API keys identify the client app; security is enforced via Firebase Rules and App Check.</button></div><div class="quiz-feedback"></div></div>
+</section>
+
+<!-- STEP 9 -->
+<section class="step-view" data-title="Initialize in main.dart"><header class="step-header"><span class="step-kicker">STEP 9 · INITIALIZATION</span><h1>Initialize Firebase in main.dart</h1><p class="lede">Bootstrap Firebase asynchronously before rendering any Flutter UI widgets.</p></header>
+<p>Update <code>lib/main.dart</code> with the proper initialization lifecycle:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+Future&lt;void&gt; main() async {
+  // 1. Guarantee engine-framework communication channels are ready
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 2. Initialize Firebase with platform-appropriate credentials
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // 3. Launch application widget tree
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Firebase CLI Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2856D8)),
+        useMaterial3: true,
+      ),
+      home: const Scaffold(
+        body: Center(
+          child: Text('Firebase Connected! 🎉'),
+        ),
+      ),
+    );
+  }
+}</code></pre></div>
+<div class="panel yellow"><strong>Why WidgetsFlutterBinding.ensureInitialized() is mandatory:</strong><p><code>Firebase.initializeApp()</code> invokes native binary platform channels (Java/Kotlin on Android, Objective-C/Swift on iOS, JavaScript on Web). If you invoke platform channels before <code>runApp()</code> without calling <code>WidgetsFlutterBinding.ensureInitialized()</code>, Flutter throws a runtime binding error.</p></div>
+<div class="quiz" data-answer="0" data-correct="Correct! Native platform channels need the Flutter engine binding initialized before async calls run in main()."><h3>Why must `WidgetsFlutterBinding.ensureInitialized()` be called before `Firebase.initializeApp()`?</h3><div class="quiz-options"><button class="quiz-option">It initializes platform channels needed by native Firebase SDKs before runApp().</button><button class="quiz-option">It compiles the Dart code into native bytecode.</button><button class="quiz-option">It creates the SQLite local cache.</button></div><div class="quiz-feedback"></div></div>
+</section>
+
+<!-- STEP 10 -->
+<section class="step-view" data-title="Android platform setup"><header class="step-header"><span class="step-kicker">STEP 10 · PLATFORM SPECIFICS</span><h1>Android Setup &amp; Requirements</h1><p class="lede">Configure Gradle settings, minimum SDK versions, and signing certificates for Android.</p></header>
+<p>Most modern Firebase plugins (like Auth and Firestore) require at least Android API 21 (or 23 for certain ML plugins). Ensure your <code>android/app/build.gradle</code> has the correct <code>minSdkVersion</code>:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// android/app/build.gradle
+android {
+    namespace "com.example.firebase_cli_starter"
+    compileSdk flutter.compileSdkVersion
+    ndkVersion flutter.ndkVersion
+
+    defaultConfig {
+        applicationId "com.example.firebase_cli_starter"
+        // Set minSdkVersion to 21 or higher
+        minSdkVersion 21
+        targetSdkVersion flutter.targetSdkVersion
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+        multiDexEnabled true
+    }
+}</code></pre></div>
+<div class="callout"><span class="label">GRADLE PLUGINS</span><p>FlutterFire CLI automatically adds the Google Services Gradle plugin. Verify that <code>android/build.gradle</code> and <code>android/app/build.gradle</code> include it:</p></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// android/build.gradle (Project level)
+plugins {
+    id 'com.google.gms.google-services' version '4.4.1' apply false
+}
+
+// android/app/build.gradle (App level)
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'dev.flutter.flutter-gradle-plugin'
+    id 'com.google.gms.google-services' // &lt;-- Applied here
+}</code></pre></div>
+<div class="panel orange"><strong>Signing Certificates (SHA-1 / SHA-256):</strong><p>If you plan to use <strong>Firebase Phone Auth</strong> or <strong>Google Sign-In</strong> on Android, you must register your debug SHA certificate. Generate it via:</p>
+<code>cd android &amp;&amp; ./gradlew signingReport</code>
+<p>Copy the debug <code>SHA1</code> string and paste it into <strong>Project Settings → Android App → Add fingerprint</strong> in the Firebase Console.</p></div>
+</section>
+
+<!-- STEP 11 -->
+<section class="step-view" data-title="iOS &amp; macOS setup"><header class="step-header"><span class="step-kicker">STEP 11 · PLATFORM SPECIFICS</span><h1>iOS &amp; macOS Setup</h1><p class="lede">Manage CocoaPods dependencies, deployment targets, and permissions on Apple platforms.</p></header>
+<p>Firebase iOS SDK requires iOS 13.0 or higher. Open <code>ios/Podfile</code> and set the platform target at the very top:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code># ios/Podfile
+platform :ios, '13.0'
+
+# Ensure modular headers are enabled for CocoaPods
+use_frameworks!
+use_modular_headers!</code></pre></div>
+<p>Then install and link the native iOS pods:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>cd ios
+pod install --repo-update
+cd ..</code></pre></div>
+<div class="grid-2"><div class="concept"><strong>Bundle Identifier Consistency</strong><p>Verify in Xcode that the <strong>Bundle Identifier</strong> under Target → Signing &amp; Capabilities matches the <code>iosBundleId</code> listed in your <code>firebase_options.dart</code>.</p></div><div class="concept"><strong>macOS Network Entitlements</strong><p>If supporting macOS, open <code>macos/Runner/DebugProfile.entitlements</code> and add client network permissions so your app can reach Firebase endpoints:</p><code>&lt;key&gt;com.apple.security.network.client&lt;/key&gt;&lt;true/&gt;</code></div></div>
+<div class="panel mint"><strong>No Xcode Drag &amp; Drop Needed!</strong><p>Because `DefaultFirebaseOptions.currentPlatform` supplies the iOS API key, app ID, and project ID at runtime in Dart, you do not even need to manually drag `GoogleService-Info.plist` into Xcode project targets.</p></div>
+</section>
+
+<!-- STEP 12 -->
+<section class="step-view" data-title="Web platform setup"><header class="step-header"><span class="step-kicker">STEP 12 · PLATFORM SPECIFICS</span><h1>Web Setup &amp; Domains</h1><p class="lede">Run Firebase directly on the modern browser canvas with zero build configuration.</p></header>
+<p>With FlutterFire CLI, Web setup is completely frictionless! The <code>web</code> options in <code>firebase_options.dart</code> directly configure the Firebase JS SDK under the hood.</p>
+<div class="flow">Flutter Web Initialization:<br>Browser loads main.dart.js<br>↓<br>WidgetsFlutterBinding.ensureInitialized()<br>↓<br>Firebase.initializeApp(options: DefaultFirebaseOptions.web)<br>↓<br>FlutterFire compiles Dart options into Firebase Web SDK calls<br>↓<br>Instant secure connection!</div>
+<div class="panel yellow"><strong>Authorized Domains for Firebase Auth:</strong><p>When running Flutter Web in debug mode (e.g. <code>flutter run -d chrome</code>), your app runs on <code>localhost</code>. By default, Firebase enables <code>localhost</code> in <strong>Authentication → Settings → Authorized domains</strong>. If deploying to custom domains, remember to add them there!</p></div>
+<div class="callout"><span class="label">TEST IN CHROME</span><p>Launch your Web build directly from your terminal:</p></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>flutter run -d chrome</code></pre></div>
+</section>
+
+<!-- STEP 13 -->
+<section class="step-view" data-title="Simple verification"><header class="step-header"><span class="step-kicker">STEP 13 · VERIFY</span><h1>Verify Firebase Connection</h1><p class="lede">Verify that Firebase is properly configured and initialized with a simple, minimal test in main.dart.</p></header>
+<p>To confirm that your Flutter application is properly connected to your Firebase project, update <code>lib/main.dart</code> with this simple verification widget:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+Future&lt;void&gt; main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Read the project ID from the initialized Firebase instance
+    final projectId = Firebase.app().options.projectId;
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Firebase Verification'),
+          backgroundColor: const Color(0xFF2856D8),
+          foregroundColor: Colors.white,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check_circle_outline, color: Colors.green, size: 72),
+              const SizedBox(height: 16),
+              const Text(
+                'Firebase Connected!',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Connected Project ID: $projectId',
+                style: const TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre></div>
+<div class="callout"><span class="label">RUN &amp; TEST</span><p>Run your app on your connected device, emulator, or browser:</p></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code># Run on connected device or default browser
+flutter run
+
+# Or specifically in Chrome
+flutter run -d chrome</code></pre></div>
+<div class="panel mint"><strong>Success Indicator:</strong><p>When the app launches, you will see a green checkmark along with your Firebase <strong>Project ID</strong> (e.g., <code>codelab-flutter-demo</code>). This proves that <code>WidgetsFlutterBinding</code> initialized, platform channels communicated successfully, and <code>DefaultFirebaseOptions</code> matched your target platform!</p></div>
+<div class="panel blue"><strong>Terminal Debug Check (Optional):</strong><p>You can also log directly to your debug console with a single line:</p><code>debugPrint('✅ Firebase initialized for: ${Firebase.app().options.projectId}');</code></div>
+</section>
+
+<!-- STEP 14 -->
+<section class="step-view" data-title="Troubleshooting"><header class="step-header"><span class="step-kicker">STEP 14 · DEBUGGING</span><h1>Troubleshooting &amp; Common Errors</h1><p class="lede">Diagnose and resolve the most frequent CLI and runtime pitfalls quickly.</p></header>
+<table class="comparison"><tr><th>Error Symptom</th><th>Root Cause</th><th>Immediate Fix</th></tr><tr><td><code>command not found: flutterfire</code></td><td>Dart's pub cache bin directory is not on system <code>PATH</code>.</td><td>Export <code>$HOME/.pub-cache/bin</code> in <code>~/.zshrc</code> or add to Windows Environment Variables.</td></tr><tr><td><code>FirebaseApp not found / [core/no-app]</code></td><td><code>Firebase.initializeApp()</code> was omitted or failed before accessing a plugin.</td><td>Ensure <code>WidgetsFlutterBinding.ensureInitialized()</code> and <code>await Firebase.initializeApp(...)</code> run before <code>runApp()</code>.</td></tr><tr><td><code>minSdkVersion 16 cannot be smaller than 21</code></td><td>Android build.gradle has outdated default min SDK.</td><td>Change <code>minSdkVersion</code> to <code>21</code> in <code>android/app/build.gradle</code>.</td></tr><tr><td><code>CocoaPods could not find compatible versions</code></td><td>CocoaPods local repo index is out of date.</td><td>Run <code>cd ios &amp;&amp; pod repo update &amp;&amp; pod install &amp;&amp; cd ..</code></td></tr><tr><td><code>Configuration out of sync after console changes</code></td><td>Added/modified apps or enabled providers in Firebase console.</td><td>Simply re-run <code>flutterfire configure</code> to regenerate updated <code>firebase_options.dart</code>.</td></tr></table>
+<div class="quiz" data-answer="1" data-correct="Correct! Re-running 'flutterfire configure' updates lib/firebase_options.dart with the newly registered credentials."><h3>What should you do after changing package IDs or enabling new platforms in Firebase?</h3><div class="quiz-options"><button class="quiz-option">Delete the entire Flutter project and recreate it from scratch.</button><button class="quiz-option">Re-run 'flutterfire configure' in the project root to synchronize options.</button><button class="quiz-option">Manually write XML files in the android folder.</button></div><div class="quiz-feedback"></div></div>
+</section>
+
+<!-- STEP 15 -->
+<section class="step-view" data-title="Security"><header class="step-header"><span class="step-kicker">STEP 15 · SECURITY</span><h1>Security Fundamentals</h1><p class="lede">Understand how Firebase secures client applications and protects credentials.</p></header>
+<div class="panel pink"><strong>Critical Security Mindset:</strong><p>Client-side code (including Flutter mobile &amp; web apps) cannot keep secrets. Anyone can inspect compiled binary files or web bundles. Therefore, Firebase relies on <strong>Server-Side Security Rules</strong> and <strong>App Check</strong> on Google's servers to authorize or deny requests.</p></div>
+<div class="grid-2"><div class="concept"><strong>Server-Side Security Rules</strong><p>When you add databases (like Cloud Firestore) or Cloud Storage in subsequent codelabs, you will secure them by writing server-enforced security rules directly in the Firebase Console.</p></div><div class="concept"><strong>Firebase App Check</strong><p>Protect your backend resources from abuse, bots, and unauthorized clients using device attestation providers (Play Integrity on Android, DeviceCheck on iOS, reCAPTCHA v3 on Web).</p></div></div>
+<div class="challenge"><h3>Security Best Practices Checklist</h3><ol><li>Never store Firebase Admin Service Account private keys inside a Flutter app.</li><li>Always define strict Security Rules in the console before shipping to production.</li><li>Enable Firebase App Check to block unauthorized non-app requests.</li><li>Add SHA-1 fingerprints for release signing keys before releasing on Google Play.</li></ol></div>
+</section>
+
+<!-- STEP 16 -->
+<section class="step-view" data-title="Revision"><header class="step-header"><span class="step-kicker">STEP 16 · FINAL REVISION</span><h1>Firebase CLI Setup Revision</h1><p class="lede">Review key takeaways and test your complete understanding.</p></header>
+<div class="reveal"><summary>Why use FlutterFire CLI instead of manual setup?</summary><div>FlutterFire CLI registers apps across platforms simultaneously, updates native build files automatically, and generates type-safe Dart options (`DefaultFirebaseOptions.currentPlatform`) to prevent platform configuration drift.</div></div>
+<div class="reveal"><summary>What is DefaultFirebaseOptions.currentPlatform?</summary><div>A static getter that inspects `kIsWeb` and `defaultTargetPlatform` at runtime and returns the matching `FirebaseOptions` instance (Android, iOS, Web, macOS, or Windows).</div></div>
+<div class="reveal"><summary>Why call WidgetsFlutterBinding.ensureInitialized()?</summary><div>Because `Firebase.initializeApp()` communicates with native platform channels before `runApp()` starts the widget engine; the binding must be ready first.</div></div>
+<div class="reveal"><summary>How do you update configuration if you add iOS later?</summary><div>Run `flutterfire configure` again in the project root, choose the same project, and include iOS in the platform selection.</div></div>
+<h2>Completion Checklist</h2>
+<ul class="checklist">
+  <li>I installed the Firebase CLI (`npm install -g firebase-tools`) and logged in.</li>
+  <li>I activated the FlutterFire CLI (`dart pub global activate flutterfire_cli`).</li>
+  <li>I added Dart pub cache to my system PATH.</li>
+  <li>I created a Firebase project in the console or via CLI.</li>
+  <li>I installed `firebase_core` in my Flutter project.</li>
+  <li>I ran `flutterfire configure` to generate `lib/firebase_options.dart`.</li>
+  <li>I initialized Firebase in `main()` using `WidgetsFlutterBinding.ensureInitialized()`.</li>
+  <li>I configured minimum Android SDK (`minSdkVersion 21`) and iOS Podfile platform.</li>
+  <li>I verified the connection using the simple verification app.</li>
+  <li>I understand that Firebase client keys are secured by backend Security Rules.</li>
+</ul>
+<div class="finish">
+  <h2>Firebase CLI Codelab Complete! 🎉</h2>
+  <p>You have mastered the modern, official way to connect Flutter applications to Firebase. Your foundational setup is complete, and you are ready to explore specialized codelabs for Firebase services!</p>
+</div>
+</section>
+
+</div></main></div><script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});
+    document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+    if(updateHash) history.pushState({step:current},'',`#step-${current+1}`);
+    window.scrollTo({top:0,behavior:'auto'});sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');
+  }
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render();}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+  nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});
+  menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+  document.addEventListener('click',async event=>{const copy=event.target.closest('.copy-btn');if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1200);return;}const option=event.target.closest('.quiz-option');if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show');}});
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+  document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});
+  current=getHashStep();render(false);
+})();
+</script></body></html>
