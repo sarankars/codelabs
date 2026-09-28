@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Authentication in Flutter — Flutter Codelab</title>
+  <meta name="description" content="Learn how to add Firebase Authentication to a Flutter app using Email/Password, Google Sign-In, and Phone Number verification. Step-by-step guide with full Dart code.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+    *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.36rem;line-height:1.08}.brand p{margin:0;font-size:.84rem;font-weight:600}
+    .auth-badge{display:inline-flex;gap:6px;margin-top:8px;flex-wrap:wrap}.auth-badge span{padding:2px 7px;font-size:.65rem;font-family:"DM Mono",monospace;font-weight:700;border:2px solid var(--ink)}.b-email{background:var(--yellow)}.b-google{background:var(--mint)}.b-phone{background:var(--pink)}
+    .progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}
+    main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(1.9rem,4.5vw,3.4rem);letter-spacing:-.04em}h2{margin:30px 0 12px;font-size:clamp(1.4rem,2.8vw,2.1rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.06rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}
+    .grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{display:grid;gap:16px;grid-template-columns:repeat(3,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}
+    .reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}
+    .challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}
+    .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto;white-space:pre}
+    .screen-stack{display:grid;gap:12px;margin:22px 0}.screen-card{padding:16px;background:#fff;border:3px solid var(--ink);box-shadow:var(--shadow-sm);font-weight:800}.screen-card.active{background:var(--mint)}
+    .checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}
+    .finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}.references a{color:var(--blue-dark);font-weight:700}
+    @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+    @media(max-width:680px){.grid-2,.grid-3{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}}
+  </style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+  <div class="brand">
+    <div class="eyebrow">Flutter Firebase Codelab</div>
+    <h2>Firebase Authentication</h2>
+    <p>Secure your Flutter app with Auth.</p>
+    <div class="auth-badge">
+      <span class="b-email">EMAIL</span>
+      <span class="b-google">GOOGLE</span>
+      <span class="b-phone">PHONE</span>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+    <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+  <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+</aside>
+
+<div class="mobile-bar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Open navigation" aria-expanded="false">&#9776;</button>
+  <div class="mobile-title" id="mobileTitle">Firebase Authentication</div>
+</div>
+
+<main><div class="content" id="content">
+
+<!-- STEP 1 -->
+<section class="step-view" data-title="What is Auth?">
+<header class="step-header">
+  <span class="step-kicker">STEP 1 &middot; INTRODUCTION</span>
+  <h1>What is Firebase Authentication?</h1>
+  <p class="lede">Understand why authentication matters, how Firebase Auth works, and what you will build in this codelab.</p>
+</header>
+<div class="objective"><strong>By the end of this codelab:</strong> You will add Firebase Authentication to a Flutter app supporting three sign-in methods &mdash; Email &amp; Password, Google Sign-In, and Phone Number OTP &mdash; with a reactive auth state listener, sign-out flow, and proper error handling.</div>
+
+<h2>Why Does Your App Need Authentication?</h2>
+<p>Authentication answers one critical question: <strong>&ldquo;Who is this user?&rdquo;</strong> Without it, every user is anonymous &mdash; you cannot personalise data, protect private content, or restrict actions. With Firebase Auth you get a verified, unique <code>uid</code> for every user that persists across sessions and devices.</p>
+
+<div class="grid-3">
+  <div class="concept"><span style="font-size:1.8rem">&#128274;</span><strong>Identity</strong><p>Every signed-in user receives a stable <code>uid</code> &mdash; the source of truth for linking Firestore documents, Storage files, and backend data.</p></div>
+  <div class="concept"><span style="font-size:1.8rem">&#128737;&#65039;</span><strong>Security Rules</strong><p>Firestore and Storage security rules read <code>request.auth.uid</code> to allow or deny requests at the server level &mdash; never trusting the client.</p></div>
+  <div class="concept"><span style="font-size:1.8rem">&#127758;</span><strong>Cross-Platform</strong><p>The same Firebase user account works on Android, iOS, and Web from a single Dart codebase using FlutterFire.</p></div>
+</div>
+
+<h2>How Firebase Authentication Works</h2>
+<div class="flow">User opens app
+  &#8595;
+App checks FirebaseAuth.instance.authStateChanges()
+  &#8595;  (stream emits User? &mdash; null = not signed in)
+  &#9500;&#9472;&#9472; null &#8594; Show Login Screen
+  &#9492;&#9472;&#9472; User &#8594; Show Home Screen
+         &#8595;
+User chooses a sign-in method
+         &#8595;
+Firebase verifies identity (Google, SMS, password, etc.)
+         &#8595;
+Firebase issues an ID Token (JWT)
+         &#8595;
+FirebaseAuth.instance.currentUser is populated
+         &#8595;
+authStateChanges() emits User &#8594; app navigates to home</div>
+
+<h2>Sign-In Methods Covered</h2>
+<div class="grid-3">
+  <div class="concept"><strong>&#128231; Email / Password</strong><p>Classic username-password flow. Users register with an email and choose a password. Firebase handles hashing, storage, and reset emails.</p></div>
+  <div class="concept"><strong>&#128247; Google Sign-In</strong><p>One-tap OAuth flow using the user&rsquo;s existing Google account. No password required &mdash; Firebase receives a Google ID token and exchanges it for a Firebase credential.</p></div>
+  <div class="concept"><strong>&#128241; Phone Number</strong><p>Firebase sends a one-time OTP via SMS. The user enters the code to verify ownership of a real phone number &mdash; popular in markets with low email adoption.</p></div>
+</div>
+
+<h2>What is <code>firebase_auth</code>?</h2>
+<p>The <code>firebase_auth</code> Flutter plugin is the official FlutterFire package that wraps the Firebase Auth SDK for Android, iOS, and Web. It provides:</p>
+<ul>
+  <li><code>FirebaseAuth.instance</code> &mdash; singleton entry point</li>
+  <li><code>authStateChanges()</code> &mdash; reactive stream of the current <code>User?</code></li>
+  <li><code>createUserWithEmailAndPassword()</code>, <code>signInWithEmailAndPassword()</code></li>
+  <li><code>signInWithCredential()</code> &mdash; accepts Google, Apple, Phone credentials</li>
+  <li><code>signOut()</code> &mdash; clears the local session token</li>
+</ul>
+<div class="panel blue"><strong>&#128203; Prerequisites:</strong><p>This codelab assumes you have completed the <em>Firebase CLI Setup</em> codelab &mdash; your Flutter project has <code>firebase_core</code> installed, <code>firebase_options.dart</code> generated, and Firebase initialized in <code>main.dart</code>.</p></div>
+</section>
+
+<!-- STEP 2 -->
+<section class="step-view" data-title="Enable Authentication">
+<header class="step-header">
+  <span class="step-kicker">STEP 2 &middot; FIREBASE CONSOLE</span>
+  <h1>Enable Authentication in Firebase Console</h1>
+  <p class="lede">Before writing any Dart code, turn on the sign-in providers you plan to use from the Firebase Console.</p>
+</header>
+
+<h2>Navigating to the Auth Dashboard</h2>
+<div class="screen-stack">
+  <div class="screen-card">1. Go to <a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a> and select your project.</div>
+  <div class="screen-card">2. In the left sidebar, click <strong>Build</strong> &#8594; <strong>Authentication</strong>.</div>
+  <div class="screen-card">3. Click the blue <strong>&ldquo;Get started&rdquo;</strong> button on the Authentication landing page.</div>
+  <div class="screen-card active">4. You are now on the <strong>Sign-in method</strong> tab &mdash; this is where providers live.</div>
+</div>
+
+<h2>Enable Email / Password</h2>
+<ol>
+  <li>Click <strong>Email/Password</strong> in the provider list.</li>
+  <li>Toggle the first switch (<em>Email/Password</em>) to <strong>Enabled</strong>.</li>
+  <li>Click <strong>Save</strong>.</li>
+</ol>
+
+<h2>Enable Google Sign-In</h2>
+<ol>
+  <li>Click <strong>Google</strong> in the provider list.</li>
+  <li>Toggle to <strong>Enabled</strong>.</li>
+  <li>Enter a support email (your Google account email is fine).</li>
+  <li>Click <strong>Save</strong>.</li>
+</ol>
+<div class="panel orange"><strong>&#9888;&#65039; Android SHA-1 Required for Google Sign-In:</strong><p>Google Sign-In on Android only works when your app&rsquo;s debug SHA-1 fingerprint is registered. Run the following from your Flutter project root:</p><code>cd android &amp;&amp; ./gradlew signingReport</code><p>Copy the <strong>SHA1</strong> value from the debug variant and add it under <strong>Project Settings &#8594; Your Android App &#8594; Add fingerprint</strong>.</p></div>
+
+<h2>Enable Phone Number</h2>
+<ol>
+  <li>Click <strong>Phone</strong> in the provider list.</li>
+  <li>Toggle to <strong>Enabled</strong>.</li>
+  <li>Click <strong>Save</strong>.</li>
+</ol>
+<div class="panel yellow"><strong>Testing Phone Auth (Test Numbers):</strong><p>Add test phone numbers in the Firebase Console so you can verify OTP flows without sending real SMS during development. Go to <strong>Authentication &#8594; Sign-in method &#8594; Phone &#8594; Phone numbers for testing</strong> and add a number like <code>+1 650-555-1234</code> with a fixed OTP like <code>123456</code>.</p></div>
+
+<table class="comparison">
+  <tr><th>Provider</th><th>Console Toggle</th><th>Extra Step?</th></tr>
+  <tr><td>Email / Password</td><td>Authentication &#8594; Sign-in method &#8594; Email/Password</td><td>None</td></tr>
+  <tr><td>Google Sign-In</td><td>Authentication &#8594; Sign-in method &#8594; Google</td><td>Android SHA-1 fingerprint registration</td></tr>
+  <tr><td>Phone Number</td><td>Authentication &#8594; Sign-in method &#8594; Phone</td><td>Test numbers (recommended in dev)</td></tr>
+</table>
+
+<div class="quiz" data-answer="1" data-correct="Correct! The Firebase Console Authentication section is where you enable providers before any client code can use them.">
+  <h3>Where do you enable Google Sign-In as a provider for your Firebase project?</h3>
+  <div class="quiz-options">
+    <button class="quiz-option">In pubspec.yaml by adding the google_sign_in package.</button>
+    <button class="quiz-option">In the Firebase Console &#8594; Authentication &#8594; Sign-in method &#8594; Google.</button>
+    <button class="quiz-option">In AndroidManifest.xml by adding a meta-data tag.</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+</section>
+
+<!-- STEP 3 -->
+<section class="step-view" data-title="Install Packages">
+<header class="step-header">
+  <span class="step-kicker">STEP 3 &middot; PROJECT SETUP</span>
+  <h1>Install Required Packages</h1>
+  <p class="lede">Add the necessary Dart packages to your Flutter project for authentication and Google Sign-In.</p>
+</header>
+
+<h2>Package Overview</h2>
+<table class="comparison">
+  <tr><th>Package</th><th>Purpose</th><th>Used For</th></tr>
+  <tr><td><code>firebase_auth</code></td><td>Official FlutterFire Auth plugin</td><td>All sign-in methods &mdash; Email, Google, Phone</td></tr>
+  <tr><td><code>google_sign_in</code></td><td>Google Sign-In SDK wrapper</td><td>Native Google OAuth flow on Android &amp; iOS</td></tr>
+</table>
+
+<p>Install both with a single command from your project root:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>flutter pub add firebase_auth google_sign_in</code></pre></div>
+
+<p>Verify your <code>pubspec.yaml</code> now includes these dependencies:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.0       # Firebase Auth plugin
+  google_sign_in: ^6.2.1      # Google Sign-In native flow</code></pre></div>
+
+<div class="callout"><span class="label">WHY TWO PACKAGES?</span><p><code>firebase_auth</code> handles the Firebase side (exchanging credentials for a Firebase user). <code>google_sign_in</code> handles the <em>native</em> Google OAuth UI flow on Android and iOS, producing a <code>GoogleSignInAccount</code> with tokens that are then passed to <code>firebase_auth</code>.</p></div>
+
+<h2>Android &mdash; Verify minSdkVersion</h2>
+<p>Firebase Auth requires Android API level 21 or higher. Open <code>android/app/build.gradle</code> and confirm:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>android {
+    defaultConfig {
+        minSdkVersion 21   // Must be 21 or higher
+    }
+}</code></pre></div>
+
+<h2>iOS &mdash; Update Podfile &amp; Run pod install</h2>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code># ios/Podfile
+platform :ios, '13.0'</code></pre></div>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>cd ios &amp;&amp; pod install --repo-update &amp;&amp; cd ..</code></pre></div>
+
+<h2>iOS &mdash; Add URL Scheme for Google Sign-In</h2>
+<p>Google Sign-In on iOS needs a custom URL scheme in <code>ios/Runner/Info.plist</code>:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>&lt;!-- ios/Runner/Info.plist --&gt;
+&lt;key&gt;CFBundleURLTypes&lt;/key&gt;
+&lt;array&gt;
+  &lt;dict&gt;
+    &lt;key&gt;CFBundleTypeRole&lt;/key&gt;
+    &lt;string&gt;Editor&lt;/string&gt;
+    &lt;key&gt;CFBundleURLSchemes&lt;/key&gt;
+    &lt;array&gt;
+      &lt;!-- REVERSED_CLIENT_ID from GoogleService-Info.plist --&gt;
+      &lt;string&gt;com.googleusercontent.apps.YOUR_REVERSED_CLIENT_ID&lt;/string&gt;
+    &lt;/array&gt;
+  &lt;/dict&gt;
+&lt;/array&gt;</code></pre></div>
+<div class="panel yellow"><strong>Finding your REVERSED_CLIENT_ID:</strong><p>Open <code>ios/Runner/GoogleService-Info.plist</code> (generated by <code>flutterfire configure</code>) and find the value for the key <code>REVERSED_CLIENT_ID</code>. It looks like <code>com.googleusercontent.apps.1039849812-abc123xyz</code>.</p></div>
+
+<div class="quiz" data-answer="2" data-correct="Correct! google_sign_in triggers the native Google OAuth popup and returns an ID token that firebase_auth uses to create a Firebase credential.">
+  <h3>What is the role of the <code>google_sign_in</code> package in the authentication flow?</h3>
+  <div class="quiz-options">
+    <button class="quiz-option">It replaces firebase_auth entirely and manages the Firebase user session.</button>
+    <button class="quiz-option">It stores Google account credentials in the device keychain.</button>
+    <button class="quiz-option">It triggers the native Google OAuth popup and returns an ID token that firebase_auth uses to create a Firebase credential.</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+</section>
+
+<!-- STEP 4 -->
+<section class="step-view" data-title="Auth State Listener">
+<header class="step-header">
+  <span class="step-kicker">STEP 4 &middot; APP ARCHITECTURE</span>
+  <h1>Listen to Auth State Changes</h1>
+  <p class="lede">The foundation of any auth-aware app is a reactive stream that tells your UI when the user signs in or out &mdash; without polling or manually managing state.</p>
+</header>
+
+<h2>The <code>authStateChanges()</code> Stream</h2>
+<p><code>FirebaseAuth.instance.authStateChanges()</code> returns a <code>Stream&lt;User?&gt;</code>. It emits:</p>
+<ul>
+  <li><code>null</code> &mdash; when no user is signed in (show login screen)</li>
+  <li>A <code>User</code> object &mdash; when a user is signed in (show home screen)</li>
+  <li>Fires automatically on app start, sign-in, sign-out, and token refresh</li>
+</ul>
+
+<h2>Project File Structure</h2>
+<div class="flow">lib/
+  &#9500;&#9472;&#9472; main.dart               &#8592; Firebase init + root router
+  &#9500;&#9472;&#9472; auth_gate.dart          &#8592; Listens to authStateChanges()
+  &#9500;&#9472;&#9472; home_screen.dart        &#8592; Shown when signed in
+  &#9500;&#9472;&#9472; login_screen.dart       &#8592; Shown when signed out
+  &#9500;&#9472;&#9472; email_auth_screen.dart  &#8592; Email/Password form
+  &#9492;&#9472;&#9472; phone_auth_screen.dart  &#8592; Phone OTP form</div>
+
+<h2><code>auth_gate.dart</code> &mdash; The Auth Router</h2>
+<p>This widget uses a <code>StreamBuilder</code> to reactively switch between the login and home screens. This is the most important pattern in auth-aware Flutter apps.</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/auth_gate.dart
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'home_screen.dart';
+import 'login_screen.dart';
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder&lt;User?&gt;(
+      // Listens to sign-in / sign-out events in real time
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        // While Firebase is resolving the initial auth state
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        // snapshot.data is null  = no user signed in
+        if (snapshot.data == null) {
+          return const LoginScreen();
+        }
+
+        // snapshot.data is a User = user is signed in
+        return const HomeScreen();
+      },
+    );
+  }
+}</code></pre></div>
+
+<h2>Update <code>main.dart</code></h2>
+<p>Make <code>AuthGate</code> the root of the app so it guards every route from the first frame:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/main.dart
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'auth_gate.dart';
+
+Future&lt;void&gt; main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Firebase Auth Demo',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF2856D8),
+        ),
+        useMaterial3: true,
+      ),
+      home: const AuthGate(), // AuthGate replaces the default home widget
+    );
+  }
+}</code></pre></div>
+
+<div class="panel mint"><strong>&#9989; Why this pattern is powerful:</strong><p>You never need to call <code>Navigator.push</code> for auth transitions. When the user signs in, Firebase updates the stream, <code>StreamBuilder</code> rebuilds automatically, and <code>HomeScreen</code> appears. When they sign out, <code>LoginScreen</code> appears. Zero manual navigation logic.</p></div>
+
+<div class="quiz" data-answer="0" data-correct="Correct! authStateChanges() is a Stream&lt;User?&gt; that emits null when signed out and a User object when signed in.">
+  <h3>What does <code>FirebaseAuth.instance.authStateChanges()</code> return?</h3>
+  <div class="quiz-options">
+    <button class="quiz-option">A Stream&lt;User?&gt; that emits null when signed out and a User when signed in.</button>
+    <button class="quiz-option">A Future&lt;User&gt; that resolves once on app startup.</button>
+    <button class="quiz-option">A bool that returns true if a user is currently logged in.</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+</section>
+
+<!-- STEP 5 -->
+<section class="step-view" data-title="Email &amp; Password Auth">
+<header class="step-header">
+  <span class="step-kicker">STEP 5 &middot; SIGN-IN METHOD</span>
+  <h1>Email &amp; Password Authentication</h1>
+  <p class="lede">Implement user registration and login using classic email and password credentials managed entirely by Firebase.</p>
+</header>
+
+<h2>How Email / Password Auth Works</h2>
+<div class="flow">User enters email + password
+  &#8595;
+createUserWithEmailAndPassword()   for new accounts
+  OR
+signInWithEmailAndPassword()       for existing accounts
+  &#8595;
+Firebase validates credentials on its servers
+  &#8595;
+Returns UserCredential (containing User)
+  &#8595;
+authStateChanges() stream emits the User
+  &#8595;
+AuthGate navigates to HomeScreen automatically</div>
+
+<h2>Key API Methods</h2>
+<table class="comparison">
+  <tr><th>Method</th><th>When to Use</th><th>Returns</th></tr>
+  <tr><td><code>createUserWithEmailAndPassword(email, password)</code></td><td>New user registration</td><td><code>Future&lt;UserCredential&gt;</code></td></tr>
+  <tr><td><code>signInWithEmailAndPassword(email, password)</code></td><td>Returning user login</td><td><code>Future&lt;UserCredential&gt;</code></td></tr>
+  <tr><td><code>sendPasswordResetEmail(email)</code></td><td>User forgot password</td><td><code>Future&lt;void&gt;</code></td></tr>
+  <tr><td><code>signOut()</code></td><td>Log the user out</td><td><code>Future&lt;void&gt;</code></td></tr>
+</table>
+
+<h2>Build <code>email_auth_screen.dart</code></h2>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/email_auth_screen.dart
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+class EmailAuthScreen extends StatefulWidget {
+  const EmailAuthScreen({super.key});
+
+  @override
+  State&lt;EmailAuthScreen&gt; createState() =&gt; _EmailAuthScreenState();
+}
+
+class _EmailAuthScreenState extends State&lt;EmailAuthScreen&gt; {
+  final _formKey     = GlobalKey&lt;FormState&gt;();
+  final _emailCtrl   = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+
+  bool    _isLogin = true;
+  bool    _loading = false;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    _passwordCtrl.dispose();
+    super.dispose();
+  }
+
+  Future&lt;void&gt; _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() { _loading = true; _errorMessage = null; });
+
+    try {
+      if (_isLogin) {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailCtrl.text.trim(),
+          password: _passwordCtrl.text.trim(),
+        );
+      } else {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailCtrl.text.trim(),
+          password: _passwordCtrl.text.trim(),
+        );
+      }
+      // AuthGate handles navigation automatically
+      if (mounted) Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      setState(() { _errorMessage = _friendlyError(e.code); });
+    } finally {
+      if (mounted) setState(() { _loading = false; });
+    }
+  }
+
+  String _friendlyError(String code) {
+    return switch (code) {
+      'email-already-in-use' =&gt; 'An account with this email already exists.',
+      'invalid-email'        =&gt; 'Please enter a valid email address.',
+      'weak-password'        =&gt; 'Password must be at least 6 characters.',
+      'user-not-found'       =&gt; 'No account found with this email.',
+      'wrong-password'       =&gt; 'Incorrect password. Please try again.',
+      'too-many-requests'    =&gt; 'Too many attempts. Please wait a moment.',
+      _                      =&gt; 'Authentication failed ($code).',
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_isLogin ? 'Sign In' : 'Create Account'),
+        backgroundColor: const Color(0xFF2856D8),
+        foregroundColor: Colors.white,
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  controller: _emailCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon: Icon(Icons.email_outlined),
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (v) =&gt; (v == null || !v.contains('@'))
+                      ? 'Enter a valid email' : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: Icon(Icons.lock_outline),
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                  validator: (v) =&gt; (v == null || v.length &lt; 6)
+                      ? 'Minimum 6 characters' : null,
+                ),
+                const SizedBox(height: 24),
+                if (_errorMessage != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      border: Border.all(color: Colors.red.shade300),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(_errorMessage!,
+                      style: TextStyle(color: Colors.red.shade800)),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                FilledButton(
+                  onPressed: _loading ? null : _submit,
+                  child: _loading
+                      ? const SizedBox(height: 20, width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2))
+                      : Text(_isLogin ? 'Sign In' : 'Create Account'),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () {
+                    setState(() { _isLogin = !_isLogin; _errorMessage = null; });
+                  },
+                  child: Text(_isLogin
+                      ? "Don't have an account? Register"
+                      : 'Already have an account? Sign In'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre></div>
+
+<h2>Understanding <code>FirebaseAuthException</code></h2>
+<p>Every Firebase Auth failure throws a <code>FirebaseAuthException</code> with a machine-readable <code>code</code> string. Always catch this exception and convert the code into a user-friendly message &mdash; <strong>never show raw error codes to users.</strong></p>
+
+<div class="panel pink">
+  <strong>Common Error Codes:</strong>
+  <ul>
+    <li><code>email-already-in-use</code> &mdash; email is taken during registration</li>
+    <li><code>invalid-email</code> &mdash; malformed email string</li>
+    <li><code>weak-password</code> &mdash; password under 6 characters</li>
+    <li><code>user-not-found</code> &mdash; no account for that email</li>
+    <li><code>wrong-password</code> &mdash; password mismatch</li>
+    <li><code>too-many-requests</code> &mdash; account temporarily locked after repeated failures</li>
+  </ul>
+</div>
+
+<div class="quiz" data-answer="2" data-correct="Correct! FirebaseAuthException has a 'code' property with a machine-readable string you map to user-friendly messages.">
+  <h3>What type of exception should you catch when an email/password sign-in fails in Firebase?</h3>
+  <div class="quiz-options">
+    <button class="quiz-option">A standard Dart <code>Exception</code> with a message string.</button>
+    <button class="quiz-option">An <code>HttpException</code> with an HTTP status code.</button>
+    <button class="quiz-option">A <code>FirebaseAuthException</code> with a readable <code>code</code> property.</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+</section>
+
+<!-- STEP 6 -->
+<section class="step-view" data-title="Home Screen &amp; Sign Out">
+<header class="step-header">
+  <span class="step-kicker">STEP 6 &middot; SIGNED-IN STATE</span>
+  <h1>Build the Home Screen &amp; Sign Out</h1>
+  <p class="lede">Display the authenticated user&rsquo;s details and implement sign-out &mdash; the screen users land on after successful authentication.</p>
+</header>
+
+<h2>The <code>User</code> Object Properties</h2>
+<table class="comparison">
+  <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+  <tr><td><code>uid</code></td><td><code>String</code></td><td>Unique user ID &mdash; use as the Firestore document key</td></tr>
+  <tr><td><code>email</code></td><td><code>String?</code></td><td>Email address (null for phone-only accounts)</td></tr>
+  <tr><td><code>displayName</code></td><td><code>String?</code></td><td>Full name (populated by Google Sign-In)</td></tr>
+  <tr><td><code>photoURL</code></td><td><code>String?</code></td><td>Profile photo URL (from Google/other providers)</td></tr>
+  <tr><td><code>phoneNumber</code></td><td><code>String?</code></td><td>Phone number (populated by Phone auth)</td></tr>
+  <tr><td><code>emailVerified</code></td><td><code>bool</code></td><td>Whether email ownership has been confirmed</td></tr>
+</table>
+
+<h2>Build <code>home_screen.dart</code></h2>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/home_screen.dart
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Guaranteed non-null because AuthGate only renders this
+    // when authStateChanges() emits a User (not null).
+    final user = FirebaseAuth.instance.currentUser!;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FB),
+      appBar: AppBar(
+        title: const Text('Home'),
+        backgroundColor: const Color(0xFF2856D8),
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sign Out',
+            onPressed: () => FirebaseAuth.instance.signOut(),
+          ),
+        ],
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 48,
+                backgroundImage: user.photoURL != null
+                    ? NetworkImage(user.photoURL!) : null,
+                backgroundColor: const Color(0xFF2856D8),
+                child: user.photoURL == null
+                    ? Text(
+                        (user.displayName ?? user.email ?? '?')
+                            .substring(0, 1).toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 36, color: Colors.white,
+                          fontWeight: FontWeight.bold),
+                      )
+                    : null,
+              ),
+              const SizedBox(height: 20),
+              Text('Welcome, ${user.displayName ?? 'User'}!',
+                style: Theme.of(context).textTheme.headlineSmall
+                    ?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center),
+              const SizedBox(height: 12),
+              if (user.email != null)
+                _InfoRow(icon: Icons.email_outlined, value: user.email!),
+              if (user.phoneNumber != null)
+                _InfoRow(icon: Icons.phone_outlined, value: user.phoneNumber!),
+              _InfoRow(
+                icon: Icons.fingerprint,
+                value: 'UID: ${user.uid.substring(0, 12)}...',
+              ),
+              _InfoRow(
+                icon: Icons.verified_outlined,
+                value: user.emailVerified
+                    ? 'Email verified ✓' : 'Email not verified',
+              ),
+              const SizedBox(height: 32),
+              FilledButton.icon(
+                onPressed: () => FirebaseAuth.instance.signOut(),
+                icon: const Icon(Icons.logout),
+                label: const Text('Sign Out'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32, vertical: 14)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  const _InfoRow({required this.icon, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: const Color(0xFF2856D8)),
+          const SizedBox(width: 8),
+          Text(value, style: const TextStyle(fontSize: 15)),
+        ],
+      ),
+    );
+  }
+}</code></pre></div>
+
+<div class="panel blue"><strong>How sign-out works:</strong><p>Calling <code>FirebaseAuth.instance.signOut()</code> clears the locally cached Firebase ID token. This causes <code>authStateChanges()</code> to emit <code>null</code>, which causes <code>AuthGate</code>&rsquo;s <code>StreamBuilder</code> to rebuild and show <code>LoginScreen</code> &mdash; zero manual navigation needed.</p></div>
+</section>
+
+<!-- STEP 7 -->
+<section class="step-view" data-title="Login Screen Hub">
+<header class="step-header">
+  <span class="step-kicker">STEP 7 &middot; UI ASSEMBLY</span>
+  <h1>Build the Login Screen Hub</h1>
+  <p class="lede">Create the landing screen that routes users to the correct sign-in method &mdash; the hub for all three authentication options.</p>
+</header>
+
+<p>The login screen presents buttons that navigate to dedicated auth screens. This keeps each file focused and easy to test.</p>
+
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/login_screen.dart
+import 'package:flutter/material.dart';
+import 'email_auth_screen.dart';
+import 'phone_auth_screen.dart';
+import 'google_sign_in_service.dart';
+
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF2856D8),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Branding
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.black, width: 3),
+                    boxShadow: const [BoxShadow(
+                      color: Colors.black, offset: Offset(6, 6))],
+                  ),
+                  child: const Icon(Icons.lock_outline_rounded,
+                    size: 64, color: Color(0xFF2856D8)),
+                ),
+                const SizedBox(height: 32),
+                const Text('Welcome Back',
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800,
+                    color: Colors.white, letterSpacing: -1)),
+                const SizedBox(height: 8),
+                const Text('Choose how you want to sign in',
+                  style: TextStyle(color: Colors.white70, fontSize: 16)),
+                const SizedBox(height: 40),
+
+                // Email / Password
+                _AuthButton(
+                  icon: Icons.email_outlined,
+                  label: 'Continue with Email',
+                  color: const Color(0xFFFFD83D),
+                  textColor: Colors.black,
+                  onTap: () =&gt; Navigator.push(context,
+                    MaterialPageRoute(builder: (_) =&gt; const EmailAuthScreen())),
+                ),
+                const SizedBox(height: 14),
+
+                // Google Sign-In
+                _AuthButton(
+                  icon: Icons.g_mobiledata_rounded,
+                  label: 'Continue with Google',
+                  color: Colors.white,
+                  textColor: Colors.black,
+                  onTap: () async {
+                    try {
+                      await GoogleSignInService.signIn();
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Google sign-in failed: $e')));
+                      }
+                    }
+                  },
+                ),
+                const SizedBox(height: 14),
+
+                // Phone Number
+                _AuthButton(
+                  icon: Icons.phone_outlined,
+                  label: 'Continue with Phone',
+                  color: const Color(0xFF75E6C5),
+                  textColor: Colors.black,
+                  onTap: () =&gt; Navigator.push(context,
+                    MaterialPageRoute(builder: (_) =&gt; const PhoneAuthScreen())),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AuthButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final Color textColor;
+  final VoidCallback onTap;
+
+  const _AuthButton({required this.icon, required this.label,
+    required this.color, required this.textColor, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            color: color,
+            border: Border.all(color: Colors.black, width: 3),
+            boxShadow: const [BoxShadow(
+              color: Colors.black, offset: Offset(4, 4))],
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: textColor, size: 22),
+              const SizedBox(width: 16),
+              Text(label, style: TextStyle(color: textColor,
+                fontWeight: FontWeight.w800, fontSize: 16)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre></div>
+</section>
+
+<!-- STEP 8 -->
+<section class="step-view" data-title="Google Sign-In">
+<header class="step-header">
+  <span class="step-kicker">STEP 8 &middot; SIGN-IN METHOD</span>
+  <h1>Google Sign-In</h1>
+  <p class="lede">Add one-tap Google OAuth authentication &mdash; the fastest and most user-friendly sign-in method for Flutter apps targeting Android and iOS.</p>
+</header>
+
+<h2>The Google Sign-In Flow Explained</h2>
+<div class="flow">User taps "Continue with Google"
+  &#8595;
+GoogleSignIn().signIn()
+  &#8594; Shows native Google account picker
+  &#8595;
+User selects account &#8594; GoogleSignInAccount returned
+  &#8595;
+.authentication &#8594; returns idToken + accessToken
+  &#8595;
+GoogleAuthProvider.credential(idToken, accessToken)
+  &#8595;
+FirebaseAuth.instance.signInWithCredential(credential)
+  &#8595;
+Firebase verifies the Google ID token with Google's servers
+  &#8595;
+Returns UserCredential &#8594; authStateChanges() emits User
+  &#8595;
+AuthGate navigates to HomeScreen automatically</div>
+
+<h2>Create <code>google_sign_in_service.dart</code></h2>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/google_sign_in_service.dart
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+class GoogleSignInService {
+  /// Initiates Google Sign-In and returns a [UserCredential].
+  /// Throws [Exception] if the user cancels or sign-in fails.
+  static Future&lt;UserCredential&gt; signIn() async {
+    // Step 1: Open the Google account picker
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    if (googleUser == null) {
+      throw Exception('Sign-in cancelled by user.');
+    }
+
+    // Step 2: Obtain Google auth tokens
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
+    // Step 3: Create a Firebase credential from the Google tokens
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      idToken: googleAuth.idToken,
+      accessToken: googleAuth.accessToken,
+    );
+
+    // Step 4: Sign into Firebase with the Google credential
+    return FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  /// Signs out of both Google and Firebase.
+  static Future&lt;void&gt; signOut() async {
+    await GoogleSignIn().signOut();
+    await FirebaseAuth.instance.signOut();
+  }
+}</code></pre></div>
+
+<div class="panel mint"><strong>Why call <code>GoogleSignIn().signOut()</code> too?</strong><p>If you only call <code>FirebaseAuth.instance.signOut()</code>, the Google Sign-In library still remembers the previously selected account. Next time the user taps "Continue with Google", it auto-selects the same account without showing the picker. Calling <code>GoogleSignIn().signOut()</code> ensures the account picker always appears on the next sign-in.</p></div>
+
+<h2>Web Support for Google Sign-In</h2>
+<p>On Flutter Web, the native account picker is not available. Use <code>signInWithPopup</code> instead:</p>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// Unified cross-platform Google Sign-In
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:firebase_auth/firebase_auth.dart';
+
+Future&lt;UserCredential&gt; signInWithGoogle() async {
+  if (kIsWeb) {
+    return FirebaseAuth.instance.signInWithPopup(GoogleAuthProvider());
+  } else {
+    return GoogleSignInService.signIn(); // native flow
+  }
+}</code></pre></div>
+
+<div class="quiz" data-answer="1" data-correct="Correct! GoogleAuthProvider.credential() wraps the Google tokens into an AuthCredential that Firebase uses to verify the Google identity.">
+  <h3>What does <code>GoogleAuthProvider.credential(idToken, accessToken)</code> create?</h3>
+  <div class="quiz-options">
+    <button class="quiz-option">A Firebase User object with the Google profile pre-populated.</button>
+    <button class="quiz-option">An AuthCredential that Firebase uses to verify the Google identity and sign in.</button>
+    <button class="quiz-option">A cached session cookie stored in local storage.</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+</section>
+
+<!-- STEP 9 -->
+<section class="step-view" data-title="Phone Number Auth">
+<header class="step-header">
+  <span class="step-kicker">STEP 9 &middot; SIGN-IN METHOD</span>
+  <h1>Phone Number Authentication</h1>
+  <p class="lede">Implement SMS-based OTP verification &mdash; Firebase sends a one-time code to the user&rsquo;s phone number, which they enter to prove ownership.</p>
+</header>
+
+<h2>How Phone Auth Works</h2>
+<div class="flow">User enters phone number (e.g. +91 98765 43210)
+  &#8595;
+verifyPhoneNumber() called
+  &#8595;
+Firebase sends SMS with 6-digit OTP
+  &#8595;
+Callbacks fire:
+  &#9500;&#9472;&#9472; verificationCompleted()     &#8594; instant auto-verify (Android only)
+  &#9500;&#9472;&#9472; verificationFailed()         &#8594; error (invalid number, quota)
+  &#9500;&#9472;&#9472; codeSent()                   &#8594; OTP sent &#8594; show OTP input field
+  &#9492;&#9472;&#9472; codeAutoRetrievalTimeout()   &#8594; auto-retrieval timed out
+  &#8595;
+User enters OTP code
+  &#8595;
+PhoneAuthProvider.credential(verificationId, smsCode)
+  &#8595;
+FirebaseAuth.instance.signInWithCredential(credential)
+  &#8595;
+authStateChanges() emits User &#8594; AuthGate shows HomeScreen</div>
+
+<div class="panel yellow"><strong>Phone Number Format (E.164):</strong><p>Always use E.164 format: <code>+[country code][number]</code>. Examples: <code>+919876543210</code> (India), <code>+16505551234</code> (USA), <code>+447911123456</code> (UK). Include the country code and omit all spaces, dashes, and parentheses.</p></div>
+
+<h2>Build <code>phone_auth_screen.dart</code></h2>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// lib/phone_auth_screen.dart
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+class PhoneAuthScreen extends StatefulWidget {
+  const PhoneAuthScreen({super.key});
+
+  @override
+  State&lt;PhoneAuthScreen&gt; createState() =&gt; _PhoneAuthScreenState();
+}
+
+class _PhoneAuthScreenState extends State&lt;PhoneAuthScreen&gt; {
+  final _phoneCtrl = TextEditingController();
+  final _otpCtrl   = TextEditingController();
+
+  String? _verificationId;
+  bool    _codeSent = false;
+  bool    _loading  = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _phoneCtrl.dispose();
+    _otpCtrl.dispose();
+    super.dispose();
+  }
+
+  // Step 1: Send OTP
+  Future&lt;void&gt; _sendOtp() async {
+    final phone = _phoneCtrl.text.trim();
+    if (phone.isEmpty) {
+      setState(() =&gt; _error = 'Enter a phone number in E.164 format.');
+      return;
+    }
+    setState(() { _loading = true; _error = null; });
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+      phoneNumber: phone,
+
+      // Android: auto-verifies if Google Play Services reads the SMS
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        await FirebaseAuth.instance.signInWithCredential(credential);
+        if (mounted) Navigator.pop(context);
+      },
+
+      // Called if verification fails
+      verificationFailed: (FirebaseAuthException e) {
+        if (mounted) setState(() {
+          _loading = false;
+          _error = e.message ?? 'Verification failed (${e.code}).';
+        });
+      },
+
+      // Called when Firebase has dispatched the SMS
+      codeSent: (String verificationId, int? resendToken) {
+        if (mounted) setState(() {
+          _verificationId = verificationId;
+          _codeSent = true;
+          _loading  = false;
+        });
+      },
+
+      // Called after auto-retrieval window expires
+      codeAutoRetrievalTimeout: (String verificationId) {
+        if (mounted) setState(() { _verificationId = verificationId; });
+      },
+
+      timeout: const Duration(seconds: 60),
+    );
+  }
+
+  // Step 2: Verify OTP
+  Future&lt;void&gt; _verifyOtp() async {
+    final smsCode = _otpCtrl.text.trim();
+    if (smsCode.length != 6) {
+      setState(() =&gt; _error = 'Enter the 6-digit OTP code.');
+      return;
+    }
+    if (_verificationId == null) return;
+    setState(() { _loading = true; _error = null; });
+
+    try {
+      final credential = PhoneAuthProvider.credential(
+        verificationId: _verificationId!,
+        smsCode: smsCode,
+      );
+      await FirebaseAuth.instance.signInWithCredential(credential);
+      if (mounted) Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _loading = false;
+        _error = e.code == 'invalid-verification-code'
+            ? 'Incorrect OTP. Please check and try again.'
+            : 'Verification failed (${e.code}).';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Phone Sign-In'),
+        backgroundColor: const Color(0xFF2856D8),
+        foregroundColor: Colors.white,
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Icon(Icons.phone_iphone_rounded,
+                size: 64, color: Color(0xFF2856D8)),
+              const SizedBox(height: 20),
+
+              if (!_codeSent) ...[
+                const Text('Enter your phone number',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center),
+                const SizedBox(height: 8),
+                const Text('Include country code, e.g. +91 9876543210',
+                  style: TextStyle(color: Colors.grey),
+                  textAlign: TextAlign.center),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _phoneCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone Number',
+                    hintText: '+91 9876543210',
+                    prefixIcon: Icon(Icons.phone_outlined),
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 20),
+                FilledButton(
+                  onPressed: _loading ? null : _sendOtp,
+                  child: _loading
+                      ? const SizedBox(height: 20, width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2))
+                      : const Text('Send OTP'),
+                ),
+              ] else ...[
+                Text('Code sent to ${_phoneCtrl.text}',
+                  style: const TextStyle(fontSize: 18,
+                    fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center),
+                const SizedBox(height: 8),
+                const Text('Enter the 6-digit code from your SMS',
+                  style: TextStyle(color: Colors.grey),
+                  textAlign: TextAlign.center),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _otpCtrl,
+                  decoration: const InputDecoration(
+                    labelText: '6-Digit OTP',
+                    prefixIcon: Icon(Icons.lock_outlined),
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 24, letterSpacing: 12,
+                    fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: _loading ? null : _verifyOtp,
+                  child: _loading
+                      ? const SizedBox(height: 20, width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2))
+                      : const Text('Verify OTP'),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () =&gt; setState(() {
+                    _codeSent = false;
+                    _otpCtrl.clear();
+                    _error = null;
+                  }),
+                  child: const Text('&#8592; Change phone number'),
+                ),
+              ],
+
+              if (_error != null) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    border: Border.all(color: Colors.red.shade300),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(_error!,
+                    style: TextStyle(color: Colors.red.shade800)),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre></div>
+
+<h2>The 4 Callbacks Explained</h2>
+<table class="comparison">
+  <tr><th>Callback</th><th>When It Fires</th><th>What to Do</th></tr>
+  <tr><td><code>verificationCompleted</code></td><td>Android auto-reads the SMS OTP</td><td>Directly call <code>signInWithCredential()</code></td></tr>
+  <tr><td><code>verificationFailed</code></td><td>Invalid number, quota exceeded, network error</td><td>Show error from <code>e.message</code></td></tr>
+  <tr><td><code>codeSent</code></td><td>SMS was dispatched by Firebase</td><td>Store <code>verificationId</code>, show OTP input field</td></tr>
+  <tr><td><code>codeAutoRetrievalTimeout</code></td><td>Auto-retrieval window expired</td><td>Update <code>verificationId</code> for manual entry</td></tr>
+</table>
+
+<div class="quiz" data-answer="0" data-correct="Correct! The codeSent callback provides the verificationId which you store and later combine with the user-entered SMS code to create a PhoneAuthCredential.">
+  <h3>When <code>codeSent</code> fires, what must you store for later use?</h3>
+  <div class="quiz-options">
+    <button class="quiz-option">The <code>verificationId</code> string &mdash; needed to create the <code>PhoneAuthCredential</code>.</button>
+    <button class="quiz-option">The user&rsquo;s phone number &mdash; Firebase doesn&rsquo;t store it.</button>
+    <button class="quiz-option">The resend token &mdash; it&rsquo;s mandatory to verify the OTP.</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+</section>
+
+<!-- STEP 10 -->
+<section class="step-view" data-title="Troubleshooting">
+<header class="step-header">
+  <span class="step-kicker">STEP 10 &middot; DEBUGGING</span>
+  <h1>Troubleshooting &amp; Common Errors</h1>
+  <p class="lede">Diagnose and fix the most frequent Firebase Auth issues across all three sign-in methods.</p>
+</header>
+
+<h2>General Firebase Auth Errors</h2>
+<table class="comparison">
+  <tr><th>Error / Symptom</th><th>Cause</th><th>Fix</th></tr>
+  <tr><td><code>FirebaseApp not initialized</code></td><td><code>Firebase.initializeApp()</code> not awaited before using Auth</td><td>Ensure <code>WidgetsFlutterBinding.ensureInitialized()</code> and <code>await Firebase.initializeApp()</code> run before <code>runApp()</code></td></tr>
+  <tr><td><code>operation-not-allowed</code></td><td>Sign-in provider not enabled in Firebase Console</td><td>Go to Authentication &#8594; Sign-in method and enable the provider</td></tr>
+  <tr><td><code>network-request-failed</code></td><td>No internet connection or Firebase endpoint unreachable</td><td>Check device connectivity</td></tr>
+</table>
+
+<h2>Email / Password Errors</h2>
+<table class="comparison">
+  <tr><th>Error Code</th><th>Cause</th><th>Fix</th></tr>
+  <tr><td><code>email-already-in-use</code></td><td>Registration with an existing email</td><td>Prompt user to sign in or use "Forgot password"</td></tr>
+  <tr><td><code>weak-password</code></td><td>Password fewer than 6 characters</td><td>Enforce minimum length in form validator</td></tr>
+  <tr><td><code>wrong-password</code></td><td>Incorrect password</td><td>Show generic "Invalid credentials"</td></tr>
+  <tr><td><code>user-not-found</code></td><td>Sign-in with email that has no account</td><td>Offer registration flow</td></tr>
+  <tr><td><code>too-many-requests</code></td><td>Account temporarily locked</td><td>Inform user and suggest waiting or password reset</td></tr>
+</table>
+
+<h2>Google Sign-In Errors</h2>
+<table class="comparison">
+  <tr><th>Error / Symptom</th><th>Cause</th><th>Fix</th></tr>
+  <tr><td>Google dialog doesn&rsquo;t open on Android</td><td>SHA-1 fingerprint not registered</td><td>Run <code>./gradlew signingReport</code>, copy SHA1, add in Project Settings</td></tr>
+  <tr><td><code>PlatformException: sign_in_failed</code></td><td>Missing URL scheme in iOS Info.plist</td><td>Add <code>REVERSED_CLIENT_ID</code> URL scheme</td></tr>
+  <tr><td><code>ApiException: 10</code> on Android</td><td>SHA-1 mismatch</td><td>Re-run signingReport and re-register the correct SHA1</td></tr>
+</table>
+
+<h2>Phone Auth Errors</h2>
+<table class="comparison">
+  <tr><th>Error / Symptom</th><th>Cause</th><th>Fix</th></tr>
+  <tr><td><code>invalid-phone-number</code></td><td>Number not in E.164 format</td><td>Prepend the country code: <code>+91</code>, <code>+1</code>, etc.</td></tr>
+  <tr><td><code>quota-exceeded</code></td><td>Too many SMS sent (free tier limit)</td><td>Use test phone numbers in Firebase Console</td></tr>
+  <tr><td><code>invalid-verification-code</code></td><td>User entered the wrong OTP</td><td>Show clear error; offer resend option</td></tr>
+  <tr><td>SMS never arrives</td><td>Carrier filtering</td><td>Test with a Firebase test phone number</td></tr>
+</table>
+
+<div class="challenge">
+  <h3>&#128269; Debug Challenge</h3>
+  <p>You call <code>signInWithEmailAndPassword()</code> and see: <strong>"[firebase_auth/user-not-found]"</strong>. What are the two most likely causes, and how should your UI handle this?</p>
+  <details style="margin-top:12px">
+    <summary style="cursor:pointer;color:var(--yellow);font-weight:800">Show Answer</summary>
+    <p style="margin-top:12px;color:#fff"><strong>Causes:</strong> (1) The user typed the wrong email address. (2) The user hasn&rsquo;t registered yet and tried to sign in directly.<br><br><strong>UI handling:</strong> Catch <code>FirebaseAuthException</code>, check <code>e.code == 'user-not-found'</code>, show "No account found with this email. Would you like to register?" and offer a button to switch to the registration form.</p>
+  </details>
+</div>
+</section>
+
+<!-- STEP 11 -->
+<section class="step-view" data-title="Security Best Practices">
+<header class="step-header">
+  <span class="step-kicker">STEP 11 &middot; SECURITY</span>
+  <h1>Auth Security Best Practices</h1>
+  <p class="lede">Authentication is only the first layer. Learn how to secure your app end-to-end once you know who the user is.</p>
+</header>
+
+<h2>Use Auth UID in Firestore Security Rules</h2>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// firestore.rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can only read and write their own document
+    match /users/{userId} {
+      allow read, write: if request.auth != null
+                        &amp;&amp; request.auth.uid == userId;
+    }
+
+    // Only authenticated users can read posts
+    match /posts/{postId} {
+      allow read: if request.auth != null;
+      // Only the post author can write/update/delete
+      allow write: if request.auth != null
+                  &amp;&amp; request.auth.uid == resource.data.authorUid;
+    }
+  }
+}</code></pre></div>
+
+<div class="grid-2">
+  <div class="concept"><strong>&#128683; Never Trust the Client</strong><p>Never rely on client-side auth checks alone. Always enforce rules server-side in Firestore Rules &mdash; a malicious client can bypass any client-side check.</p></div>
+  <div class="concept"><strong>&#9989; Verify Emails</strong><p>Call <code>user.sendEmailVerification()</code> after registration and check <code>user.emailVerified</code> before allowing access to sensitive features.</p></div>
+  <div class="concept"><strong>&#128273; Prefer Federated Login</strong><p>Google Sign-In and Apple Sign-In are more secure than email/password &mdash; they eliminate password reuse, brute-force, and phishing risks.</p></div>
+  <div class="concept"><strong>&#129302; Enable App Check</strong><p>Firebase App Check (Play Integrity on Android, DeviceCheck on iOS, reCAPTCHA on Web) protects your Auth quota from bot abuse.</p></div>
+</div>
+
+<h2>Email Verification Flow</h2>
+<div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>// After successful createUserWithEmailAndPassword():
+final user = FirebaseAuth.instance.currentUser!;
+
+if (!user.emailVerified) {
+  await user.sendEmailVerification();
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Verification email sent!')));
+}
+
+// Later: reload user to check if email is now verified
+await FirebaseAuth.instance.currentUser!.reload();
+final refreshedUser = FirebaseAuth.instance.currentUser!;
+print('Email verified: ${refreshedUser.emailVerified}');</code></pre></div>
+
+<div class="panel pink"><strong>&#9888;&#65039; Password Reset Best Practice:</strong><p>Use <code>FirebaseAuth.instance.sendPasswordResetEmail(email: email)</code> rather than building your own reset flow. Always show the same success message whether the email exists or not &mdash; to prevent email enumeration attacks.</p></div>
+</section>
+
+<!-- STEP 12 -->
+<section class="step-view" data-title="Revision &amp; Checklist">
+<header class="step-header">
+  <span class="step-kicker">STEP 12 &middot; FINAL REVISION</span>
+  <h1>Firebase Auth Revision &amp; Checklist</h1>
+  <p class="lede">Review key concepts, test your understanding, and confirm you have completed every implementation step.</p>
+</header>
+
+<h2>Quick-Answer Flashcards</h2>
+<details class="reveal">
+  <summary>What is <code>authStateChanges()</code> and why is it the preferred way to track auth?</summary>
+  <div>It is a <code>Stream&lt;User?&gt;</code> from <code>FirebaseAuth.instance</code>. It automatically emits the current user whenever auth state changes &mdash; on app start, sign-in, sign-out, and token refresh. Using a <code>StreamBuilder</code> on it means you never need manual navigation calls for auth transitions.</div>
+</details>
+<details class="reveal">
+  <summary>What is an AuthCredential and when do you create one?</summary>
+  <div>An <code>AuthCredential</code> is a platform-independent token bundle that Firebase Auth uses to sign in. You create one for federated providers: <code>GoogleAuthProvider.credential(idToken, accessToken)</code> for Google Sign-In, and <code>PhoneAuthProvider.credential(verificationId, smsCode)</code> for phone OTP. Then pass it to <code>signInWithCredential(credential)</code>.</div>
+</details>
+<details class="reveal">
+  <summary>Explain the Phone Auth <code>codeSent</code> callback.</summary>
+  <div>It fires when Firebase has successfully dispatched an SMS. It receives a <code>verificationId</code> (server-side session token) and an optional <code>resendToken</code>. Store the <code>verificationId</code> and show the OTP input field. Later combine it with the user-entered code via <code>PhoneAuthProvider.credential()</code> and call <code>signInWithCredential()</code>.</div>
+</details>
+<details class="reveal">
+  <summary>Why is SHA-1 required for Google Sign-In on Android?</summary>
+  <div>Google&rsquo;s OAuth system verifies the app making a Google Sign-In request is the genuine app &mdash; not a fake copy. It checks the SHA-1 fingerprint of the APK signing certificate against registered fingerprints in your Firebase project. Without a matching SHA-1, Google rejects the request with <code>ApiException: 10</code>.</div>
+</details>
+<details class="reveal">
+  <summary>What is the difference between <code>currentUser</code> and <code>authStateChanges()</code>?</summary>
+  <div><code>FirebaseAuth.instance.currentUser</code> is a synchronous getter returning the cached <code>User?</code> &mdash; fine for one-time reads. <code>authStateChanges()</code> is a reactive stream that fires whenever auth state changes. For UI that needs to update on sign-in/sign-out events, always prefer the stream.</div>
+</details>
+
+<h2>Final Quiz</h2>
+<div class="quiz" data-answer="2" data-correct="Correct! PhoneAuthProvider.credential() takes the verificationId (from codeSent) and the SMS code entered by the user, and returns an AuthCredential for signInWithCredential().">
+  <h3>To verify a phone OTP, which method creates the credential from the verification ID and SMS code?</h3>
+  <div class="quiz-options">
+    <button class="quiz-option"><code>FirebaseAuth.instance.verifyPhoneNumber()</code></button>
+    <button class="quiz-option"><code>GoogleAuthProvider.credential()</code></button>
+    <button class="quiz-option"><code>PhoneAuthProvider.credential(verificationId, smsCode)</code></button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+
+<h2>Implementation Checklist</h2>
+<ul class="checklist">
+  <li>I enabled Email/Password, Google, and Phone providers in Firebase Console &#8594; Authentication.</li>
+  <li>I added <code>firebase_auth</code> and <code>google_sign_in</code> packages with <code>flutter pub add</code>.</li>
+  <li>I registered the debug SHA-1 fingerprint for Google Sign-In on Android.</li>
+  <li>I added the <code>REVERSED_CLIENT_ID</code> URL scheme to <code>ios/Runner/Info.plist</code>.</li>
+  <li>I created <code>AuthGate</code> using <code>StreamBuilder</code> on <code>authStateChanges()</code>.</li>
+  <li>I set <code>AuthGate</code> as the root of <code>MaterialApp</code> in <code>main.dart</code>.</li>
+  <li>I implemented <code>createUserWithEmailAndPassword()</code> and <code>signInWithEmailAndPassword()</code>.</li>
+  <li>I catch <code>FirebaseAuthException</code> and map <code>e.code</code> to user-friendly messages.</li>
+  <li>I implemented <code>GoogleSignInService</code> using the two-step token exchange flow.</li>
+  <li>I implemented <code>verifyPhoneNumber()</code> with all four callbacks.</li>
+  <li>I store <code>verificationId</code> from <code>codeSent</code> and use it to create a <code>PhoneAuthCredential</code>.</li>
+  <li>I added test phone numbers in Firebase Console to avoid SMS quota limits during development.</li>
+  <li>I wrote Firestore security rules that use <code>request.auth.uid</code> to protect user data.</li>
+  <li>I call <code>user.sendEmailVerification()</code> after email/password registration.</li>
+  <li>I call <code>GoogleSignIn().signOut()</code> alongside <code>FirebaseAuth.instance.signOut()</code>.</li>
+</ul>
+
+<div class="finish">
+  <h2>Firebase Authentication Codelab Complete! &#127881;</h2>
+  <p>You have successfully implemented three authentication methods &mdash; Email &amp; Password, Google Sign-In, and Phone Number OTP &mdash; in Flutter using Firebase Auth. Your app now has a reactive auth state listener, a clean login hub, and properly scoped user identity across all screens.</p>
+  <p><strong>Next steps:</strong> Add Firebase App Check to prevent bot abuse, link multiple auth providers to a single account with <code>user.linkWithCredential()</code>, or persist user preferences in Cloud Firestore using the authenticated <code>uid</code>.</p>
+</div>
+
+<div class="panel blue references" style="margin-top:24px">
+  <strong>&#128218; Official References:</strong>
+  <ul>
+    <li><a href="https://firebase.flutter.dev/docs/auth/overview" target="_blank" rel="noopener">FlutterFire Auth &mdash; Overview</a></li>
+    <li><a href="https://firebase.google.com/docs/auth" target="_blank" rel="noopener">Firebase Auth Documentation</a></li>
+    <li><a href="https://pub.dev/packages/firebase_auth" target="_blank" rel="noopener">firebase_auth on pub.dev</a></li>
+    <li><a href="https://pub.dev/packages/google_sign_in" target="_blank" rel="noopener">google_sign_in on pub.dev</a></li>
+    <li><a href="https://firebase.google.com/docs/rules" target="_blank" rel="noopener">Firebase Security Rules</a></li>
+  </ul>
+</div>
+</section>
+
+</div></main>
+</div>
+
+<script>
+(() => {
+  const steps   = [...document.querySelectorAll('.step-view')];
+  const titles  = steps.map(s => s.dataset.title);
+  const nav     = document.getElementById('stepNav');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const completed = new Set();
+  let current = 0;
+
+  nav.innerHTML = titles.map((title, i) =>
+    `<button class="step-link" data-step="${i}" type="button">
+      <span class="step-number">${String(i+1).padStart(2,'0')}</span>
+      <span>${title}</span>
+      <span class="step-status" aria-hidden="true"></span>
+    </button>`).join('');
+
+  const getHashStep = () => {
+    const m = location.hash.match(/^#step-(\d+)$/);
+    const v = m ? Number(m[1]) - 1 : 0;
+    return Number.isInteger(v) && v >= 0 && v < steps.length ? v : 0;
+  };
+
+  function render(updateHash = true) {
+    current = Math.max(0, Math.min(current, steps.length - 1));
+    steps.forEach((step, i) => {
+      const active = i === current;
+      step.classList.toggle('active', active);
+      step.setAttribute('aria-hidden', String(!active));
+    });
+    document.querySelectorAll('.step-link').forEach((btn, i) => {
+      btn.classList.toggle('active', i === current);
+      btn.setAttribute('aria-current', i === current ? 'step' : 'false');
+      btn.querySelector('.step-status').textContent = completed.has(i) ? '✓' : '';
+    });
+    const pct = Math.round((completed.size / steps.length) * 100);
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressText').textContent = pct + '%';
+    document.getElementById('progressTrack').setAttribute('aria-valuenow', pct);
+    document.getElementById('mobileTitle').textContent = titles[current];
+    if (updateHash) history.replaceState(null, '', `#step-${current+1}`);
+    addNavButtons();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function addNavButtons() {
+    steps.forEach(s => { const r = s.querySelector('.nav-row'); if (r) r.remove(); });
+    const step = steps[current];
+    const row  = document.createElement('div');
+    row.className = 'nav-row';
+    const prev = document.createElement('button');
+    prev.className = 'nav-btn';
+    prev.textContent = '\u2190 Previous';
+    prev.disabled = current === 0;
+    prev.addEventListener('click', () => { current--; render(); });
+    const next = document.createElement('button');
+    next.className = 'nav-btn primary';
+    next.textContent = current === steps.length - 1 ? '\u2713 Finish' : 'Next \u2192';
+    next.addEventListener('click', () => {
+      completed.add(current);
+      if (current < steps.length - 1) { current++; render(); } else { render(); }
+    });
+    row.append(prev, next);
+    step.appendChild(row);
+  }
+
+  nav.addEventListener('click', e => {
+    const btn = e.target.closest('.step-link');
+    if (!btn) return;
+    completed.add(current);
+    current = Number(btn.dataset.step);
+    render();
+    if (window.innerWidth <= 850) {
+      sidebar.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  menuBtn.addEventListener('click', () => {
+    const open = sidebar.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+  });
+
+  document.addEventListener('click', e => {
+    if (window.innerWidth > 850) return;
+    if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+      sidebar.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.matches('.copy-btn')) return;
+    const code = e.target.closest('.code-wrap').querySelector('code');
+    if (!code) return;
+    navigator.clipboard.writeText(code.textContent).then(() => {
+      const orig = e.target.textContent;
+      e.target.textContent = 'Copied!';
+      setTimeout(() => { e.target.textContent = orig; }, 1800);
+    });
+  });
+
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const correct  = Number(quiz.dataset.answer);
+    const feedback = quiz.querySelector('.quiz-feedback');
+    const options  = [...quiz.querySelectorAll('.quiz-option')];
+    options.forEach((opt, i) => {
+      opt.addEventListener('click', () => {
+        if (options.some(o => o.classList.contains('correct') || o.classList.contains('wrong'))) return;
+        const isRight = i === correct;
+        opt.classList.add(isRight ? 'correct' : 'wrong');
+        if (!isRight) options[correct].classList.add('correct');
+        feedback.textContent = isRight ? quiz.dataset.correct : '\u2717 Not quite. ' + quiz.dataset.correct;
+        feedback.classList.add('show');
+      });
+    });
+  });
+
+  window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+  current = getHashStep();
+  render(false);
+})();
+</script>
+</body>
+</html>
