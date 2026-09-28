@@ -1,0 +1,1667 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description"
+    content="An interactive codelab teaching face detection with K-Means clustering in OpenCV — colour spaces, clustering, masking, morphology, and contour scoring.">
+  <meta name="theme-color" content="#17213c">
+  <title>Face Detection with K-Means · OpenCV Codelab</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Manrope:wght@400;600;700;800&display=swap');
+
+    :root {
+      --navy: #17213c;
+      --ink: #17213c;
+      --paper: #f4f1e8;
+      --white: #fffdf7;
+      --cyan: #63dbe8;
+      --coral: #ff735c;
+      --lime: #c9ef75;
+      --muted: #697083;
+      --line: 2px solid var(--ink);
+      --shadow: 5px 5px 0 var(--ink);
+      --side: 300px
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 16px/1.65 Manrope, system-ui, sans-serif
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+      cursor: pointer
+    }
+
+    :focus-visible {
+      outline: 4px solid var(--coral);
+      outline-offset: 3px
+    }
+
+    code,
+    pre,
+    .mono {
+      font-family: "IBM Plex Mono", monospace
+    }
+
+    .layout {
+      min-height: 100vh
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--side);
+      padding: 24px 18px;
+      background: var(--navy);
+      color: white;
+      border-right: var(--line);
+      overflow: auto;
+      z-index: 10
+    }
+
+    .brand {
+      padding: 17px;
+      background: var(--cyan);
+      color: var(--ink);
+      border: var(--line);
+      box-shadow: var(--shadow)
+    }
+
+    .brand small {
+      font: 600 .72rem "IBM Plex Mono";
+      letter-spacing: .08em;
+      text-transform: uppercase
+    }
+
+    .brand h2 {
+      font-size: 1.3rem;
+      line-height: 1.1;
+      margin: 7px 0
+    }
+
+    .brand p {
+      font-size: .82rem;
+      margin: 0
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      margin: 25px 2px 7px;
+      font: 600 .72rem "IBM Plex Mono"
+    }
+
+    .track {
+      height: 13px;
+      background: white;
+      border: 2px solid white
+    }
+
+    .bar {
+      height: 100%;
+      width: 11%;
+      background: var(--coral);
+      transition: .2s
+    }
+
+    .steps {
+      display: grid;
+      gap: 7px;
+      margin-top: 18px
+    }
+
+    .step-link {
+      display: grid;
+      grid-template-columns: 31px 1fr;
+      gap: 9px;
+      align-items: center;
+      text-align: left;
+      padding: 9px;
+      background: transparent;
+      color: white;
+      border: 2px solid transparent;
+      font-size: .86rem;
+      font-weight: 700;
+      line-height: 1.2
+    }
+
+    .step-link:hover {
+      background: #263354
+    }
+
+    .step-link.active {
+      background: white;
+      color: var(--ink);
+      border-color: var(--ink);
+      box-shadow: 4px 4px 0 var(--coral)
+    }
+
+    .num {
+      height: 29px;
+      display: grid;
+      place-items: center;
+      border: 2px solid currentColor;
+      font: 600 .72rem "IBM Plex Mono"
+    }
+
+    .mobile {
+      display: none
+    }
+
+    .main {
+      margin-left: var(--side)
+    }
+
+    .content {
+      width: min(980px, calc(100% - 48px));
+      margin: auto;
+      padding: 44px 0 90px
+    }
+
+    .view {
+      display: none
+    }
+
+    .view.active {
+      display: block;
+      animation: in .18s ease-out
+    }
+
+    @keyframes in {
+      from {
+        opacity: .3;
+        transform: translateY(5px)
+      }
+    }
+
+    .hero,
+    .card,
+    .callout,
+    .quiz,
+    .lab {
+      border: var(--line);
+      background: var(--white);
+      box-shadow: var(--shadow)
+    }
+
+    .hero {
+      padding: 30px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .hero:after {
+      content: "";
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      right: -30px;
+      top: -35px;
+      background: var(--cyan);
+      border: var(--line)
+    }
+
+    .kicker {
+      display: inline-block;
+      background: var(--coral);
+      padding: 5px 9px;
+      border: var(--line);
+      font: 600 .72rem "IBM Plex Mono";
+      text-transform: uppercase
+    }
+
+    .hero h1 {
+      font-size: clamp(2.1rem, 5vw, 4.15rem);
+      letter-spacing: -.055em;
+      line-height: 1;
+      margin: 17px 100px 15px 0
+    }
+
+    .hero p {
+      font-size: 1.08rem;
+      max-width: 720px;
+      margin: 0
+    }
+
+    h2 {
+      font-size: 1.85rem;
+      line-height: 1.15;
+      margin: 34px 0 13px
+    }
+
+    h3 {
+      line-height: 1.25;
+      margin: 0 0 8px
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px
+    }
+
+    .card {
+      padding: 21px
+    }
+
+    .card p:last-child {
+      margin-bottom: 0
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      background: var(--lime);
+      border: 2px solid var(--ink);
+      font: 600 .7rem "IBM Plex Mono";
+      text-transform: uppercase
+    }
+
+    .callout {
+      padding: 17px 19px;
+      margin: 20px 0;
+      background: var(--lime)
+    }
+
+    .callout.warn {
+      background: #ffe18b
+    }
+
+    .callout.cyan {
+      background: var(--cyan)
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--white);
+      box-shadow: var(--shadow)
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border: 2px solid var(--ink);
+      text-align: left;
+      vertical-align: top
+    }
+
+    th {
+      background: var(--cyan)
+    }
+
+    .lab {
+      margin: 20px 0
+    }
+
+    .lab-head {
+      padding: 18px 20px;
+      background: var(--navy);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px
+    }
+
+    .lab-body {
+      padding: 20px
+    }
+
+    .lab-body ol {
+      padding-left: 22px
+    }
+
+    .code-wrap {
+      position: relative;
+      margin: 15px 0
+    }
+
+    .code-wrap pre {
+      margin: 0;
+      padding: 20px;
+      background: #10182c;
+      color: #eef7fb;
+      border: var(--line);
+      overflow: auto;
+      font-size: .82rem;
+      line-height: 1.55
+    }
+
+    .copy {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      background: var(--cyan);
+      border: 2px solid var(--ink);
+      padding: 5px 9px;
+      font: 600 .7rem "IBM Plex Mono"
+    }
+
+    .diagram {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 18px;
+      align-items: center;
+      margin: 20px 0
+    }
+
+    .arrow {
+      font-size: 2rem;
+      font-weight: 800
+    }
+
+    .legend {
+      font-size: .86rem;
+      color: var(--muted)
+    }
+
+    .quiz {
+      padding: 20px;
+      margin: 17px 0
+    }
+
+    .options {
+      display: grid;
+      gap: 9px;
+      margin-top: 13px
+    }
+
+    .option {
+      text-align: left;
+      padding: 11px;
+      background: white;
+      border: 2px solid var(--ink)
+    }
+
+    .option.correct {
+      background: var(--lime)
+    }
+
+    .option.wrong {
+      background: #ffb5aa
+    }
+
+    .feedback {
+      display: none;
+      margin: 12px 0 0;
+      font-weight: 700
+    }
+
+    .feedback.show {
+      display: block
+    }
+
+    .nav {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      display: flex;
+      gap: 9px;
+      z-index: 8
+    }
+
+    .nav button {
+      padding: 11px 17px;
+      border: var(--line);
+      box-shadow: 3px 3px 0 var(--ink);
+      background: white;
+      font-weight: 800
+    }
+
+    .nav .next {
+      background: var(--coral)
+    }
+
+    details {
+      border: var(--line);
+      background: white;
+      margin: 15px 0
+    }
+
+    summary {
+      padding: 13px;
+      font-weight: 800;
+      cursor: pointer
+    }
+
+    details>div {
+      padding: 0 15px 15px
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: .8rem;
+      margin-top: 36px
+    }
+
+    .plain-note {
+      margin: 20px 0;
+      padding: 20px;
+      border: var(--line);
+      border-left: 10px solid var(--cyan);
+      background: var(--white)
+    }
+
+    .plain-note h3 {
+      margin: 0 0 7px
+    }
+
+    .analogy {
+      margin: 20px 0;
+      padding: 20px;
+      border: var(--line);
+      background: #fff2c8;
+      box-shadow: var(--shadow)
+    }
+
+    .analogy:before {
+      content: "EVERYDAY EXAMPLE";
+      display: block;
+      margin-bottom: 8px;
+      font: 600 .7rem "IBM Plex Mono";
+      letter-spacing: .06em
+    }
+
+    .term-list {
+      display: grid;
+      gap: 10px;
+      margin: 18px 0
+    }
+
+    .term {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      border: var(--line);
+      background: var(--white)
+    }
+
+    .term strong {
+      padding: 12px;
+      background: var(--cyan);
+      border-right: var(--line)
+    }
+
+    .term span {
+      padding: 12px
+    }
+
+    .walkthrough {
+      counter-reset: walk;
+      display: grid;
+      gap: 13px;
+      margin: 20px 0
+    }
+
+    .walk-step {
+      position: relative;
+      padding: 17px 18px 17px 66px;
+      border: var(--line);
+      background: var(--white)
+    }
+
+    .walk-step:before {
+      counter-increment: walk;
+      content: counter(walk);
+      position: absolute;
+      left: 17px;
+      top: 17px;
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      background: var(--coral);
+      border: 2px solid var(--ink);
+      font: 600 .8rem "IBM Plex Mono"
+    }
+
+    .walk-step h3 {
+      margin: 0 0 5px
+    }
+
+    .walk-step p {
+      margin: 0
+    }
+
+    .code-explain {
+      display: grid;
+      grid-template-columns: minmax(180px, .8fr) 1.2fr;
+      border: var(--line);
+      margin: 9px 0;
+      background: var(--white)
+    }
+
+    .code-explain code {
+      padding: 13px;
+      background: #e9edf1;
+      border-right: var(--line);
+      overflow-wrap: anywhere
+    }
+
+    .code-explain span {
+      padding: 13px
+    }
+
+    .checkpoint {
+      padding: 18px;
+      border: 3px dashed var(--ink);
+      background: var(--lime);
+      margin: 22px 0
+    }
+
+    .checkpoint h3 {
+      margin: 0 0 6px
+    }
+
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+      margin: 20px 0
+    }
+
+    .flow-item {
+      flex: 1;
+      padding: 14px;
+      border: var(--line);
+      background: var(--white);
+      text-align: center
+    }
+
+    .flow-arrow {
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      font-weight: 800
+    }
+
+    .why {
+      color: var(--muted);
+      font-size: .92rem
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 14px 0;
+      flex-wrap: wrap
+    }
+
+    .slider-row label {
+      font-weight: 700;
+      min-width: 110px
+    }
+
+    .slider-row input[type=range] {
+      flex: 1;
+      min-width: 120px
+    }
+
+    .readout {
+      font: 600 .82rem "IBM Plex Mono";
+      min-width: 90px
+    }
+
+    .hsv-demo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin: 18px 0
+    }
+
+    .colour-box {
+      height: 80px;
+      border: var(--line);
+      display: grid;
+      place-items: center;
+      font: 700 .85rem "IBM Plex Mono";
+      transition: background .15s
+    }
+
+    .candy-arena {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 16px;
+      border: var(--line);
+      background: white;
+      min-height: 90px;
+      margin: 14px 0
+    }
+
+    .candy {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--ink);
+      transition: background .4s, transform .2s
+    }
+
+    .candy:hover {
+      transform: scale(1.15)
+    }
+
+    .cluster-legend {
+      display: flex;
+      gap: 18px;
+      margin: 8px 0;
+      flex-wrap: wrap
+    }
+
+    .cl-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font: 600 .8rem "IBM Plex Mono"
+    }
+
+    .cl-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--ink)
+    }
+
+    .morph-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 28px);
+      gap: 3px;
+      margin: 14px 0
+    }
+
+    .mcell {
+      width: 28px;
+      height: 28px;
+      border: 1px solid #ccc;
+      background: #111;
+      transition: background .25s
+    }
+
+    .mcell.on {
+      background: white
+    }
+
+    .score-demo {
+      position: relative;
+      height: 220px;
+      border: var(--line);
+      background: #1a2540;
+      margin: 14px 0;
+      overflow: hidden
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 40%;
+      background: rgba(255, 255, 255, .18);
+      border: 2px dashed rgba(255, 255, 255, .4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font: 700 .75rem "IBM Plex Mono";
+      color: white;
+      transition: border-color .3s, background .3s;
+      cursor: help
+    }
+
+    .blob.winner {
+      background: rgba(99, 219, 232, .35);
+      border: 2px solid var(--cyan)
+    }
+
+    .pipe {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0;
+      margin: 20px 0;
+      border: var(--line)
+    }
+
+    .pipe-step {
+      padding: 14px 10px;
+      text-align: center;
+      border-right: var(--line);
+      font-size: .85rem
+    }
+
+    .pipe-step:last-child {
+      border-right: none
+    }
+
+    .pipe-step strong {
+      display: block;
+      margin-bottom: 4px
+    }
+
+    .pipe-step.hl {
+      background: var(--coral)
+    }
+
+    @media(max-width:820px) {
+      :root {
+        --side: 0px
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform .25s
+      }
+
+      .sidebar.open {
+        transform: none;
+        width: 270px
+      }
+
+      .mobile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        background: var(--navy);
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 9
+      }
+
+      .mobile button {
+        background: none;
+        border: 2px solid white;
+        padding: 6px 10px;
+        color: white;
+        font-weight: 700
+      }
+
+      .main {
+        margin-left: 0
+      }
+
+      .grid {
+        grid-template-columns: 1fr
+      }
+
+      .hsv-demo {
+        grid-template-columns: 1fr
+      }
+
+      .pipe {
+        grid-template-columns: 1fr
+      }
+
+      .pipe-step {
+        border-right: none;
+        border-bottom: var(--line)
+      }
+
+      .pipe-step:last-child {
+        border-bottom: none
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <div class="mobile" aria-hidden="true">
+      <button id="menuBtn" aria-label="Open menu" aria-expanded="false">&#9776; Menu</button>
+      <span style="font-weight:700">Face Detection &middot; K-Means</span>
+    </div>
+
+    <nav class="sidebar" id="sidebar" aria-label="Codelab steps">
+      <div class="brand">
+        <small>Computer Vision &middot; Lab 2</small>
+        <h2>Face Detection with K-Means</h2>
+        <p>OpenCV &middot; Python &middot; HSV &middot; Morphology</p>
+      </div>
+      <div class="progress-meta"><span>Progress</span><span id="progText">1 / 9</span></div>
+      <div class="track">
+        <div class="bar" id="bar"></div>
+      </div>
+      <div class="steps" id="nav">
+        <button class="step-link active" data-go="0"><span class="num">1</span>Introduction</button>
+        <button class="step-link" data-go="1"><span class="num">2</span>RGB vs HSV</button>
+        <button class="step-link" data-go="2"><span class="num">3</span>What is K-Means?</button>
+        <button class="step-link" data-go="3"><span class="num">4</span>Run K-Means in OpenCV</button>
+        <button class="step-link" data-go="4"><span class="num">5</span>Find the Skin Cluster</button>
+        <button class="step-link" data-go="5"><span class="num">6</span>Build the Mask</button>
+        <button class="step-link" data-go="6"><span class="num">7</span>Clean the Mask</button>
+        <button class="step-link" data-go="7"><span class="num">8</span>Find &amp; Score Contours</button>
+        <button class="step-link" data-go="8"><span class="num">9</span>Full Code &amp; Recap</button>
+      </div>
+    </nav>
+
+    <main class="main">
+      <div class="content">
+
+        <!-- STEP 1 -->
+        <section class="view active" data-step="0">
+          <header class="hero">
+            <span class="kicker">Step 1 &middot; Introduction</span>
+            <h1>Finding a face using colour clusters</h1>
+            <p>We will build a face detector from scratch using only colour &mdash; no deep learning, no magic black
+              box.</p>
+          </header>
+          <div class="grid">
+            <article class="card"><span class="badge">You will learn</span>
+              <ul>
+                <li>Why HSV beats RGB for skin detection</li>
+                <li>How K-Means groups pixels by colour</li>
+                <li>How to identify the skin cluster automatically</li>
+                <li>How to clean a noisy mask with morphology</li>
+                <li>How to score blobs to pick the face</li>
+              </ul>
+            </article>
+            <article class="card"><span class="badge">You will practise</span>
+              <ul>
+                <li>Converting colour spaces in OpenCV</li>
+                <li>Running <code>cv2.kmeans()</code> and reading its output</li>
+                <li>Creating binary masks from cluster labels</li>
+                <li>Using <code>MORPH_OPEN</code> and <code>MORPH_CLOSE</code></li>
+                <li>Scoring contours with area, position, and shape rules</li>
+              </ul>
+            </article>
+          </div>
+          <h2>The big picture</h2>
+          <p>Our approach has five stages. Each stage takes the output of the previous one.</p>
+          <div class="pipe">
+            <div class="pipe-step"><strong>1</strong>Load image &rarr; HSV</div>
+            <div class="pipe-step"><strong>2</strong>K-Means: 4 colour clusters</div>
+            <div class="pipe-step hl"><strong>3</strong>Skin cluster &rarr; binary mask</div>
+            <div class="pipe-step"><strong>4</strong>Morphology: clean mask</div>
+            <div class="pipe-step"><strong>5</strong>Score contours &rarr; face box</div>
+          </div>
+          <h2>Tools we use</h2>
+          <div class="term-list">
+            <div class="term"><strong>Python</strong><span>The programming language for all the code in this lab.</span>
+            </div>
+            <div class="term"><strong>OpenCV (<code>cv2</code>)</strong><span>A free library full of ready-made image
+                processing functions.</span></div>
+            <div class="term"><strong>NumPy (<code>np</code>)</strong><span>Images are stored as big grids of numbers.
+                NumPy gives us fast tools to work with them.</span></div>
+          </div>
+          <div class="callout cyan"><strong>No deep learning here.</strong> We use classical computer vision only
+            &mdash; maths and colour rules. This makes it easy to understand every decision the code makes.</div>
+          <div class="checkpoint">
+            <h3>Before you continue</h3>
+            <p>Make sure Python, OpenCV (<code>pip install opencv-python</code>), and NumPy are installed.</p>
+          </div>
+        </section>
+
+        <!-- STEP 2 -->
+        <section class="view" data-step="1">
+          <header class="hero">
+            <span class="kicker">Step 2 &middot; Colour Spaces</span>
+            <h1>Why we ditch RGB and use HSV</h1>
+            <p>The colour system we choose has a huge effect on how well skin detection works.</p>
+          </header>
+          <h2>The problem with RGB</h2>
+          <p>RGB mixes the actual colour with brightness. Shadow on a forehead and bright light on a cheek both look
+            like different colours in RGB &mdash; even though both are skin.</p>
+          <div class="grid">
+            <article class="card">
+              <h3>Skin in bright light</h3>
+              <p>A forehead in sunlight: <code>[220, 170, 140]</code> &mdash; bright, warm.</p>
+            </article>
+            <article class="card">
+              <h3>Same skin in shadow</h3>
+              <p>Same spot in shade: <code>[110, 85, 70]</code> &mdash; almost half the values. Looks totally different
+                to K-Means.</p>
+            </article>
+          </div>
+          <h2>Enter HSV</h2>
+          <div class="term-list">
+            <div class="term"><strong>H &mdash; Hue</strong><span>The actual colour (orange, green&hellip;). Skin sits
+                in the orange range: roughly H&nbsp;0&ndash;22 in OpenCV.</span></div>
+            <div class="term"><strong>S &mdash; Saturation</strong><span>How vivid the colour is. 0&nbsp;=&nbsp;grey,
+                255&nbsp;=&nbsp;very vivid. Skin is moderately saturated.</span></div>
+            <div class="term"><strong>V &mdash; Value</strong><span>How bright the pixel is. Skin is bright &mdash; not
+                dark like hair or a black shirt.</span></div>
+          </div>
+          <div class="analogy">Think of a paint set. Hue is which colour you pick (orange). Saturation is how much water
+            you add. Value is whether you paint in a dark room or a bright one. HSV lets us describe skin by Hue alone,
+            regardless of lighting.</div>
+          <h2>Try it &mdash; drag the sliders</h2>
+          <div class="lab">
+            <div class="lab-head"><strong>Explore &middot; HSV colour space</strong><span class="mono">drag the
+                sliders</span></div>
+            <div class="lab-body">
+              <div class="slider-row"><label for="hSlider">Hue (H)</label><input type="range" id="hSlider" min="0"
+                  max="179" value="15"><span class="readout" id="hVal">15</span></div>
+              <div class="slider-row"><label for="sSlider">Saturation (S)</label><input type="range" id="sSlider"
+                  min="0" max="255" value="121"><span class="readout" id="sVal">121</span></div>
+              <div class="slider-row"><label for="vSlider">Value (V)</label><input type="range" id="vSlider" min="0"
+                  max="255" value="145"><span class="readout" id="vVal">145</span></div>
+              <div class="hsv-demo">
+                <div>
+                  <p style="margin:0 0 6px;font-weight:700">Your colour</p>
+                  <div class="colour-box" id="colourBox">H=15 S=121 V=145</div>
+                </div>
+                <div>
+                  <p style="margin:0 0 6px;font-weight:700">Skin range check</p>
+                  <div class="colour-box" id="skinCheck">&mdash;</div>
+                </div>
+              </div>
+              <p class="legend">OpenCV HSV: H is 0&ndash;179 (half of 360&deg;), S and V are 0&ndash;255.</p>
+            </div>
+          </div>
+          <h2>Converting in code</h2>
+          <div class="code-wrap">
+            <button class="copy"
+              onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)">Copy</button>
+            <pre>import cv2
+image = cv2.imread('image.png')
+# one line to convert BGR -> HSV
+hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)</pre>
+          </div>
+          <div class="quiz" data-answer="1">
+            <strong>Which channel in HSV tells us the actual colour (e.g. "orange")?</strong>
+            <div class="options">
+              <button class="option">Value (V)</button>
+              <button class="option">Hue (H)</button>
+              <button class="option">Saturation (S)</button>
+            </div>
+            <p class="feedback">&#10004; Correct &mdash; Hue is the colour channel. Value is brightness, Saturation is
+              vividness.</p>
+          </div>
+          <div class="checkpoint">
+            <h3>Key takeaway</h3>
+            <p>Convert to HSV before skin detection. Skin in HSV has a consistent Hue of roughly 0&ndash;22, regardless
+              of lighting.</p>
+          </div>
+        </section>
+
+        <!-- STEP 3 -->
+        <section class="view" data-step="2">
+          <header class="hero">
+            <span class="kicker">Step 3 &middot; K-Means</span>
+            <h1>Sorting pixels into colour buckets</h1>
+            <p>K-Means groups similar things together &mdash; like sorting a bag of sweets by colour.</p>
+          </header>
+          <div class="analogy">Tip a bag of mixed sweets onto a table. You want to sort them into k piles. Start with k
+            piles at random spots. Each sweet goes to the nearest pile. Move each pile&rsquo;s centre to the average
+            position of its sweets. Repeat until nothing moves. That is K-Means.</div>
+          <h2>How K-Means works</h2>
+          <div class="walkthrough">
+            <div class="walk-step">
+              <h3>Pick k random centre points</h3>
+              <p>Starting &ldquo;guesses&rdquo; for where each colour group lives.</p>
+            </div>
+            <div class="walk-step">
+              <h3>Assign every pixel to the nearest centre</h3>
+              <p>Each pixel gets a label (0, 1, 2&hellip;) matching the closest centre colour.</p>
+            </div>
+            <div class="walk-step">
+              <h3>Move each centre to the average of its group</h3>
+              <p>The centre shifts to better represent the pixels in it.</p>
+            </div>
+            <div class="walk-step">
+              <h3>Repeat until centres stop moving</h3>
+              <p>When no centre moves more than a tiny amount, the algorithm is done.</p>
+            </div>
+          </div>
+          <h2>Try it &mdash; watch the pixels sort</h2>
+          <div class="lab">
+            <div class="lab-head"><strong>Explore &middot; K-Means candy sorter</strong><span class="mono">click
+                Run</span></div>
+            <div class="lab-body">
+              <p>24 &ldquo;pixels&rdquo; with random colours. Click <strong>Run K-Means</strong> to sort them into 4
+                groups. The outline colour shows which cluster each pixel joined.</p>
+              <div class="candy-arena" id="candyArena" aria-label="K-Means candy demo"></div>
+              <div class="cluster-legend" id="clusterLegend"></div>
+              <button id="candyBtn"
+                style="padding:10px 18px;background:var(--coral);border:var(--line);font-weight:800;box-shadow:3px 3px 0 var(--ink)">&#9654;
+                Run K-Means (k = 4)</button>
+              <p class="legend" id="candyStatus" style="margin-top:10px">Click the button to start.</p>
+            </div>
+          </div>
+          <h2>Why k = 4?</h2>
+          <div class="grid">
+            <article class="card">
+              <h3>Group &mdash; Background</h3>
+              <p>The wall or sky. Usually low saturation.</p>
+            </article>
+            <article class="card">
+              <h3>Group &mdash; Skin</h3>
+              <p>Face, neck, hands. Orange-ish hue, moderate saturation, bright.</p>
+            </article>
+            <article class="card">
+              <h3>Group &mdash; Hair</h3>
+              <p>Usually dark. Low value.</p>
+            </article>
+            <article class="card">
+              <h3>Group &mdash; Clothing</h3>
+              <p>The shirt or jacket. Colour varies, usually not orange.</p>
+            </article>
+          </div>
+          <div class="callout warn"><strong>Important:</strong> the group numbers (0, 1, 2, 3) are random every run.
+            Never hardcode the cluster number &mdash; always detect it from the colour of the cluster centre.</div>
+          <div class="checkpoint">
+            <h3>Key takeaway</h3>
+            <p>K-Means gives every pixel a label. We then look at the colour of each label&rsquo;s centre to decide
+              which label is skin.</p>
+          </div>
+        </section>
+
+        <!-- STEP 4 -->
+        <section class="view" data-step="3">
+          <header class="hero">
+            <span class="kicker">Step 4 &middot; OpenCV Code</span>
+            <h1>Running K-Means on an image</h1>
+            <p>OpenCV does the heavy maths. We prepare the data and read the output.</p>
+          </header>
+          <h2>K-Means wants a flat list</h2>
+          <p>An image is a 3-D grid: Height &times; Width &times; 3 channels. <code>cv2.kmeans</code> wants one long
+            list where each row is <code>[H, S, V]</code>.</p>
+          <div class="diagram">
+            <div>
+              <h3>Image shape</h3>
+              <p><code>(1024, 1536, 3)</code><br>Height &times; Width &times; Channels</p>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div>
+              <h3>Flattened shape</h3>
+              <p><code>(1572864, 3)</code><br>All pixels in one list</p>
+            </div>
+          </div>
+          <div class="code-wrap">
+            <button class="copy"
+              onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)">Copy</button>
+            <pre># flatten the 2D grid into a 1D list; each pixel = [H, S, V]
+pixels = hsv.reshape((-1, 3)).astype(np.float32)</pre>
+          </div>
+          <h2>The main call</h2>
+          <div class="code-wrap">
+            <button class="copy"
+              onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)">Copy</button>
+            <pre>k = 4
+criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+_, labels, centers = cv2.kmeans(
+    pixels, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS
+)</pre>
+          </div>
+          <h2>Reading the outputs</h2>
+          <div class="term-list">
+            <div class="term"><strong><code>labels</code></strong><span>One number per pixel &mdash; its cluster ID (0,
+                1, 2, or 3).</span></div>
+            <div class="term"><strong><code>centers</code></strong><span>A 4&times;3 array. Each row is the average
+                <code>[H, S, V]</code> of one cluster.</span></div>
+          </div>
+          <div class="code-explain"><code>cv2.KMEANS_RANDOM_CENTERS</code><span>Starts cluster centres at random
+              positions. Running 10 times and keeping the best reduces the chance of a bad start.</span></div>
+          <div class="code-explain"><code>cv2.TERM_CRITERIA_EPS</code><span>Stop early if centres move less than 1.0
+              between iterations &mdash; the result has converged.</span></div>
+          <div class="code-explain"><code>TERM_CRITERIA_MAX_ITER, 10</code><span>Also stop after 10 iterations even if
+              not fully converged.</span></div>
+          <div class="quiz" data-answer="2">
+            <strong>After <code>cv2.kmeans()</code>, which variable tells you which cluster each pixel belongs
+              to?</strong>
+            <div class="options">
+              <button class="option"><code>centers</code></button>
+              <button class="option">The first return value <code>_</code></button>
+              <button class="option"><code>labels</code></button>
+            </div>
+            <p class="feedback">&#10004; Correct &mdash; <code>labels</code> is a flat list with one cluster ID per
+              pixel.</p>
+          </div>
+        </section>
+
+        <!-- STEP 5 -->
+        <section class="view" data-step="4">
+          <header class="hero">
+            <span class="kicker">Step 5 &middot; Skin Cluster</span>
+            <h1>Which cluster is skin?</h1>
+            <p>The cluster numbers are random every run, so we detect the skin cluster from its colour.</p>
+          </header>
+          <h2>The bug in hardcoding</h2>
+          <div class="code-wrap">
+            <pre
+              style="border-left:6px solid var(--coral)">skin_cluster_id = 1  # WRONG &mdash; cluster 1 might be the wall today</pre>
+          </div>
+          <p>K-Means shuffles starting positions randomly. The code above will draw the face box around the white
+            background wall instead of the face.</p>
+          <h2>The fix: check the centre colour</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Channel</th>
+                <th>Skin range</th>
+                <th>Why</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Hue (H)</td>
+                <td>0 &ndash; 22</td>
+                <td>Skin is orange-ish. Orange sits at the low end of OpenCV&rsquo;s hue scale.</td>
+              </tr>
+              <tr>
+                <td>Saturation (S)</td>
+                <td>25 &ndash; 130</td>
+                <td>Not too grey, not super vivid. Wood and some objects have S &gt; 130.</td>
+              </tr>
+              <tr>
+                <td>Value (V)</td>
+                <td>90 &ndash; 255</td>
+                <td>Skin is bright &mdash; not dark like hair or a black shirt.</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="code-wrap">
+            <button class="copy"
+              onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)">Copy</button>
+            <pre>SKIN_H_MIN, SKIN_H_MAX = 0,   22
+SKIN_S_MIN, SKIN_S_MAX = 25, 130
+SKIN_V_MIN, SKIN_V_MAX = 90, 255
+
+skin_cluster_id = None
+for i, center in enumerate(centers):
+    h, s, v = center
+    if SKIN_H_MIN <= h <= SKIN_H_MAX and \
+       SKIN_S_MIN <= s <= SKIN_S_MAX and \
+       SKIN_V_MIN <= v <= SKIN_V_MAX:
+        skin_cluster_id = i
+        break
+
+# backup: nothing matched? pick the most orange-looking cluster
+if skin_cluster_id is None:
+    def skin_score(c):
+        h, s, v = c
+        return s * v / (h + 1)  # high S+V, low H = most skin-like
+    skin_cluster_id = int(np.argmax([skin_score(c) for c in centers]))</pre>
+          </div>
+          <details>
+            <summary>What about darker skin tones?</summary>
+            <div>
+              <p>Darker skin tones still sit in the orange hue range but have lower Value (V). Lower
+                <code>SKIN_V_MIN</code> from 90 to around 60 to handle them. The Hue range stays roughly the same for
+                all human skin tones.
+              </p>
+            </div>
+          </details>
+          <div class="quiz" data-answer="0">
+            <strong>Why can&rsquo;t we hardcode <code>skin_cluster_id = 1</code>?</strong>
+            <div class="options">
+              <button class="option">K-Means assigns cluster numbers randomly each run, so cluster 1 might not be skin
+                next time.</button>
+              <button class="option">OpenCV only allows cluster IDs starting from 0.</button>
+              <button class="option">Skin always ends up in cluster 0 when we use HSV.</button>
+            </div>
+            <p class="feedback">&#10004; Correct &mdash; the cluster numbers are random. You must detect the skin
+              cluster by checking its centre colour.</p>
+          </div>
+        </section>
+
+        <!-- STEP 6 -->
+        <section class="view" data-step="5">
+          <header class="hero">
+            <span class="kicker">Step 6 &middot; Binary Mask</span>
+            <h1>Painting skin white, everything else black</h1>
+            <p>Once we know the skin cluster, building the mask is one line of code.</p>
+          </header>
+          <div class="diagram">
+            <div>
+              <h3>Original photo</h3>
+              <p>Millions of coloured pixels &mdash; face, hair, wall, shirt.</p>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div>
+              <h3>Skin mask</h3>
+              <p>White where skin was found. Black everywhere else.</p>
+            </div>
+          </div>
+          <div class="code-wrap">
+            <button class="copy"
+              onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)">Copy</button>
+            <pre># reshape labels back into a 2D image (height x width)
+labels_2d = labels.reshape(hsv.shape[:2])
+
+# skin pixel -> 255 (white), everything else -> 0 (black)
+mask = np.where(labels_2d == skin_cluster_id, 255, 0).astype(np.uint8)
+cv2.imwrite('1_raw_mask.jpg', mask)</pre>
+          </div>
+          <div class="code-explain"><code>hsv.shape[:2]</code><span>This is <code>(height, width)</code> &mdash; just
+              the first two dimensions. That is the shape a mask needs.</span></div>
+          <div class="code-explain"><code>np.where(condition, 255, 0)</code><span>For every pixel: if true put 255, else
+              put 0. Much faster than a Python loop over millions of pixels.</span></div>
+          <div class="code-explain"><code>.astype(np.uint8)</code><span>OpenCV expects unsigned 8-bit integers
+              (0&ndash;255). <code>np.where</code> returns floats by default.</span></div>
+          <div class="callout warn"><strong>The raw mask is noisy.</strong> Camera noise means the mask has tiny white
+            dots in the black areas and tiny black holes in the white face. The next step fixes that.</div>
+          <div class="checkpoint">
+            <h3>Check your understanding</h3>
+            <p>After this step, <code>mask</code> has value 255 where skin was detected and 0 everywhere else.</p>
+          </div>
+        </section>
+
+        <!-- STEP 7 -->
+        <section class="view" data-step="6">
+          <header class="hero">
+            <span class="kicker">Step 7 &middot; Morphology</span>
+            <h1>Cleaning up the noisy mask</h1>
+            <p>Two operations remove noise and fill the holes left by eyes, beard, and shadows.</p>
+          </header>
+          <div class="term-list">
+            <div class="term"><strong>Erosion</strong><span>Shrinks white areas. Kills isolated white specks.</span>
+            </div>
+            <div class="term"><strong>Dilation</strong><span>Grows white areas. Fills small black holes.</span></div>
+            <div class="term"><strong>OPEN = erode then dilate</strong><span>Kills stray white noise dots without
+                changing big white regions.</span></div>
+            <div class="term"><strong>CLOSE = dilate then erode</strong><span>Fills black holes inside white regions
+                (eye sockets, beard gaps) then returns to the original size.</span></div>
+          </div>
+          <div class="analogy">Imagine a white chalk drawing on a blackboard with chalk dust everywhere. Eroding wipes
+            away tiny specks. Dilating grows every white edge outward. OPEN wipes the dust. CLOSE fills gaps inside the
+            drawing.</div>
+          <h2>Try it &mdash; click the buttons</h2>
+          <div class="lab">
+            <div class="lab-head"><strong>Explore &middot; Morphological operations</strong><span class="mono">click the
+                buttons</span></div>
+            <div class="lab-body">
+              <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px">
+                <button id="morphRaw"
+                  style="padding:8px 14px;border:var(--line);font-weight:700;background:var(--coral);box-shadow:3px 3px 0 var(--ink)">Raw
+                  mask</button>
+                <button id="morphOpen"
+                  style="padding:8px 14px;border:var(--line);font-weight:700;background:white;box-shadow:3px 3px 0 var(--ink)">After
+                  OPEN</button>
+                <button id="morphClose"
+                  style="padding:8px 14px;border:var(--line);font-weight:700;background:white;box-shadow:3px 3px 0 var(--ink)">After
+                  CLOSE</button>
+              </div>
+              <div class="morph-grid" id="morphGrid" aria-label="Morphology demonstration"></div>
+              <p class="legend" id="morphStatus" style="margin-top:10px">Raw K-Means mask &mdash; noisy, full of small
+                holes.</p>
+            </div>
+          </div>
+          <h2>The code</h2>
+          <div class="code-wrap">
+            <button class="copy"
+              onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)">Copy</button>
+            <pre># round brush, 15 px -- small enough not to merge nearby objects
+small_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+
+# OPEN: kills tiny noise dots
+mask_clean = cv2.morphologyEx(mask, cv2.MORPH_OPEN, small_kernel, iterations=1)
+
+# CLOSE: fills small holes inside the face
+mask_clean = cv2.morphologyEx(mask_clean, cv2.MORPH_CLOSE, small_kernel, iterations=2)
+
+cv2.imwrite('2_clean_mask.jpg', mask_clean)</pre>
+          </div>
+          <div class="callout warn"><strong>Keep the kernel small (15 px).</strong> A bigger kernel would grow the face
+            blob until it merges with the stick or neck, turning them into one giant region that cannot be separated.
+          </div>
+          <div class="checkpoint">
+            <h3>Key takeaway</h3>
+            <p>OPEN first (remove noise), then CLOSE (fill holes). Small kernel = objects stay separate.</p>
+          </div>
+        </section>
+
+        <!-- STEP 8 -->
+        <section class="view" data-step="7">
+          <header class="hero">
+            <span class="kicker">Step 8 &middot; Contours &amp; Scoring</span>
+            <h1>Finding and picking the face blob</h1>
+            <p>The mask has several white blobs. We score each one and pick the winner.</p>
+          </header>
+          <h2>Finding contours</h2>
+          <div class="code-wrap">
+            <button class="copy"
+              onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)">Copy</button>
+            <pre>contours, _ = cv2.findContours(
+    mask_clean,
+    cv2.RETR_EXTERNAL,      # only the outermost edge
+    cv2.CHAIN_APPROX_SIMPLE # store corners only
+)</pre>
+          </div>
+          <h2>Why "biggest blob" alone fails</h2>
+          <p>A wooden stick, a patch of wall, or the neck can all be bigger than the face blob. Picking
+            <code>max(contours, key=cv2.contourArea)</code> often draws the box on the wrong object.
+          </p>
+          <h2>The scoring system</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Rule</th>
+                <th>Score effect</th>
+                <th>Why</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>In the top 60% of image</td>
+                <td>&times;1.0 (else &times;0.3)</td>
+                <td>Faces are upper-body &mdash; rarely at the very bottom.</td>
+              </tr>
+              <tr>
+                <td>Near the horizontal centre</td>
+                <td>0.4&ndash;1.0 based on distance</td>
+                <td>People usually stand in the middle of the photo.</td>
+              </tr>
+              <tr>
+                <td>Width &lt; 45% of image</td>
+                <td>&times;1.0 (else &times;0.1)</td>
+                <td>A face is not edge-to-edge. Sticks and arms get a huge penalty.</td>
+              </tr>
+              <tr>
+                <td>Aspect ratio 0.4&ndash;1.8</td>
+                <td>&times;1.0 (else &times;0.3)</td>
+                <td>Faces are roughly square-ish &mdash; not thin strips or tall columns.</td>
+              </tr>
+            </tbody>
+          </table>
+          <h2>Try it &mdash; hover each blob</h2>
+          <div class="lab">
+            <div class="lab-head"><strong>Explore &middot; Contour scoring</strong><span class="mono">hover each
+                blob</span></div>
+            <div class="lab-body">
+              <div class="score-demo" id="scoreDemo" aria-label="Contour scoring demo"></div>
+              <p class="legend" id="scoreCaption">The cyan blob is the winner. Hover any blob to see why it won or lost.
+              </p>
+            </div>
+          </div>
+          <h2>The code</h2>
+          <div class="code-wrap">
+            <button class="copy"
+              onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)">Copy</button>
+            <pre>image_height, image_width = image.shape[:2]
+min_area = image_height * image_width * 0.005  # skip blobs < 0.5% of image
+best_contour, best_score = None, -1
+
+for contour in contours:
+    area = cv2.contourArea(contour)
+    if area < min_area:
+        continue
+
+    x, y, w, h = cv2.boundingRect(contour)
+    center_y, center_x = y + h / 2, x + w / 2
+
+    position_bonus = 1.0 if center_y < image_height * 0.6 else 0.3
+    h_distance = abs(center_x - image_width / 2) / (image_width / 2)
+    center_bonus = 1.0 - 0.6 * h_distance
+    width_penalty = 1.0 if w / image_width < 0.45 else 0.1
+    aspect = w / h if h > 0 else 0
+    shape_bonus = 1.0 if 0.4 < aspect < 1.8 else 0.3
+
+    score = area * position_bonus * center_bonus * width_penalty * shape_bonus
+    if score > best_score:
+        best_score, best_contour = score, contour
+
+result = image.copy()
+if best_contour is not None:
+    x, y, w, h = cv2.boundingRect(best_contour)
+    cv2.rectangle(result, (x, y), (x + w, y + h), (0, 255, 0), 4)
+cv2.imwrite('3_final_detection.jpg', result)</pre>
+          </div>
+          <div class="quiz" data-answer="2">
+            <strong>A blob spans 80% of the image width. What does the scoring system do?</strong>
+            <div class="options">
+              <button class="option">Gives it a position bonus of 1.0 because it is large.</button>
+              <button class="option">Selects it because large area = high score.</button>
+              <button class="option">Multiplies its score by 0.1 &mdash; a heavy penalty for being too wide.</button>
+            </div>
+            <p class="feedback">&#10004; Correct &mdash; <code>width_penalty</code> drops to 0.1 for any blob wider than
+              45% of the image.</p>
+          </div>
+        </section>
+
+        <!-- STEP 9 -->
+        <section class="view" data-step="8">
+          <header class="hero">
+            <span class="kicker">Step 9 &middot; Full Code &amp; Recap</span>
+            <h1>Putting it all together</h1>
+            <p>The complete, working script &mdash; every step in one place.</p>
+          </header>
+          <div class="code-wrap">
+            <button class="copy"
+              onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)">Copy</button>
+            <pre>import cv2, numpy as np, sys
+
+# accept any image via command line, e.g.  python main.py photo.jpg
+image_path = sys.argv[1] if len(sys.argv) > 1 else 'image.png'
+image = cv2.imread(image_path)
+if image is None:
+    raise FileNotFoundError(f"{image_path} not found")
+
+# HSV keeps the actual color (Hue) separate from brightness
+hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+# k-means needs a flat list; each pixel = [H, S, V]
+pixels = hsv.reshape((-1, 3)).astype(np.float32)
+
+# group pixels into 4 color buckets
+k = 4
+criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+_, labels, centers = cv2.kmeans(pixels, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+
+# find which cluster is skin by checking its average HSV
+SKIN_H_MIN, SKIN_H_MAX = 0,   22
+SKIN_S_MIN, SKIN_S_MAX = 25, 130
+SKIN_V_MIN, SKIN_V_MAX = 90, 255
+
+skin_cluster_id = None
+for i, center in enumerate(centers):
+    h, s, v = center
+    if SKIN_H_MIN <= h <= SKIN_H_MAX and SKIN_S_MIN <= s <= SKIN_S_MAX and SKIN_V_MIN <= v <= SKIN_V_MAX:
+        skin_cluster_id = i; break
+
+if skin_cluster_id is None:
+    def skin_score(c): h, s, v = c; return s * v / (h + 1)
+    skin_cluster_id = int(np.argmax([skin_score(c) for c in centers]))
+
+# build mask: skin = white (255), else black (0)
+labels_2d = labels.reshape(hsv.shape[:2])
+mask = np.where(labels_2d == skin_cluster_id, 255, 0).astype(np.uint8)
+cv2.imwrite('1_raw_mask.jpg', mask)
+
+# OPEN: remove noise   CLOSE: fill holes
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+mask_clean = cv2.morphologyEx(mask, cv2.MORPH_OPEN,  kernel, iterations=1)
+mask_clean = cv2.morphologyEx(mask_clean, cv2.MORPH_CLOSE, kernel, iterations=2)
+cv2.imwrite('2_clean_mask.jpg', mask_clean)
+
+# find blobs and score them
+contours, _ = cv2.findContours(mask_clean, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+image_height, image_width = image.shape[:2]
+min_area = image_height * image_width * 0.005
+best_contour, best_score = None, -1
+
+for contour in contours:
+    area = cv2.contourArea(contour)
+    if area < min_area: continue
+    x, y, w, h = cv2.boundingRect(contour)
+    cy, cx = y + h/2, x + w/2
+    pos   = 1.0 if cy < image_height * 0.6 else 0.3
+    ctr   = 1.0 - 0.6 * abs(cx - image_width/2) / (image_width/2)
+    wp    = 1.0 if w/image_width < 0.45 else 0.1
+    asp   = w/h if h > 0 else 0
+    shape = 1.0 if 0.4 < asp < 1.8 else 0.3
+    score = area * pos * ctr * wp * shape
+    if score > best_score: best_score, best_contour = score, contour
+
+result = image.copy()
+if best_contour is not None:
+    x, y, w, h = cv2.boundingRect(best_contour)
+    cv2.rectangle(result, (x, y), (x+w, y+h), (0, 255, 0), 4)
+    print(f"face found at x={x}, y={y}, w={w}, h={h}")
+else:
+    print("no face found")
+
+cv2.imwrite('3_final_detection.jpg', result)
+print("done! see 3_final_detection.jpg")</pre>
+          </div>
+          <h2>Run it</h2>
+          <div
+            style="padding:14px;background:#e6e8e9;border:2px dashed var(--ink);font-family:'IBM Plex Mono',monospace;overflow:auto">
+            python main.py photo.jpg</div>
+          <h2>Output files</h2>
+          <div class="term-list">
+            <div class="term"><strong>1_raw_mask.jpg</strong><span>Direct K-Means output &mdash; noisy, holes in the
+                face.</span></div>
+            <div class="term"><strong>2_clean_mask.jpg</strong><span>After OPEN + CLOSE &mdash; smooth blobs, holes
+                filled.</span></div>
+            <div class="term"><strong>3_final_detection.jpg</strong><span>Original photo with the green face box.</span>
+            </div>
+          </div>
+          <h2>Concept recap</h2>
+          <div class="walkthrough">
+            <div class="walk-step">
+              <h3>HSV colour space</h3>
+              <p>Separates colour (Hue) from brightness (Value). Skin looks like skin regardless of lighting.</p>
+            </div>
+            <div class="walk-step">
+              <h3>K-Means clustering</h3>
+              <p>Groups all pixels into k colour buckets by minimising distance to cluster centres.</p>
+            </div>
+            <div class="walk-step">
+              <h3>Automatic skin cluster detection</h3>
+              <p>Check each cluster&rsquo;s average HSV against known skin range. Never hardcode the cluster number.</p>
+            </div>
+            <div class="walk-step">
+              <h3>Binary mask</h3>
+              <p>White = skin, black = everything else.</p>
+            </div>
+            <div class="walk-step">
+              <h3>Morphological OPEN + CLOSE</h3>
+              <p>OPEN removes noise. CLOSE fills holes. Small kernel keeps nearby objects separate.</p>
+            </div>
+            <div class="walk-step">
+              <h3>Contour scoring</h3>
+              <p>Score each white blob by area, position, centre distance, width ratio, and aspect ratio. Highest score
+                = face.</p>
+            </div>
+          </div>
+          <div class="callout cyan"><strong>Limitations to discuss:</strong> this approach struggles when the background
+            is skin-coloured, when there are multiple faces, or in very dark images. These real problems lead engineers
+            toward deep learning detectors like YOLO or MediaPipe.</div>
+          <div class="checkpoint">
+            <h3>&#10004; You finished the lab</h3>
+            <p>You can now explain every single line of the face detector. Try it on a different photo and see what
+              adjustments you need.</p>
+          </div>
+          <footer class="footer">
+            <p>Computer Vision &middot; Lab 2 &mdash; Face Detection with K-Means &middot; OpenCV + Python</p>
+          </footer>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <nav class="nav" aria-label="Step navigation">
+    <button id="prev">&larr; Prev</button>
+    <button id="next" class="next">Next &rarr;</button>
+  </nav>
+
+  <script>
+    (() => {
+      'use strict';
+      const views = [...document.querySelectorAll('.view')];
+      const navEl = document.getElementById('nav');
+      const bar = document.getElementById('bar');
+      const progText = document.getElementById('progText');
+      let current = 0;
+
+      function hashStep() { const m = location.hash.match(/^#step-(\d+)$/); return m ? Math.min(Math.max(+m[1] - 1, 0), views.length - 1) : 0; }
+      function render(push = true) {
+        views.forEach((v, i) => v.classList.toggle('active', i === current));
+        [...navEl.querySelectorAll('.step-link')].forEach((b, i) => b.classList.toggle('active', i === current));
+        bar.style.width = Math.round((current + 1) / views.length * 100) + '%';
+        progText.textContent = `${current + 1} / ${views.length}`;
+        document.getElementById('prev').disabled = current === 0;
+        document.getElementById('next').textContent = current === views.length - 1 ? '\u2713 Done' : 'Next \u2192';
+        if (push) history.pushState(null, '', `#step-${current + 1}`);
+        if (innerWidth <= 820) document.getElementById('sidebar').classList.remove('open');
+        window.scrollTo(0, 0);
+      }
+      function go(n) { if (n < 0 || n >= views.length) return; current = n; render(); }
+      navEl.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) go(+b.dataset.go); });
+      document.getElementById('prev').onclick = () => go(current - 1);
+      document.getElementById('next').onclick = () => { if (current < views.length - 1) go(current + 1); };
+      document.getElementById('menuBtn').onclick = e => { const open = document.getElementById('sidebar').classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', open); };
+      document.addEventListener('click', e => {
+        if (e.target.matches('.option')) {
+          const quiz = e.target.closest('.quiz'), opts = [...quiz.querySelectorAll('.option')], chosen = opts.indexOf(e.target), answer = +quiz.dataset.answer;
+          opts.forEach((o, i) => { o.disabled = true; o.classList.toggle('correct', i === answer); });
+          if (chosen !== answer) e.target.classList.add('wrong');
+          quiz.querySelector('.feedback').classList.add('show');
+        }
+      });
+      addEventListener('popstate', () => { current = hashStep(); render(false); });
+      current = hashStep(); render(false);
+
+      /* HSV explorer */
+      (function () {
+        const hS = document.getElementById('hSlider'), sS = document.getElementById('sSlider'), vS = document.getElementById('vSlider');
+        const hV = document.getElementById('hVal'), sV = document.getElementById('sVal'), vV = document.getElementById('vVal');
+        const box = document.getElementById('colourBox'), check = document.getElementById('skinCheck');
+        if (!hS) return;
+        function hsvRgb(h, s, v) { h = h / 179 * 360; s = s / 255; v = v / 255; const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c; let r, g, b; if (h < 60) { r = c; g = x; b = 0; } else if (h < 120) { r = x; g = c; b = 0; } else if (h < 180) { r = 0; g = c; b = x; } else if (h < 240) { r = 0; g = x; b = c; } else if (h < 300) { r = x; g = 0; b = c; } else { r = c; g = 0; b = x; } return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)]; }
+        function update() { const h = +hS.value, s = +sS.value, v = +vS.value; hV.textContent = h; sV.textContent = s; vV.textContent = v; const [r, g, b] = hsvRgb(h, s, v); box.style.background = `rgb(${r},${g},${b})`; box.style.color = v > 128 ? '#17213c' : '#fff'; box.textContent = `H=${h} S=${s} V=${v}`; const ok = h >= 0 && h <= 22 && s >= 25 && s <= 130 && v >= 90; check.style.background = ok ? '#c9ef75' : '#ffb5aa'; check.style.color = '#17213c'; check.textContent = ok ? '\u2714 Matches skin range' : '\u2718 Outside skin range'; }
+        [hS, sS, vS].forEach(el => el.addEventListener('input', update)); update();
+      })();
+
+      /* Candy K-Means */
+      (function () {
+        const arena = document.getElementById('candyArena'), btn = document.getElementById('candyBtn'), legend = document.getElementById('clusterLegend'), status = document.getElementById('candyStatus');
+        if (!arena) return;
+        const CC = ['#ff735c', '#63dbe8', '#c9ef75', '#b89df8'], CN = ['Skin (orange)', 'Background (pale)', 'Hair (dark)', 'Other'];
+        function rHSV() { return { h: Math.random() * 179, s: Math.random() * 255, v: Math.random() * 255 }; }
+        function d3(a, b) { return Math.sqrt((a.h - b.h) ** 2 + (a.s - b.s) ** 2 + (a.v - b.v) ** 2); }
+        function km(data, k, iters = 8) { let c = Array.from({ length: k }, (_, i) => ({ ...data[Math.floor(Math.random() * data.length)] })), lbl = new Array(data.length).fill(0); for (let t = 0; t < iters; t++) { data.forEach((d, i) => { let b = 0, bd = Infinity; c.forEach((cc, ci) => { const dd = d3(d, cc); if (dd < bd) { bd = dd; b = ci; } }); lbl[i] = b; }); c = c.map((_, ci) => { const pts = data.filter((_, i) => lbl[i] === ci); if (!pts.length) return c[ci]; return { h: pts.reduce((a, p) => a + p.h, 0) / pts.length, s: pts.reduce((a, p) => a + p.s, 0) / pts.length, v: pts.reduce((a, p) => a + p.v, 0) / pts.length }; }); } return lbl; }
+        function hRgb(h, s, v) { h = h / 179 * 360; s = s / 255; v = v / 255; const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c; let r, g, b; if (h < 60) { r = c; g = x; b = 0; } else if (h < 120) { r = x; g = c; b = 0; } else if (h < 180) { r = 0; g = c; b = x; } else if (h < 240) { r = 0; g = x; b = c; } else if (h < 300) { r = x; g = 0; b = c; } else { r = c; g = 0; b = x; } return `rgb(${Math.round((r + m) * 255)},${Math.round((g + m) * 255)},${Math.round((b + m) * 255)})`; }
+        function run() { const c = Array.from({ length: 24 }, rHSV); arena.innerHTML = ''; c.forEach(p => { const el = document.createElement('span'); el.className = 'candy'; el.style.background = hRgb(p.h, p.s, p.v); arena.appendChild(el); }); status.textContent = 'Running K-Means\u2026'; setTimeout(() => { const lbl = km(c, 4);[...arena.children].forEach((el, i) => { el.style.outline = `3px solid ${CC[lbl[i]]}`; }); legend.innerHTML = CC.map((col, i) => `<span class="cl-item"><span class="cl-dot" style="background:${col}"></span>${CN[i]}</span>`).join(''); status.textContent = 'Done! Outline colour = cluster. Orange outlines = skin cluster.'; }, 300); }
+        btn.addEventListener('click', run); run();
+      })();
+
+      /* Morph demo */
+      (function () {
+        const grid = document.getElementById('morphGrid'), status = document.getElementById('morphStatus');
+        const bR = document.getElementById('morphRaw'), bO = document.getElementById('morphOpen'), bC = document.getElementById('morphClose');
+        if (!grid) return;
+        const raw = [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1];
+        const open = [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0];
+        const close = [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0];
+        let cells = []; for (let i = 0; i < 60; i++) { const c = document.createElement('span'); c.className = 'mcell'; grid.appendChild(c); cells.push(c); }
+        function show(data, msg, active) { data.forEach((v, i) => cells[i].classList.toggle('on', !!v)); status.textContent = msg;[bR, bO, bC].forEach(b => b.style.background = 'white'); active.style.background = 'var(--coral)'; }
+        bR.onclick = () => show(raw, 'Raw mask \u2014 noisy dots and holes inside the face blob.', bR);
+        bO.onclick = () => show(open, 'After MORPH_OPEN \u2014 tiny noise dot removed. Holes still there.', bO);
+        bC.onclick = () => show(close, 'After MORPH_CLOSE \u2014 holes inside the face are filled. Clean!', bC);
+        show(raw, 'Raw mask \u2014 noisy dots and holes inside the face blob.', bR);
+      })();
+
+      /* Score demo */
+      (function () {
+        const demo = document.getElementById('scoreDemo');
+        if (!demo) return;
+        const blobs = [
+          { label: 'Face blob', x: 32, y: 12, w: 36, h: 52, winner: true, note: 'Large \u00b7 centred \u00b7 square-ish \u2192 highest score' },
+          { label: 'Stick blob', x: 2, y: 44, w: 94, h: 7, winner: false, note: 'Width = 94% of image \u2192 \u00d70.1 width penalty' },
+          { label: 'Neck blob', x: 36, y: 70, w: 26, h: 22, winner: false, note: 'Too low (bottom 30%) \u2192 \u00d70.3 position penalty' },
+          { label: 'Noise', x: 80, y: 8, w: 6, h: 4, winner: false, note: 'Too small \u2192 skipped entirely (area < 0.5%)' },
+        ];
+        const cap = document.getElementById('scoreCaption');
+        blobs.forEach(b => { const el = document.createElement('div'); el.className = 'blob' + (b.winner ? ' winner' : ''); el.style.cssText = `left:${b.x}%;top:${b.y}%;width:${b.w}%;height:${b.h}%`; el.title = b.note; el.innerHTML = `<div style="text-align:center;padding:4px;font-size:.6rem;line-height:1.2;opacity:.9">${b.label}</div>`; el.addEventListener('mouseenter', () => { cap.textContent = b.note; }); demo.appendChild(el); });
+      })();
+    })();
+  </script>
+</body>
+
+</html>
