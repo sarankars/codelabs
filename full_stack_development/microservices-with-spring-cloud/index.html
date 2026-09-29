@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Cloud Microservices — Theoretical Codelab</title>
+    <meta name="description"
+        content="Learn the core theoretical concepts of Microservices and Spring Cloud, including Service Discovery, API Gateways, Config Servers, and Circuit Breakers.">
+    <meta name="theme-color" content="#2856d8">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+        :root {
+            --blue: #2856d8;
+            --blue-dark: #17348e;
+            --blue-light: #e4ebff;
+            --ink: #101010;
+            --paper: #f5f7fb;
+            --white: #fff;
+            --yellow: #ffd83d;
+            --mint: #75e6c5;
+            --pink: #ff9bb7;
+            --orange: #ffb866;
+            --border: 3px solid var(--ink);
+            --shadow: 6px 6px 0 var(--ink);
+            --shadow-sm: 4px 4px 0 var(--ink);
+            --sidebar: 292px
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-behavior: auto
+        }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: "Space Grotesk", system-ui, sans-serif;
+            line-height: 1.55
+        }
+
+        button,
+        a {
+            font: inherit
+        }
+
+        button {
+            cursor: pointer
+        }
+
+        :focus-visible {
+            outline: 4px solid var(--yellow);
+            outline-offset: 3px
+        }
+
+        .app {
+            min-height: 100vh
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: var(--sidebar);
+            padding: 22px 18px;
+            background: var(--blue);
+            border-right: var(--border);
+            overflow: auto;
+            z-index: 20
+        }
+
+        .brand {
+            padding: 16px;
+            margin-bottom: 20px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .eyebrow,
+        .progress-meta,
+        .step-number,
+        .step-kicker,
+        .label,
+        .footer-note {
+            font-family: "DM Mono", monospace
+        }
+
+        .eyebrow {
+            font-size: .72rem;
+            font-weight: 500;
+            letter-spacing: .06em;
+            text-transform: uppercase
+        }
+
+        .brand h2 {
+            margin: 5px 0 3px;
+            font-size: 1.42rem;
+            line-height: 1.05
+        }
+
+        .brand p {
+            margin: 0;
+            font-size: .85rem;
+            font-weight: 600
+        }
+
+        .progress-wrap {
+            margin: 0 2px 20px;
+            color: #fff
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 7px;
+            font-size: .72rem
+        }
+
+        .progress-track {
+            height: 16px;
+            padding: 2px;
+            background: #fff;
+            border: var(--border)
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: var(--yellow);
+            transition: width .2s ease
+        }
+
+        .steps {
+            display: grid;
+            gap: 8px
+        }
+
+        .step-link {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 34px 1fr 18px;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 8px;
+            color: #fff;
+            background: transparent;
+            border: 3px solid transparent;
+            text-align: left;
+            font-weight: 700;
+            line-height: 1.15
+        }
+
+        .step-link:hover {
+            background: rgba(255, 255, 255, .14)
+        }
+
+        .step-link.active {
+            color: var(--ink);
+            background: #fff;
+            border-color: var(--ink);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            border: 2px solid currentColor;
+            font-size: .78rem
+        }
+
+        .step-status {
+            text-align: center
+        }
+
+        .mobile-bar {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--blue);
+            border-bottom: var(--border)
+        }
+
+        .menu-btn,
+        .mobile-title {
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .menu-btn {
+            width: 46px;
+            height: 42px;
+            font-size: 1.25rem;
+            font-weight: 900
+        }
+
+        .mobile-title {
+            flex: 1;
+            padding: 8px 10px;
+            font-weight: 800
+        }
+
+        main {
+            margin-left: var(--sidebar);
+            min-height: 100vh
+        }
+
+        .content {
+            width: min(980px, calc(100% - 48px));
+            margin: 0 auto;
+            padding: 42px 0 28px
+        }
+
+        .step-view {
+            display: none
+        }
+
+        .step-view.active {
+            display: block;
+            animation: stepIn .18s ease-out
+        }
+
+        @keyframes stepIn {
+            from {
+                opacity: .35;
+                transform: translateY(5px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .step-header {
+            padding: 28px;
+            margin-bottom: 24px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow)
+        }
+
+        .step-kicker {
+            display: inline-block;
+            margin-bottom: 13px;
+            padding: 5px 9px;
+            color: #fff;
+            background: var(--blue);
+            border: 2px solid var(--ink);
+            font-size: .72rem
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.08
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 5vw, 3.7rem);
+            letter-spacing: -.045em
+        }
+
+        h2 {
+            margin: 30px 0 12px;
+            font-size: clamp(1.5rem, 3vw, 2.15rem)
+        }
+
+        h3 {
+            margin: 22px 0 9px;
+            font-size: 1.15rem
+        }
+
+        .lede {
+            max-width: 780px;
+            margin: 0;
+            font-size: 1.08rem
+        }
+
+        .objective {
+            margin-top: 20px;
+            padding: 14px 16px;
+            background: var(--yellow);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 700
+        }
+
+        .panel,
+        .concept,
+        .quiz,
+        .reveal {
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .panel {
+            padding: 22px;
+            margin: 20px 0
+        }
+
+        .panel.blue {
+            background: var(--blue-light)
+        }
+
+        .panel.mint {
+            background: var(--mint)
+        }
+
+        .panel.pink {
+            background: var(--pink)
+        }
+
+        .panel.yellow {
+            background: var(--yellow)
+        }
+
+        .panel.orange {
+            background: var(--orange)
+        }
+
+        .callout {
+            padding: 16px 18px;
+            margin: 20px 0;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .callout .label {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 3px 7px;
+            color: #fff;
+            background: var(--ink);
+            border: 2px solid var(--ink);
+            font-size: .72rem
+        }
+
+        .grid-2 {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(2, minmax(0, 1fr))
+        }
+
+        .concept {
+            padding: 18px
+        }
+
+        .concept strong {
+            font-size: 1.05rem
+        }
+
+        .concept p:last-child {
+            margin-bottom: 0
+        }
+
+        .code-wrap {
+            position: relative;
+            margin: 18px 0
+        }
+
+        pre {
+            margin: 0;
+            padding: 20px;
+            overflow: auto;
+            color: #f7f7f7;
+            background: #111;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-family: "DM Mono", ui-monospace, monospace;
+            font-size: .84rem;
+            line-height: 1.62;
+            tab-size: 2
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 2;
+            padding: 5px 9px;
+            background: var(--yellow);
+            border: 2px solid var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+            font-size: .75rem;
+            font-weight: 800
+        }
+
+        code:not(pre code) {
+            padding: 1px 5px;
+            background: #e8edf7;
+            border: 1px solid #9da9bb;
+            font-family: "DM Mono", monospace;
+            font-size: .88em
+        }
+
+        ul,
+        ol {
+            padding-left: 1.35rem
+        }
+
+        li {
+            margin: 7px 0
+        }
+
+        .comparison {
+            width: 100%;
+            margin: 18px 0;
+            background: #fff;
+            border: var(--border);
+            border-collapse: collapse
+        }
+
+        .comparison th,
+        .comparison td {
+            padding: 11px;
+            border: 2px solid var(--ink);
+            text-align: left;
+            vertical-align: top
+        }
+
+        .comparison th {
+            color: #fff;
+            background: var(--blue)
+        }
+
+        .quiz {
+            padding: 20px;
+            margin: 20px 0
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 9px;
+            margin-top: 14px
+        }
+
+        .quiz-option {
+            text-align: left;
+            padding: 11px 13px;
+            background: #fff;
+            border: 2px solid var(--ink);
+            font-weight: 700
+        }
+
+        .quiz-option:hover {
+            background: var(--blue-light)
+        }
+
+        .quiz-option.correct {
+            background: var(--mint)
+        }
+
+        .quiz-option.wrong {
+            background: var(--pink)
+        }
+
+        .quiz-feedback {
+            display: none;
+            margin-top: 13px;
+            padding: 10px;
+            border: 2px solid var(--ink);
+            font-weight: 700
+        }
+
+        .quiz-feedback.show {
+            display: block
+        }
+
+        .reveal {
+            margin: 18px 0
+        }
+
+        .reveal summary {
+            padding: 13px 16px;
+            cursor: pointer;
+            background: var(--blue-light);
+            font-weight: 800
+        }
+
+        .reveal>div {
+            padding: 15px 16px
+        }
+
+        .challenge {
+            padding: 22px;
+            margin: 24px 0;
+            color: #fff;
+            background: var(--ink);
+            border: var(--border);
+            box-shadow: var(--shadow)
+        }
+
+        .challenge h3 {
+            margin-top: 0;
+            color: var(--yellow)
+        }
+
+        .flow {
+            margin: 20px 0;
+            padding: 20px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-family: "DM Mono", monospace;
+            line-height: 1.9;
+            overflow: auto
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0
+        }
+
+        .checklist li {
+            position: relative;
+            padding-left: 30px
+        }
+
+        .checklist li::before {
+            content: "□";
+            position: absolute;
+            left: 0;
+            font-size: 1.25rem;
+            font-weight: 900
+        }
+
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            margin-top: 34px;
+            padding-top: 20px;
+            border-top: var(--border)
+        }
+
+        .nav-btn {
+            min-width: 130px;
+            padding: 12px 18px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 900
+        }
+
+        .nav-btn.primary {
+            color: #fff;
+            background: var(--blue)
+        }
+
+        .nav-btn:disabled {
+            opacity: .35;
+            cursor: not-allowed
+        }
+
+        .finish {
+            padding: 20px;
+            margin-top: 24px;
+            background: var(--mint);
+            border: var(--border);
+            box-shadow: var(--shadow)
+        }
+
+        @media(max-width:850px) {
+            :root {
+                --sidebar: 270px;
+                --mobile-bar-height: 65px
+            }
+
+            .sidebar {
+                inset: var(--mobile-bar-height) auto 0 0;
+                transform: translateX(-100%);
+                transition: transform .2s ease
+            }
+
+            .sidebar.open {
+                transform: none
+            }
+
+            .mobile-bar {
+                display: flex;
+                height: var(--mobile-bar-height)
+            }
+
+            main {
+                margin-left: 0
+            }
+
+            .content {
+                width: min(940px, calc(100% - 28px));
+                padding-top: 24px
+            }
+        }
+
+        @media(max-width:680px) {
+            .grid-2 {
+                grid-template-columns: 1fr
+            }
+
+            .content {
+                width: calc(100% - 18px);
+                padding-top: 16px
+            }
+
+            .step-header {
+                padding: 20px 16px
+            }
+
+            .panel,
+            .concept,
+            .quiz {
+                padding: 16px
+            }
+
+            .nav-row {
+                position: sticky;
+                bottom: 0;
+                z-index: 10;
+                padding: 12px 0;
+                background: var(--paper)
+            }
+
+            .nav-btn {
+                min-width: 0;
+                flex: 1;
+                padding: 11px 10px
+            }
+
+            pre {
+                padding: 16px 12px;
+                font-size: .76rem
+            }
+
+            .copy-btn {
+                position: static;
+                align-self: flex-end;
+                margin-bottom: 6px
+            }
+
+            .code-wrap {
+                display: flex;
+                flex-direction: column
+            }
+
+            .code-wrap pre {
+                order: 2
+            }
+
+            .code-wrap .copy-btn {
+                order: 1
+            }
+
+            .comparison {
+                display: block;
+                overflow-x: auto
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+            <div class="brand">
+                <div class="eyebrow">Architecture Codelab</div>
+                <h2>Spring Cloud Theory</h2>
+                <p>Microservices concepts without code.</p>
+            </div>
+            <div class="progress-wrap">
+                <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+                <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                    aria-valuenow="0">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+            <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+        </aside>
+        <div class="mobile-bar"><button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation"
+                aria-expanded="false">☰</button>
+            <div class="mobile-title" id="mobileTitle">Spring Cloud Theory</div>
+        </div>
+        <main>
+            <div class="content" id="content">
+
+                <section class="step-view" data-title="Monolith vs Microservices">
+                    <header class="step-header"><span class="step-kicker">STEP 1 · INTRODUCTION</span>
+                        <h1>The Shift to Microservices</h1>
+                        <p class="lede">Before we understand Spring Cloud, we need to understand the architectural shift
+                            from single-deployable monolithic applications to distributed systems.</p>
+                    </header>
+                    <div class="objective"><strong>By the end:</strong> You will understand what microservices are, why
+                        they introduce new architectural challenges, and how Spring Cloud acts as an ecosystem to solve
+                        them.
+                    </div>
+
+                    <h2>Architecture Comparison</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>Feature</th>
+                            <th>Monolith</th>
+                            <th>Microservices</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Deployment</strong></td>
+                            <td>One large file (e.g., a single .jar or .war).</td>
+                            <td>Dozens or hundreds of small, independent files.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Database</strong></td>
+                            <td>Usually a single shared database.</td>
+                            <td>Ideally, each service owns its own database.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Scaling</strong></td>
+                            <td>Scale the entire app by running multiple instances.</td>
+                            <td>Scale only the services that have high traffic.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Failure Impact</strong></td>
+                            <td>A bug in one feature can crash the whole application.</td>
+                            <td>A bug in one service ideally isolates the failure.</td>
+                        </tr>
+                    </table>
+
+                    <div class="panel mint"><strong>The Trade-off</strong>
+                        <p>Microservices solve organizational and scaling problems, but they introduce heavy
+                            <strong>operational complexity</strong>. You are trading software complexity inside your
+                            code for network complexity between your servers.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="The Distributed Problem">
+                    <header class="step-header"><span class="step-kicker">STEP 2 · THE PROBLEM</span>
+                        <h1>The Challenges of Distributed Systems</h1>
+                        <p class="lede">When you split an application into 10 smaller applications, simple things
+                            suddenly become very hard.</p>
+                    </header>
+
+                    <div class="grid-2">
+                        <div class="concept"><strong>Configuration Management</strong>
+                            <p>If a database password changes, do you manually update 10 different
+                                `application.properties` files and restart 10 servers?</p>
+                        </div>
+                        <div class="concept"><strong>Service Location</strong>
+                            <p>How does the "Order Service" know the IP address of the "Payment Service" if IPs change
+                                dynamically in the cloud?</p>
+                        </div>
+                        <div class="concept"><strong>Routing & Security</strong>
+                            <p>Do mobile clients need to memorize the IP and Port of every single microservice to fetch
+                                data?</p>
+                        </div>
+                        <div class="concept"><strong>Cascading Failures</strong>
+                            <p>If the Payment Service goes offline, will the Order Service crash waiting for a response,
+                                bringing down the whole system?</p>
+                        </div>
+                    </div>
+
+                    <div class="panel yellow"><strong>Enter Spring Cloud</strong>
+                        <p>Spring Cloud is an umbrella project. It provides a suite of tools designed specifically to
+                            solve these distributed systems problems using established design patterns.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Service Discovery (Eureka)">
+                    <header class="step-header"><span class="step-kicker">STEP 3 · DISCOVERY</span>
+                        <h1>Service Discovery: Finding Other Services</h1>
+                        <p class="lede">We cannot hardcode IP addresses (like `http://192.168.1.15:8080`) when cloud
+                            servers dynamically spin up and down.</p>
+                    </header>
+
+                    <h2>The Phonebook Analogy</h2>
+                    <p>Think of <strong>Service Discovery (e.g., Netflix Eureka)</strong> as a dynamic corporate
+                        phonebook.</p>
+
+                    <ol>
+                        <li><strong>Registration:</strong> When a microservice starts up, it connects to the Eureka
+                            Server and says, <em>"Hi, I am the PAYMENT-SERVICE, and I am currently at IP 10.0.0.5 on
+                                Port 8081."</em></li>
+                        <li><strong>Heartbeats:</strong> The service pings Eureka every 30 seconds to prove it is still
+                            alive.</li>
+                        <li><strong>Discovery:</strong> When the ORDER-SERVICE needs to call the payment service, it
+                            asks Eureka, <em>"Where is PAYMENT-SERVICE?"</em></li>
+                        <li>Eureka replies with the live IP address.</li>
+                    </ol>
+
+                    <div class="flow">
+                        ORDER-SERVICE <br>
+                        ↓ "Where is PAYMENT-SERVICE?" <br>
+                        EUREKA REGISTRY (The Phonebook) <br>
+                        ↓ "It's at 10.0.0.5:8081" <br>
+                        ORDER-SERVICE makes HTTP call directly to 10.0.0.5:8081
+                    </div>
+
+                </section>
+
+                <section class="step-view" data-title="API Gateway">
+                    <header class="step-header"><span class="step-kicker">STEP 4 · ROUTING</span>
+                        <h1>API Gateway: The Front Door</h1>
+                        <p class="lede">Without a gateway, a mobile app would have to make requests to 15 different
+                            servers on 15 different ports to load one user dashboard.</p>
+                    </header>
+
+                    <p>An <strong>API Gateway (e.g., Spring Cloud Gateway)</strong> acts as the single point of entry
+                        for all external clients (browsers, mobile apps).</p>
+
+                    <h2>Key Responsibilities:</h2>
+                    <ul>
+                        <li><strong>Routing:</strong> Forwards `/api/orders/**` to the Order Service and `/api/users/**`
+                            to the User Service.</li>
+                        <li><strong>Cross-Cutting Concerns:</strong> Handles authentication, SSL termination, and CORS
+                            in one place.</li>
+                        <li><strong>Load Balancing:</strong> Works alongside Eureka to route traffic to the least busy
+                            instance of a service.</li>
+                    </ul>
+
+                    <div class="quiz" data-answer="1"
+                        data-correct="Correct! The gateway handles cross-cutting concerns at the entry point so individual services don't have to.">
+                        <h3>Which of the following is a primary benefit of using an API Gateway?</h3>
+                        <div class="quiz-options">
+                            <button class="quiz-option">It stores a backup of all microservice databases.</button>
+                            <button class="quiz-option">It provides a single entry point for authentication and
+                                routing.</button>
+                            <button class="quiz-option">It replaces the need for a Service Registry like
+                                Eureka.</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Centralized Config">
+                    <header class="step-header"><span class="step-kicker">STEP 5 · CONFIGURATION</span>
+                        <h1>Centralized Configuration Server</h1>
+                        <p class="lede">Managing 50 different `application.properties` files across 50 servers is an
+                            operational nightmare.</p>
+                    </header>
+
+                    <p><strong>Spring Cloud Config</strong> moves configuration files <em>out</em> of the application's
+                        source code and into a central repository (usually a private Git repository).</p>
+
+                    <div class="flow">
+                        Git Repository (holds payment-prod.yml, order-prod.yml)<br>
+                        ↓<br>
+                        Spring Cloud Config Server (Reads Git)<br>
+                        ↓<br>
+                        Microservices (Fetch their config on startup)
+                    </div>
+
+                    <div class="panel blue"><strong>Why Git?</strong>
+                        <p>By keeping configuration in Git, you get version control, audit logs (who changed the
+                            database password?), and easy rollbacks if a bad configuration brings down a service.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Fault Tolerance">
+                    <header class="step-header"><span class="step-kicker">STEP 6 · RESILIENCE</span>
+                        <h1>Fault Tolerance & Circuit Breakers</h1>
+                        <p class="lede">In a distributed system, network failures and service crashes are guaranteed. We
+                            must design for failure.</p>
+                    </header>
+
+                    <h2>The Cascading Failure</h2>
+                    <p>If Service A calls Service B, and Service B is incredibly slow (taking 30 seconds to reply),
+                        Service A will lock up all its threads waiting for a reply. Soon, Service A crashes too.</p>
+
+                    <h2>The Circuit Breaker Pattern (Resilience4j)</h2>
+                    <p>Modeled after an electrical circuit breaker, this pattern wraps network calls and monitors for
+                        failures.</p>
+
+                    <table class="comparison">
+                        <tr>
+                            <th>State</th>
+                            <th>What happens?</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Closed</strong></td>
+                            <td>Everything is healthy. Traffic flows normally to the destination service.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Open</strong></td>
+                            <td>Failures passed a threshold (e.g., 50% of requests failed). The circuit "trips." Network
+                                calls are blocked immediately and return a fallback (default) response to prevent
+                                cascading failure.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Half-Open</strong></td>
+                            <td>After a timeout, the circuit lets a few requests through to test if the destination
+                                service has recovered. If yes, it closes. If no, it opens again.</td>
+                        </tr>
+                    </table>
+
+                </section>
+
+                <section class="step-view" data-title="The Big Picture">
+                    <header class="step-header"><span class="step-kicker">STEP 7 · ARCHITECTURE</span>
+                        <h1>Putting It All Together</h1>
+                        <p class="lede">Let's trace how all these theoretical components interact during a single user
+                            request.</p>
+                    </header>
+
+                    <div class="flow">
+                        1. Mobile App makes a request to `api.myapp.com/orders`<br>
+                        ↓<br>
+                        2. <strong>Spring Cloud Gateway</strong> receives the request.<br>
+                        ↓<br>
+                        3. Gateway asks <strong>Eureka</strong>: "Where is the Order Service?"<br>
+                        ↓<br>
+                        4. Gateway routes the traffic to the Order Service IP.<br>
+                        ↓<br>
+                        5. Order Service needs User data. It asks <strong>Eureka</strong> for the User Service IP.<br>
+                        ↓<br>
+                        6. Order Service calls User Service. This call is wrapped in a <strong>Circuit Breaker</strong>
+                        just in case User Service is down.<br>
+                        ↓<br>
+                        7. Response travels all the way back to the client.
+                    </div>
+
+                    <div class="callout"><span class="label">NOTE</span>
+                        <p>All microservices in this diagram fetched their database credentials on startup from the
+                            <strong>Config Server</strong>.</p>
+                    </div>
+                </section>
+
+                <section class="step-view" data-title="Revision">
+                    <header class="step-header"><span class="step-kicker">STEP 8 · RECAP</span>
+                        <h1>Theoretical Revision</h1>
+                        <p class="lede">Review the core concepts before diving into the code in your next module.</p>
+                    </header>
+
+                    <div class="reveal">
+                        <summary>What problem does Eureka solve?</summary>
+                        <div>It prevents hardcoding IP addresses by acting as a dynamic registry/phonebook for services
+                            to find each other.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>What does an API Gateway do?</summary>
+                        <div>It acts as the single front door, handling routing, load balancing, and security before
+                            traffic hits individual microservices.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>Why use a Spring Cloud Config Server?</summary>
+                        <div>To centralize configuration properties in a Git repository so they can be updated without
+                            rebuilding application code.</div>
+                    </div>
+                    <div class="reveal">
+                        <summary>How does a Circuit Breaker prevent cascading failures?</summary>
+                        <div>If a downstream service is failing or slow, the circuit "opens" to block traffic and return
+                            fallback data immediately, freeing up server threads.</div>
+                    </div>
+
+                    <h2>Completion checklist</h2>
+                    <ul class="checklist">
+                        <li>I understand the difference between Monoliths and Microservices.</li>
+                        <li>I understand why hardcoded IPs fail in the cloud.</li>
+                        <li>I can explain the role of a Service Registry.</li>
+                        <li>I know why mobile clients shouldn't call microservices directly.</li>
+                        <li>I understand the three states of a Circuit Breaker.</li>
+                        <li>I can visualize the end-to-end architecture flow.</li>
+                    </ul>
+
+                    <div class="finish">
+                        <h2>Spring Cloud Theory complete! 🎉</h2>
+                        <p>You now understand the <em>why</em> behind microservice architecture patterns. In your next
+                            hands-on codelabs, you will learn how to implement Eureka, Gateway, and Config Server using
+                            Spring Boot annotations.</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script>
+        (() => {
+            const steps = [...document.querySelectorAll('.step-view')];
+            const titles = steps.map(step => step.dataset.title);
+            const nav = document.getElementById('stepNav');
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const content = document.getElementById('content');
+            const completed = new Set();
+            let current = 0;
+            nav.innerHTML = titles.map((title, index) => `<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+            const getHashStep = () => { const match = location.hash.match(/^#step-(\d+)$/); const value = match ? Number(match[1]) - 1 : 0; return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0 };
+            function render(updateHash = true) {
+                current = Math.max(0, Math.min(current, steps.length - 1));
+                steps.forEach((step, index) => { const active = index === current; step.classList.toggle('active', active); step.setAttribute('aria-hidden', String(!active)) });
+                document.querySelectorAll('.step-link').forEach((button, index) => { button.classList.toggle('active', index === current); button.setAttribute('aria-current', index === current ? 'step' : 'false'); button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '' });
+                const percent = Math.round(((current + 1) / steps.length) * 100);
+                document.getElementById('progressBar').style.width = `${percent}%`;
+                document.getElementById('progressText').textContent = `${percent}%`;
+                document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+                document.getElementById('mobileTitle').textContent = titles[current];
+                document.getElementById('prevBtn').disabled = current === 0;
+                document.getElementById('nextBtn').disabled = current === steps.length - 1;
+                document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+                if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+                window.scrollTo({ top: 0, behavior: 'auto' }); sidebar.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false');
+            }
+            function goTo(index) { if (index < 0 || index >= steps.length) return; completed.add(current); current = index; render(); }
+            const navRow = document.createElement('div'); navRow.className = 'nav-row'; navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>'; content.appendChild(navRow);
+            document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+            document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+            nav.addEventListener('click', event => { const button = event.target.closest('.step-link'); if (button) goTo(Number(button.dataset.step)) });
+            menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)) });
+            document.addEventListener('click', async event => { const copy = event.target.closest('.copy-btn'); if (copy) { const code = copy.parentElement.querySelector('pre code')?.textContent ?? ''; try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!' } catch { copy.textContent = 'Select & copy' } setTimeout(() => copy.textContent = 'Copy', 1200); return; } const option = event.target.closest('.quiz-option'); if (option) { const quiz = option.closest('.quiz'); if (quiz.dataset.answered) return; const options = [...quiz.querySelectorAll('.quiz-option')]; const choice = options.indexOf(option); const answer = Number(quiz.dataset.answer); quiz.dataset.answered = 'true'; options.forEach(button => button.disabled = true); option.classList.add(choice === answer ? 'correct' : 'wrong'); if (choice !== answer) options[answer].classList.add('correct'); const feedback = quiz.querySelector('.quiz-feedback'); feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`; feedback.classList.add('show'); } });
+            window.addEventListener('popstate', () => { current = getHashStep(); render(false) }); window.addEventListener('hashchange', () => { current = getHashStep(); render(false) });
+            document.addEventListener('keydown', event => { if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return; if (event.key === 'ArrowRight') goTo(current + 1); if (event.key === 'ArrowLeft') goTo(current - 1) });
+            current = getHashStep(); render(false);
+        })();
+    </script>
+</body>
+
+</html>
