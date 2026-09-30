@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCA for Images — Practical Codelab</title>
+<meta name="description" content="Step-by-step practical codelab: implement dimensionality reduction using PCA for images in Python. Covers loading images, flattening, PCA compression, eigenfaces, and reconstruction.">
+<meta name="theme-color" content="#2856d8">
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+  :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--purple:#c7b2ff;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+  *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+  .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.28rem;line-height:1.05}.brand p{margin:0;font-size:.82rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+  .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+  .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(1.8rem,4vw,3.2rem);letter-spacing:-.04em}h2{margin:30px 0 12px;font-size:clamp(1.3rem,2.5vw,1.9rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+  .panel,.concept,.quiz,.reveal{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.panel.purple{background:var(--purple)}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+  .code-wrap{position:relative;margin:18px 0}.code-wrap .filename{display:inline-block;padding:4px 10px;background:var(--ink);color:var(--yellow);font-family:"DM Mono",monospace;font-size:.72rem;font-weight:500;border:2px solid var(--ink);margin-bottom:-2px}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+  .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}
+  .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}
+  .output-box{margin:18px 0;padding:16px 20px;background:#0d1117;color:#7ee787;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;font-size:.84rem;line-height:1.62}
+  .output-box .out-label{display:block;color:#8b949e;font-size:.72rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em}
+  .checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px;margin:10px 0}.checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}
+  .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}
+  .finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}
+  @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+  @media(max-width:680px){.grid-2{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+  <div class="brand">
+    <div class="eyebrow">Computer Vision · Practical</div>
+    <h2>PCA for Images</h2>
+    <p>Dimensionality Reduction Lab</p>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+    <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+  <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+</aside>
+
+<div class="mobile-bar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">&#9776;</button>
+  <div class="mobile-title" id="mobileTitle">PCA for Images</div>
+</div>
+
+<main>
+<div class="content" id="content">
+
+<!-- STEP 1 -->
+<section class="step-view" data-title="Overview &amp; Goal">
+  <header class="step-header">
+    <span class="step-kicker">STEP 1 &middot; OVERVIEW</span>
+    <h1>Implement PCA Dimensionality Reduction for Images</h1>
+    <p class="lede">In this practical codelab you will write every line of Python code needed to load images, apply PCA, visualise eigenfaces, and reconstruct compressed images &mdash; step by step.</p>
+  </header>
+  <div class="objective"><strong>By the end of this lab you will be able to:</strong>
+    <ul style="margin:.5rem 0 0">
+      <li>Load and preprocess a set of face images into a data matrix</li>
+      <li>Standardise the matrix and apply PCA using scikit-learn</li>
+      <li>Inspect explained variance and choose the right number of components</li>
+      <li>Visualise the mean face and eigenfaces</li>
+      <li>Reconstruct compressed images and measure quality</li>
+      <li>Plot a scree chart and compare compression levels</li>
+    </ul>
+  </div>
+  <h2>What you will build</h2>
+  <div class="flow">Raw face images (Olivetti / ORL dataset)<br>&#8595; flatten each image to a row vector<br>&#8595; stack into matrix X &nbsp;(n_samples &times; n_pixels)<br>&#8595; standardise<br>&#8595; apply PCA &rarr; choose k components<br>&#8595; reconstruct images from k components<br>&#8595; compute reconstruction error<br>&#8595; visualise eigenfaces and compressed images</div>
+  <div class="grid-2">
+    <div class="concept"><strong>&#128013; Language</strong><p>Python 3.8+</p></div>
+    <div class="concept"><strong>&#128230; Libraries</strong><p>NumPy, scikit-learn, Matplotlib</p></div>
+    <div class="concept"><strong>&#128194; Dataset</strong><p>Olivetti Faces &mdash; built into scikit-learn, no download needed</p></div>
+    <div class="concept"><strong>&#9201; Estimated time</strong><p>45 &ndash; 60 minutes</p></div>
+  </div>
+  <div class="panel blue"><strong>Prerequisite</strong><p>This lab follows the conceptual codelab <em>Dimensionality Reduction (Module 4.2)</em>. Make sure you understand what PCA does before writing the code.</p></div>
+</section>
+
+<!-- STEP 2 -->
+<section class="step-view" data-title="Environment setup">
+  <header class="step-header">
+    <span class="step-kicker">STEP 2 &middot; SETUP</span>
+    <h1>Set Up Your Environment</h1>
+    <p class="lede">Create a clean Python environment and install the required packages before writing any code.</p>
+  </header>
+  <h2>Option A &mdash; local virtual environment</h2>
+  <div class="code-wrap">
+    <div class="filename">terminal</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>python -m venv pca_lab
+source pca_lab/bin/activate       # Windows: pca_lab\Scripts\activate
+pip install numpy scikit-learn matplotlib scikit-image</code></pre>
+  </div>
+  <h2>Option B &mdash; Google Colab / Jupyter</h2>
+  <div class="code-wrap">
+    <div class="filename">notebook cell</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>!pip install -q scikit-image   # numpy, sklearn, matplotlib are pre-installed</code></pre>
+  </div>
+  <h2>Verify your setup</h2>
+  <div class="code-wrap">
+    <div class="filename">pca_images.py</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>import numpy as np
+import sklearn
+import matplotlib
+print("NumPy      :", np.__version__)
+print("scikit-learn:", sklearn.__version__)
+print("Matplotlib :", matplotlib.__version__)
+print("Setup OK &#10003;")</code></pre>
+  </div>
+  <div class="output-box">
+    <span class="out-label">expected output</span>
+NumPy      : 1.26.x
+scikit-learn: 1.4.x
+Matplotlib : 3.8.x
+Setup OK &#10003;
+  </div>
+</section>
+
+<!-- STEP 3 -->
+<section class="step-view" data-title="Load the face dataset">
+  <header class="step-header">
+    <span class="step-kicker">STEP 3 &middot; DATA</span>
+    <h1>Load the Olivetti Faces Dataset</h1>
+    <p class="lede">The Olivetti Faces dataset ships with scikit-learn &mdash; 400 grayscale 64&times;64 face images of 40 different people, 10 images each.</p>
+  </header>
+  <h2>Write the import and loading code</h2>
+  <div class="code-wrap">
+    <div class="filename">pca_images.py &mdash; Part 1: imports &amp; data</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_olivetti_faces
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+# Load dataset
+dataset = fetch_olivetti_faces(shuffle=True, random_state=42)
+X = dataset.data          # shape: (400, 4096)
+y = dataset.target        # shape: (400,) person identity 0-39
+
+n_samples, n_features = X.shape
+image_shape = (64, 64)
+
+print(f"Dataset loaded:")
+print(f"  Samples  : {n_samples}")
+print(f"  Features : {n_features}  (64 x 64 pixels)")
+print(f"  Classes  : {len(np.unique(y))} people")</code></pre>
+  </div>
+  <div class="output-box">
+    <span class="out-label">expected output</span>
+Dataset loaded:
+  Samples  : 400
+  Features : 4096  (64 x 64 pixels)
+  Classes  : 40 people
+  </div>
+  <div class="callout">
+    <span class="label">KEY POINT</span>
+    <p>Each image is <strong>flattened</strong> into a row vector of 4,096 numbers (64&times;64). The full dataset matrix <code>X</code> is therefore 400&times;4,096 &mdash; a very wide table. PCA will reduce the 4,096 columns to a much smaller number.</p>
+  </div>
+  <h2>Visualise a sample of raw images</h2>
+  <div class="code-wrap">
+    <div class="filename">pca_images.py &mdash; Part 1 continued</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>fig, axes = plt.subplots(2, 5, figsize=(12, 5))
+fig.suptitle("Sample raw images from Olivetti Faces", fontsize=14, fontweight="bold")
+for ax, image, label in zip(axes.flat, X[:10], y[:10]):
+    ax.imshow(image.reshape(image_shape), cmap="gray")
+    ax.set_title(f"Person {label}")
+    ax.axis("off")
+plt.tight_layout()
+plt.savefig("01_raw_samples.png", dpi=120, bbox_inches="tight")
+plt.show()</code></pre>
+  </div>
+  <div class="panel yellow"><strong>What to check</strong><p>You should see 10 small grayscale face images. Note how lighting, expression, and pose vary across people.</p></div>
+</section>
+
+<!-- STEP 4 -->
+<section class="step-view" data-title="Standardise the data">
+  <header class="step-header">
+    <span class="step-kicker">STEP 4 &middot; PREPROCESSING</span>
+    <h1>Standardise the Image Matrix</h1>
+    <p class="lede">PCA is sensitive to scale. We standardise each pixel feature so that no pixel dominates just because of its brightness range.</p>
+  </header>
+  <h2>Why standardise?</h2>
+  <div class="grid-2">
+    <div class="concept"><strong>Without standardisation</strong><p>PCA directions are dominated by features with the largest numerical range, not the most informative ones.</p></div>
+    <div class="concept"><strong>With standardisation</strong><p>Every pixel has mean 0 and variance 1, so PCA looks for the most informative directions regardless of raw scale.</p></div>
+  </div>
+  <div class="code-wrap">
+    <div class="filename">pca_images.py &mdash; Part 2: standardisation</div>
+    <button class="copy-btn">Copy</button>
+<pre><code># Standardise: zero mean, unit variance per pixel
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+print("Scaled matrix shape:", X_scaled.shape)
+print("Mean of first feature (should be ~0):", round(X_scaled[:, 0].mean(), 4))
+print("Std  of first feature (should be ~1):", round(X_scaled[:, 0].std(), 4))</code></pre>
+  </div>
+  <div class="output-box">
+    <span class="out-label">expected output</span>
+Scaled matrix shape: (400, 4096)
+Mean of first feature (should be ~0): 0.0
+Std  of first feature (should be ~1): 1.0
+  </div>
+  <div class="flow">Raw X &nbsp;(400 &times; 4096, pixel range 0.0 &ndash; 1.0)<br>&#8595; StandardScaler().fit_transform(X)<br>X_scaled &nbsp;(400 &times; 4096, mean&asymp;0, std&asymp;1)</div>
+  <div class="quiz" data-answer="1" data-correct="Correct. PCA maximises variance, so features with larger numerical ranges would dominate the principal directions without standardisation.">
+    <h3>Why should we standardise before applying PCA?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">To make images look brighter</button>
+      <button class="quiz-option">So that features with large numerical ranges don&rsquo;t dominate PCA</button>
+      <button class="quiz-option">To remove duplicate images</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 5 -->
+<section class="step-view" data-title="Apply PCA">
+  <header class="step-header">
+    <span class="step-kicker">STEP 5 &middot; PCA</span>
+    <h1>Apply PCA to the Image Matrix</h1>
+    <p class="lede">Use scikit-learn&rsquo;s PCA class to find the principal components of the face dataset, keeping 150 components to start.</p>
+  </header>
+  <div class="code-wrap">
+    <div class="filename">pca_images.py &mdash; Part 3: apply PCA</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>N_COMPONENTS = 150   # we will experiment with this later
+
+pca = PCA(n_components=N_COMPONENTS, whiten=True, random_state=42)
+X_pca = pca.fit_transform(X_scaled)
+
+print(f"PCA applied:")
+print(f"  Original  : {X_scaled.shape}")
+print(f"  Compressed: {X_pca.shape}")
+print(f"  Ratio     : {X_pca.shape[1]/X_scaled.shape[1]:.2%} of original features")
+
+cum_var = np.cumsum(pca.explained_variance_ratio_)
+print(f"\nVariance explained by top {N_COMPONENTS} components: {cum_var[-1]:.2%}")</code></pre>
+  </div>
+  <div class="output-box">
+    <span class="out-label">expected output</span>
+PCA applied:
+  Original  : (400, 4096)
+  Compressed: (400, 150)
+  Ratio     : 3.66% of original features
+
+Variance explained by top 150 components: 99.xx%
+  </div>
+  <h2>Understand the output</h2>
+  <table class="comparison">
+    <tr><th>Variable</th><th>Shape</th><th>Meaning</th></tr>
+    <tr><td><code>X_scaled</code></td><td>(400, 4096)</td><td>Standardised full image matrix</td></tr>
+    <tr><td><code>X_pca</code></td><td>(400, 150)</td><td>Compressed representation</td></tr>
+    <tr><td><code>pca.components_</code></td><td>(150, 4096)</td><td>Eigenfaces (principal directions)</td></tr>
+    <tr><td><code>pca.explained_variance_ratio_</code></td><td>(150,)</td><td>Fraction of variance each PC captures</td></tr>
+    <tr><td><code>pca.mean_</code></td><td>(4096,)</td><td>Mean face (per-pixel average)</td></tr>
+  </table>
+  <div class="callout"><span class="label">PARAMETER</span><p><code>whiten=True</code> divides each component by its standard deviation. This gives components with unit variance and often helps downstream classifiers.</p></div>
+</section>
+
+<!-- STEP 6 -->
+<section class="step-view" data-title="Explained variance &amp; scree plot">
+  <header class="step-header">
+    <span class="step-kicker">STEP 6 &middot; ANALYSIS</span>
+    <h1>Plot Explained Variance (Scree Chart)</h1>
+    <p class="lede">The scree plot shows how much information each principal component carries, helping us decide how many components to keep.</p>
+  </header>
+  <div class="code-wrap">
+    <div class="filename">pca_images.py &mdash; Part 4: scree plot</div>
+    <button class="copy-btn">Copy</button>
+<pre><code># Fit full PCA to see ALL components
+pca_full = PCA(random_state=42)
+pca_full.fit(X_scaled)
+
+ev_ratio = pca_full.explained_variance_ratio_
+cum_ev   = np.cumsum(ev_ratio)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+fig.suptitle("Explained Variance -- Olivetti Faces", fontsize=14, fontweight="bold")
+
+ax1.bar(range(1, 51), ev_ratio[:50], color="#2856d8", edgecolor="#101010", linewidth=0.8)
+ax1.set_xlabel("Principal Component")
+ax1.set_ylabel("Explained Variance Ratio")
+ax1.set_title("Individual (first 50 components)")
+
+ax2.plot(range(1, len(cum_ev)+1), cum_ev, color="#2856d8", linewidth=2)
+ax2.axhline(y=0.90, color="#ff9bb7", linestyle="--", linewidth=1.5, label="90%")
+ax2.axhline(y=0.95, color="#ffd83d", linestyle="--", linewidth=1.5, label="95%")
+ax2.axhline(y=0.99, color="#75e6c5", linestyle="--", linewidth=1.5, label="99%")
+ax2.set_xlabel("Number of Components")
+ax2.set_ylabel("Cumulative Explained Variance")
+ax2.set_title("Cumulative")
+ax2.legend()
+ax2.set_xlim(0, 200)
+
+plt.tight_layout()
+plt.savefig("02_scree_plot.png", dpi=120, bbox_inches="tight")
+plt.show()
+
+for threshold in [0.80, 0.90, 0.95, 0.99]:
+    n = np.argmax(cum_ev >= threshold) + 1
+    print(f"  {threshold:.0%} variance -> {n} components  ({n/X_scaled.shape[1]:.2%} of features)")</code></pre>
+  </div>
+  <div class="panel yellow">
+    <strong>Reading the chart</strong>
+    <ul>
+      <li>The first few bars are tall &mdash; those components explain a lot.</li>
+      <li>The curve flattens quickly &mdash; a small number of components carries most information.</li>
+      <li>This is the power of PCA: enormous compression with minimal information loss.</li>
+    </ul>
+  </div>
+  <div class="quiz" data-answer="0" data-correct="Correct. The elbow or threshold approach on the cumulative curve tells us where adding more components gives diminishing returns.">
+    <h3>How do you use the cumulative explained variance curve to choose the number of components?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">Find where the curve crosses a chosen threshold (e.g. 95%)</button>
+      <button class="quiz-option">Always use exactly half the original features</button>
+      <button class="quiz-option">Pick the component with the smallest bar on the scree chart</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 7 -->
+<section class="step-view" data-title="Mean face &amp; eigenfaces">
+  <header class="step-header">
+    <span class="step-kicker">STEP 7 &middot; VISUALISE</span>
+    <h1>Visualise the Mean Face and Eigenfaces</h1>
+    <p class="lede">The mean face is the average of all training images. Eigenfaces are the principal directions &mdash; they look like ghostly faces capturing the main patterns of variation.</p>
+  </header>
+  <h2>Plot the mean face</h2>
+  <div class="code-wrap">
+    <div class="filename">pca_images.py &mdash; Part 5: mean face</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>mean_face = pca.mean_.reshape(image_shape)
+
+plt.figure(figsize=(3, 3))
+plt.imshow(mean_face, cmap="gray")
+plt.title("Mean Face", fontsize=13, fontweight="bold")
+plt.axis("off")
+plt.tight_layout()
+plt.savefig("03_mean_face.png", dpi=120, bbox_inches="tight")
+plt.show()</code></pre>
+  </div>
+  <div class="panel blue"><strong>What is the mean face?</strong><p>It is the pixel-wise average of all 400 training images. PCA then finds the directions of variation <em>around</em> this mean.</p></div>
+  <h2>Plot the top eigenfaces</h2>
+  <div class="code-wrap">
+    <div class="filename">pca_images.py &mdash; Part 5 continued: eigenfaces</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>fig, axes = plt.subplots(3, 5, figsize=(14, 9))
+fig.suptitle("Top Eigenfaces (principal components)", fontsize=14, fontweight="bold")
+
+for idx, ax in enumerate(axes.flat):
+    eigenface = pca.components_[idx].reshape(image_shape)
+    # Normalise each eigenface to [0,1] for display
+    eigenface_display = (eigenface - eigenface.min()) / (eigenface.max() - eigenface.min())
+    ax.imshow(eigenface_display, cmap="gray")
+    ax.set_title(f"PC {idx+1}\n{pca.explained_variance_ratio_[idx]:.2%}", fontsize=8)
+    ax.axis("off")
+
+plt.tight_layout()
+plt.savefig("04_eigenfaces.png", dpi=120, bbox_inches="tight")
+plt.show()</code></pre>
+  </div>
+  <div class="panel mint"><strong>What do eigenfaces look like?</strong><p>They look like ghostly, abstract face patterns. PC1 captures the most common variation (e.g. overall lighting). Later PCs capture finer details like eye shape or hair texture.</p></div>
+  <div class="callout"><span class="label">INSIGHT</span><p>Each original face image can be <strong>expressed as a weighted sum</strong> of eigenfaces plus the mean face. PCA compression means keeping only the weights for the top-k eigenfaces.</p></div>
+</section>
+
+<!-- STEP 8 -->
+<section class="step-view" data-title="Reconstruct compressed images">
+  <header class="step-header">
+    <span class="step-kicker">STEP 8 &middot; RECONSTRUCTION</span>
+    <h1>Reconstruct Images from Compressed Representations</h1>
+    <p class="lede">After compressing with PCA, we can reconstruct approximate versions of the original images. Quality improves as we keep more components.</p>
+  </header>
+  <div class="code-wrap">
+    <div class="filename">pca_images.py &mdash; Part 6: reconstruction</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>def reconstruct(X_scaled, n_components, image_shape=(64, 64)):
+    """Compress X with n_components PCA dimensions and reconstruct."""
+    pca_k   = PCA(n_components=n_components, whiten=True, random_state=42)
+    X_proj  = pca_k.fit_transform(X_scaled)
+    X_recon = pca_k.inverse_transform(X_proj)
+    X_recon = scaler.inverse_transform(X_recon)
+    X_recon = np.clip(X_recon, 0, 1)
+    return X_recon
+
+levels = [1, 5, 10, 20, 50, 100, 150, 200]
+sample_idx = 0
+original_face = X[sample_idx].reshape(image_shape)
+
+fig, axes = plt.subplots(2, 4, figsize=(14, 7))
+fig.suptitle("Image Reconstruction at Different Compression Levels", fontsize=13, fontweight="bold")
+
+for ax, k in zip(axes.flat, levels):
+    recon      = reconstruct(X_scaled, n_components=k)
+    recon_face = recon[sample_idx].reshape(image_shape)
+    mse        = np.mean((original_face - recon_face) ** 2)
+    ax.imshow(recon_face, cmap="gray", vmin=0, vmax=1)
+    ax.set_title(f"k={k}\nMSE={mse:.4f}", fontsize=9)
+    ax.axis("off")
+
+plt.tight_layout()
+plt.savefig("05_reconstruction.png", dpi=120, bbox_inches="tight")
+plt.show()</code></pre>
+  </div>
+  <div class="output-box">
+    <span class="out-label">what to observe</span>
+k=1   -> very blurry, only overall brightness captured
+k=5   -> rough face shape visible
+k=20  -> recognisable face, some smoothing
+k=100 -> nearly identical to original
+k=200 -> very close to lossless
+  </div>
+  <div class="panel yellow"><strong>MSE (Mean Squared Error)</strong><p>MSE measures the average squared difference between original and reconstructed pixel values. Lower MSE = better reconstruction. As k increases, MSE decreases.</p></div>
+</section>
+
+<!-- STEP 9 -->
+<section class="step-view" data-title="Reconstruction error curve">
+  <header class="step-header">
+    <span class="step-kicker">STEP 9 &middot; ANALYSIS</span>
+    <h1>Plot Reconstruction Error vs Number of Components</h1>
+    <p class="lede">Quantify how reconstruction quality improves as we add more principal components, and find the sweet spot between compression and accuracy.</p>
+  </header>
+  <div class="code-wrap">
+    <div class="filename">pca_images.py &mdash; Part 7: MSE curve</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>k_values  = list(range(1, 21)) + list(range(25, 201, 5))
+mse_values = []
+X_original = np.clip(scaler.inverse_transform(X_scaled), 0, 1)
+
+for k in k_values:
+    X_recon_k = reconstruct(X_scaled, n_components=k)
+    mse = np.mean((X_original - X_recon_k) ** 2)
+    mse_values.append(mse)
+
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.plot(k_values, mse_values, color="#2856d8", linewidth=2, marker=".", markersize=4)
+ax.fill_between(k_values, mse_values, alpha=0.15, color="#2856d8")
+ax.set_xlabel("Number of PCA Components (k)", fontsize=12)
+ax.set_ylabel("Mean Squared Error", fontsize=12)
+ax.set_title("Reconstruction Error vs. Number of Components", fontsize=13, fontweight="bold")
+ax.axvline(x=50,  color="#ffd83d", linestyle="--", linewidth=1.5, label="k=50")
+ax.axvline(x=100, color="#75e6c5", linestyle="--", linewidth=1.5, label="k=100")
+ax.legend()
+ax.set_xlim(0, max(k_values))
+plt.tight_layout()
+plt.savefig("06_mse_curve.png", dpi=120, bbox_inches="tight")
+plt.show()</code></pre>
+  </div>
+  <div class="panel mint">
+    <strong>Interpretation</strong>
+    <ul>
+      <li>The curve drops steeply at first &mdash; the first few components reduce error dramatically.</li>
+      <li>After ~50&ndash;100 components, gains become much smaller (diminishing returns).</li>
+      <li>This matches the scree plot from Step 6.</li>
+    </ul>
+  </div>
+  <div class="quiz" data-answer="2" data-correct="Correct. MSE decreases as k grows because more components capture more detail. Adding components never increases reconstruction error.">
+    <h3>What happens to reconstruction MSE as we increase k (number of PCA components)?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">It increases, because more components add noise</button>
+      <button class="quiz-option">It stays constant regardless of k</button>
+      <button class="quiz-option">It decreases, because more components capture more detail</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 10 -->
+<section class="step-view" data-title="Side-by-side comparison">
+  <header class="step-header">
+    <span class="step-kicker">STEP 10 &middot; VISUALISE</span>
+    <h1>Original vs Reconstructed &mdash; Gallery</h1>
+    <p class="lede">Create a polished comparison showing original images next to their reconstructions at k = 50 and k = 150 components.</p>
+  </header>
+  <div class="code-wrap">
+    <div class="filename">pca_images.py &mdash; Part 8: comparison gallery</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>X_recon_50  = reconstruct(X_scaled, n_components=50)
+X_recon_150 = reconstruct(X_scaled, n_components=150)
+X_original_unscaled = np.clip(scaler.inverse_transform(X_scaled), 0, 1)
+
+n_display = 6
+fig, axes = plt.subplots(3, n_display, figsize=(16, 9))
+fig.suptitle("Original  |  k=50 components  |  k=150 components",
+             fontsize=13, fontweight="bold")
+
+for col in range(n_display):
+    idx = col * 5
+    axes[0, col].imshow(X_original_unscaled[idx].reshape(image_shape), cmap="gray", vmin=0, vmax=1)
+    axes[0, col].set_title(f"Original\n(Person {y[idx]})", fontsize=8)
+    axes[0, col].axis("off")
+
+    axes[1, col].imshow(X_recon_50[idx].reshape(image_shape), cmap="gray", vmin=0, vmax=1)
+    mse_50 = np.mean((X_original_unscaled[idx] - X_recon_50[idx]) ** 2)
+    axes[1, col].set_title(f"k=50\nMSE={mse_50:.4f}", fontsize=8)
+    axes[1, col].axis("off")
+
+    axes[2, col].imshow(X_recon_150[idx].reshape(image_shape), cmap="gray", vmin=0, vmax=1)
+    mse_150 = np.mean((X_original_unscaled[idx] - X_recon_150[idx]) ** 2)
+    axes[2, col].set_title(f"k=150\nMSE={mse_150:.4f}", fontsize=8)
+    axes[2, col].axis("off")
+
+plt.tight_layout()
+plt.savefig("07_comparison_gallery.png", dpi=120, bbox_inches="tight")
+plt.show()</code></pre>
+  </div>
+  <div class="panel blue"><strong>What you will see</strong><p>Row 1: originals. Row 2 (k=50): blurry but recognisable. Row 3 (k=150): nearly identical to row 1. Yet k=150 uses only 150/4096 &asymp; 3.7% of the original storage per image.</p></div>
+</section>
+
+<!-- STEP 11 -->
+<section class="step-view" data-title="Compression ratio analysis">
+  <header class="step-header">
+    <span class="step-kicker">STEP 11 &middot; ANALYSIS</span>
+    <h1>Measure Compression Ratio</h1>
+    <p class="lede">Quantify how much space is saved by PCA compression compared to storing the full images.</p>
+  </header>
+  <div class="code-wrap">
+    <div class="filename">pca_images.py &mdash; Part 9: compression analysis</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>original_size = n_samples * n_features  # 400 x 4096 = 1,638,400
+
+print("=" * 60)
+print(f"{'Compression Summary':^60}")
+print("=" * 60)
+print(f"{'Components':>12}  {'Size (floats)':>14}  {'Saved':>7}  {'Var. explained':>16}")
+print("-" * 60)
+
+for k in [5, 10, 20, 50, 100, 150, 200]:
+    compressed_size = n_samples * k + k * n_features
+    saving = 1 - compressed_size / original_size
+    pca_k  = PCA(n_components=k, random_state=42).fit(X_scaled)
+    var_exp = np.sum(pca_k.explained_variance_ratio_)
+    print(f"{k:>12}  {compressed_size:>14,}  {saving:>6.1%}  {var_exp:>15.2%}")
+
+print("=" * 60)
+print(f"{'Original':>12}  {original_size:>14,}  {'--':>7}  {'100.00%':>16}")</code></pre>
+  </div>
+  <div class="panel orange"><strong>Trade-off</strong><p>k = 50 saves ~87% of storage while preserving most recognisable image quality. This is the fundamental power and trade-off of PCA compression.</p></div>
+</section>
+
+<!-- STEP 12 -->
+<section class="step-view" data-title="Complete script">
+  <header class="step-header">
+    <span class="step-kicker">STEP 12 &middot; COMPLETE CODE</span>
+    <h1>The Complete Script</h1>
+    <p class="lede">Below is the full, self-contained Python script containing all parts from Steps 2&ndash;11. Copy it into <code>pca_images.py</code> and run it end-to-end.</p>
+  </header>
+  <div class="code-wrap">
+    <div class="filename">pca_images.py &mdash; COMPLETE SCRIPT</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>"""
+pca_images.py
+Implement Dimensionality Reduction using PCA for Images
+Practical Codelab -- Computer Vision
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_olivetti_faces
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+# 1. Load dataset
+dataset = fetch_olivetti_faces(shuffle=True, random_state=42)
+X = dataset.data          # (400, 4096)
+y = dataset.target        # (400,)
+n_samples, n_features = X.shape
+image_shape = (64, 64)
+print(f"Loaded: {n_samples} images, {n_features} features")
+
+# 2. Visualise samples
+fig, axes = plt.subplots(2, 5, figsize=(12, 5))
+fig.suptitle("Sample Raw Images", fontsize=13, fontweight="bold")
+for ax, img, lbl in zip(axes.flat, X[:10], y[:10]):
+    ax.imshow(img.reshape(image_shape), cmap="gray"); ax.set_title(f"P{lbl}"); ax.axis("off")
+plt.tight_layout(); plt.savefig("01_raw_samples.png", dpi=120, bbox_inches="tight"); plt.show()
+
+# 3. Standardise
+scaler   = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# 4. Apply PCA (150 components)
+N_COMPONENTS = 150
+pca   = PCA(n_components=N_COMPONENTS, whiten=True, random_state=42)
+X_pca = pca.fit_transform(X_scaled)
+print(f"Compressed: {X_scaled.shape} -> {X_pca.shape}")
+print(f"Variance explained: {np.sum(pca.explained_variance_ratio_):.2%}")
+
+# 5. Scree plot
+pca_full = PCA(random_state=42).fit(X_scaled)
+ev       = pca_full.explained_variance_ratio_
+cum_ev   = np.cumsum(ev)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+fig.suptitle("Explained Variance", fontsize=13, fontweight="bold")
+ax1.bar(range(1, 51), ev[:50], color="#2856d8", edgecolor="#101010", linewidth=0.8)
+ax1.set(xlabel="Component", ylabel="Variance Ratio", title="Individual (first 50)")
+ax2.plot(range(1, len(cum_ev)+1), cum_ev, color="#2856d8", linewidth=2)
+for t, c in [(0.90, "#ff9bb7"), (0.95, "#ffd83d"), (0.99, "#75e6c5")]:
+    ax2.axhline(t, color=c, linestyle="--", linewidth=1.5, label=f"{t:.0%}")
+ax2.set(xlabel="Components", ylabel="Cumulative Variance", title="Cumulative", xlim=(0,200))
+ax2.legend()
+plt.tight_layout(); plt.savefig("02_scree_plot.png", dpi=120, bbox_inches="tight"); plt.show()
+for t in [0.80, 0.90, 0.95, 0.99]:
+    print(f"  {t:.0%} variance -> {np.argmax(cum_ev >= t)+1} components")
+
+# 6. Mean face
+plt.figure(figsize=(3, 3))
+plt.imshow(pca.mean_.reshape(image_shape), cmap="gray")
+plt.title("Mean Face", fontweight="bold"); plt.axis("off")
+plt.tight_layout(); plt.savefig("03_mean_face.png", dpi=120, bbox_inches="tight"); plt.show()
+
+# 7. Eigenfaces
+fig, axes = plt.subplots(3, 5, figsize=(14, 9))
+fig.suptitle("Top 15 Eigenfaces", fontsize=13, fontweight="bold")
+for idx, ax in enumerate(axes.flat):
+    ef = pca.components_[idx].reshape(image_shape)
+    ef = (ef - ef.min()) / (ef.max() - ef.min())
+    ax.imshow(ef, cmap="gray")
+    ax.set_title(f"PC{idx+1}: {pca.explained_variance_ratio_[idx]:.2%}", fontsize=8); ax.axis("off")
+plt.tight_layout(); plt.savefig("04_eigenfaces.png", dpi=120, bbox_inches="tight"); plt.show()
+
+# 8. Reconstruction helper
+def reconstruct(X_sc, k):
+    pca_k = PCA(n_components=k, whiten=True, random_state=42)
+    X_r   = pca_k.inverse_transform(pca_k.fit_transform(X_sc))
+    return np.clip(scaler.inverse_transform(X_r), 0, 1)
+
+# 9. Reconstruction gallery
+levels = [1, 5, 10, 20, 50, 100, 150, 200]
+orig   = np.clip(scaler.inverse_transform(X_scaled), 0, 1)
+fig, axes = plt.subplots(2, 4, figsize=(14, 7))
+fig.suptitle("Reconstruction at Different Compression Levels", fontsize=13, fontweight="bold")
+for ax, k in zip(axes.flat, levels):
+    rc  = reconstruct(X_scaled, k)[0].reshape(image_shape)
+    mse = np.mean((orig[0].reshape(image_shape) - rc)**2)
+    ax.imshow(rc, cmap="gray", vmin=0, vmax=1)
+    ax.set_title(f"k={k}\nMSE={mse:.4f}", fontsize=9); ax.axis("off")
+plt.tight_layout(); plt.savefig("05_reconstruction.png", dpi=120, bbox_inches="tight"); plt.show()
+
+# 10. MSE curve
+k_vals  = list(range(1, 21)) + list(range(25, 201, 5))
+mse_arr = [np.mean((orig - reconstruct(X_scaled, k))**2) for k in k_vals]
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.plot(k_vals, mse_arr, color="#2856d8", linewidth=2, marker=".", markersize=4)
+ax.fill_between(k_vals, mse_arr, alpha=0.15, color="#2856d8")
+ax.set(xlabel="k (components)", ylabel="MSE", title="Reconstruction Error vs. Components")
+ax.axvline(50,  color="#ffd83d", linestyle="--", linewidth=1.5, label="k=50")
+ax.axvline(100, color="#75e6c5", linestyle="--", linewidth=1.5, label="k=100")
+ax.legend()
+plt.tight_layout(); plt.savefig("06_mse_curve.png", dpi=120, bbox_inches="tight"); plt.show()
+
+# 11. Comparison gallery
+r50  = reconstruct(X_scaled, 50)
+r150 = reconstruct(X_scaled, 150)
+fig, axes = plt.subplots(3, 6, figsize=(16, 9))
+fig.suptitle("Original  |  k=50  |  k=150", fontsize=13, fontweight="bold")
+for col in range(6):
+    idx = col * 5
+    for row, (data, label) in enumerate([(orig,"Original"),(r50,"k=50"),(r150,"k=150")]):
+        mse = "" if row==0 else f"\nMSE={np.mean((orig[idx]-data[idx])**2):.4f}"
+        axes[row,col].imshow(data[idx].reshape(image_shape), cmap="gray", vmin=0, vmax=1)
+        axes[row,col].set_title(f"{label}{mse}", fontsize=8); axes[row,col].axis("off")
+plt.tight_layout(); plt.savefig("07_comparison_gallery.png", dpi=120, bbox_inches="tight"); plt.show()
+
+# 12. Compression summary
+orig_size = n_samples * n_features
+print(f"\n{'='*60}\n{'Compression Summary':^60}\n{'='*60}")
+print(f"{'k':>10}  {'Floats':>12}  {'Saved':>7}  {'Var%':>8}")
+print("-"*45)
+for k in [5, 10, 20, 50, 100, 150, 200]:
+    sz = n_samples*k + k*n_features
+    sv = 1 - sz/orig_size
+    ve = np.sum(PCA(n_components=k, random_state=42).fit(X_scaled).explained_variance_ratio_)
+    print(f"{k:>10}  {sz:>12,}  {sv:>6.1%}  {ve:>7.2%}")
+print(f"{'Original':>10}  {orig_size:>12,}  {'--':>7}  {'100.00%':>8}")
+print("\nAll outputs saved. Lab complete!")</code></pre>
+  </div>
+  <div class="panel mint">
+    <strong>Run the script</strong>
+    <div class="code-wrap" style="margin-top:10px">
+      <div class="filename">terminal</div>
+      <button class="copy-btn">Copy</button>
+<pre><code>python pca_images.py</code></pre>
+    </div>
+    <p>Seven PNG files will be saved in your working directory as the script runs.</p>
+  </div>
+</section>
+
+<!-- STEP 13 -->
+<section class="step-view" data-title="Extend &amp; experiment">
+  <header class="step-header">
+    <span class="step-kicker">STEP 13 &middot; EXTEND</span>
+    <h1>Extensions and Experiments</h1>
+    <p class="lede">Now that the core pipeline works, try these extensions to deepen your understanding.</p>
+  </header>
+  <h2>Extension A &mdash; Use your own images</h2>
+  <div class="code-wrap">
+    <div class="filename">pca_custom.py &mdash; custom image loader</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>import os, numpy as np
+from skimage import io, color, transform
+
+IMAGE_DIR   = "my_faces/"      # folder containing .jpg or .png images
+TARGET_SIZE = (64, 64)
+
+images = []
+for fname in sorted(os.listdir(IMAGE_DIR)):
+    if fname.lower().endswith((".jpg", ".png", ".jpeg")):
+        img = io.imread(os.path.join(IMAGE_DIR, fname))
+        if img.ndim == 3:
+            img = color.rgb2gray(img)
+        img = transform.resize(img, TARGET_SIZE)
+        images.append(img.flatten())
+
+X_custom = np.array(images)
+print(f"Custom dataset: {X_custom.shape}")
+# Then continue with StandardScaler -> PCA -> reconstruct</code></pre>
+  </div>
+  <h2>Extension B &mdash; PCA features for classification</h2>
+  <div class="code-wrap">
+    <div class="filename">pca_classification.py</div>
+    <button class="copy-btn">Copy</button>
+<pre><code>from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_pca, y, test_size=0.25, random_state=42
+)
+clf = SVC(kernel="rbf", C=10, gamma="scale")
+clf.fit(X_train, y_train)
+print(f"Accuracy with {N_COMPONENTS} PCA components: {accuracy_score(y_test, clf.predict(X_test)):.2%}")</code></pre>
+  </div>
+  <div class="panel purple"><strong>What to expect</strong><p>PCA features often give similar or better accuracy than raw pixels, with much less computation.</p></div>
+  <div class="challenge">
+    <h3>&#129504; Challenge Questions</h3>
+    <ol>
+      <li>With k = 10 components, what percentage of variance is retained? What does the reconstruction look like?</li>
+      <li>How many components are needed to exceed 95% cumulative variance on this dataset?</li>
+      <li>Why does <code>whiten=True</code> help downstream classifiers?</li>
+      <li>What would happen if you applied PCA to colour (RGB) images? How would you modify the pipeline?</li>
+      <li>If the dataset grows to 5,000 images of 128&times;128, what changes computationally?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- STEP 14 -->
+<section class="step-view" data-title="Revision &amp; wrap-up">
+  <header class="step-header">
+    <span class="step-kicker">STEP 14 &middot; REVISION</span>
+    <h1>Lab Revision &amp; Wrap-Up</h1>
+    <p class="lede">Review the key concepts and code patterns from this lab before moving on.</p>
+  </header>
+  <h2>Key code patterns</h2>
+  <div class="reveal"><summary>1. Load and flatten images into a matrix</summary><div><code>X = dataset.data</code> &mdash; each row is one flattened image. Shape: <code>(n_samples, n_pixels)</code>.</div></div>
+  <div class="reveal"><summary>2. Standardise with StandardScaler</summary><div><code>X_scaled = StandardScaler().fit_transform(X)</code> &mdash; always fit on training data only.</div></div>
+  <div class="reveal"><summary>3. Apply PCA</summary><div><code>pca = PCA(n_components=k, whiten=True); X_pca = pca.fit_transform(X_scaled)</code> &mdash; result shape: <code>(n_samples, k)</code>.</div></div>
+  <div class="reveal"><summary>4. Inspect explained variance</summary><div><code>pca.explained_variance_ratio_</code> per component; <code>np.cumsum(...)</code> for cumulative.</div></div>
+  <div class="reveal"><summary>5. Access eigenfaces</summary><div><code>pca.components_[i].reshape(image_shape)</code> &mdash; <code>pca.components_</code> shape: <code>(k, n_pixels)</code>.</div></div>
+  <div class="reveal"><summary>6. Reconstruct images</summary><div><code>X_recon = scaler.inverse_transform(pca.inverse_transform(X_pca))</code> &mdash; then clip to [0,1].</div></div>
+  <h2>Full pipeline at a glance</h2>
+  <div class="flow">fetch_olivetti_faces()<br>&#8595; X &nbsp;(400 &times; 4096)<br>&#8595; StandardScaler().fit_transform(X)<br>&#8595; X_scaled &nbsp;(400 &times; 4096)<br>&#8595; PCA(n_components=k).fit_transform(X_scaled)<br>&#8595; X_pca &nbsp;(400 &times; k) &nbsp;&larr; compressed representation<br>&#8595; pca.inverse_transform(X_pca)<br>&#8595; scaler.inverse_transform(...)<br>&#8595; Reconstructed X &nbsp;(400 &times; 4096)</div>
+  <h2>Completion checklist</h2>
+  <ul class="checklist">
+    <li>I loaded the Olivetti dataset and checked its shape.</li>
+    <li>I standardised the image matrix using StandardScaler.</li>
+    <li>I applied PCA and confirmed the compressed shape.</li>
+    <li>I plotted and interpreted the scree chart.</li>
+    <li>I visualised the mean face and at least 10 eigenfaces.</li>
+    <li>I reconstructed images at different k values and observed quality differences.</li>
+    <li>I plotted the MSE vs k curve.</li>
+    <li>I computed and interpreted the compression ratio table.</li>
+  </ul>
+  <div class="finish">
+    <h2>Lab complete! &#127881;</h2>
+    <p>You have implemented a full PCA pipeline for image dimensionality reduction &mdash; from raw pixels to eigenfaces to reconstruction analysis. This exact workflow is the foundation of classical face recognition systems and image compression algorithms.</p>
+    <p style="margin-bottom:0"><a href="../dimenstionality-reduction/index.html" style="color:var(--blue-dark);font-weight:700;">&larr; Back to the Conceptual Codelab (Module 4.2)</a></p>
+  </div>
+</section>
+
+</div><!-- /content -->
+</main>
+</div><!-- /app -->
+
+<script>
+(() => {
+  const steps = [...document.querySelectorAll('.step-view')];
+  const titles = steps.map(s => s.dataset.title);
+  const nav = document.getElementById('stepNav');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const content = document.getElementById('content');
+  const completed = new Set();
+  let current = 0;
+
+  nav.innerHTML = titles.map((title, i) =>
+    `<button class="step-link" data-step="${i}" type="button">
+      <span class="step-number">${String(i+1).padStart(2,'0')}</span>
+      <span>${title}</span>
+      <span class="step-status" aria-hidden="true"></span>
+    </button>`
+  ).join('');
+
+  const getHashStep = () => {
+    const m = location.hash.match(/^#step-(\d+)$/);
+    const v = m ? Number(m[1]) - 1 : 0;
+    return Number.isInteger(v) && v >= 0 && v < steps.length ? v : 0;
+  };
+
+  function render(updateHash = true) {
+    current = Math.max(0, Math.min(current, steps.length - 1));
+    steps.forEach((s, i) => { s.classList.toggle('active', i === current); s.setAttribute('aria-hidden', String(i !== current)); });
+    document.querySelectorAll('.step-link').forEach((btn, i) => {
+      btn.classList.toggle('active', i === current);
+      btn.setAttribute('aria-current', i === current ? 'step' : 'false');
+      btn.querySelector('.step-status').textContent = completed.has(i) ? '&#10003;' : '';
+    });
+    const pct = Math.round(((current + 1) / steps.length) * 100);
+    document.getElementById('progressBar').style.width = `${pct}%`;
+    document.getElementById('progressText').textContent = `${pct}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow', String(pct));
+    document.getElementById('mobileTitle').textContent = titles[current];
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === steps.length - 1;
+    document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lab complete' : 'Next \u2192';
+    if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    sidebar.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= steps.length) return;
+    completed.add(current); current = index; render();
+  }
+
+  const navRow = document.createElement('div');
+  navRow.className = 'nav-row';
+  navRow.innerHTML = `<button class="nav-btn" id="prevBtn" type="button">\u2190 Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next \u2192</button>`;
+  content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+  nav.addEventListener('click', e => { const btn = e.target.closest('.step-link'); if (btn) goTo(Number(btn.dataset.step)); });
+  menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)); });
+
+  document.addEventListener('click', async e => {
+    const copy = e.target.closest('.copy-btn');
+    if (copy) {
+      const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+      try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!'; }
+      catch { copy.textContent = 'Select & copy'; }
+      setTimeout(() => copy.textContent = 'Copy', 1400);
+      return;
+    }
+    const option = e.target.closest('.quiz-option');
+    if (option) {
+      const quiz = option.closest('.quiz');
+      if (quiz.dataset.answered) return;
+      const options = [...quiz.querySelectorAll('.quiz-option')];
+      const choice = options.indexOf(option);
+      const answer = Number(quiz.dataset.answer);
+      quiz.dataset.answered = 'true';
+      options.forEach(b => b.disabled = true);
+      option.classList.add(choice === answer ? 'correct' : 'wrong');
+      if (choice !== answer) options[answer].classList.add('correct');
+      const fb = quiz.querySelector('.quiz-feedback');
+      fb.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
+      fb.classList.add('show');
+    }
+  });
+
+  window.addEventListener('popstate', () => { current = getHashStep(); render(false); });
+  window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+  document.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey || ['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)) return;
+    if (e.key === 'ArrowRight') goTo(current + 1);
+    if (e.key === 'ArrowLeft')  goTo(current - 1);
+  });
+
+  current = getHashStep(); render(false);
+})();
+</script>
+</body>
+</html>
