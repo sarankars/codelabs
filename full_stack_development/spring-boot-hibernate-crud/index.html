@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot &amp; Hibernate Student CRUD API — Step-by-Step Codelab</title>
+    <meta name="description"
+        content="Step-by-step practical guide to creating a Spring Boot project, integrating Hibernate with Spring Data JPA and an in-memory H2 database, and building a complete Student CRUD REST API.">
+    <meta name="theme-color" content="#2856d8">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+        :root {
+            --blue: #2856d8;
+            --blue-dark: #17348e;
+            --blue-light: #e4ebff;
+            --ink: #101010;
+            --paper: #f5f7fb;
+            --white: #fff;
+            --yellow: #ffd83d;
+            --mint: #75e6c5;
+            --pink: #ff9bb7;
+            --orange: #ffb866;
+            --purple: #9d72ff;
+            --border: 3px solid var(--ink);
+            --shadow: 6px 6px 0 var(--ink);
+            --shadow-sm: 4px 4px 0 var(--ink);
+            --sidebar: 292px
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-behavior: auto
+        }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: "Space Grotesk", system-ui, sans-serif;
+            line-height: 1.55
+        }
+
+        button,
+        a {
+            font: inherit
+        }
+
+        button {
+            cursor: pointer
+        }
+
+        :focus-visible {
+            outline: 4px solid var(--yellow);
+            outline-offset: 3px
+        }
+
+        .app {
+            min-height: 100vh
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: var(--sidebar);
+            padding: 22px 18px;
+            background: var(--blue);
+            border-right: var(--border);
+            overflow: auto;
+            z-index: 20
+        }
+
+        .brand {
+            padding: 16px;
+            margin-bottom: 20px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .eyebrow,
+        .progress-meta,
+        .step-number,
+        .step-kicker,
+        .label,
+        .footer-note,
+        .http-badge {
+            font-family: "DM Mono", monospace
+        }
+
+        .eyebrow {
+            font-size: .72rem;
+            font-weight: 500;
+            letter-spacing: .06em;
+            text-transform: uppercase
+        }
+
+        .brand h2 {
+            margin: 5px 0 3px;
+            font-size: 1.35rem;
+            line-height: 1.05
+        }
+
+        .brand p {
+            margin: 0;
+            font-size: .83rem;
+            font-weight: 600
+        }
+
+        .progress-wrap {
+            margin: 0 2px 20px;
+            color: #fff
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 7px;
+            font-size: .72rem
+        }
+
+        .progress-track {
+            height: 16px;
+            padding: 2px;
+            background: #fff;
+            border: var(--border)
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: var(--yellow);
+            transition: width .2s ease
+        }
+
+        .steps {
+            display: grid;
+            gap: 7px
+        }
+
+        .step-link {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 34px 1fr 18px;
+            align-items: center;
+            gap: 9px;
+            padding: 8px;
+            color: #fff;
+            background: transparent;
+            border: 3px solid transparent;
+            text-align: left;
+            font-weight: 700;
+            font-size: .88rem;
+            line-height: 1.15
+        }
+
+        .step-link:hover {
+            background: rgba(255, 255, 255, .14)
+        }
+
+        .step-link.active {
+            color: var(--ink);
+            background: #fff;
+            border-color: var(--ink);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border: 2px solid currentColor;
+            font-size: .75rem
+        }
+
+        .step-status {
+            text-align: center;
+            font-weight: 900
+        }
+
+        .mobile-bar {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--blue);
+            border-bottom: var(--border)
+        }
+
+        .menu-btn,
+        .mobile-title {
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .menu-btn {
+            width: 46px;
+            height: 42px;
+            font-size: 1.25rem;
+            font-weight: 900
+        }
+
+        .mobile-title {
+            flex: 1;
+            padding: 8px 10px;
+            font-weight: 800
+        }
+
+        main {
+            margin-left: var(--sidebar);
+            min-height: 100vh
+        }
+
+        .content {
+            width: min(980px, calc(100% - 48px));
+            margin: 0 auto;
+            padding: 42px 0 32px
+        }
+
+        .step-view {
+            display: none
+        }
+
+        .step-view.active {
+            display: block;
+            animation: stepIn .18s ease-out
+        }
+
+        @keyframes stepIn {
+            from {
+                opacity: .35;
+                transform: translateY(5px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .step-header {
+            padding: 28px;
+            margin-bottom: 24px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow)
+        }
+
+        .step-kicker {
+            display: inline-block;
+            margin-bottom: 13px;
+            padding: 5px 9px;
+            color: #fff;
+            background: var(--blue);
+            border: 2px solid var(--ink);
+            font-size: .72rem
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.08
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: clamp(1.9rem, 4.8vw, 3.4rem);
+            letter-spacing: -.04em
+        }
+
+        h2 {
+            margin: 32px 0 12px;
+            font-size: clamp(1.4rem, 2.8vw, 2.1rem)
+        }
+
+        h3 {
+            margin: 22px 0 9px;
+            font-size: 1.15rem
+        }
+
+        .lede {
+            max-width: 780px;
+            margin: 0;
+            font-size: 1.06rem
+        }
+
+        .objective {
+            margin-top: 20px;
+            padding: 14px 16px;
+            background: var(--yellow);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 700
+        }
+
+        .panel,
+        .concept,
+        .quiz,
+        .reveal {
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .panel {
+            padding: 22px;
+            margin: 20px 0
+        }
+
+        .panel.blue {
+            background: var(--blue-light)
+        }
+
+        .panel.mint {
+            background: var(--mint)
+        }
+
+        .panel.pink {
+            background: var(--pink)
+        }
+
+        .panel.yellow {
+            background: var(--yellow)
+        }
+
+        .panel.orange {
+            background: var(--orange)
+        }
+
+        .panel.purple {
+            background: #f1ebff
+        }
+
+        .callout {
+            padding: 16px 18px;
+            margin: 20px 0;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm)
+        }
+
+        .callout .label {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 3px 7px;
+            color: #fff;
+            background: var(--ink);
+            border: 2px solid var(--ink);
+            font-size: .72rem
+        }
+
+        .grid-2 {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(2, minmax(0, 1fr))
+        }
+
+        .grid-3 {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(3, minmax(0, 1fr))
+        }
+
+        .concept {
+            padding: 18px
+        }
+
+        .concept strong {
+            font-size: 1.05rem
+        }
+
+        .concept p:last-child {
+            margin-bottom: 0
+        }
+
+        .code-wrap {
+            position: relative;
+            margin: 18px 0
+        }
+
+        pre {
+            margin: 0;
+            padding: 20px;
+            overflow: auto;
+            color: #f7f7f7;
+            background: #111;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-family: "DM Mono", ui-monospace, monospace;
+            font-size: .84rem;
+            line-height: 1.62;
+            tab-size: 2
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 2;
+            padding: 5px 9px;
+            background: var(--yellow);
+            border: 2px solid var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+            font-size: .75rem;
+            font-weight: 800
+        }
+
+        .copy-btn:hover {
+            background: #ffe066
+        }
+
+        code:not(pre code) {
+            padding: 1px 5px;
+            background: #e8edf7;
+            border: 1px solid #9da9bb;
+            font-family: "DM Mono", monospace;
+            font-size: .88em
+        }
+
+        ul,
+        ol {
+            padding-left: 1.35rem
+        }
+
+        li {
+            margin: 7px 0
+        }
+
+        .comparison {
+            width: 100%;
+            margin: 18px 0;
+            background: #fff;
+            border: var(--border);
+            border-collapse: collapse
+        }
+
+        .comparison th,
+        .comparison td {
+            padding: 11px;
+            border: 2px solid var(--ink);
+            text-align: left;
+            vertical-align: top
+        }
+
+        .comparison th {
+            color: #fff;
+            background: var(--blue)
+        }
+
+        .http-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border: 2px solid var(--ink);
+            font-weight: 700;
+            font-size: .75rem
+        }
+
+        .http-badge.get {
+            background: var(--mint)
+        }
+
+        .http-badge.post {
+            background: var(--yellow)
+        }
+
+        .http-badge.put {
+            background: var(--orange)
+        }
+
+        .http-badge.delete {
+            background: var(--pink)
+        }
+
+        .quiz {
+            padding: 20px;
+            margin: 20px 0
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 9px;
+            margin-top: 14px
+        }
+
+        .quiz-option {
+            text-align: left;
+            padding: 11px 13px;
+            background: #fff;
+            border: 2px solid var(--ink);
+            font-weight: 700
+        }
+
+        .quiz-option:hover {
+            background: var(--blue-light)
+        }
+
+        .quiz-option.correct {
+            background: var(--mint)
+        }
+
+        .quiz-option.wrong {
+            background: var(--pink)
+        }
+
+        .quiz-feedback {
+            display: none;
+            margin-top: 13px;
+            padding: 10px;
+            border: 2px solid var(--ink);
+            font-weight: 700
+        }
+
+        .quiz-feedback.show {
+            display: block
+        }
+
+        .reveal {
+            margin: 18px 0
+        }
+
+        .reveal summary {
+            padding: 13px 16px;
+            cursor: pointer;
+            background: var(--blue-light);
+            font-weight: 800
+        }
+
+        .reveal>div {
+            padding: 15px 16px
+        }
+
+        .flow {
+            margin: 20px 0;
+            padding: 20px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-family: "DM Mono", monospace;
+            line-height: 1.85;
+            overflow: auto
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0
+        }
+
+        .checklist li {
+            position: relative;
+            padding-left: 30px
+        }
+
+        .checklist li::before {
+            content: "□";
+            position: absolute;
+            left: 0;
+            font-size: 1.25rem;
+            font-weight: 900
+        }
+
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            margin-top: 34px;
+            padding-top: 20px;
+            border-top: var(--border)
+        }
+
+        .nav-btn {
+            min-width: 130px;
+            padding: 12px 18px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 900
+        }
+
+        .nav-btn.primary {
+            color: #fff;
+            background: var(--blue)
+        }
+
+        .nav-btn:disabled {
+            opacity: .35;
+            cursor: not-allowed
+        }
+
+        .finish {
+            padding: 24px;
+            margin-top: 24px;
+            background: var(--mint);
+            border: var(--border);
+            box-shadow: var(--shadow)
+        }
+
+        @media(max-width:850px) {
+            :root {
+                --sidebar: 270px;
+                --mobile-bar-height: 65px
+            }
+
+            .sidebar {
+                inset: var(--mobile-bar-height) auto 0 0;
+                transform: translateX(-100%);
+                transition: transform .2s ease
+            }
+
+            .sidebar.open {
+                transform: none
+            }
+
+            .mobile-bar {
+                display: flex;
+                height: var(--mobile-bar-height)
+            }
+
+            main {
+                margin-left: 0
+            }
+
+            .content {
+                width: min(940px, calc(100% - 28px));
+                padding-top: 24px
+            }
+        }
+
+        @media(max-width:680px) {
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr
+            }
+
+            .content {
+                width: calc(100% - 18px);
+                padding-top: 16px
+            }
+
+            .step-header {
+                padding: 20px 16px
+            }
+
+            .panel,
+            .concept,
+            .quiz {
+                padding: 16px
+            }
+
+            .nav-row {
+                position: sticky;
+                bottom: 0;
+                z-index: 10;
+                padding: 12px 0;
+                background: var(--paper)
+            }
+
+            .nav-btn {
+                min-width: 0;
+                flex: 1;
+                padding: 11px 10px
+            }
+
+            pre {
+                padding: 16px 12px;
+                font-size: .76rem
+            }
+
+            .copy-btn {
+                position: static;
+                align-self: flex-end;
+                margin-bottom: 6px
+            }
+
+            .code-wrap {
+                display: flex;
+                flex-direction: column
+            }
+
+            .code-wrap pre {
+                order: 2
+            }
+
+            .code-wrap .copy-btn {
+                order: 1
+            }
+
+            .comparison {
+                display: block;
+                overflow-x: auto
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+            <div class="brand">
+                <div class="eyebrow">SPRING BOOT &amp; HIBERNATE</div>
+                <h2>Student CRUD API</h2>
+                <p>Hibernate ORM &amp; H2 Database.</p>
+            </div>
+            <div class="progress-wrap">
+                <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+                <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                    aria-valuenow="0">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+            <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+        </aside>
+
+        <div class="mobile-bar">
+            <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation"
+                aria-expanded="false">☰</button>
+            <div class="mobile-title" id="mobileTitle">Spring Boot Hibernate CRUD</div>
+        </div>
+
+        <main>
+            <div class="content" id="content">
+
+                <!-- STEP 1 -->
+                <section class="step-view" data-title="What we will build">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 1 · OVERVIEW</span>
+                        <h1>What We Will Build</h1>
+                        <p class="lede">Build a complete, production-pattern Student CRUD REST API using Spring Boot,
+                            Hibernate (via Spring Data JPA), and an embedded in-memory H2 database with zero complex
+                            database installation.</p>
+                    </header>
+
+                    <div class="objective">
+                        <strong>Goal:</strong> Transform a simple in-memory Student List into a real ORM-backed database
+                        application where Hibernate generates tables, executes queries, manages transactions, and
+                        handles data persistence automatically.
+                    </div>
+
+                    <h2>Why Hibernate Over a Plain In-Memory ArrayList?</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>Feature</th>
+                            <th>Plain ArrayList CRUD</th>
+                            <th>Hibernate + JPA CRUD</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Data Storage</strong></td>
+                            <td>Hardcoded <code>List&lt;Student&gt;</code> in memory. Lost upon restart.</td>
+                            <td>Relational database table (<code>STUDENTS</code>) mapped via ORM.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data Queries</strong></td>
+                            <td>Manual Java loops (<code>for (Student s : students)</code>).</td>
+                            <td>Automatic SQL generation via <code>JpaRepository</code> and Hibernate.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ID Generation</strong></td>
+                            <td>Manual integer counters (<code>nextId++</code>).</td>
+                            <td>Database auto-increment identity via <code>@GeneratedValue</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Scalability</strong></td>
+                            <td>Cannot scale across multiple server instances or threads safely.</td>
+                            <td>Database transactions, connection pooling, and multi-user concurrency.</td>
+                        </tr>
+                    </table>
+
+                    <h2>The REST API Endpoints We Will Build</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>Method</th>
+                            <th>URL</th>
+                            <th>Action</th>
+                            <th>Hibernate Operation</th>
+                        </tr>
+                        <tr>
+                            <td><span class="http-badge get">GET</span></td>
+                            <td><code>/api/students</code></td>
+                            <td>Return list of all students</td>
+                            <td><code>SELECT * FROM students</code></td>
+                        </tr>
+                        <tr>
+                            <td><span class="http-badge get">GET</span></td>
+                            <td><code>/api/students/{id}</code></td>
+                            <td>Return single student by ID</td>
+                            <td><code>SELECT * FROM students WHERE id = ?</code></td>
+                        </tr>
+                        <tr>
+                            <td><span class="http-badge post">POST</span></td>
+                            <td><code>/api/students</code></td>
+                            <td>Create a new student</td>
+                            <td><code>INSERT INTO students ...</code></td>
+                        </tr>
+                        <tr>
+                            <td><span class="http-badge put">PUT</span></td>
+                            <td><code>/api/students/{id}</code></td>
+                            <td>Update an existing student</td>
+                            <td><code>UPDATE students SET ... WHERE id = ?</code></td>
+                        </tr>
+                        <tr>
+                            <td><span class="http-badge delete">DELETE</span></td>
+                            <td><code>/api/students/{id}</code></td>
+                            <td>Delete student by ID</td>
+                            <td><code>DELETE FROM students WHERE id = ?</code></td>
+                        </tr>
+                        <tr>
+                            <td><span class="http-badge get">GET</span></td>
+                            <td><code>/h2-console</code></td>
+                            <td>Interactive visual web console</td>
+                            <td>View database tables &amp; run SQL live</td>
+                        </tr>
+                    </table>
+
+                    <div class="panel mint">
+                        <strong>Architecture Overview:</strong>
+                        <p>HTTP Request → <strong>StudentController</strong> (REST layer) →
+                            <strong>StudentRepository</strong> (Spring Data JPA) → <strong>Hibernate ORM</strong>
+                            (Entity Manager &amp; SQL generation) → <strong>H2 Database</strong> (In-memory storage).
+                        </p>
+                    </div>
+                </section>
+
+                <!-- STEP 2 -->
+                <section class="step-view" data-title="Prerequisites">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 2 · ENVIRONMENT</span>
+                        <h1>Prerequisites &amp; Tools</h1>
+                        <p class="lede">You only need standard Java development tools. Because we use the embedded H2
+                            database, you do not need to install MySQL or PostgreSQL.</p>
+                    </header>
+
+                    <div class="grid-3">
+                        <div class="concept">
+                            <strong>1. JDK 17 or 21</strong>
+                            <p>Spring Boot 3 requires Java 17 or higher. Check your version with <code>java -version</code>.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>2. VS Code or IntelliJ</strong>
+                            <p>VS Code with <em>Extension Pack for Java</em> and <em>Spring Boot Extension Pack</em>, or
+                                IntelliJ IDEA Community/Ultimate.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>3. Postman or cURL</strong>
+                            <p>Used to send HTTP requests (<span class="http-badge post">POST</span>, <span
+                                    class="http-badge put">PUT</span>, <span class="http-badge delete">DELETE</span>)
+                                to test our CRUD endpoints.</p>
+                        </div>
+                    </div>
+
+                    <h2>Verify Java Version</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>java -version</code></pre>
+                    </div>
+                    <p>Expected output should show version <code>17.x</code>, <code>21.x</code>, or newer.</p>
+                </section>
+
+                <!-- STEP 3 -->
+                <section class="step-view" data-title="Generate project">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 3 · SPRING INITIALIZR</span>
+                        <h1>Create the Spring Boot Project</h1>
+                        <p class="lede">We use Spring Initializr to bootstrap our project with Maven, Spring Boot 3, and
+                            the necessary starters.</p>
+                    </header>
+
+                    <p>Open <a href="https://start.spring.io" target="_blank"
+                            rel="noreferrer"><strong>start.spring.io</strong></a> in your browser and configure the
+                        project with these exact settings:</p>
+
+                    <table class="comparison">
+                        <tr>
+                            <th>Setting</th>
+                            <th>Value</th>
+                            <th>Why</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Project</strong></td>
+                            <td><code>Maven</code></td>
+                            <td>Standard Java build tool with dependency management.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Language</strong></td>
+                            <td><code>Java</code></td>
+                            <td>Core language.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Spring Boot</strong></td>
+                            <td><code>3.3.x</code> (or latest stable 3.x)</td>
+                            <td>Uses Jakarta EE 10 and Hibernate 6+.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Group</strong></td>
+                            <td><code>com.example</code></td>
+                            <td>Root Java package identifier.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Artifact</strong></td>
+                            <td><code>student-crud-hibernate</code></td>
+                            <td>Project directory and JAR file name.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Packaging</strong></td>
+                            <td><code>Jar</code></td>
+                            <td>Self-executable archive with embedded Tomcat.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Java</strong></td>
+                            <td><code>17</code> (or 21)</td>
+                            <td>Modern Long-Term Support release.</td>
+                        </tr>
+                    </table>
+
+                    <h2>Required Dependencies</h2>
+                    <p>Click <strong>"Add Dependencies"</strong> and add these 3 items:</p>
+                    <div class="grid-3">
+                        <div class="panel yellow">
+                            <strong>1. Spring Web</strong>
+                            <p>Embeds Apache Tomcat server and provides Spring MVC for REST controllers.</p>
+                        </div>
+                        <div class="panel blue">
+                            <strong>2. Spring Data JPA</strong>
+                            <p>Includes Hibernate ORM Core, Jakarta Persistence API, and repository abstractions.</p>
+                        </div>
+                        <div class="panel mint">
+                            <strong>3. H2 Database</strong>
+                            <p>Fast, in-memory embedded relational database that runs inside your Java process.</p>
+                        </div>
+                    </div>
+
+                    <div class="callout">
+                        <span class="label">TIP</span>
+                        <p>Click <strong>"Generate"</strong> (or press <code>Ctrl+Enter</code> / <code>Cmd+Enter</code>) to
+                            download <code>student-crud-hibernate.zip</code>.</p>
+                    </div>
+                </section>
+
+                <!-- STEP 4 -->
+                <section class="step-view" data-title="Project structure">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 4 · PROJECT SETUP</span>
+                        <h1>Unzip and Inspect Structure</h1>
+                        <p class="lede">Extract the downloaded ZIP file and open the folder in VS Code or your preferred
+                            IDE.</p>
+                    </header>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code># Extract and open in VS Code
+unzip student-crud-hibernate.zip
+cd student-crud-hibernate
+code .</code></pre>
+                    </div>
+
+                    <h2>Target Directory Structure</h2>
+                    <div class="flow">student-crud-hibernate/<br>├── pom.xml<br>└── src/<br>&nbsp;&nbsp;&nbsp;&nbsp;└──
+                        main/<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── java/com/example/studentcrudhibernate/<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├──
+                        StudentCrudHibernateApplication.java&nbsp;&nbsp;&nbsp;(Main Entrypoint)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├──
+                        entity/Student.java&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Hibernate
+                        Entity)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├──
+                        repository/StudentRepository.java&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(JPA
+                        Repository)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└──
+                        controller/StudentController.java&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(REST
+                        Endpoints)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└──
+                        resources/<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└──
+                        application.properties&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Hibernate
+                        &amp; H2 Config)</div>
+
+                    <h2>pom.xml Dependencies</h2>
+                    <p>Verify that your <code>pom.xml</code> contains the three key starters:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>&lt;dependencies&gt;
+    &lt;!-- Spring Web for REST APIs --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- Spring Data JPA (Includes Hibernate ORM) --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- In-Memory H2 Database --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.h2database&lt;/groupId&gt;
+        &lt;artifactId&gt;h2&lt;/artifactId&gt;
+        &lt;scope&gt;runtime&lt;/scope&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+                    </div>
+                </section>
+
+                <!-- STEP 5 -->
+                <section class="step-view" data-title="Configure Hibernate">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 5 · CONFIGURATION</span>
+                        <h1>Configure Hibernate &amp; H2 Database</h1>
+                        <p class="lede">Unlike standalone Hibernate which needs <code>hibernate.cfg.xml</code>, Spring
+                            Boot configures Hibernate directly in <code>src/main/resources/application.properties</code>.</p>
+                    </header>
+
+                    <p>Open <code>src/main/resources/application.properties</code> and replace its content with:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code># Server Port
+server.port=8080
+
+# -------------------------------------------------------------
+# H2 In-Memory Database Configuration
+# -------------------------------------------------------------
+spring.datasource.url=jdbc:h2:mem:studentdb;DB_CLOSE_DELAY=-1
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# Enable H2 Web Console to inspect database tables in your browser
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+# -------------------------------------------------------------
+# Hibernate / JPA Settings
+# -------------------------------------------------------------
+# Automatically creates and updates DB tables based on Java @Entity classes
+spring.jpa.hibernate.ddl-auto=update
+
+# Print all generated SQL queries directly to terminal
+spring.jpa.show-sql=true
+
+# Format generated SQL for readability
+spring.jpa.properties.hibernate.format_sql=true
+
+# Specify SQL dialect for H2
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect</code></pre>
+                    </div>
+
+                    <h2>Understanding the Configuration</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>Property</th>
+                            <th>What It Does</th>
+                        </tr>
+                        <tr>
+                            <td><code>jdbc:h2:mem:studentdb</code></td>
+                            <td>Creates a local in-memory database named <code>studentdb</code>. Runs inside RAM.</td>
+                        </tr>
+                        <tr>
+                            <td><code>spring.h2.console.enabled=true</code></td>
+                            <td>Enables a web-based GUI at <code>http://localhost:8080/h2-console</code> to view tables
+                                and data.</td>
+                        </tr>
+                        <tr>
+                            <td><code>spring.jpa.hibernate.ddl-auto=update</code></td>
+                            <td>Tells Hibernate to automatically generate the <code>STUDENTS</code> table from our Java
+                                entity at startup.</td>
+                        </tr>
+                        <tr>
+                            <td><code>spring.jpa.show-sql=true</code></td>
+                            <td>Shows the exact SQL statements Hibernate generates for each CRUD request in the terminal.
+                            </td>
+                        </tr>
+                    </table>
+                </section>
+
+                <!-- STEP 6 -->
+                <section class="step-view" data-title="Create Student entity">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 6 · ENTITY MAPPING</span>
+                        <h1>Create the Student Entity</h1>
+                        <p class="lede">An entity is a plain Java class annotated with <code>@Entity</code>. Hibernate maps
+                            each instance of this class to a row in the database table.</p>
+                    </header>
+
+                    <p>Create a package named <code>entity</code> inside <code>com.example.studentcrudhibernate</code> and
+                        create a file named <code>Student.java</code>.</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.studentcrudhibernate.entity;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "students")
+public class Student {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
+    @Column(name = "course")
+    private String course;
+
+    // 1. Default No-Argument Constructor (Required by Hibernate for reflection)
+    public Student() {
+    }
+
+    // 2. Parameterized Constructor (Convenient for creating objects)
+    public Student(String name, String email, String course) {
+        this.name = name;
+        this.email = email;
+        this.course = course;
+    }
+
+    // 3. Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getCourse() {
+        return course;
+    }
+
+    public void setCourse(String course) {
+        this.course = course;
+    }
+}</code></pre>
+                    </div>
+
+                    <h2>Essential Hibernate Annotations Explained</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>Annotation</th>
+                            <th>Purpose in Hibernate</th>
+                        </tr>
+                        <tr>
+                            <td><code>@Entity</code></td>
+                            <td>Tells Hibernate that this class represents a database table. Hibernate manages its
+                                lifecycle.</td>
+                        </tr>
+                        <tr>
+                            <td><code>@Table(name = "students")</code></td>
+                            <td>Specifies the exact table name in the relational database.</td>
+                        </tr>
+                        <tr>
+                            <td><code>@Id</code></td>
+                            <td>Designates this field as the primary key of the table.</td>
+                        </tr>
+                        <tr>
+                            <td><code>@GeneratedValue(strategy = IDENTITY)</code></td>
+                            <td>Tells the database to automatically generate and increment primary key values (1, 2, 3...).</td>
+                        </tr>
+                        <tr>
+                            <td><code>@Column(nullable = false)</code></td>
+                            <td>Maps field to column and configures constraints like <code>NOT NULL</code> and <code>UNIQUE</code>.</td>
+                        </tr>
+                    </table>
+
+                    <div class="panel orange">
+                        <strong>Why is the no-argument constructor mandatory?</strong>
+                        <p>When Hibernate loads records from the database, it uses Java Reflection to instantiate the
+                            object first using the default <code>Student()</code> constructor, and then sets field values.
+                            Without this constructor, Hibernate throws an <code>InstantiationException</code>.</p>
+                    </div>
+                </section>
+
+                <!-- STEP 7 -->
+                <section class="step-view" data-title="Create repository">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 7 · DATA ACCESS LAYER</span>
+                        <h1>Create the StudentRepository</h1>
+                        <p class="lede">Spring Data JPA provides <code>JpaRepository</code>, which handles all SQL queries
+                            and Hibernate session transactions under the hood with zero boilerplate code.</p>
+                    </header>
+
+                    <p>Create a package named <code>repository</code> inside <code>com.example.studentcrudhibernate</code>
+                        and create an interface named <code>StudentRepository.java</code>.</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.studentcrudhibernate.repository;
+
+import com.example.studentcrudhibernate.entity.Student;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface StudentRepository extends JpaRepository&lt;Student, Long&gt; {
+    // That's it! No code or SQL needed inside this interface.
+}</code></pre>
+                    </div>
+
+                    <h2>What JpaRepository Gives You for Free</h2>
+                    <p>By extending <code>JpaRepository&lt;Student, Long&gt;</code>, Hibernate dynamically implements this
+                        interface with complete CRUD capabilities:</p>
+                    <table class="comparison">
+                        <tr>
+                            <th>Method</th>
+                            <th>Return Type</th>
+                            <th>SQL Generated by Hibernate</th>
+                        </tr>
+                        <tr>
+                            <td><code>findAll()</code></td>
+                            <td><code>List&lt;Student&gt;</code></td>
+                            <td><code>SELECT * FROM students;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>findById(Long id)</code></td>
+                            <td><code>Optional&lt;Student&gt;</code></td>
+                            <td><code>SELECT * FROM students WHERE id = ?;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>save(Student s)</code></td>
+                            <td><code>Student</code></td>
+                            <td><code>INSERT</code> (if new) or <code>UPDATE</code> (if existing).</td>
+                        </tr>
+                        <tr>
+                            <td><code>deleteById(Long id)</code></td>
+                            <td><code>void</code></td>
+                            <td><code>DELETE FROM students WHERE id = ?;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>existsById(Long id)</code></td>
+                            <td><code>boolean</code></td>
+                            <td><code>SELECT count(*) > 0 FROM students WHERE id = ?;</code></td>
+                        </tr>
+                    </table>
+
+                    <div class="panel mint">
+                        <strong>The Magic:</strong> You write zero SQL queries. Hibernate inspects the entity, generates the
+                        correct dialect-specific SQL, runs it against H2, maps the result set into <code>Student</code>
+                        objects, and returns them as a <code>List&lt;Student&gt;</code>!
+                    </div>
+                </section>
+
+                <!-- STEP 8 -->
+                <section class="step-view" data-title="Create controller">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 8 · REST CONTROLLER</span>
+                        <h1>Create StudentController &amp; Inject Repository</h1>
+                        <p class="lede">The controller handles incoming HTTP requests, invokes the repository, and returns
+                            JSON responses with proper HTTP status codes.</p>
+                    </header>
+
+                    <p>Create a package named <code>controller</code> inside <code>com.example.studentcrudhibernate</code>
+                        and create <code>StudentController.java</code>.</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.studentcrudhibernate.controller;
+
+import com.example.studentcrudhibernate.entity.Student;
+import com.example.studentcrudhibernate.repository.StudentRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/students")
+public class StudentController {
+
+    private final StudentRepository studentRepository;
+
+    // Constructor Injection (Recommended Best Practice in Spring)
+    public StudentController(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
+    }
+
+}</code></pre>
+                    </div>
+
+                    <h2>Controller Components Explained</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>Annotation / Code</th>
+                            <th>Explanation</th>
+                        </tr>
+                        <tr>
+                            <td><code>@RestController</code></td>
+                            <td>Combines <code>@Controller</code> and <code>@ResponseBody</code>. Returns data serialized
+                                directly into JSON.</td>
+                        </tr>
+                        <tr>
+                            <td><code>@RequestMapping("/api/students")</code></td>
+                            <td>Sets the base route for all endpoints in this class.</td>
+                        </tr>
+                        <tr>
+                            <td><code>StudentRepository studentRepository</code></td>
+                            <td>Spring's Dependency Injection injects the Hibernate-managed repository bean at runtime.</td>
+                        </tr>
+                    </table>
+                </section>
+
+                <!-- STEP 9 -->
+                <section class="step-view" data-title="GET endpoints">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 9 · READ OPERATIONS</span>
+                        <h1>Implement GET Endpoints (List &amp; Find by ID)</h1>
+                        <p class="lede">Add methods to retrieve all students as a list and to search for a single student
+                            by ID with clean 404 handling.</p>
+                    </header>
+
+                    <h2>1. GET All Students: Return List&lt;Student&gt;</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>    // GET /api/students - Returns list of all students
+    @GetMapping
+    public List&lt;Student&gt; getAllStudents() {
+        return studentRepository.findAll();
+    }</code></pre>
+                    </div>
+
+                    <div class="flow">HTTP GET /api/students<br>↓<br>getAllStudents() calls studentRepository.findAll()<br>↓<br>Hibernate
+                        runs: SELECT id, name, email, course FROM students<br>↓<br>Maps DB records into
+                        List&lt;Student&gt;<br>↓<br>Jackson converts List to JSON array → 200 OK</div>
+
+                    <h2>2. GET Single Student: Find by ID</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>    // GET /api/students/{id} - Returns student by ID or 404 Not Found
+    @GetMapping("/{id}")
+    public ResponseEntity&lt;Student&gt; getStudentById(@PathVariable Long id) {
+        return studentRepository.findById(id)
+                .map(student -&gt; ResponseEntity.ok(student))
+                .orElse(ResponseEntity.notFound().build());
+    }</code></pre>
+                    </div>
+
+                    <table class="comparison">
+                        <tr>
+                            <th>Part</th>
+                            <th>Function</th>
+                        </tr>
+                        <tr>
+                            <td><code>@PathVariable Long id</code></td>
+                            <td>Extracts the numeric ID directly from the URL path (e.g. <code>/api/students/1</code>).</td>
+                        </tr>
+                        <tr>
+                            <td><code>studentRepository.findById(id)</code></td>
+                            <td>Returns an <code>Optional&lt;Student&gt;</code>, preventing <code>NullPointerException</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><code>.map(ResponseEntity::ok)</code></td>
+                            <td>If found, wraps the student inside HTTP 200 OK.</td>
+                        </tr>
+                        <tr>
+                            <td><code>.orElse(ResponseEntity.notFound().build())</code></td>
+                            <td>If not found, returns HTTP 404 Not Found.</td>
+                        </tr>
+                    </table>
+                </section>
+
+                <!-- STEP 10 -->
+                <section class="step-view" data-title="POST & PUT endpoints">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 10 · CREATE &amp; UPDATE</span>
+                        <h1>Implement POST and PUT Endpoints</h1>
+                        <p class="lede">Add methods to accept JSON in request bodies, create new records, and update
+                            existing records in the database.</p>
+                    </header>
+
+                    <h2>1. POST: Create a New Student</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>    // POST /api/students - Creates a new student record
+    @PostMapping
+    public ResponseEntity&lt;Student&gt; createStudent(@RequestBody Student student) {
+        // Hibernate saves the entity and populates its generated auto-increment ID
+        Student savedStudent = studentRepository.save(student);
+        return new ResponseEntity&lt;&gt;(savedStudent, HttpStatus.CREATED);
+    }</code></pre>
+                    </div>
+
+                    <div class="flow">HTTP POST /api/students with JSON body<br>↓<br>@RequestBody converts JSON to
+                        Student object (Transient state)<br>↓<br>studentRepository.save(student)<br>↓<br>Hibernate executes:
+                        INSERT INTO students (name, email, course) VALUES (?, ?, ?)<br>↓<br>Database assigns new ID
+                        (e.g., 1)<br>↓<br>Returns saved Student with ID → 201 CREATED</div>
+
+                    <h2>2. PUT: Update an Existing Student</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>    // PUT /api/students/{id} - Updates an existing student
+    @PutMapping("/{id}")
+    public ResponseEntity&lt;Student&gt; updateStudent(@PathVariable Long id, @RequestBody Student studentDetails) {
+        return studentRepository.findById(id)
+                .map(existingStudent -&gt; {
+                    // Update field values
+                    existingStudent.setName(studentDetails.getName());
+                    existingStudent.setEmail(studentDetails.getEmail());
+                    existingStudent.setCourse(studentDetails.getCourse());
+
+                    // Hibernate detects changes and runs SQL UPDATE
+                    Student updatedStudent = studentRepository.save(existingStudent);
+                    return ResponseEntity.ok(updatedStudent);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }</code></pre>
+                    </div>
+
+                    <div class="panel blue">
+                        <strong>Hibernate Dirty Checking:</strong> When an entity is loaded from the database into the
+                        Session/EntityManager, Hibernate tracks any changes to its fields. Calling <code>save()</code>
+                        causes Hibernate to execute an <code>UPDATE</code> statement containing the modified columns.
+                    </div>
+                </section>
+
+                <!-- STEP 11 -->
+                <section class="step-view" data-title="DELETE endpoint">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 11 · DELETE OPERATION</span>
+                        <h1>Implement DELETE Endpoint</h1>
+                        <p class="lede">Delete an existing student record by ID and return standard HTTP status codes
+                            (204 No Content when successful, or 404 Not Found).</p>
+                    </header>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>    // DELETE /api/students/{id} - Deletes a student by ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity&lt;Void&gt; deleteStudent(@PathVariable Long id) {
+        if (!studentRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        studentRepository.deleteById(id);
+        return ResponseEntity.noContent().build(); // HTTP 204 No Content
+    }</code></pre>
+                    </div>
+
+                    <div class="flow">HTTP DELETE /api/students/1<br>↓<br>Check if record exists via existsById(1)<br>↓<br>studentRepository.deleteById(1)<br>↓<br>Hibernate
+                        executes: DELETE FROM students WHERE id = ?<br>↓<br>Returns empty response with 204 NO CONTENT
+                    </div>
+
+                    <h2>HTTP Status Codes Summary</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>Status Code</th>
+                            <th>Meaning</th>
+                            <th>When We Return It</th>
+                        </tr>
+                        <tr>
+                            <td><code>200 OK</code></td>
+                            <td>Standard success</td>
+                            <td>Successful GET and PUT responses containing data.</td>
+                        </tr>
+                        <tr>
+                            <td><code>201 CREATED</code></td>
+                            <td>Resource successfully created</td>
+                            <td>Successful POST response containing newly created student with ID.</td>
+                        </tr>
+                        <tr>
+                            <td><code>204 NO CONTENT</code></td>
+                            <td>Success, no body returned</td>
+                            <td>Successful DELETE response.</td>
+                        </tr>
+                        <tr>
+                            <td><code>404 NOT FOUND</code></td>
+                            <td>Resource does not exist</td>
+                            <td>When the student with requested ID is not in database.</td>
+                        </tr>
+                    </table>
+                </section>
+
+                <!-- STEP 12 -->
+                <section class="step-view" data-title="Complete controller">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 12 · COMPLETE CODE</span>
+                        <h1>Full StudentController.java</h1>
+                        <p class="lede">Review the complete controller file. Ensure your file matches this code exactly.</p>
+                    </header>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.studentcrudhibernate.controller;
+
+import com.example.studentcrudhibernate.entity.Student;
+import com.example.studentcrudhibernate.repository.StudentRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/students")
+public class StudentController {
+
+    private final StudentRepository studentRepository;
+
+    public StudentController(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
+    }
+
+    // 1. GET ALL
+    @GetMapping
+    public List&lt;Student&gt; getAllStudents() {
+        return studentRepository.findAll();
+    }
+
+    // 2. GET BY ID
+    @GetMapping("/{id}")
+    public ResponseEntity&lt;Student&gt; getStudentById(@PathVariable Long id) {
+        return studentRepository.findById(id)
+                .map(student -&gt; ResponseEntity.ok(student))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // 3. POST (CREATE)
+    @PostMapping
+    public ResponseEntity&lt;Student&gt; createStudent(@RequestBody Student student) {
+        Student savedStudent = studentRepository.save(student);
+        return new ResponseEntity&lt;&gt;(savedStudent, HttpStatus.CREATED);
+    }
+
+    // 4. PUT (UPDATE)
+    @PutMapping("/{id}")
+    public ResponseEntity&lt;Student&gt; updateStudent(@PathVariable Long id, @RequestBody Student studentDetails) {
+        return studentRepository.findById(id)
+                .map(existingStudent -&gt; {
+                    existingStudent.setName(studentDetails.getName());
+                    existingStudent.setEmail(studentDetails.getEmail());
+                    existingStudent.setCourse(studentDetails.getCourse());
+                    Student updated = studentRepository.save(existingStudent);
+                    return ResponseEntity.ok(updated);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // 5. DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity&lt;Void&gt; deleteStudent(@PathVariable Long id) {
+        if (!studentRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        studentRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}</code></pre>
+                    </div>
+                </section>
+
+                <!-- STEP 13 -->
+                <section class="step-view" data-title="Run & observe Hibernate">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 13 · RUN &amp; VERIFY</span>
+                        <h1>Run Application &amp; Observe Hibernate Logs</h1>
+                        <p class="lede">Start the Spring Boot application and watch Hibernate automatically create your
+                            database table.</p>
+                    </header>
+
+                    <h2>Run from Terminal</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code># On macOS / Linux
+./mvnw spring-boot:run
+
+# On Windows
+mvnw.cmd spring-boot:run</code></pre>
+                    </div>
+
+                    <h2>Inspect the Console Output</h2>
+                    <p>Watch the startup logs carefully. Because we enabled <code>spring.jpa.show-sql=true</code> and
+                        <code>ddl-auto=update</code>, Hibernate outputs:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>2026-09-30T08:00:00.123+05:30  INFO ... : Initialized JPA EntityManagerFactory for persistence unit 'default'
+Hibernate: 
+    drop table if exists students cascade 
+Hibernate: 
+    create table students (
+        id bigint generated by default as identity,
+        course varchar(255),
+        email varchar(255) not null,
+        name varchar(255) not null,
+        primary key (id)
+    )
+Hibernate: 
+    alter table if exists students 
+       add constraint UK_students_email unique (email)
+2026-09-30T08:00:01.456+05:30  INFO ... : Tomcat started on port 8080 (http) with context path '/'
+2026-09-30T08:00:01.458+05:30  INFO ... : Started StudentCrudHibernateApplication in 2.1 seconds</code></pre>
+                    </div>
+
+                    <div class="panel mint">
+                        <strong>Notice:</strong> Hibernate automatically generated the table <code>students</code> with
+                        correct column types, primary key constraint, and unique email constraint without you ever
+                        writing a single SQL <code>CREATE TABLE</code> command!
+                    </div>
+                </section>
+
+                <!-- STEP 14 -->
+                <section class="step-view" data-title="Inspect H2 Console">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 14 · DATABASE GUI</span>
+                        <h1>Inspect Tables via H2 Web Console</h1>
+                        <p class="lede">The H2 web console allows you to visually inspect the tables created by
+                            Hibernate and run SQL queries directly inside your browser.</p>
+                    </header>
+
+                    <p>Open your browser and navigate to: <a href="http://localhost:8080/h2-console" target="_blank"
+                            rel="noreferrer"><strong>http://localhost:8080/h2-console</strong></a></p>
+
+                    <h2>Login Credentials</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>Field</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Driver Class</strong></td>
+                            <td><code>org.h2.Driver</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>JDBC URL</strong></td>
+                            <td><code>jdbc:h2:mem:studentdb</code> (Must match <code>application.properties</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>User Name</strong></td>
+                            <td><code>sa</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Password</strong></td>
+                            <td><em>(Leave blank)</em></td>
+                        </tr>
+                    </table>
+
+                    <div class="callout">
+                        <span class="label">IMPORTANT</span>
+                        <p>Make sure the JDBC URL is set to <code>jdbc:h2:mem:studentdb</code> before clicking
+                            <strong>Connect</strong>. If you leave the default test URL, you won't see your tables!</p>
+                    </div>
+
+                    <h2>What You Will See</h2>
+                    <p>On the left sidebar, click on the <strong>STUDENTS</strong> table. You can run the query:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>SELECT * FROM STUDENTS;</code></pre>
+                    </div>
+                    <p>Initially it will return 0 rows. As we test our REST APIs in the next step, rows will appear here
+                        in real-time!</p>
+                </section>
+
+                <!-- STEP 15 -->
+                <section class="step-view" data-title="Test APIs">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 15 · TESTING WITH CURL &amp; POSTMAN</span>
+                        <h1>Test All CRUD Endpoints</h1>
+                        <p class="lede">Execute requests using cURL in a second terminal or in Postman to test the full
+                            lifecycle: Create, Read, Update, and Delete.</p>
+                    </header>
+
+                    <h2>1. Create First Student (POST)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl -X POST http://localhost:8080/api/students \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Alice Johnson", "email": "alice@example.com", "course": "Computer Science"}'</code></pre>
+                    </div>
+                    <p><strong>Response (201 Created):</strong></p>
+                    <div class="code-wrap">
+                        <pre><code>{"id":1,"name":"Alice Johnson","email":"alice@example.com","course":"Computer Science"}</code></pre>
+                    </div>
+
+                    <h2>2. Create Second Student (POST)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl -X POST http://localhost:8080/api/students \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Bob Smith", "email": "bob@example.com", "course": "Information Technology"}'</code></pre>
+                    </div>
+                    <p><strong>Response (201 Created):</strong></p>
+                    <div class="code-wrap">
+                        <pre><code>{"id":2,"name":"Bob Smith","email":"bob@example.com","course":"Information Technology"}</code></pre>
+                    </div>
+
+                    <h2>3. Retrieve All Students List (GET)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl http://localhost:8080/api/students</code></pre>
+                    </div>
+                    <p><strong>Response (200 OK):</strong></p>
+                    <div class="code-wrap">
+                        <pre><code>[
+  {"id":1,"name":"Alice Johnson","email":"alice@example.com","course":"Computer Science"},
+  {"id":2,"name":"Bob Smith","email":"bob@example.com","course":"Information Technology"}
+]</code></pre>
+                    </div>
+
+                    <h2>4. Retrieve Single Student by ID (GET)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl http://localhost:8080/api/students/1</code></pre>
+                    </div>
+                    <p><strong>Response (200 OK):</strong></p>
+                    <div class="code-wrap">
+                        <pre><code>{"id":1,"name":"Alice Johnson","email":"alice@example.com","course":"Computer Science"}</code></pre>
+                    </div>
+
+                    <h2>5. Update Existing Student (PUT)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl -X PUT http://localhost:8080/api/students/1 \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Alice Johnson", "email": "alice.johnson@example.com", "course": "Artificial Intelligence"}'</code></pre>
+                    </div>
+                    <p><strong>Response (200 OK):</strong></p>
+                    <div class="code-wrap">
+                        <pre><code>{"id":1,"name":"Alice Johnson","email":"alice.johnson@example.com","course":"Artificial Intelligence"}</code></pre>
+                    </div>
+
+                    <h2>6. Delete Student by ID (DELETE)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl -X DELETE -i http://localhost:8080/api/students/2</code></pre>
+                    </div>
+                    <p><strong>Response Header:</strong></p>
+                    <div class="code-wrap">
+                        <pre><code>HTTP/1.1 204 No Content</code></pre>
+                    </div>
+
+                    <h2>7. Verify Deletion (GET Non-Existent ID)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl -i http://localhost:8080/api/students/2</code></pre>
+                    </div>
+                    <p><strong>Response Header:</strong></p>
+                    <div class="code-wrap">
+                        <pre><code>HTTP/1.1 404 Not Found</code></pre>
+                    </div>
+                </section>
+
+                <!-- STEP 16 -->
+                <section class="step-view" data-title="Hibernate lifecycle">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 16 · DEEP DIVE</span>
+                        <h1>Hibernate Entity Lifecycle in Action</h1>
+                        <p class="lede">Understand how an entity moves through Hibernate's four states during our CRUD
+                            requests.</p>
+                    </header>
+
+                    <h2>The 4 Entity States in Our Student CRUD</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>State</th>
+                            <th>When It Happens in Our App</th>
+                            <th>Database / Session Status</th>
+                        </tr>
+                        <tr>
+                            <td><strong>1. Transient</strong></td>
+                            <td><code>@RequestBody Student student</code> arrives as JSON and is instantiated via
+                                <code>new Student()</code>.</td>
+                            <td>Has no database ID yet. Not associated with Hibernate Session.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2. Persistent</strong></td>
+                            <td>After <code>studentRepository.save(student)</code> or <code>findById()</code> is called.</td>
+                            <td>Managed by Hibernate Session. Has an assigned primary key. Any field changes are tracked
+                                automatically.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3. Detached</strong></td>
+                            <td>When the HTTP request finishes and transaction commits. Object is sent as JSON.</td>
+                            <td>Has a database ID, but Session is closed. Hibernate is no longer tracking changes.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4. Removed</strong></td>
+                            <td>When <code>studentRepository.deleteById(id)</code> is executed.</td>
+                            <td>Marked for deletion. Removed from database upon transaction commit.</td>
+                        </tr>
+                    </table>
+
+                    <h2>Complete Request Flow Architecture</h2>
+                    <div class="flow">
+                        [Client / Postman]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;│ (HTTP JSON Request)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;▼<br>
+                        [StudentController]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;│ (Entity Object)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;▼<br>
+                        [StudentRepository (JpaRepository)]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;│ (Method Calls: findAll, save, delete)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;▼<br>
+                        [Hibernate ORM Engine (Session / EntityManager)]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;│ (Generates &amp; Executes SQL Queries)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;▼<br>
+                        [H2 In-Memory Relational Database (STUDENTS Table)]
+                    </div>
+                </section>
+
+                <!-- STEP 17 -->
+                <section class="step-view" data-title="Revision & Quiz">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 17 · REVISION &amp; QUIZ</span>
+                        <h1>Test Your Knowledge &amp; Summary</h1>
+                        <p class="lede">Consolidate your learning with interactive quizzes and concept summaries.</p>
+                    </header>
+
+                    <h2>Interactive Checkpoint Quizzes</h2>
+
+                    <!-- Quiz 1 -->
+                    <div class="quiz" data-answer="1"
+                        data-correct="Correct! @GeneratedValue(strategy = GenerationType.IDENTITY) instructs the underlying database to generate and increment primary key values automatically.">
+                        <strong>Quiz 1: Which annotation tells Hibernate that the primary key should be auto-incremented by the database?</strong>
+                        <div class="quiz-options">
+                            <button class="quiz-option" type="button">@AutoIncrement</button>
+                            <button class="quiz-option" type="button">@GeneratedValue(strategy = GenerationType.IDENTITY)</button>
+                            <button class="quiz-option" type="button">@PrimaryKey(auto = true)</button>
+                            <button class="quiz-option" type="button">@SequenceGeneratorOnly</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+
+                    <!-- Quiz 2 -->
+                    <div class="quiz" data-answer="2"
+                        data-correct="Correct! Hibernate uses Java Reflection to instantiate entity instances when retrieving rows from the database. A default no-argument constructor is required for this.">
+                        <strong>Quiz 2: Why does Hibernate require an empty no-argument constructor in Student.java?</strong>
+                        <div class="quiz-options">
+                            <button class="quiz-option" type="button">Because Java does not compile classes without an empty constructor.</button>
+                            <button class="quiz-option" type="button">To make the object immutable.</button>
+                            <button class="quiz-option" type="button">Hibernate uses Java reflection to instantiate objects from database result sets.</button>
+                            <button class="quiz-option" type="button">To speed up database network requests.</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+
+                    <!-- Quiz 3 -->
+                    <div class="quiz" data-answer="0"
+                        data-correct="Correct! Extending JpaRepository provides ready-to-use CRUD methods including findAll(), findById(), save(), and deleteById() implemented dynamically by Hibernate.">
+                        <strong>Quiz 3: What does extending JpaRepository&lt;Student, Long&gt; provide?</strong>
+                        <div class="quiz-options">
+                            <button class="quiz-option" type="button">Complete CRUD operations with automatic SQL generation without writing implementation code.</button>
+                            <button class="quiz-option" type="button">HTML web pages with CSS styling.</button>
+                            <button class="quiz-option" type="button">JWT token authentication filters.</button>
+                            <button class="quiz-option" type="button">A Docker container image.</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+
+                    <h2>Frequently Asked Questions</h2>
+                    <details class="reveal">
+                        <summary>How do I switch from H2 to MySQL?</summary>
+                        <div>
+                            Just swap two things:
+                            <ol>
+                                <li>In <code>pom.xml</code>, replace the <code>h2</code> dependency with <code>mysql-connector-j</code>.</li>
+                                <li>In <code>application.properties</code>, set:
+                                    <pre><code>spring.datasource.url=jdbc:mysql://localhost:3306/student_db
+spring.datasource.username=root
+spring.datasource.password=yourpassword
+spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect</code></pre>
+                                </li>
+                            </ol>
+                            Zero changes to your <code>Student.java</code>, <code>StudentRepository.java</code>, or <code>StudentController.java</code> code are needed!
+                        </div>
+                    </details>
+
+                    <details class="reveal">
+                        <summary>What is the difference between save() for new vs. existing entities?</summary>
+                        <div>
+                            When you pass an entity with <code>id == null</code>, Hibernate recognizes it as <strong>new</strong> and executes an <code>INSERT INTO</code> statement. When the entity has an existing non-null <code>id</code> that already exists in the database, Hibernate executes an <code>UPDATE</code> statement.
+                        </div>
+                    </details>
+
+                    <details class="reveal">
+                        <summary>Why use ResponseEntity instead of returning raw Student objects?</summary>
+                        <div>
+                            <code>ResponseEntity</code> lets you control HTTP status codes (such as returning <code>201 Created</code> on POST, <code>204 No Content</code> on DELETE, and <code>404 Not Found</code> when a student ID does not exist).
+                        </div>
+                    </details>
+
+                    <h2>Completion Checklist</h2>
+                    <ul class="checklist">
+                        <li>I created a Spring Boot project with Spring Web, Spring Data JPA, and H2.</li>
+                        <li>I configured Hibernate properties and enabled the H2 console in <code>application.properties</code>.</li>
+                        <li>I created a <code>Student</code> entity with <code>@Entity</code>, <code>@Id</code>, and <code>@GeneratedValue</code>.</li>
+                        <li>I created <code>StudentRepository</code> extending <code>JpaRepository</code>.</li>
+                        <li>I built <code>StudentController</code> with GET, POST, PUT, and DELETE endpoints.</li>
+                        <li>I verified Hibernate's automatic DDL SQL generation in the console logs.</li>
+                        <li>I connected to the H2 web console at <code>http://localhost:8080/h2-console</code>.</li>
+                        <li>I tested all CRUD operations using cURL or Postman.</li>
+                    </ul>
+
+                    <div class="finish">
+                        <h2>Congratulations! You Built a Hibernate CRUD API 🎉</h2>
+                        <p>You have successfully built an ORM-backed Spring Boot REST API using Hibernate and an
+                            embedded H2 database. You now understand how Java classes map to database tables, how
+                            repositories abstract SQL queries, and how to test complete CRUD flows.</p>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        (() => {
+            const steps = [...document.querySelectorAll('.step-view')];
+            const titles = steps.map(step => step.dataset.title);
+            const nav = document.getElementById('stepNav');
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const content = document.getElementById('content');
+            const completed = new Set();
+            let current = 0;
+
+            nav.innerHTML = titles.map((title, index) =>
+                `<button class="step-link" data-step="${index}" type="button">
+                    <span class="step-number">${String(index + 1).padStart(2, '0')}</span>
+                    <span>${title}</span>
+                    <span class="step-status" aria-hidden="true"></span>
+                </button>`
+            ).join('');
+
+            const getHashStep = () => {
+                const match = location.hash.match(/^#step-(\d+)$/);
+                const value = match ? Number(match[1]) - 1 : 0;
+                return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+            };
+
+            function render(updateHash = true) {
+                current = Math.max(0, Math.min(current, steps.length - 1));
+                steps.forEach((step, index) => {
+                    const active = index === current;
+                    step.classList.toggle('active', active);
+                    step.setAttribute('aria-hidden', String(!active));
+                });
+
+                document.querySelectorAll('.step-link').forEach((button, index) => {
+                    button.classList.toggle('active', index === current);
+                    button.setAttribute('aria-current', index === current ? 'step' : 'false');
+                    button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '';
+                });
+
+                const percent = Math.round(((current + 1) / steps.length) * 100);
+                document.getElementById('progressBar').style.width = `${percent}%`;
+                document.getElementById('progressText').textContent = `${percent}%`;
+                document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+                document.getElementById('mobileTitle').textContent = titles[current];
+                document.getElementById('prevBtn').disabled = current === 0;
+                document.getElementById('nextBtn').disabled = current === steps.length - 1;
+                document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Finish Lesson 🎉' : 'Next →';
+
+                if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+                window.scrollTo({ top: 0, behavior: 'auto' });
+                sidebar.classList.remove('open');
+                menuBtn.setAttribute('aria-expanded', 'false');
+            }
+
+            function goTo(index) {
+                if (index < 0 || index >= steps.length) return;
+                completed.add(current);
+                current = index;
+                render();
+            }
+
+            const navRow = document.createElement('div');
+            navRow.className = 'nav-row';
+            navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';
+            content.appendChild(navRow);
+
+            document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+            document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+            nav.addEventListener('click', event => {
+                const button = event.target.closest('.step-link');
+                if (button) goTo(Number(button.dataset.step));
+            });
+
+            menuBtn.addEventListener('click', () => {
+                const open = sidebar.classList.toggle('open');
+                menuBtn.setAttribute('aria-expanded', String(open));
+            });
+
+            document.addEventListener('click', async event => {
+                const copy = event.target.closest('.copy-btn');
+                if (copy) {
+                    const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+                    try {
+                        await navigator.clipboard.writeText(code);
+                        copy.textContent = 'Copied!';
+                    } catch {
+                        copy.textContent = 'Select & copy';
+                    }
+                    setTimeout(() => copy.textContent = 'Copy', 1200);
+                    return;
+                }
+
+                const option = event.target.closest('.quiz-option');
+                if (option) {
+                    const quiz = option.closest('.quiz');
+                    if (quiz.dataset.answered) return;
+                    const options = [...quiz.querySelectorAll('.quiz-option')];
+                    const choice = options.indexOf(option);
+                    const answer = Number(quiz.dataset.answer);
+                    quiz.dataset.answered = 'true';
+                    options.forEach(button => button.disabled = true);
+                    option.classList.add(choice === answer ? 'correct' : 'wrong');
+                    if (choice !== answer) options[answer].classList.add('correct');
+                    const feedback = quiz.querySelector('.quiz-feedback');
+                    feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
+                    feedback.classList.add('show');
+                }
+            });
+
+            window.addEventListener('popstate', () => {
+                current = getHashStep();
+                render(false);
+            });
+            window.addEventListener('hashchange', () => {
+                current = getHashStep();
+                render(false);
+            });
+
+            document.addEventListener('keydown', event => {
+                if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+                if (event.key === 'ArrowRight') goTo(current + 1);
+                if (event.key === 'ArrowLeft') goTo(current - 1);
+            });
+
+            current = getHashStep();
+            render(false);
+        })();
+    </script>
+</body>
+
+</html>

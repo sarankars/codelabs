@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hibernate: Introduction, Architecture &amp; Configuration — Theoretical Codelab</title>
+    <meta name="description"
+        content="Learn the core theoretical concepts of Hibernate ORM, including what it is, how its layered architecture works, how to add it to a Java project, and how to configure it with hibernate.cfg.xml.">
+    <meta name="theme-color" content="#2856d8">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+        :root {
+            --blue: #2856d8;
+            --blue-dark: #17348e;
+            --blue-light: #e4ebff;
+            --ink: #101010;
+            --paper: #f5f7fb;
+            --white: #fff;
+            --yellow: #ffd83d;
+            --mint: #75e6c5;
+            --pink: #ff9bb7;
+            --orange: #ffb866;
+            --border: 3px solid var(--ink);
+            --shadow: 6px 6px 0 var(--ink);
+            --shadow-sm: 4px 4px 0 var(--ink);
+            --sidebar: 292px
+        }
+
+        * { box-sizing: border-box }
+        html { scroll-behavior: auto }
+        body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Space Grotesk", system-ui, sans-serif; line-height: 1.55 }
+        button, a { font: inherit }
+        button { cursor: pointer }
+        :focus-visible { outline: 4px solid var(--yellow); outline-offset: 3px }
+        .app { min-height: 100vh }
+        .sidebar { position: fixed; inset: 0 auto 0 0; width: var(--sidebar); padding: 22px 18px; background: var(--blue); border-right: var(--border); overflow: auto; z-index: 20 }
+        .brand { padding: 16px; margin-bottom: 20px; background: #fff; border: var(--border); box-shadow: var(--shadow-sm) }
+        .eyebrow, .progress-meta, .step-number, .step-kicker, .label, .footer-note { font-family: "DM Mono", monospace }
+        .eyebrow { font-size: .72rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase }
+        .brand h2 { margin: 5px 0 3px; font-size: 1.42rem; line-height: 1.05 }
+        .brand p { margin: 0; font-size: .85rem; font-weight: 600 }
+        .progress-wrap { margin: 0 2px 20px; color: #fff }
+        .progress-meta { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 7px; font-size: .72rem }
+        .progress-track { height: 16px; padding: 2px; background: #fff; border: var(--border) }
+        .progress-bar { height: 100%; width: 0; background: var(--yellow); transition: width .2s ease }
+        .steps { display: grid; gap: 8px }
+        .step-link { width: 100%; display: grid; grid-template-columns: 34px 1fr 18px; align-items: center; gap: 9px; padding: 9px 8px; color: #fff; background: transparent; border: 3px solid transparent; text-align: left; font-weight: 700; line-height: 1.15 }
+        .step-link:hover { background: rgba(255,255,255,.14) }
+        .step-link.active { color: var(--ink); background: #fff; border-color: var(--ink); box-shadow: var(--shadow-sm) }
+        .step-number { width: 30px; height: 30px; display: grid; place-items: center; border: 2px solid currentColor; font-size: .78rem }
+        .step-status { text-align: center }
+        .mobile-bar { display: none; position: sticky; top: 0; z-index: 30; align-items: center; gap: 10px; padding: 10px; background: var(--blue); border-bottom: var(--border) }
+        .menu-btn, .mobile-title { background: #fff; border: var(--border); box-shadow: var(--shadow-sm) }
+        .menu-btn { width: 46px; height: 42px; font-size: 1.25rem; font-weight: 900 }
+        .mobile-title { flex: 1; padding: 8px 10px; font-weight: 800 }
+        main { margin-left: var(--sidebar); min-height: 100vh }
+        .content { width: min(980px, calc(100% - 48px)); margin: 0 auto; padding: 42px 0 28px }
+        .step-view { display: none }
+        .step-view.active { display: block; animation: stepIn .18s ease-out }
+        @keyframes stepIn { from { opacity: .35; transform: translateY(5px) } to { opacity: 1; transform: none } }
+        .step-header { padding: 28px; margin-bottom: 24px; background: #fff; border: var(--border); box-shadow: var(--shadow) }
+        .step-kicker { display: inline-block; margin-bottom: 13px; padding: 5px 9px; color: #fff; background: var(--blue); border: 2px solid var(--ink); font-size: .72rem }
+        h1, h2, h3 { line-height: 1.08 }
+        h1 { margin: 0 0 12px; font-size: clamp(2rem, 5vw, 3.7rem); letter-spacing: -.045em }
+        h2 { margin: 30px 0 12px; font-size: clamp(1.5rem, 3vw, 2.15rem) }
+        h3 { margin: 22px 0 9px; font-size: 1.15rem }
+        .lede { max-width: 780px; margin: 0; font-size: 1.08rem }
+        .objective { margin-top: 20px; padding: 14px 16px; background: var(--yellow); border: var(--border); box-shadow: var(--shadow-sm); font-weight: 700 }
+        .panel, .concept, .quiz, .reveal { background: #fff; border: var(--border); box-shadow: var(--shadow-sm) }
+        .panel { padding: 22px; margin: 20px 0 }
+        .panel.blue { background: var(--blue-light) }
+        .panel.mint { background: var(--mint) }
+        .panel.pink { background: var(--pink) }
+        .panel.yellow { background: var(--yellow) }
+        .panel.orange { background: var(--orange) }
+        .callout { padding: 16px 18px; margin: 20px 0; background: #fff; border: var(--border); box-shadow: var(--shadow-sm) }
+        .callout .label { display: inline-block; margin-bottom: 8px; padding: 3px 7px; color: #fff; background: var(--ink); border: 2px solid var(--ink); font-size: .72rem }
+        .grid-2 { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)) }
+        .concept { padding: 18px }
+        .concept strong { font-size: 1.05rem }
+        .concept p:last-child { margin-bottom: 0 }
+        .code-wrap { position: relative; margin: 18px 0 }
+        pre { margin: 0; padding: 20px; overflow: auto; color: #f7f7f7; background: #111; border: var(--border); box-shadow: var(--shadow-sm); font-family: "DM Mono", ui-monospace, monospace; font-size: .84rem; line-height: 1.62; tab-size: 2 }
+        .copy-btn { position: absolute; top: 8px; right: 8px; z-index: 2; padding: 5px 9px; background: var(--yellow); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); font-size: .75rem; font-weight: 800 }
+        code:not(pre code) { padding: 1px 5px; background: #e8edf7; border: 1px solid #9da9bb; font-family: "DM Mono", monospace; font-size: .88em }
+        ul, ol { padding-left: 1.35rem }
+        li { margin: 7px 0 }
+        .comparison { width: 100%; margin: 18px 0; background: #fff; border: var(--border); border-collapse: collapse }
+        .comparison th, .comparison td { padding: 11px; border: 2px solid var(--ink); text-align: left; vertical-align: top }
+        .comparison th { color: #fff; background: var(--blue) }
+        .quiz { padding: 20px; margin: 20px 0 }
+        .quiz-options { display: grid; gap: 9px; margin-top: 14px }
+        .quiz-option { text-align: left; padding: 11px 13px; background: #fff; border: 2px solid var(--ink); font-weight: 700 }
+        .quiz-option:hover { background: var(--blue-light) }
+        .quiz-option.correct { background: var(--mint) }
+        .quiz-option.wrong { background: var(--pink) }
+        .quiz-feedback { display: none; margin-top: 13px; padding: 10px; border: 2px solid var(--ink); font-weight: 700 }
+        .quiz-feedback.show { display: block }
+        .reveal { margin: 18px 0 }
+        .reveal summary { padding: 13px 16px; cursor: pointer; background: var(--blue-light); font-weight: 800 }
+        .reveal > div { padding: 15px 16px }
+        .flow { margin: 20px 0; padding: 20px; background: #fff; border: var(--border); box-shadow: var(--shadow-sm); font-family: "DM Mono", monospace; line-height: 1.9; overflow: auto }
+        .checklist { list-style: none; padding: 0 }
+        .checklist li { position: relative; padding-left: 30px }
+        .checklist li::before { content: "□"; position: absolute; left: 0; font-size: 1.25rem; font-weight: 900 }
+        .nav-row { display: flex; justify-content: space-between; gap: 14px; margin-top: 34px; padding-top: 20px; border-top: var(--border) }
+        .nav-btn { min-width: 130px; padding: 12px 18px; background: #fff; border: var(--border); box-shadow: var(--shadow-sm); font-weight: 900 }
+        .nav-btn.primary { color: #fff; background: var(--blue) }
+        .nav-btn:disabled { opacity: .35; cursor: not-allowed }
+        .finish { padding: 20px; margin-top: 24px; background: var(--mint); border: var(--border); box-shadow: var(--shadow) }
+        @media(max-width:850px) {
+            :root { --sidebar: 270px; --mobile-bar-height: 65px }
+            .sidebar { inset: var(--mobile-bar-height) auto 0 0; transform: translateX(-100%); transition: transform .2s ease }
+            .sidebar.open { transform: none }
+            .mobile-bar { display: flex; height: var(--mobile-bar-height) }
+            main { margin-left: 0 }
+            .content { width: min(940px, calc(100% - 28px)); padding-top: 24px }
+        }
+        @media(max-width:680px) {
+            .grid-2 { grid-template-columns: 1fr }
+            .content { width: calc(100% - 18px); padding-top: 16px }
+            .step-header { padding: 20px 16px }
+            .panel, .concept, .quiz { padding: 16px }
+            .nav-row { position: sticky; bottom: 0; z-index: 10; padding: 12px 0; background: var(--paper) }
+            .nav-btn { min-width: 0; flex: 1; padding: 11px 10px }
+            pre { padding: 16px 12px; font-size: .76rem }
+            .copy-btn { position: static; align-self: flex-end; margin-bottom: 6px }
+            .code-wrap { display: flex; flex-direction: column }
+            .code-wrap pre { order: 2 }
+            .code-wrap .copy-btn { order: 1 }
+            .comparison { display: block; overflow-x: auto }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+            <div class="brand">
+                <div class="eyebrow">ORM Codelab</div>
+                <h2>Hibernate Theory</h2>
+                <p>ORM concepts without code.</p>
+            </div>
+            <div class="progress-wrap">
+                <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+                <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+            <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+        </aside>
+        <div class="mobile-bar">
+            <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">☰</button>
+            <div class="mobile-title" id="mobileTitle">Hibernate Theory</div>
+        </div>
+        <main>
+            <div class="content" id="content">
+
+                <!-- STEP 1 -->
+                <section class="step-view" data-title="What is Hibernate?">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 1 · INTRODUCTION</span>
+                        <h1>What is Hibernate?</h1>
+                        <p class="lede">Before we look at architecture or configuration, we need to understand the fundamental problem Hibernate solves and why it exists.</p>
+                    </header>
+                    <div class="objective"><strong>By the end:</strong> You will understand what an ORM framework is, why JDBC alone is tedious for large applications, and how Hibernate bridges the gap.</div>
+
+                    <h2>The Problem with Raw JDBC</h2>
+                    <p>In traditional Java database programming you use <strong>JDBC</strong> (Java Database Connectivity) to talk to a relational database. While powerful, it forces you to:</p>
+                    <ul>
+                        <li>Write repetitive boilerplate SQL for every table (<code>INSERT</code>, <code>SELECT</code>, <code>UPDATE</code>, <code>DELETE</code>).</li>
+                        <li>Manually map every <code>ResultSet</code> column to a Java object field.</li>
+                        <li>Handle connection management, transactions, and resource cleanup yourself.</li>
+                        <li>Rewrite SQL when you switch databases (MySQL → PostgreSQL → Oracle).</li>
+                    </ul>
+
+                    <div class="panel yellow"><strong>The Impedance Mismatch</strong>
+                        <p>There is a fundamental mismatch between the object-oriented world of Java (classes, inheritance, associations) and the relational world of SQL (tables, rows, foreign keys). Bridging this gap manually is repetitive and error-prone.</p>
+                    </div>
+
+                    <h2>Enter Hibernate</h2>
+                    <p><strong>Hibernate</strong> is an open-source <em>Object-Relational Mapping (ORM)</em> framework for Java. It bridges the impedance mismatch by automatically converting Java objects into database rows — and vice versa — so you rarely write raw SQL.</p>
+
+                    <div class="grid-2">
+                        <div class="concept"><strong>Without Hibernate (JDBC)</strong>
+                            <p>You write SQL, iterate over a <code>ResultSet</code>, and copy each column value into a Java object field — every time, for every table.</p>
+                        </div>
+                        <div class="concept"><strong>With Hibernate (ORM)</strong>
+                            <p>You work with plain Java objects. Hibernate generates and executes the SQL, caches results, and manages transactions automatically.</p>
+                        </div>
+                    </div>
+
+                    <h2>Hibernate vs. JDBC at a Glance</h2>
+                    <table class="comparison">
+                        <tr><th>Aspect</th><th>Raw JDBC</th><th>Hibernate ORM</th></tr>
+                        <tr><td><strong>SQL Writing</strong></td><td>Manual for every operation.</td><td>Auto-generated; HQL for custom queries.</td></tr>
+                        <tr><td><strong>Object Mapping</strong></td><td>Manual field-by-field copy from ResultSet.</td><td>Automatic via annotations or XML mappings.</td></tr>
+                        <tr><td><strong>Database Portability</strong></td><td>SQL is often DB-specific.</td><td>Dialect abstraction makes switching easier.</td></tr>
+                        <tr><td><strong>Caching</strong></td><td>Implement yourself.</td><td>First- and second-level cache built-in.</td></tr>
+                        <tr><td><strong>Transaction Management</strong></td><td>Manual commit / rollback.</td><td>Integrated with JTA and Spring transactions.</td></tr>
+                        <tr><td><strong>Learning Curve</strong></td><td>Low — just SQL and JDBC API.</td><td>Moderate — new concepts like Session, HQL, mappings.</td></tr>
+                    </table>
+
+                    <div class="panel mint"><strong>Key Fact</strong>
+                        <p>Hibernate is the most widely used JPA implementation. JPA (Jakarta Persistence API) is a <em>specification</em>; Hibernate is the <em>implementation</em>. When you use Spring Data JPA, Hibernate is running underneath.</p>
+                    </div>
+                </section>
+
+                <!-- STEP 2 -->
+                <section class="step-view" data-title="Core Concepts">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 2 · CONCEPTS</span>
+                        <h1>Core Hibernate Concepts</h1>
+                        <p class="lede">Hibernate introduces a small vocabulary of terms you must understand before looking at architecture or configuration.</p>
+                    </header>
+
+                    <h2>Entity</h2>
+                    <p>An <strong>Entity</strong> is a plain Java class (a POJO) that is mapped to a database table. Each instance of the class corresponds to one row in that table.</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>@Entity
+@Table(name = "students")
+public class Student {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "email")
+    private String email;
+
+    // getters and setters ...
+}</code></pre>
+                    </div>
+                    <div class="callout"><span class="label">NOTE</span>
+                        <p><code>@Entity</code> marks the class. <code>@Table</code> names the database table. <code>@Id</code> marks the primary key. <code>@Column</code> maps a field to a specific column name.</p>
+                    </div>
+
+                    <h2>Session</h2>
+                    <p>A <strong>Session</strong> is a short-lived, lightweight object that represents a single unit of work with the database. It is the primary interface for performing CRUD operations.</p>
+                    <ul>
+                        <li>Obtained from a <code>SessionFactory</code>.</li>
+                        <li>Not thread-safe — create one per request/transaction and close it when done.</li>
+                        <li>Maintains a <strong>first-level cache</strong> (within the session) automatically.</li>
+                    </ul>
+
+                    <h2>SessionFactory</h2>
+                    <p>The <strong>SessionFactory</strong> is a heavyweight, thread-safe object created once per application lifetime. It reads your configuration, validates your mappings, and acts as a factory for <code>Session</code> objects.</p>
+                    <div class="panel blue"><strong>Analogy</strong>
+                        <p>Think of <code>SessionFactory</code> as a database connection pool manager. You create it once (expensive), then ask it for a <code>Session</code> every time you need to talk to the database (cheap).</p>
+                    </div>
+
+                    <h2>Transaction</h2>
+                    <p>A <strong>Transaction</strong> groups a set of operations that must either all succeed or all fail together (atomicity). You always begin a transaction before writing data and either commit or rollback at the end.</p>
+
+                    <h2>HQL — Hibernate Query Language</h2>
+                    <p><strong>HQL</strong> is an object-oriented query language similar to SQL, but operates on <em>entity class names and field names</em> instead of tables and columns. Hibernate translates HQL into the correct SQL dialect automatically.</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>// HQL — works with entity class names, not table names
+String hql = "FROM Student WHERE email = :email";
+
+// Equivalent SQL Hibernate might generate for MySQL:
+// SELECT * FROM students WHERE email = ?</code></pre>
+                    </div>
+
+                    <div class="quiz" data-answer="1"
+                        data-correct="Correct! SessionFactory is created once per application and is thread-safe; Session is created per unit of work and is not thread-safe.">
+                        <h3>What is the key difference between a <code>SessionFactory</code> and a <code>Session</code>?</h3>
+                        <div class="quiz-options">
+                            <button class="quiz-option">SessionFactory is created for every database call; Session is created once per application.</button>
+                            <button class="quiz-option">SessionFactory is created once per application and is thread-safe; Session is created per unit of work and is not thread-safe.</button>
+                            <button class="quiz-option">They are interchangeable; Session is just a newer name for SessionFactory.</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <!-- STEP 3 -->
+                <section class="step-view" data-title="Hibernate Architecture">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 3 · ARCHITECTURE</span>
+                        <h1>Hibernate Architecture</h1>
+                        <p class="lede">Hibernate sits between your Java application and the database, acting as a translation layer. Understanding its layered architecture is key to using it effectively.</p>
+                    </header>
+
+                    <h2>The Layered View</h2>
+                    <div class="flow">
+                        +------------------------------------------+<br>
+                        |        Java Application Layer            |<br>
+                        |  (Your code: Entity classes, services)   |<br>
+                        +------------------+-----------------------+<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v<br>
+                        +------------------------------------------+<br>
+                        |          Hibernate ORM Layer             |<br>
+                        |  SessionFactory · Session · Transaction  |<br>
+                        |  Query (HQL/Criteria) · Cache            |<br>
+                        +------------------+-----------------------+<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v<br>
+                        +------------------------------------------+<br>
+                        |          JDBC / Database Layer           |<br>
+                        |  Connection Pool · SQL Dialect · DB      |<br>
+                        +------------------------------------------+
+                    </div>
+
+                    <h2>Key Architectural Components</h2>
+                    <div class="grid-2">
+                        <div class="concept"><strong>Configuration</strong>
+                            <p>The starting point. Reads <code>hibernate.cfg.xml</code> (or <code>application.properties</code> in Spring Boot), registers entity classes, and builds the <code>SessionFactory</code>.</p>
+                        </div>
+                        <div class="concept"><strong>SessionFactory</strong>
+                            <p>Thread-safe, created once. Holds compiled mapping metadata and the database connection pool. The most expensive object to create.</p>
+                        </div>
+                        <div class="concept"><strong>Session</strong>
+                            <p>The workhorse. Wraps a JDBC connection, maintains the first-level cache, and provides <code>save()</code>, <code>get()</code>, <code>update()</code>, <code>delete()</code> methods.</p>
+                        </div>
+                        <div class="concept"><strong>Transaction</strong>
+                            <p>Wraps database operations in a single atomic unit. Delegates to JDBC transactions or JTA depending on the environment.</p>
+                        </div>
+                        <div class="concept"><strong>Query / Criteria</strong>
+                            <p>Interfaces to run HQL or Criteria API queries. Both are translated into dialect-specific SQL at runtime.</p>
+                        </div>
+                        <div class="concept"><strong>Cache</strong>
+                            <p><em>First-level</em> cache lives inside a Session (always on). <em>Second-level</em> cache is shared across sessions (optional; needs a provider like EhCache).</p>
+                        </div>
+                    </div>
+
+                    <h2>Object States in Hibernate</h2>
+                    <p>Every entity object has a lifecycle with four possible states:</p>
+                    <table class="comparison">
+                        <tr><th>State</th><th>What it means</th><th>Database Row?</th></tr>
+                        <tr><td><strong>Transient</strong></td><td>Object just created with <code>new</code>. Hibernate does not know about it.</td><td>No</td></tr>
+                        <tr><td><strong>Persistent</strong></td><td>Object is associated with an open Session. Any change is tracked and synced to the DB.</td><td>Yes (or pending flush)</td></tr>
+                        <tr><td><strong>Detached</strong></td><td>Session was closed. Object has a DB identity but is no longer tracked.</td><td>Yes</td></tr>
+                        <tr><td><strong>Removed</strong></td><td>Marked for deletion. Will be deleted on the next flush.</td><td>Pending deletion</td></tr>
+                    </table>
+
+                    <div class="panel orange"><strong>Why States Matter</strong>
+                        <p>Understanding object states prevents common bugs like "why didn't my change save?" (object was Detached) or "why did Hibernate fire an unexpected UPDATE?" (object was Persistent and every field change was tracked).</p>
+                    </div>
+
+                    <div class="quiz" data-answer="0"
+                        data-correct="Correct! A Persistent object is associated with an open Session, so Hibernate tracks every change to its fields automatically.">
+                        <h3>An entity object whose changes are automatically tracked and synced to the database is in which state?</h3>
+                        <div class="quiz-options">
+                            <button class="quiz-option">Persistent</button>
+                            <button class="quiz-option">Transient</button>
+                            <button class="quiz-option">Detached</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <!-- STEP 4 -->
+                <section class="step-view" data-title="Installation">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 4 · INSTALLATION</span>
+                        <h1>Adding Hibernate to a Java Project</h1>
+                        <p class="lede">Hibernate is installed by declaring dependencies in your build tool — Maven or Gradle. No separate download or installer is required.</p>
+                    </header>
+                    <div class="objective"><strong>Goal:</strong> Understand which dependencies are needed and what role each plays.</div>
+
+                    <h2>Required Dependencies</h2>
+                    <ol>
+                        <li><strong>Hibernate Core</strong> — the ORM engine itself.</li>
+                        <li><strong>JDBC Driver</strong> — the connector for your specific database (MySQL, PostgreSQL, etc.).</li>
+                        <li><strong>Jakarta Persistence API (JPA)</strong> — the standard interface Hibernate implements (bundled inside Hibernate Core from version 6+).</li>
+                    </ol>
+
+                    <h2>Maven — pom.xml</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>&lt;dependencies&gt;
+
+    &lt;!-- Hibernate ORM Core (includes JPA API) --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.hibernate.orm&lt;/groupId&gt;
+        &lt;artifactId&gt;hibernate-core&lt;/artifactId&gt;
+        &lt;version&gt;6.6.0.Final&lt;/version&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- MySQL JDBC Driver --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.mysql&lt;/groupId&gt;
+        &lt;artifactId&gt;mysql-connector-j&lt;/artifactId&gt;
+        &lt;version&gt;8.4.0&lt;/version&gt;
+    &lt;/dependency&gt;
+
+&lt;/dependencies&gt;</code></pre>
+                    </div>
+
+                    <h2>Gradle — build.gradle</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>dependencies {
+    // Hibernate ORM Core (includes JPA API)
+    implementation 'org.hibernate.orm:hibernate-core:6.6.0.Final'
+
+    // MySQL JDBC Driver
+    runtimeOnly 'com.mysql:mysql-connector-j:8.4.0'
+}</code></pre>
+                    </div>
+
+                    <div class="callout"><span class="label">TIP</span>
+                        <p>If you are using <strong>Spring Boot</strong>, add the <code>spring-boot-starter-data-jpa</code> starter instead. It automatically pulls in Hibernate Core, the JPA API, and wires everything together — you only need to add the JDBC driver separately.</p>
+                    </div>
+
+                    <h2>What Gets Installed</h2>
+                    <div class="grid-2">
+                        <div class="concept"><strong>hibernate-core</strong>
+                            <p>The main JAR. Contains the Session, SessionFactory, Transaction, HQL engine, mapping processors, and caching infrastructure.</p>
+                        </div>
+                        <div class="concept"><strong>JDBC Driver (e.g., mysql-connector-j)</strong>
+                            <p>A thin driver that knows how to speak the MySQL wire protocol. Hibernate delegates all actual SQL execution to this driver.</p>
+                        </div>
+                        <div class="concept"><strong>Jakarta Persistence API</strong>
+                            <p>The standard annotations (<code>@Entity</code>, <code>@Id</code>, etc.) that make Hibernate interoperable with JPA-compatible tools like Spring Data.</p>
+                        </div>
+                        <div class="concept"><strong>Byte Buddy / Javassist</strong>
+                            <p>Pulled in automatically. Hibernate uses these to create proxy classes for lazy loading without touching your entity source code.</p>
+                        </div>
+                    </div>
+
+                    <h2>Project Structure After Setup</h2>
+                    <div class="flow">
+                        my-hibernate-project/<br>
+                        +-- src/main/java/<br>
+                        |&nbsp;&nbsp;&nbsp;+-- com/example/<br>
+                        |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+-- entity/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your @Entity classes<br>
+                        |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+-- util/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HibernateUtil helper<br>
+                        +-- src/main/resources/<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;+-- hibernate.cfg.xml&nbsp;&nbsp;&nbsp;Main configuration file
+                    </div>
+                </section>
+
+                <!-- STEP 5 -->
+                <section class="step-view" data-title="hibernate.cfg.xml">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 5 · CONFIGURATION</span>
+                        <h1>hibernate.cfg.xml — The Configuration File</h1>
+                        <p class="lede">The <code>hibernate.cfg.xml</code> file tells Hibernate how to connect to your database, which SQL dialect to use, and which entity classes to map.</p>
+                    </header>
+
+                    <h2>A Complete Example</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>&lt;!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd"&gt;
+
+&lt;hibernate-configuration&gt;
+    &lt;session-factory&gt;
+
+        &lt;!-- Database Connection --&gt;
+        &lt;property name="hibernate.connection.driver_class"&gt;
+            com.mysql.cj.jdbc.Driver
+        &lt;/property&gt;
+        &lt;property name="hibernate.connection.url"&gt;
+            jdbc:mysql://localhost:3306/college_db
+        &lt;/property&gt;
+        &lt;property name="hibernate.connection.username"&gt;root&lt;/property&gt;
+        &lt;property name="hibernate.connection.password"&gt;secret&lt;/property&gt;
+
+        &lt;!-- SQL Dialect --&gt;
+        &lt;property name="hibernate.dialect"&gt;
+            org.hibernate.dialect.MySQLDialect
+        &lt;/property&gt;
+
+        &lt;!-- Schema Management --&gt;
+        &lt;property name="hibernate.hbm2ddl.auto"&gt;update&lt;/property&gt;
+
+        &lt;!-- Debug: Print Generated SQL --&gt;
+        &lt;property name="hibernate.show_sql"&gt;true&lt;/property&gt;
+        &lt;property name="hibernate.format_sql"&gt;true&lt;/property&gt;
+
+        &lt;!-- Entity Mappings --&gt;
+        &lt;mapping class="com.example.entity.Student"/&gt;
+
+    &lt;/session-factory&gt;
+&lt;/hibernate-configuration&gt;</code></pre>
+                    </div>
+
+                    <h2>Configuration Properties Explained</h2>
+                    <table class="comparison">
+                        <tr><th>Property</th><th>Purpose</th></tr>
+                        <tr><td><code>connection.driver_class</code></td><td>Fully-qualified class name of the JDBC driver for your database.</td></tr>
+                        <tr><td><code>connection.url</code></td><td>The JDBC URL: protocol, host, port, and database name.</td></tr>
+                        <tr><td><code>connection.username</code> / <code>password</code></td><td>Database credentials. In production use environment variables, not hard-coded values.</td></tr>
+                        <tr><td><code>dialect</code></td><td>Tells Hibernate which SQL flavour to generate (MySQL, PostgreSQL, Oracle, H2, …).</td></tr>
+                        <tr><td><code>hbm2ddl.auto</code></td><td>Schema strategy. See the table below for all options.</td></tr>
+                        <tr><td><code>show_sql</code></td><td>Prints every generated SQL statement to the console. Useful for debugging.</td></tr>
+                        <tr><td><code>format_sql</code></td><td>Pretty-prints the SQL for easier reading.</td></tr>
+                        <tr><td><code>&lt;mapping class="…"/&gt;</code></td><td>Registers an entity class with Hibernate so it can be managed.</td></tr>
+                    </table>
+
+                    <h2>hbm2ddl.auto Options</h2>
+                    <table class="comparison">
+                        <tr><th>Value</th><th>What Hibernate does at startup</th><th>When to use</th></tr>
+                        <tr><td><code>create</code></td><td>Drops existing tables and creates new ones from scratch.</td><td>Development only — you lose all data on every restart.</td></tr>
+                        <tr><td><code>create-drop</code></td><td>Creates on startup, drops on SessionFactory close.</td><td>In-memory testing (H2 database).</td></tr>
+                        <tr><td><code>update</code></td><td>Adds missing columns/tables; never removes existing ones.</td><td>Development when you want data to persist between restarts.</td></tr>
+                        <tr><td><code>validate</code></td><td>Checks that the schema matches the mappings; throws if not.</td><td>Production — schema managed by Flyway / Liquibase.</td></tr>
+                        <tr><td><code>none</code></td><td>Does nothing. You manage the schema entirely yourself.</td><td>Production with DBA-managed schemas.</td></tr>
+                    </table>
+
+                    <div class="panel pink"><strong>Production Warning</strong>
+                        <p>Never use <code>create</code> or <code>create-drop</code> in production — they will <strong>delete all your data</strong> on each restart. Use <code>validate</code> or <code>none</code> and manage schema changes with a migration tool such as <strong>Flyway</strong> or <strong>Liquibase</strong>.</p>
+                    </div>
+
+                    <h2>Dialect Quick Reference</h2>
+                    <div class="grid-2">
+                        <div class="concept"><strong>MySQL</strong><p><code>org.hibernate.dialect.MySQLDialect</code></p></div>
+                        <div class="concept"><strong>PostgreSQL</strong><p><code>org.hibernate.dialect.PostgreSQLDialect</code></p></div>
+                        <div class="concept"><strong>Oracle</strong><p><code>org.hibernate.dialect.OracleDialect</code></p></div>
+                        <div class="concept"><strong>H2 (In-Memory Testing)</strong><p><code>org.hibernate.dialect.H2Dialect</code></p></div>
+                    </div>
+                </section>
+
+                <!-- STEP 6 -->
+                <section class="step-view" data-title="HibernateUtil &amp; SessionFactory">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 6 · BOOTSTRAP</span>
+                        <h1>Bootstrapping Hibernate — HibernateUtil</h1>
+                        <p class="lede">The <code>SessionFactory</code> must be created exactly once and shared across the entire application. A utility class is the conventional way to manage this.</p>
+                    </header>
+
+                    <h2>Why a Utility Class?</h2>
+                    <p>Building a <code>SessionFactory</code> is expensive: Hibernate parses all configuration and mapping metadata, validates the schema, and establishes the connection pool. Creating it more than once wastes resources and may cause bugs.</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.util;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+
+public class HibernateUtil {
+
+    // Created once when the class is first loaded
+    private static final SessionFactory sessionFactory = buildSessionFactory();
+
+    private static SessionFactory buildSessionFactory() {
+        try {
+            // Reads hibernate.cfg.xml from the classpath
+            return new Configuration()
+                    .configure("hibernate.cfg.xml")
+                    .buildSessionFactory();
+        } catch (Throwable ex) {
+            System.err.println("SessionFactory creation failed: " + ex);
+            throw new ExceptionInInitializerError(ex);
+        }
+    }
+
+    public static SessionFactory getSessionFactory() {
+        return sessionFactory;
+    }
+
+    public static void shutdown() {
+        getSessionFactory().close();
+    }
+}</code></pre>
+                    </div>
+
+                    <h2>Using the Utility</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>Session session = HibernateUtil.getSessionFactory().openSession();
+Transaction tx = null;
+
+try {
+    tx = session.beginTransaction();
+
+    Student s = new Student();
+    s.setFirstName("Arjun");
+    s.setEmail("arjun@example.com");
+
+    session.save(s);      // generates: INSERT INTO students ...
+    tx.commit();          // flush + commit
+
+} catch (Exception e) {
+    if (tx != null) tx.rollback();
+    e.printStackTrace();
+} finally {
+    session.close();      // always release the session
+}</code></pre>
+                    </div>
+
+                    <div class="flow">
+                        Application starts<br>
+                        v<br>
+                        HibernateUtil.getSessionFactory() -- reads hibernate.cfg.xml, creates pool<br>
+                        v  (called many times)<br>
+                        openSession() -- new Session (wraps one JDBC Connection)<br>
+                        v<br>
+                        beginTransaction() -- Transaction object<br>
+                        v<br>
+                        CRUD operations (save / get / update / delete)<br>
+                        v<br>
+                        commit() -- Hibernate flushes pending SQL, commits JDBC transaction<br>
+                        v<br>
+                        session.close() -- releases JDBC connection back to pool
+                    </div>
+
+                    <div class="callout"><span class="label">SPRING BOOT NOTE</span>
+                        <p>In Spring Boot you do <strong>not</strong> write <code>HibernateUtil</code> yourself. Spring creates and manages the <code>SessionFactory</code> (exposed as <code>EntityManagerFactory</code>) automatically. You inject a <code>JpaRepository</code> or <code>EntityManager</code> wherever you need it.</p>
+                    </div>
+
+                    <div class="quiz" data-answer="2"
+                        data-correct="Correct! Building a SessionFactory reads and compiles all mapping metadata, which is expensive and should only be done once.">
+                        <h3>Why should <code>SessionFactory</code> be created only once per application?</h3>
+                        <div class="quiz-options">
+                            <button class="quiz-option">Because Hibernate enforces a singleton via a static constructor.</button>
+                            <button class="quiz-option">Because the database only allows one connection at a time when using Hibernate.</button>
+                            <button class="quiz-option">Because building it reads and compiles all mapping metadata and creates a connection pool, which is expensive and should be done only once.</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <!-- STEP 7 -->
+                <section class="step-view" data-title="Spring Boot Integration">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 7 · SPRING BOOT</span>
+                        <h1>Hibernate in Spring Boot</h1>
+                        <p class="lede">When you use Spring Boot, manual Hibernate bootstrap is replaced by auto-configuration. Understanding what Spring Boot does for you clarifies both approaches.</p>
+                    </header>
+
+                    <h2>The Spring Boot Way</h2>
+                    <p>Instead of <code>hibernate.cfg.xml</code>, Spring Boot reads from <code>application.properties</code>:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code># src/main/resources/application.properties
+
+# DataSource
+spring.datasource.url=jdbc:mysql://localhost:3306/college_db
+spring.datasource.username=root
+spring.datasource.password=secret
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# Hibernate / JPA
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect</code></pre>
+                    </div>
+                    <p>Spring Boot scans all classes annotated with <code>@Entity</code> automatically — no <code>&lt;mapping class="…"/&gt;</code> tags needed.</p>
+
+                    <h2>Dependency Starter</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>&lt;!-- Maven pom.xml — Spring Boot approach --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;com.mysql&lt;/groupId&gt;
+    &lt;artifactId&gt;mysql-connector-j&lt;/artifactId&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+                    </div>
+
+                    <h2>Comparison: Standalone vs. Spring Boot</h2>
+                    <table class="comparison">
+                        <tr><th>Concern</th><th>Standalone Hibernate</th><th>Spring Boot + JPA</th></tr>
+                        <tr><td><strong>Configuration file</strong></td><td><code>hibernate.cfg.xml</code></td><td><code>application.properties</code></td></tr>
+                        <tr><td><strong>SessionFactory</strong></td><td>You create it in <code>HibernateUtil</code>.</td><td>Spring creates and manages it automatically.</td></tr>
+                        <tr><td><strong>Entity scanning</strong></td><td>Explicit <code>&lt;mapping class&gt;</code> tags.</td><td>Auto-scans classpath for <code>@Entity</code>.</td></tr>
+                        <tr><td><strong>Transaction mgmt</strong></td><td>Manual <code>tx.commit()</code> / <code>tx.rollback()</code>.</td><td><code>@Transactional</code> annotation handles it.</td></tr>
+                        <tr><td><strong>Data access</strong></td><td>Direct <code>Session</code> API.</td><td><code>JpaRepository</code> / <code>EntityManager</code>.</td></tr>
+                    </table>
+
+                    <div class="panel mint"><strong>Bottom Line</strong>
+                        <p>Spring Boot reduces Hibernate configuration to a few lines in <code>application.properties</code>, but every concept — Session, Transaction, Dialect, Entity states — still applies. The plumbing is just hidden.</p>
+                    </div>
+                </section>
+
+                <!-- STEP 8 -->
+                <section class="step-view" data-title="Revision">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 8 · RECAP</span>
+                        <h1>Theoretical Revision</h1>
+                        <p class="lede">Review the core concepts before writing your first Hibernate program.</p>
+                    </header>
+
+                    <details class="reveal">
+                        <summary>What problem does Hibernate solve?</summary>
+                        <div>Hibernate bridges the <em>impedance mismatch</em> between Java's object model and the relational database model. It auto-generates SQL, handles object mapping, connection pooling, caching, and transactions so you don't write boilerplate JDBC code.</div>
+                    </details>
+                    <details class="reveal">
+                        <summary>What is the difference between JPA and Hibernate?</summary>
+                        <div>JPA (Jakarta Persistence API) is a <em>specification</em> — a set of interfaces and annotations. Hibernate is an <em>implementation</em> of that specification. You write against JPA annotations; Hibernate provides the engine that makes them work.</div>
+                    </details>
+                    <details class="reveal">
+                        <summary>What are the four entity object states?</summary>
+                        <div><strong>Transient</strong> — not known to Hibernate. <strong>Persistent</strong> — attached to an open Session; changes tracked. <strong>Detached</strong> — Session closed; has a DB identity but not tracked. <strong>Removed</strong> — scheduled for deletion on next flush.</div>
+                    </details>
+                    <details class="reveal">
+                        <summary>What does hbm2ddl.auto=update do?</summary>
+                        <div>It tells Hibernate to add missing tables and columns at startup to match your entity mappings. It never removes existing columns. Safe for development but not for production.</div>
+                    </details>
+                    <details class="reveal">
+                        <summary>What is HQL and why does it exist?</summary>
+                        <div>HQL (Hibernate Query Language) operates on entity class and field names instead of table and column names. It exists so your queries remain database-independent — Hibernate translates HQL into the correct SQL dialect at runtime.</div>
+                    </details>
+                    <details class="reveal">
+                        <summary>Why is SessionFactory created only once?</summary>
+                        <div>Creating a <code>SessionFactory</code> reads and compiles all configuration and mapping metadata, validates the database schema, and initialises the connection pool. This is expensive and should be done exactly once per application lifecycle.</div>
+                    </details>
+
+                    <h2>Completion Checklist</h2>
+                    <ul class="checklist">
+                        <li>I can explain the impedance mismatch problem and how Hibernate solves it.</li>
+                        <li>I understand the difference between JPA (specification) and Hibernate (implementation).</li>
+                        <li>I can name and describe all four entity lifecycle states.</li>
+                        <li>I know the role of SessionFactory, Session, and Transaction.</li>
+                        <li>I understand the key properties in hibernate.cfg.xml.</li>
+                        <li>I can choose the correct hbm2ddl.auto value for different environments.</li>
+                        <li>I understand how Spring Boot replaces manual Hibernate bootstrap.</li>
+                    </ul>
+
+                    <div class="finish">
+                        <h2>Hibernate Theory complete! 🎉</h2>
+                        <p>You now understand what Hibernate is, how its layered architecture works, how to add it to a Java project, and how to configure it. In your hands-on codelab you will map a real entity, open a Session, and perform CRUD operations.</p>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+    <script>
+        (() => {
+            const steps = [...document.querySelectorAll('.step-view')];
+            const titles = steps.map(step => step.dataset.title);
+            const nav = document.getElementById('stepNav');
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const content = document.getElementById('content');
+            const completed = new Set();
+            let current = 0;
+            nav.innerHTML = titles.map((title, index) => `<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+            const getHashStep = () => { const match = location.hash.match(/^#step-(\d+)$/); const value = match ? Number(match[1]) - 1 : 0; return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0 };
+            function render(updateHash = true) {
+                current = Math.max(0, Math.min(current, steps.length - 1));
+                steps.forEach((step, index) => { const active = index === current; step.classList.toggle('active', active); step.setAttribute('aria-hidden', String(!active)) });
+                document.querySelectorAll('.step-link').forEach((button, index) => { button.classList.toggle('active', index === current); button.setAttribute('aria-current', index === current ? 'step' : 'false'); button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '' });
+                const percent = Math.round(((current + 1) / steps.length) * 100);
+                document.getElementById('progressBar').style.width = `${percent}%`;
+                document.getElementById('progressText').textContent = `${percent}%`;
+                document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+                document.getElementById('mobileTitle').textContent = titles[current];
+                document.getElementById('prevBtn').disabled = current === 0;
+                document.getElementById('nextBtn').disabled = current === steps.length - 1;
+                document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+                if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+                window.scrollTo({ top: 0, behavior: 'auto' }); sidebar.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false');
+            }
+            function goTo(index) { if (index < 0 || index >= steps.length) return; completed.add(current); current = index; render(); }
+            const navRow = document.createElement('div'); navRow.className = 'nav-row'; navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>'; content.appendChild(navRow);
+            document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+            document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+            nav.addEventListener('click', event => { const button = event.target.closest('.step-link'); if (button) goTo(Number(button.dataset.step)) });
+            menuBtn.addEventListener('click', () => { const open = sidebar.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open)) });
+            document.addEventListener('click', async event => { const copy = event.target.closest('.copy-btn'); if (copy) { const code = copy.parentElement.querySelector('pre code')?.textContent ?? ''; try { await navigator.clipboard.writeText(code); copy.textContent = 'Copied!' } catch { copy.textContent = 'Select & copy' } setTimeout(() => copy.textContent = 'Copy', 1200); return; } const option = event.target.closest('.quiz-option'); if (option) { const quiz = option.closest('.quiz'); if (quiz.dataset.answered) return; const options = [...quiz.querySelectorAll('.quiz-option')]; const choice = options.indexOf(option); const answer = Number(quiz.dataset.answer); quiz.dataset.answered = 'true'; options.forEach(button => button.disabled = true); option.classList.add(choice === answer ? 'correct' : 'wrong'); if (choice !== answer) options[answer].classList.add('correct'); const feedback = quiz.querySelector('.quiz-feedback'); feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`; feedback.classList.add('show'); } });
+            window.addEventListener('popstate', () => { current = getHashStep(); render(false) }); window.addEventListener('hashchange', () => { current = getHashStep(); render(false) });
+            document.addEventListener('keydown', event => { if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return; if (event.key === 'ArrowRight') goTo(current + 1); if (event.key === 'ArrowLeft') goTo(current - 1) });
+            current = getHashStep(); render(false);
+        })();
+    </script>
+</body>
+
+</html>
