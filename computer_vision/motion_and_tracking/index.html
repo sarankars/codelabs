@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motion &amp; Tracking — Point Feature Detection &amp; Tracking Codelab</title>
+<meta name="description" content="Interactive codelab on motion analysis, point feature detection with Harris corners and SIFT, and feature tracking using optical flow and KLT tracker in computer vision.">
+<meta name="theme-color" content="#2856d8">
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+  :root{--blue:#2856d8;--blue-dark:#17348e;--blue-light:#e4ebff;--ink:#101010;--paper:#f5f7fb;--white:#fff;--yellow:#ffd83d;--mint:#75e6c5;--pink:#ff9bb7;--orange:#ffb866;--teal:#38bdf8;--border:3px solid var(--ink);--shadow:6px 6px 0 var(--ink);--shadow-sm:4px 4px 0 var(--ink);--sidebar:292px}
+  *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}button,a{font:inherit}button{cursor:pointer}:focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+  .app{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}.brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.eyebrow,.progress-meta,.step-number,.step-kicker,.label{font-family:"DM Mono",monospace}.eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}.brand h2{margin:5px 0 3px;font-size:1.42rem;line-height:1.05}.brand p{margin:0;font-size:.85rem;font-weight:600}.progress-wrap{margin:0 2px 20px;color:#fff}.progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}.progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}.progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}.steps{display:grid;gap:8px}.step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}.step-link:hover{background:rgba(255,255,255,.14)}.step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}.step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}.step-status{text-align:center}
+  .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}.menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}.mobile-title{flex:1;padding:8px 10px;font-weight:800}main{margin-left:var(--sidebar);min-height:100vh}.content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}.step-view{display:none}.step-view.active{display:block;animation:stepIn .18s ease-out}@keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+  .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}.step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}h1,h2,h3{line-height:1.08}h1{margin:0 0 12px;font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.045em}h2{margin:30px 0 12px;font-size:clamp(1.5rem,3vw,2.15rem)}h3{margin:22px 0 9px;font-size:1.15rem}.lede{max-width:780px;margin:0;font-size:1.08rem}.objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+  .panel,.concept,.quiz,.reveal{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.panel{padding:22px;margin:20px 0}.panel.blue{background:var(--blue-light)}.panel.mint{background:var(--mint)}.panel.pink{background:var(--pink)}.panel.yellow{background:var(--yellow)}.panel.orange{background:var(--orange)}.panel.teal{background:#e0f7ff}.callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}.grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}.concept{padding:18px}.concept strong{font-size:1.05rem}.concept p:last-child{margin-bottom:0}
+  .code-wrap{position:relative;margin:18px 0}pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}.copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}ul,ol{padding-left:1.35rem}li{margin:7px 0}.comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}.comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}.comparison th{color:#fff;background:var(--blue)}
+  .quiz{padding:20px;margin:20px 0}.quiz-options{display:grid;gap:9px;margin-top:14px}.quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}.quiz-option:hover{background:var(--blue-light)}.quiz-option.correct{background:var(--mint)}.quiz-option.wrong{background:var(--pink)}.quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}.quiz-feedback.show{display:block}.reveal{margin:18px 0}.reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}.reveal>div{padding:15px 16px}.challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}.challenge h3{margin-top:0;color:var(--yellow)}
+  .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}.checklist{list-style:none;padding:0}.checklist li{position:relative;padding-left:30px}.checklist li::before{content:"&#9633;";position:absolute;left:0;font-size:1.25rem;font-weight:900}.nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}.nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}.nav-btn.primary{color:#fff;background:var(--blue)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}
+  .step-by-step{counter-reset:sbstep;list-style:none;padding:0}.step-by-step li{counter-increment:sbstep;position:relative;padding:14px 14px 14px 54px;margin:10px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}.step-by-step li::before{content:counter(sbstep);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:30px;height:30px;display:grid;place-items:center;background:var(--blue);color:#fff;font-family:"DM Mono",monospace;font-weight:700;border:2px solid var(--ink)}
+  .formula-box{padding:16px 20px;margin:18px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;font-size:1rem;text-align:center;line-height:1.8}
+  @media(max-width:850px){:root{--sidebar:270px;--mobile-bar-height:65px}.sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}.sidebar.open{transform:none}.mobile-bar{display:flex;height:var(--mobile-bar-height)}main{margin-left:0}.content{width:min(940px,calc(100% - 28px));padding-top:24px}}
+  @media(max-width:680px){.grid-2{grid-template-columns:1fr}.content{width:calc(100% - 18px);padding-top:16px}.step-header{padding:20px 16px}.panel,.concept,.quiz{padding:16px}.nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}.nav-btn{min-width:0;flex:1;padding:11px 10px}pre{padding:16px 12px;font-size:.76rem}.copy-btn{position:static;align-self:flex-end;margin-bottom:6px}.code-wrap{display:flex;flex-direction:column}.code-wrap pre{order:2}.code-wrap .copy-btn{order:1}.comparison{display:block;overflow-x:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+  <div class="brand">
+    <div class="eyebrow">Computer Vision &middot; Motion</div>
+    <h2>Motion &amp; Tracking</h2>
+    <p>Point Feature Detection &amp; Tracking</p>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+    <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+  <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+</aside>
+
+<div class="mobile-bar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">&#9776;</button>
+  <div class="mobile-title" id="mobileTitle">Motion &amp; Tracking</div>
+</div>
+
+<main>
+<div class="content" id="content">
+
+<!-- STEP 1 -->
+<section class="step-view" data-title="What we will learn">
+  <header class="step-header">
+    <span class="step-kicker">STEP 1 &middot; GOAL</span>
+    <h1>Motion &amp; Point Feature Tracking</h1>
+    <p class="lede">Videos are sequences of images. Between consecutive frames, pixels and objects move. This codelab teaches you how to <strong>detect reliable point features</strong> in a frame and then <strong>track them</strong> across subsequent frames.</p>
+  </header>
+  <div class="objective"><strong>By the end:</strong> Understand what motion means in image sequences, detect corners and keypoints with Harris and SIFT, track points using Optical Flow and the KLT tracker, write complete Python + OpenCV code for each stage, and interpret the results critically.</div>
+  <div class="flow">Video stream (frame sequence)<br>&#8595;<br>Detect reliable point features in frame t<br>&#8595;<br>Predict / search for the same features in frame t+1<br>&#8595;<br>Record displacement vectors (motion field)<br>&#8595;<br>Analyse: ego-motion, object tracking, action recognition</div>
+  <div class="panel mint"><strong>Why point features?</strong><p>Tracking every pixel is expensive and ambiguous (the aperture problem). Instead, we track a small set of <em>distinctive</em> points &mdash; corners, blobs, or keypoints &mdash; that are easy to find again in the next frame.</p></div>
+</section>
+
+<!-- STEP 2 -->
+<section class="step-view" data-title="Motion in image sequences">
+  <header class="step-header">
+    <span class="step-kicker">STEP 2 &middot; FOUNDATION</span>
+    <h1>What Is Motion in a Video?</h1>
+    <p class="lede">A video is a sequence of 2D images captured at regular time intervals. Motion appears when the intensity pattern at a pixel location changes across frames.</p>
+  </header>
+  <h2>Frame difference &mdash; the simplest motion signal</h2>
+  <p>The most basic way to see motion is to subtract two consecutive frames:</p>
+  <div class="formula-box">D(x, y) = I(x, y, t+1) &minus; I(x, y, t)</div>
+  <p>Where <code>I(x,y,t)</code> is the intensity of pixel <code>(x,y)</code> at time <code>t</code>. Large differences indicate motion.</p>
+  <div class="grid-2">
+    <div class="concept"><strong>Static scene</strong><p>If nothing moves, <code>D &asymp; 0</code> everywhere. Only sensor noise remains.</p></div>
+    <div class="concept"><strong>Moving object</strong><p><code>D</code> is large along the boundary of the moving object and zero in static regions.</p></div>
+  </div>
+  <h2>The Aperture Problem</h2>
+  <div class="panel orange"><strong>Problem: Aperture Problem</strong><p>A plain edge (uniform strip of colour) moving perpendicular to itself gives a strong signal. But the same edge moving <em>parallel</em> to itself gives <strong>zero</strong> difference &mdash; motion is invisible! Only distinctive points like <strong>corners</strong> let us resolve motion direction uniquely.</p></div>
+  <pre><code>Horizontal edge moving left-right:  D = 0  (invisible motion)
+Corner point moving left-right:     D != 0 (detectable motion)</code></pre>
+  <div class="quiz" data-answer="1" data-correct="Correct. A plain edge moving parallel to itself produces no frame difference because the intensity pattern looks exactly the same.">
+    <h3>Why is a long, uniform edge difficult to track?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">It is too bright for the camera sensor</button>
+      <button class="quiz-option">Motion along the edge creates no intensity change</button>
+      <button class="quiz-option">Edges are not part of the image</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 3 -->
+<section class="step-view" data-title="Good feature points">
+  <header class="step-header">
+    <span class="step-kicker">STEP 3 &middot; FEATURES</span>
+    <h1>What Makes a Good Feature Point?</h1>
+    <p class="lede">Not every pixel is worth tracking. A good feature point must be <em>detectable</em>, <em>localizable</em>, and <em>re-detectable</em> after motion.</p>
+  </header>
+  <h2>Three types of local structure</h2>
+  <div class="grid-2">
+    <div class="concept"><strong>Flat region</strong><p>All directions look the same. Shifting the window in any direction gives the same intensity pattern. <em>Cannot be localized.</em></p>
+    <pre><code>[ ] [ ] [ ]
+[ ] [ ] [ ]  all same
+[ ] [ ] [ ]</code></pre></div>
+    <div class="concept"><strong>Edge</strong><p>One direction gives a change; the other is uniform. <em>Partially localizable.</em></p>
+    <pre><code>[ ] [ ] [ ]
+[X] [X] [X]  change in one dir only
+[ ] [ ] [ ]</code></pre></div>
+    <div class="concept"><strong>Corner</strong><p>Shifting in <em>any</em> direction gives a different intensity pattern. <em>Fully localizable in 2D.</em></p>
+    <pre><code>[ ] [ ] [X]
+[ ] [X] [X]  change in all directions
+[X] [X] [X]</code></pre></div>
+    <div class="concept"><strong>Blob / Keypoint</strong><p>A compact region distinct from its surroundings at a particular scale. Also fully localizable and scale-aware.</p></div>
+  </div>
+  <div class="callout"><span class="label">KEY INSIGHT</span><p>Good tracking features are usually <strong>corners</strong> or <strong>blobs</strong> because they are constrained in all directions and can therefore be re-found accurately after the camera or object moves.</p></div>
+  <h2>Desired properties of a feature point</h2>
+  <table class="comparison">
+    <tr><th>Property</th><th>Meaning</th></tr>
+    <tr><td>Repeatability</td><td>The same point is detected even after geometric transformation.</td></tr>
+    <tr><td>Distinctiveness</td><td>The local patch around the point looks different from other patches.</td></tr>
+    <tr><td>Locality</td><td>Small patch is sufficient &mdash; robust to occlusion of the rest of the scene.</td></tr>
+    <tr><td>Quantity</td><td>Enough features exist in a typical image (not too sparse).</td></tr>
+    <tr><td>Accuracy</td><td>The location can be determined precisely (sub-pixel).</td></tr>
+  </table>
+</section>
+
+<!-- STEP 4 -->
+<section class="step-view" data-title="Harris corner detector">
+  <header class="step-header">
+    <span class="step-kicker">STEP 4 &middot; DETECTION</span>
+    <h1>Harris Corner Detector</h1>
+    <p class="lede">The Harris detector (Harris &amp; Stephens, 1988) measures how intensity changes when a small analysis window is shifted in every direction. Corners produce large changes in all directions.</p>
+  </header>
+  <h2>The structure tensor M</h2>
+  <p>For each pixel <code>(x,y)</code>, compute the image gradients <code>Ix</code> (horizontal) and <code>Iy</code> (vertical), then build M over a small window:</p>
+  <div class="formula-box">M = &Sigma;<sub>window</sub> [ Ix&sup2;&nbsp;&nbsp; IxIy ]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ IxIy&nbsp;&nbsp; Iy&sup2; ]</div>
+  <h2>What the eigenvalues tell us</h2>
+  <table class="comparison">
+    <tr><th>&lambda;&#8321;</th><th>&lambda;&#8322;</th><th>Structure type</th></tr>
+    <tr><td>&asymp; 0</td><td>&asymp; 0</td><td>Flat region &mdash; no gradient in any direction</td></tr>
+    <tr><td>Large</td><td>&asymp; 0</td><td>Edge &mdash; gradient only in one direction</td></tr>
+    <tr><td>Large</td><td>Large</td><td><strong>Corner</strong> &mdash; gradient in all directions</td></tr>
+  </table>
+  <h2>The Harris response score R</h2>
+  <div class="formula-box">R = det(M) &minus; k &middot; trace(M)&sup2;<br>
+where det(M) = &lambda;&#8321;&lambda;&#8322; and trace(M) = &lambda;&#8321; + &lambda;&#8322;<br>
+k is typically 0.04 &ndash; 0.06</div>
+  <div class="grid-2">
+    <div class="concept"><strong>R &gg; 0</strong><p>Corner &mdash; both eigenvalues are large.</p></div>
+    <div class="concept"><strong>R &ll; 0</strong><p>Edge &mdash; one eigenvalue is large, the other small.</p></div>
+    <div class="concept"><strong>R &asymp; 0</strong><p>Flat &mdash; both eigenvalues are small.</p></div>
+    <div class="concept"><strong>Non-maximum suppression</strong><p>After computing R for every pixel, keep only local maxima above a threshold as final corner detections.</p></div>
+  </div>
+  <div class="panel blue"><strong>Harris is rotation-invariant</strong><p>The eigenvalues of M do not change when the image is rotated. Harris corners are found at the same physical location even after the camera rotates.</p></div>
+  <div class="callout"><span class="label">LIMITATION</span><p>Harris is <strong>not scale-invariant</strong>. A corner detected at one resolution may not be detected if the image is zoomed in or out significantly.</p></div>
+</section>
+
+<!-- STEP 5 -->
+<section class="step-view" data-title="Harris: Python practical">
+  <header class="step-header">
+    <span class="step-kicker">STEP 5 &middot; PRACTICAL</span>
+    <h1>Harris Corner Detection in Python</h1>
+    <p class="lede">Use OpenCV's <code>cornerHarris</code> to find corners in an image, threshold the response, and mark the detected corners in red.</p>
+  </header>
+  <h2>Step-by-step walkthrough</h2>
+  <ol class="step-by-step">
+    <li><strong>Read and convert to grayscale.</strong> Harris works on a single intensity channel.</li>
+    <li><strong>Compute the Harris response R</strong> for every pixel using <code>cv2.cornerHarris()</code>.</li>
+    <li><strong>Dilate the response</strong> to make corners slightly larger and easier to see.</li>
+    <li><strong>Threshold R</strong> &mdash; keep pixels where <code>R &gt; threshold &times; max(R)</code>.</li>
+    <li><strong>Mark corners</strong> on the original image in red.</li>
+  </ol>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. Load image
+img  = cv2.imread('image.jpg')
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+gray = np.float32(gray)           # Harris requires float32
+
+# 2. Compute Harris response R
+#    blockSize : neighbourhood size for M computation
+#    ksize     : Sobel kernel size for gradients
+#    k         : Harris free parameter
+R = cv2.cornerHarris(gray, blockSize=2, ksize=3, k=0.04)
+
+# 3. Dilate response (optional - helps visualise)
+R_dilated = cv2.dilate(R, None)
+
+# 4. Threshold and mark corners in red
+output    = img.copy()
+threshold = 0.01 * R_dilated.max()        # 1% of maximum R
+output[R_dilated &gt; threshold] = [0, 0, 255]
+
+# 5. Display
+plt.figure(figsize=(12, 5))
+plt.subplot(1, 2, 1)
+plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+plt.title('Original Image')
+plt.axis('off')
+plt.subplot(1, 2, 2)
+plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
+plt.title('Harris Corners (red)')
+plt.axis('off')
+plt.tight_layout()
+plt.show()</code></pre></div>
+  <h2>Key parameters</h2>
+  <table class="comparison">
+    <tr><th>Parameter</th><th>Meaning</th><th>Typical value</th></tr>
+    <tr><td><code>blockSize</code></td><td>Neighbourhood window size for M</td><td>2 or 3</td></tr>
+    <tr><td><code>ksize</code></td><td>Sobel gradient kernel size</td><td>3 or 5</td></tr>
+    <tr><td><code>k</code></td><td>Harris sensitivity parameter</td><td>0.04 &ndash; 0.06</td></tr>
+    <tr><td>threshold</td><td>Fraction of max R above which a pixel is a corner</td><td>0.01 &ndash; 0.05</td></tr>
+  </table>
+  <div class="quiz" data-answer="2" data-correct="Correct. A large positive R means both eigenvalues are large, indicating intensity changes in all directions — the definition of a corner.">
+    <h3>The Harris response R is very large and positive at a pixel. What does that mean?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">The pixel is in a flat, uniform region</button>
+      <button class="quiz-option">The pixel lies on a straight edge</button>
+      <button class="quiz-option">The pixel is a corner with intensity change in all directions</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 6 -->
+<section class="step-view" data-title="Shi-Tomasi detector">
+  <header class="step-header">
+    <span class="step-kicker">STEP 6 &middot; DETECTION</span>
+    <h1>Shi-Tomasi: &ldquo;Good Features to Track&rdquo;</h1>
+    <p class="lede">Shi and Tomasi (1994) proposed using the <em>minimum eigenvalue</em> of M directly as the corner score &mdash; a stricter and more reliable criterion for tracking.</p>
+  </header>
+  <div class="formula-box">Score = min(&lambda;&#8321;, &lambda;&#8322;)</div>
+  <p>A pixel is a corner if its minimum eigenvalue exceeds a threshold. Both eigenvalues must be large &mdash; meaning the patch is constrained in all directions.</p>
+  <div class="grid-2">
+    <div class="concept"><strong>Harris R</strong><p>Uses det &minus; k&middot;trace&sup2;. Sensitive to the choice of k. Can sometimes misclassify edges.</p></div>
+    <div class="concept"><strong>Shi-Tomasi score</strong><p>Uses min(&lambda;&#8321;, &lambda;&#8322;). No free parameter. Proven optimal for tracking.</p></div>
+  </div>
+  <h2>OpenCV: <code>goodFeaturesToTrack</code></h2>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+img    = cv2.imread('image.jpg')
+gray   = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+# Detect up to 200 strongest corners
+# qualityLevel : fraction of best corner score to accept (0-1)
+# minDistance  : minimum pixel distance between two corners
+corners = cv2.goodFeaturesToTrack(
+    gray,
+    maxCorners   = 200,
+    qualityLevel = 0.01,
+    minDistance  = 10
+)
+
+# corners shape: (N, 1, 2)  -  N points, each [x, y]
+corners = np.int32(corners)
+
+output = img.copy()
+for corner in corners:
+    x, y = corner.ravel()
+    cv2.circle(output, (x, y), 5, (0, 255, 0), -1)
+
+plt.figure(figsize=(12, 5))
+plt.subplot(1, 2, 1)
+plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+plt.title('Original')
+plt.axis('off')
+plt.subplot(1, 2, 2)
+plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
+plt.title('Shi-Tomasi Corners (green)')
+plt.axis('off')
+plt.tight_layout()
+plt.show()
+
+print(f"Detected {len(corners)} corners")</code></pre></div>
+  <div class="callout"><span class="label">NOTE</span><p><code>goodFeaturesToTrack</code> is the standard starting point for the KLT tracker. The corners it returns are fed directly into <code>cv2.calcOpticalFlowPyrLK</code>.</p></div>
+</section>
+
+<!-- STEP 7 -->
+<section class="step-view" data-title="SIFT keypoints">
+  <header class="step-header">
+    <span class="step-kicker">STEP 7 &middot; DETECTION</span>
+    <h1>SIFT &mdash; Scale-Invariant Feature Transform</h1>
+    <p class="lede">SIFT (Lowe, 2004) finds blob-like keypoints that are invariant to both scale and rotation, making it far more robust than Harris for matching features across large viewpoint changes.</p>
+  </header>
+  <h2>How SIFT detects keypoints</h2>
+  <div class="flow">Build a Gaussian scale-space pyramid<br>&#8595;<br>Compute Difference of Gaussians (DoG) between adjacent levels<br>&#8595;<br>Find local extrema in (x, y, scale) space<br>&#8595;<br>Reject low-contrast points and edge responses<br>&#8595;<br>Assign dominant orientation (rotation invariance)<br>&#8595;<br>Keypoint: (x, y, scale, orientation)</div>
+  <div class="grid-2">
+    <div class="concept"><strong>Gaussian blur at scale &sigma;</strong><p><code>L(x,y,&sigma;) = G(&sigma;) * I(x,y)</code><br>Progressively blurs the image to suppress fine detail.</p></div>
+    <div class="concept"><strong>Difference of Gaussians (DoG)</strong><p><code>DoG = L(x,y,k&sigma;) &minus; L(x,y,&sigma;)</code><br>Approximates the Laplacian of Gaussian &mdash; a blob detector across scales.</p></div>
+  </div>
+  <h2>Python + OpenCV: detect SIFT keypoints</h2>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import cv2
+import matplotlib.pyplot as plt
+
+img  = cv2.imread('image.jpg')
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+# Create SIFT detector
+sift = cv2.SIFT_create(nfeatures=500)
+
+# Detect keypoints and compute 128-D descriptors
+keypoints, descriptors = sift.detectAndCompute(gray, mask=None)
+
+print(f"Number of SIFT keypoints: {len(keypoints)}")
+print(f"Descriptor shape: {descriptors.shape}")   # (N, 128)
+
+# Draw keypoints with scale and orientation circles
+output = cv2.drawKeypoints(
+    img, keypoints, None,
+    flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
+)
+
+plt.figure(figsize=(10, 6))
+plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
+plt.title('SIFT Keypoints (circle = scale, line = orientation)')
+plt.axis('off')
+plt.tight_layout()
+plt.show()</code></pre></div>
+  <div class="callout"><span class="label">DESCRIPTOR</span><p>Each SIFT keypoint comes with a <strong>128-dimensional descriptor</strong> &mdash; a histogram of gradient orientations in a 16&times;16 neighbourhood. This descriptor is used for <em>matching</em> keypoints across frames.</p></div>
+  <table class="comparison">
+    <tr><th>Property</th><th>Harris</th><th>Shi-Tomasi</th><th>SIFT</th></tr>
+    <tr><td>Scale invariant?</td><td>No</td><td>No</td><td>Yes</td></tr>
+    <tr><td>Rotation invariant?</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Has descriptor?</td><td>No</td><td>No</td><td>Yes (128-D)</td></tr>
+    <tr><td>Speed</td><td>Fast</td><td>Fast</td><td>Moderate</td></tr>
+    <tr><td>Best for</td><td>Video tracking</td><td>Video tracking</td><td>Image matching</td></tr>
+  </table>
+  <div class="quiz" data-answer="1" data-correct="Correct. SIFT's scale-space search makes it detect the same feature even when the image is zoomed in or out.">
+    <h3>What makes SIFT superior to Harris for matching features across different zoom levels?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">SIFT uses coloured images while Harris uses grayscale</button>
+      <button class="quiz-option">SIFT searches for features across multiple scales using a pyramid</button>
+      <button class="quiz-option">SIFT tracks motion directly between frames</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 8 -->
+<section class="step-view" data-title="Optical flow theory">
+  <header class="step-header">
+    <span class="step-kicker">STEP 8 &middot; TRACKING</span>
+    <h1>Optical Flow &mdash; Theory</h1>
+    <p class="lede">Optical flow is the apparent motion of brightness patterns in an image sequence. It assigns a velocity vector <code>(u, v)</code> to pixels, describing how far they moved between two frames.</p>
+  </header>
+  <h2>The Brightness Constancy Assumption</h2>
+  <p>The core assumption of optical flow: a pixel's intensity stays the same as it moves.</p>
+  <div class="formula-box">I(x, y, t) = I(x + u, y + v, t + 1)</div>
+  <p>Applying a first-order Taylor expansion gives the <strong>optical flow constraint equation</strong>:</p>
+  <div class="formula-box">Ix &middot; u + Iy &middot; v + It = 0</div>
+  <table class="comparison">
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td><code>Ix, Iy</code></td><td>Spatial image gradients (&part;I/&part;x, &part;I/&part;y)</td></tr>
+    <tr><td><code>It</code></td><td>Temporal gradient (&part;I/&part;t) &mdash; frame difference</td></tr>
+    <tr><td><code>u, v</code></td><td>Horizontal and vertical flow (unknowns to solve for)</td></tr>
+  </table>
+  <div class="panel orange"><strong>Aperture problem again!</strong><p>One equation, two unknowns (u, v). The system is <em>underdetermined</em> for a single pixel. Additional constraints are needed: a <strong>smoothness prior</strong> (dense flow) or a <strong>local patch constraint</strong> (Lucas-Kanade).</p></div>
+  <h2>Two families of optical flow methods</h2>
+  <div class="grid-2">
+    <div class="concept"><strong>Dense optical flow</strong><p>Computes a flow vector for <em>every</em> pixel. Rich, but computationally heavier. Example: <strong>Farneb&auml;ck method</strong>.</p></div>
+    <div class="concept"><strong>Sparse optical flow</strong><p>Computes flow only for a set of <em>pre-selected feature points</em>. Much faster. Example: <strong>Lucas-Kanade / KLT tracker</strong>.</p></div>
+  </div>
+</section>
+
+<!-- STEP 9 -->
+<section class="step-view" data-title="KLT tracker theory">
+  <header class="step-header">
+    <span class="step-kicker">STEP 9 &middot; TRACKING</span>
+    <h1>Lucas-Kanade &amp; the KLT Tracker</h1>
+    <p class="lede">The Lucas-Kanade method (1981) solves the aperture problem by assuming all pixels in a small window around a feature point share the <em>same</em> flow vector.</p>
+  </header>
+  <h2>The window constraint</h2>
+  <p>For a window of n pixels, one equation per pixel:</p>
+  <pre><code>Ix1*u + Iy1*v = -It1
+Ix2*u + Iy2*v = -It2
+   ...
+Ixn*u + Iyn*v = -Itn</code></pre>
+  <p>In matrix form: <code>A &middot; [u, v]&sup1; = b</code></p>
+  <div class="formula-box">[u, v]&sup1; = (A&sup1;A)&minus;&#185; A&sup1; b</div>
+  <p>Notice: <code>A&sup1;A</code> is exactly the <strong>Harris structure tensor M</strong>! The system is well-conditioned only when M has two large eigenvalues &mdash; i.e. the feature is a <em>corner</em>.</p>
+  <div class="panel mint"><strong>Why corners are the best features to track</strong><p>The KLT solution is reliable only when both eigenvalues of M are large &mdash; precisely the Harris corner condition. Edges and flat regions give poorly-conditioned M matrices and unreliable flow estimates.</p></div>
+  <h2>Pyramidal KLT for large motion</h2>
+  <p>Large motions break the small-displacement assumption. The solution: build an <strong>image pyramid</strong>.</p>
+  <div class="flow">Image at full resolution (level 0)<br>&#8595; downsample &times;2<br>Image at half resolution (level 1)<br>&#8595; downsample &times;2<br>Image at quarter resolution (level 2)<br>&#8595;<br>Estimate coarse flow at top level<br>&#8595; propagate and refine downward<br>Final sub-pixel accurate flow at level 0</div>
+  <div class="callout"><span class="label">OPENCV</span><p><code>cv2.calcOpticalFlowPyrLK</code> implements pyramidal Lucas-Kanade. The parameter <code>maxLevel</code> controls the number of pyramid levels.</p></div>
+</section>
+
+<!-- STEP 10 -->
+<section class="step-view" data-title="KLT tracker: Python practical">
+  <header class="step-header">
+    <span class="step-kicker">STEP 10 &middot; PRACTICAL</span>
+    <h1>Sparse KLT Tracking in Python</h1>
+    <p class="lede">Track Shi-Tomasi corners across video frames using <code>cv2.calcOpticalFlowPyrLK</code> and draw motion trails for each tracked point.</p>
+  </header>
+  <h2>Step-by-step algorithm</h2>
+  <ol class="step-by-step">
+    <li><strong>Read the first frame</strong> and convert to grayscale. Detect Shi-Tomasi corners as initial tracking points.</li>
+    <li><strong>For each subsequent frame</strong>, call <code>calcOpticalFlowPyrLK</code> to predict where each corner moved.</li>
+    <li><strong>Check the status array</strong> &mdash; discard points that the tracker lost (status = 0).</li>
+    <li><strong>Draw motion trails</strong> by recording the history of each point's position.</li>
+    <li><strong>Update</strong> the previous frame and previous points for the next iteration.</li>
+  </ol>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import cv2
+import numpy as np
+
+# Parameters for Shi-Tomasi feature detection
+FEATURE_PARAMS = dict(
+    maxCorners   = 200,
+    qualityLevel = 0.01,
+    minDistance  = 10,
+    blockSize    = 7
+)
+
+# Parameters for Lucas-Kanade optical flow
+LK_PARAMS = dict(
+    winSize  = (21, 21),    # search window around each point
+    maxLevel = 3,           # pyramid levels (0 = no pyramid)
+    criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 30, 0.01)
+)
+
+COLOURS = np.random.randint(0, 255, (200, 3))
+
+# Open video (use 0 for webcam)
+cap = cv2.VideoCapture('video.mp4')
+
+ret, old_frame = cap.read()
+old_gray       = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
+
+# Detect initial corners in the first frame
+p0 = cv2.goodFeaturesToTrack(old_gray, mask=None, **FEATURE_PARAMS)
+
+# Blank canvas for drawing trails
+trail_canvas = np.zeros_like(old_frame)
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Track points with pyramidal Lucas-Kanade
+    # p1     : predicted new positions
+    # status : 1 if tracked successfully, 0 if lost
+    p1, status, error = cv2.calcOpticalFlowPyrLK(
+        old_gray, frame_gray, p0, None, **LK_PARAMS
+    )
+
+    if p1 is None or status is None:
+        p0       = cv2.goodFeaturesToTrack(frame_gray, mask=None, **FEATURE_PARAMS)
+        old_gray = frame_gray.copy()
+        continue
+
+    good_new = p1[status == 1]   # new positions of good points
+    good_old = p0[status == 1]   # old positions of good points
+
+    # Draw motion trails
+    for i, (new, old) in enumerate(zip(good_new, good_old)):
+        a, b   = new.ravel().astype(int)
+        c, d   = old.ravel().astype(int)
+        colour = COLOURS[i % len(COLOURS)].tolist()
+        trail_canvas = cv2.line(trail_canvas, (a, b), (c, d), colour, 2)
+        frame        = cv2.circle(frame, (a, b), 5, colour, -1)
+
+    # Composite trails over current frame
+    output = cv2.add(frame, trail_canvas)
+    cv2.imshow('KLT Tracker', output)
+
+    if cv2.waitKey(30) &amp; 0xFF == ord('q'):
+        break
+
+    # Update for next iteration
+    old_gray = frame_gray.copy()
+    p0       = good_new.reshape(-1, 1, 2)
+
+cap.release()
+cv2.destroyAllWindows()</code></pre></div>
+  <h2>Key parameters explained</h2>
+  <table class="comparison">
+    <tr><th>Parameter</th><th>Meaning</th></tr>
+    <tr><td><code>winSize</code></td><td>Search window around each point. Larger = handles bigger motion.</td></tr>
+    <tr><td><code>maxLevel</code></td><td>Pyramid levels. 0 = no pyramid. 3&ndash;4 = handles large fast motion.</td></tr>
+    <tr><td><code>criteria</code></td><td>Iteration stop condition: max iterations or convergence threshold.</td></tr>
+    <tr><td><code>status</code></td><td>Output: 1 = point tracked successfully, 0 = point lost.</td></tr>
+  </table>
+  <div class="panel teal"><strong>Try webcam:</strong><p>Change <code>cv2.VideoCapture('video.mp4')</code> to <code>cv2.VideoCapture(0)</code> to track features from your live webcam in real-time!</p></div>
+  <div class="quiz" data-answer="0" data-correct="Correct. status==1 means the tracker found the point in the new frame successfully.">
+    <h3>In <code>calcOpticalFlowPyrLK</code>, what does status = 1 mean for a point?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">The point was tracked successfully to the new frame</button>
+      <button class="quiz-option">The tracking error was above the threshold</button>
+      <button class="quiz-option">The point is a corner, not an edge</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 11 -->
+<section class="step-view" data-title="Dense optical flow">
+  <header class="step-header">
+    <span class="step-kicker">STEP 11 &middot; PRACTICAL</span>
+    <h1>Dense Optical Flow &mdash; Farneb&auml;ck Method</h1>
+    <p class="lede">Dense optical flow computes a motion vector for <em>every</em> pixel. OpenCV's <code>calcOpticalFlowFarneback</code> uses polynomial expansion to estimate a smooth flow field across the entire image.</p>
+  </header>
+  <h2>How it works</h2>
+  <div class="flow">Approximate local intensity with a polynomial near each pixel<br>&#8595;<br>Estimate displacement that minimises the difference in polynomial coefficients<br>&#8595;<br>Apply Gaussian regularisation for a smooth, consistent flow field<br>&#8595;<br>Output: two-channel array (u, v) &mdash; one vector per pixel</div>
+  <h2>Visualising flow with HSV colour mapping</h2>
+  <p>Encode <strong>direction</strong> as hue and <strong>magnitude</strong> as brightness.</p>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import cv2
+import numpy as np
+
+cap = cv2.VideoCapture('video.mp4')
+
+ret, old_frame = cap.read()
+old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
+
+# Pre-allocate HSV canvas
+hsv       = np.zeros_like(old_frame)
+hsv[...,1] = 255   # full saturation
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Compute dense optical flow
+    flow = cv2.calcOpticalFlowFarneback(
+        old_gray, frame_gray, None,
+        pyr_scale  = 0.5,   # pyramid scale between levels
+        levels     = 3,     # pyramid levels
+        winsize    = 15,    # smoothing window size
+        iterations = 3,     # iterations at each level
+        poly_n     = 5,     # pixel neighbourhood for polynomial
+        poly_sigma = 1.2,   # Gaussian sigma for polynomial
+        flags      = 0
+    )
+    # flow shape: (height, width, 2)
+    # flow[..., 0] = u (horizontal velocity)
+    # flow[..., 1] = v (vertical velocity)
+
+    # Convert (u,v) to polar (magnitude, angle)
+    magnitude, angle = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+
+    # Encode direction as Hue (0-180 for OpenCV HSV)
+    hsv[..., 0] = angle * 180 / np.pi / 2
+    # Encode magnitude as Value, normalised
+    hsv[..., 2] = cv2.normalize(magnitude, None, 0, 255, cv2.NORM_MINMAX)
+
+    # Convert HSV to BGR for display
+    flow_rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+    combined = np.hstack([frame, flow_rgb])
+    cv2.imshow('Dense Optical Flow', combined)
+
+    if cv2.waitKey(30) &amp; 0xFF == ord('q'):
+        break
+
+    old_gray = frame_gray.copy()
+
+cap.release()
+cv2.destroyAllWindows()</code></pre></div>
+  <div class="callout"><span class="label">INTERPRET</span><p>In the HSV visualisation: <strong>colour</strong> tells you which direction pixels are moving, and <strong>brightness</strong> tells you how fast they are moving.</p></div>
+  <div class="grid-2">
+    <div class="concept"><strong>Sparse (KLT)</strong><p>Fast. Tracks ~50&ndash;200 interest points. Ideal for real-time object tracking and SLAM.</p></div>
+    <div class="concept"><strong>Dense (Farneb&auml;ck)</strong><p>Slower. Gives a motion vector for every pixel. Ideal for action recognition and scene flow analysis.</p></div>
+  </div>
+</section>
+
+<!-- STEP 12 -->
+<section class="step-view" data-title="Re-detection strategy">
+  <header class="step-header">
+    <span class="step-kicker">STEP 12 &middot; ROBUSTNESS</span>
+    <h1>Handling Point Loss: Re-detection Strategy</h1>
+    <p class="lede">As tracking progresses, points are lost due to occlusion, fast motion, or leaving the frame. A robust tracker periodically re-detects new features to maintain tracking density.</p>
+  </header>
+  <h2>Why points get lost</h2>
+  <div class="grid-2">
+    <div class="concept"><strong>Occlusion</strong><p>A tracked point passes behind another object and its appearance changes completely.</p></div>
+    <div class="concept"><strong>Out of frame</strong><p>The tracked object exits the image boundary.</p></div>
+    <div class="concept"><strong>Large motion blur</strong><p>Fast movement blurs the patch beyond recognition.</p></div>
+    <div class="concept"><strong>Illumination change</strong><p>Sudden lighting shifts break the brightness constancy assumption.</p></div>
+  </div>
+  <h2>Re-detection when points fall below a threshold</h2>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import cv2
+import numpy as np
+
+FEATURE_PARAMS = dict(maxCorners=200, qualityLevel=0.01,
+                      minDistance=10, blockSize=7)
+LK_PARAMS      = dict(winSize=(21, 21), maxLevel=3,
+                      criteria=(cv2.TERM_CRITERIA_EPS |
+                                cv2.TERM_CRITERIA_COUNT, 30, 0.01))
+MIN_FEATURES   = 50   # re-detect when fewer than this many points remain
+
+cap          = cv2.VideoCapture('video.mp4')
+ret, frame   = cap.read()
+old_gray     = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+p0           = cv2.goodFeaturesToTrack(old_gray, mask=None, **FEATURE_PARAMS)
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    if p0 is not None and len(p0) &gt; 0:
+        p1, status, _ = cv2.calcOpticalFlowPyrLK(
+            old_gray, frame_gray, p0, None, **LK_PARAMS)
+        if p1 is not None and status is not None:
+            good_new = p1[status == 1]
+            good_old = p0[status == 1]
+        else:
+            good_new = np.empty((0, 2))
+    else:
+        good_new = np.empty((0, 2))
+
+    for pt in good_new:
+        x, y = pt.ravel().astype(int)
+        cv2.circle(frame, (x, y), 4, (0, 255, 0), -1)
+
+    # Re-detect if too few points remain
+    if len(good_new) &lt; MIN_FEATURES:
+        print(f"Re-detecting: only {len(good_new)} points left")
+        p0 = cv2.goodFeaturesToTrack(frame_gray, mask=None, **FEATURE_PARAMS)
+    else:
+        p0 = good_new.reshape(-1, 1, 2)
+
+    cv2.putText(frame, f"Points: {len(good_new)}", (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2)
+    cv2.imshow('Robust KLT', frame)
+
+    if cv2.waitKey(30) &amp; 0xFF == ord('q'):
+        break
+
+    old_gray = frame_gray.copy()
+
+cap.release()
+cv2.destroyAllWindows()</code></pre></div>
+  <div class="panel yellow"><strong>Best practice:</strong><p>Set <code>MIN_FEATURES</code> to about 25% of your target feature count. This ensures tracking never degrades too far before recovering with fresh features.</p></div>
+</section>
+
+<!-- STEP 13 -->
+<section class="step-view" data-title="SIFT feature matching">
+  <header class="step-header">
+    <span class="step-kicker">STEP 13 &middot; MATCHING</span>
+    <h1>SIFT Feature Matching Between Frames</h1>
+    <p class="lede">When KLT loses a point, SIFT descriptors can match features between a reference frame and the current frame, enabling re-identification across large changes in viewpoint or scale.</p>
+  </header>
+  <h2>Matching pipeline</h2>
+  <div class="flow">Detect SIFT keypoints and 128-D descriptors in frame A<br>&#8595;<br>Detect SIFT keypoints and descriptors in frame B<br>&#8595;<br>Match descriptors using FLANN nearest-neighbour search<br>&#8595;<br>Apply Lowe's ratio test to discard ambiguous matches<br>&#8595;<br>Optional: compute homography with RANSAC to remove outliers</div>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import cv2
+import matplotlib.pyplot as plt
+
+img1 = cv2.imread('frame_001.jpg', cv2.IMREAD_GRAYSCALE)
+img2 = cv2.imread('frame_020.jpg', cv2.IMREAD_GRAYSCALE)
+
+# 1. Detect and compute SIFT descriptors
+sift = cv2.SIFT_create(nfeatures=1000)
+kp1, des1 = sift.detectAndCompute(img1, None)
+kp2, des2 = sift.detectAndCompute(img2, None)
+
+# 2. Match using FLANN (fast approximate nearest neighbour)
+FLANN_INDEX_KDTREE = 1
+index_params  = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+search_params = dict(checks=50)
+flann         = cv2.FlannBasedMatcher(index_params, search_params)
+matches       = flann.knnMatch(des1, des2, k=2)  # 2 nearest neighbours
+
+# 3. Lowe's ratio test
+good_matches = []
+for m, n in matches:
+    if m.distance &lt; 0.75 * n.distance:   # best match &lt;&lt; second best
+        good_matches.append(m)
+
+print(f"Total: {len(matches)},  Good: {len(good_matches)}")
+
+# 4. Draw matches
+result = cv2.drawMatches(
+    img1, kp1, img2, kp2, good_matches[:60], None,
+    matchColor=(0, 255, 0),
+    singlePointColor=(255, 0, 0),
+    flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS
+)
+
+plt.figure(figsize=(16, 6))
+plt.imshow(result, cmap='gray')
+plt.title(f'SIFT Matches: {len(good_matches)} good after ratio test')
+plt.axis('off')
+plt.tight_layout()
+plt.show()</code></pre></div>
+  <h2>Lowe's ratio test explained</h2>
+  <div class="panel blue"><strong>Why ratio test?</strong><p>For each descriptor in image A, FLANN finds the two closest descriptors in image B. If the best match distance is much less than the second best (ratio &lt; 0.75), the match is unambiguous and accepted. Otherwise it's discarded as a false match.</p></div>
+  <div class="formula-box">Accept if: d(best) / d(second_best) &lt; 0.75</div>
+  <div class="quiz" data-answer="2" data-correct="Correct. The ratio test rejects matches where two descriptors are nearly equally close, which indicates ambiguity.">
+    <h3>What does Lowe's ratio test do?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">Computes the pixel distance between keypoints</button>
+      <button class="quiz-option">Sorts matches by descriptor dimension</button>
+      <button class="quiz-option">Rejects ambiguous matches where two descriptors are nearly equally close</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 14 -->
+<section class="step-view" data-title="Full pipeline">
+  <header class="step-header">
+    <span class="step-kicker">STEP 14 &middot; INTEGRATION</span>
+    <h1>Full Motion &amp; Tracking Pipeline</h1>
+    <p class="lede">Combine all components into a unified, production-ready tracking system with trail drawing, re-detection, and on-screen HUD.</p>
+  </header>
+  <div class="flow">Input: Video stream<br>&#8595;<br>Frame t=0: goodFeaturesToTrack &rarr; initial points p0<br>&#8595;<br>[Loop over frames]<br>&#8595;<br>calcOpticalFlowPyrLK(old_gray, new_gray, p0) &rarr; p1, status<br>&#8595;<br>Filter: keep p1[status==1]<br>&#8595;<br>Draw trails and circles on frame<br>&#8595;<br>If #points &lt; MIN_FEATURES &rarr; re-detect<br>&#8595;<br>old_gray = new_gray, p0 = filtered p1<br>&#8595;<br>Display / save output frame</div>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import cv2
+import numpy as np
+
+def run_full_pipeline(video_source=0, max_corners=150, min_features=40):
+    """
+    Full sparse optical flow tracking pipeline with re-detection.
+
+    Args:
+        video_source : int (webcam) or str (video file path)
+        max_corners  : maximum Shi-Tomasi corners to track
+        min_features : re-detect when fewer than this many points remain
+    """
+    FEATURE_PARAMS = dict(maxCorners=max_corners, qualityLevel=0.01,
+                          minDistance=10, blockSize=7)
+    LK_PARAMS      = dict(winSize=(21, 21), maxLevel=3,
+                          criteria=(cv2.TERM_CRITERIA_EPS |
+                                    cv2.TERM_CRITERIA_COUNT, 30, 0.01))
+    COLOURS = np.random.randint(0, 255, (max_corners, 3))
+
+    cap = cv2.VideoCapture(video_source)
+    if not cap.isOpened():
+        print("ERROR: Cannot open video source"); return
+
+    ret, frame = cap.read()
+    if not ret:
+        print("ERROR: Cannot read first frame"); return
+
+    old_gray     = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    p0           = cv2.goodFeaturesToTrack(old_gray, mask=None, **FEATURE_PARAMS)
+    trail_canvas = np.zeros_like(frame)
+    frame_count  = 0
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        frame_count += 1
+        good_new = np.empty((0, 2))
+        good_old = np.empty((0, 2))
+
+        if p0 is not None and len(p0) &gt; 0:
+            p1, status, _ = cv2.calcOpticalFlowPyrLK(
+                old_gray, frame_gray, p0, None, **LK_PARAMS)
+            if p1 is not None and status is not None:
+                good_new = p1[status == 1]
+                good_old = p0[status == 1]
+
+        for i, (new, old) in enumerate(zip(good_new, good_old)):
+            a, b = new.ravel().astype(int)
+            c, d = old.ravel().astype(int)
+            col  = COLOURS[i % len(COLOURS)].tolist()
+            trail_canvas = cv2.line(trail_canvas, (a, b), (c, d), col, 2)
+            frame        = cv2.circle(frame, (a, b), 4, col, -1)
+
+        output = cv2.add(frame, trail_canvas)
+
+        if len(good_new) &lt; min_features:
+            p0           = cv2.goodFeaturesToTrack(frame_gray, mask=None, **FEATURE_PARAMS)
+            trail_canvas = np.zeros_like(frame)  # reset trails after re-detection
+        else:
+            p0 = good_new.reshape(-1, 1, 2)
+
+        cv2.putText(output, f"Frame: {frame_count}", (10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 200), 2)
+        cv2.putText(output, f"Points: {len(good_new)}", (10, 60),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
+        cv2.imshow('Full Tracking Pipeline', output)
+        if cv2.waitKey(30) &amp; 0xFF == ord('q'):
+            break
+
+        old_gray = frame_gray.copy()
+
+    cap.release()
+    cv2.destroyAllWindows()
+    print(f"Processed {frame_count} frames.")
+
+run_full_pipeline(video_source='video.mp4')
+# run_full_pipeline(video_source=0)  # webcam</code></pre></div>
+  <div class="panel mint"><strong>Extensions to try:</strong><p>1. Add SIFT re-identification when KLT loses all points. 2. Track only within a bounding box by passing a mask to <code>goodFeaturesToTrack</code>. 3. Log each point's trajectory to a CSV for analysis.</p></div>
+</section>
+
+<!-- STEP 15 -->
+<section class="step-view" data-title="Real-world applications">
+  <header class="step-header">
+    <span class="step-kicker">STEP 15 &middot; APPLICATIONS</span>
+    <h1>Real-World Applications</h1>
+    <p class="lede">Point feature tracking is a fundamental building block in many important computer vision systems.</p>
+  </header>
+  <div class="grid-2">
+    <div class="concept"><strong>&#128249; Video Stabilisation</strong><p>Track features across frames to estimate global camera motion (homography). Warp frames to compensate, producing smooth video from shaky footage.</p></div>
+    <div class="concept"><strong>&#129302; SLAM</strong><p>Robot tracks features to estimate its own camera pose (position + orientation) while simultaneously building a 3D map of the environment.</p></div>
+    <div class="concept"><strong>&#127916; Augmented Reality</strong><p>Track a planar marker's feature points to estimate the homography, then overlay 3D graphics in correct perspective on every frame.</p></div>
+    <div class="concept"><strong>&#128663; Autonomous Driving</strong><p>Track features to compute ego-motion and detect independently moving objects (pedestrians, other vehicles).</p></div>
+    <div class="concept"><strong>&#127919; Sports Analysis</strong><p>Track players and ball across broadcast video frames to extract trajectory statistics and tactical patterns.</p></div>
+    <div class="concept"><strong>&#129657; Medical Imaging</strong><p>Track tissue motion in cardiac MRI or ultrasound to measure heart deformation and detect anomalies.</p></div>
+  </div>
+  <h2>Ego-motion estimation snippet</h2>
+  <div class="code-wrap"><button class="copy-btn">Copy</button><pre><code>import cv2
+import numpy as np
+
+# Camera intrinsic matrix (obtained from calibration)
+K = np.array([[718.8, 0,     607.2],
+              [0,     718.8, 185.2],
+              [0,     0,     1.0  ]])
+
+# pts1, pts2 : tracked feature points in two frames (shape N x 2)
+pts1 = ...   # points in frame t
+pts2 = ...   # same points in frame t+1
+
+# Compute Essential Matrix with RANSAC
+E, mask = cv2.findEssentialMat(pts1, pts2, K,
+                                method=cv2.RANSAC, prob=0.999, threshold=1.0)
+
+# Recover rotation R and translation t from E
+_, R, t, mask = cv2.recoverPose(E, pts1, pts2, K)
+
+print("Camera rotation R:")
+print(R)
+print("Camera translation t (unit vector):")
+print(t)</code></pre></div>
+  <div class="callout"><span class="label">NOTE</span><p>The recovered translation <code>t</code> is a unit vector &mdash; only direction, not magnitude, can be determined from a monocular camera without knowing the true scale of the scene.</p></div>
+</section>
+
+<!-- STEP 16 -->
+<section class="step-view" data-title="Methods comparison">
+  <header class="step-header">
+    <span class="step-kicker">STEP 16 &middot; COMPARE</span>
+    <h1>Methods Comparison</h1>
+    <p class="lede">A side-by-side summary of all detection and tracking techniques covered in this codelab.</p>
+  </header>
+  <table class="comparison">
+    <tr><th>Method</th><th>Type</th><th>Scale inv.</th><th>Rotation inv.</th><th>Descriptor</th><th>Speed</th><th>Best for</th></tr>
+    <tr><td>Harris</td><td>Detector</td><td>No</td><td>Yes</td><td>No</td><td>Very fast</td><td>Corner detection, KLT seeding</td></tr>
+    <tr><td>Shi-Tomasi</td><td>Detector</td><td>No</td><td>Yes</td><td>No</td><td>Very fast</td><td>KLT seeding (preferred)</td></tr>
+    <tr><td>SIFT</td><td>Detector + Desc.</td><td>Yes</td><td>Yes</td><td>Yes (128-D)</td><td>Moderate</td><td>Cross-frame matching, re-id</td></tr>
+    <tr><td>Lucas-Kanade (KLT)</td><td>Sparse tracker</td><td>Yes (pyramid)</td><td>Partial</td><td>&mdash;</td><td>Fast</td><td>Real-time video tracking</td></tr>
+    <tr><td>Farneb&auml;ck</td><td>Dense tracker</td><td>Yes (pyramid)</td><td>Partial</td><td>&mdash;</td><td>Moderate</td><td>Full motion field analysis</td></tr>
+  </table>
+  <div class="reveal"><summary>When does KLT fail?</summary><div>KLT fails when motion is too large for the search window (even with pyramids), when the brightness constancy assumption breaks (strong illumination change), or when a feature gets occluded. Use SIFT-based matching or re-detection to recover.</div></div>
+  <div class="reveal"><summary>What is the aperture problem and how do we solve it?</summary><div>The aperture problem means that for a local window, motion along an edge direction is invisible &mdash; only the perpendicular component is measurable. Corners solve this by providing a gradient constraint in all directions. Lucas-Kanade exploits a window of pixels to get enough equations to solve for both u and v uniquely.</div></div>
+  <div class="reveal"><summary>Why does pyramid KLT handle fast motion?</summary><div>At the top of the pyramid, the image is small and even large real-world displacements appear small. The tracker estimates a coarse flow at the top, then refines it level by level down to full resolution, accumulating the total flow. This extends the effective search range without requiring a prohibitively large window.</div></div>
+  <div class="reveal"><summary>SIFT vs. KLT for tracking?</summary><div>KLT is faster and works frame-to-frame, but cannot handle large viewpoint changes. SIFT is slower but robust to scale, rotation, and large viewpoint changes. In practice, use KLT for frame-to-frame tracking and SIFT when re-identification after loss is needed.</div></div>
+</section>
+
+<!-- STEP 17 -->
+<section class="step-view" data-title="Revision &amp; Practice">
+  <header class="step-header">
+    <span class="step-kicker">STEP 17 &middot; REVISION</span>
+    <h1>Revision &amp; Practice</h1>
+    <p class="lede">Review all key concepts before moving on to deeper topics in motion analysis.</p>
+  </header>
+  <div class="reveal"><summary>What is the brightness constancy assumption?</summary><div>A pixel's intensity stays the same as it moves between frames: I(x,y,t) = I(x+u, y+v, t+1). This gives the optical flow constraint equation Ix&middot;u + Iy&middot;v + It = 0.</div></div>
+  <div class="reveal"><summary>What is the aperture problem?</summary><div>The optical flow constraint has two unknowns (u, v) but only one equation per pixel. Motion along an edge is undetectable &mdash; only the perpendicular component can be estimated.</div></div>
+  <div class="reveal"><summary>Why are corners the best features to track?</summary><div>The structure tensor M has two large eigenvalues at a corner, making the Lucas-Kanade system well-conditioned with a unique, accurate flow estimate. Edges and flat regions give degenerate M matrices.</div></div>
+  <div class="reveal"><summary>What does Harris response R &gt; 0 mean?</summary><div>Both eigenvalues of M are large &rarr; the pixel is a corner. R &lt;&lt; 0 means edge; R &asymp; 0 means flat region.</div></div>
+  <div class="reveal"><summary>How does Shi-Tomasi improve on Harris?</summary><div>Shi-Tomasi uses min(&lambda;&#8321;, &lambda;&#8322;) directly as the score, with no free parameter k. This is provably optimal for tracking.</div></div>
+  <div class="reveal"><summary>What does the SIFT 128-D descriptor capture?</summary><div>A histogram of gradient orientations computed over a 16&times;16 neighbourhood. It is invariant to rotation and moderately invariant to illumination changes.</div></div>
+  <div class="reveal"><summary>What is Lowe's ratio test?</summary><div>Accept a SIFT match only if d(best) / d(second_best) &lt; 0.75. This removes ambiguous matches where two descriptors are nearly equally close.</div></div>
+  <div class="reveal"><summary>What does status=1 from calcOpticalFlowPyrLK mean?</summary><div>The tracker successfully found that point in the new frame. status=0 means the point was lost.</div></div>
+  <div class="reveal"><summary>Dense vs sparse optical flow &mdash; when to use each?</summary><div>Sparse (KLT): real-time tracking, robotics, low compute. Dense (Farneb&auml;ck): action recognition, full scene analysis, more compute needed.</div></div>
+
+  <h2>Completion checklist</h2>
+  <ul class="checklist">
+    <li>I understand why corners are better than edges for tracking (aperture problem).</li>
+    <li>I can explain the Harris corner detector and interpret R values.</li>
+    <li>I understand why Shi-Tomasi uses min(&lambda;&#8321;, &lambda;&#8322;).</li>
+    <li>I can detect Harris and Shi-Tomasi corners in Python + OpenCV.</li>
+    <li>I understand how SIFT detects scale-invariant keypoints using DoG.</li>
+    <li>I can detect SIFT keypoints and match them between frames.</li>
+    <li>I understand the brightness constancy assumption and the optical flow equation.</li>
+    <li>I understand how Lucas-Kanade solves the aperture problem with a window of pixels.</li>
+    <li>I understand why a pyramid extends KLT to handle large motion.</li>
+    <li>I can implement sparse KLT tracking with re-detection in Python.</li>
+    <li>I can implement dense optical flow and visualise it in HSV colour space.</li>
+    <li>I know at least three real-world applications of feature tracking.</li>
+  </ul>
+
+  <div class="challenge">
+    <h3>Practice Exercises</h3>
+    <ol>
+      <li>Detect Harris corners on a chessboard image. How does the result compare to the actual corner locations?</li>
+      <li>Run <code>goodFeaturesToTrack</code> with <code>qualityLevel=0.01</code> then <code>0.1</code>. How does the number of detected features change?</li>
+      <li>Implement KLT tracking on a video clip. Add a counter that prints to the terminal each time re-detection occurs.</li>
+      <li>Modify the dense optical flow code to visualise only pixels where the flow magnitude exceeds 3 pixels per frame.</li>
+      <li>Match SIFT keypoints between two frames taken 2 seconds apart. How many good matches survive Lowe's ratio test?</li>
+      <li>Explain why <code>maxLevel=0</code> in <code>calcOpticalFlowPyrLK</code> might fail for a fast-moving object but <code>maxLevel=3</code> succeeds.</li>
+      <li>Research RAFT and FlowNet. How do deep-learning optical flow methods differ from the classical methods in this codelab?</li>
+    </ol>
+  </div>
+
+  <div class="finish">
+    <h2>Motion &amp; Tracking complete! &#127881;</h2>
+    <p>You can now detect point features with Harris, Shi-Tomasi, and SIFT, track them across frames using sparse KLT and dense Farneb&auml;ck optical flow, and build robust tracking pipelines with re-detection strategies in Python + OpenCV.</p>
+  </div>
+</section>
+
+</div>
+</main>
+</div>
+<script>
+(() => {
+  const steps=[...document.querySelectorAll('.step-view')];
+  const titles=steps.map(step=>step.dataset.title);
+  const nav=document.getElementById('stepNav');
+  const sidebar=document.getElementById('sidebar');
+  const menuBtn=document.getElementById('menuBtn');
+  const content=document.getElementById('content');
+  const completed=new Set();
+  let current=0;
+  nav.innerHTML=titles.map((title,index)=>`<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index+1).padStart(2,'0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`).join('');
+  const getHashStep=()=>{const match=location.hash.match(/^#step-(\d+)$/);const value=match?Number(match[1])-1:0;return Number.isInteger(value)&&value>=0&&value<steps.length?value:0};
+  function render(updateHash=true){
+    current=Math.max(0,Math.min(current,steps.length-1));
+    steps.forEach((step,index)=>{const active=index===current;step.classList.toggle('active',active);step.setAttribute('aria-hidden',String(!active))});
+    document.querySelectorAll('.step-link').forEach((button,index)=>{button.classList.toggle('active',index===current);button.setAttribute('aria-current',index===current?'step':'false');button.querySelector('.step-status').textContent=completed.has(index)?'✓':''});
+    const percent=Math.round(((current+1)/steps.length)*100);
+    document.getElementById('progressBar').style.width=`${percent}%`;
+    document.getElementById('progressText').textContent=`${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow',String(percent));
+    document.getElementById('mobileTitle').textContent=titles[current];
+    document.getElementById('prevBtn').disabled=current===0;
+    document.getElementById('nextBtn').disabled=current===steps.length-1;
+    document.getElementById('nextBtn').textContent=current===steps.length-1?'Lesson complete':'Next →';
+    if(updateHash) history.pushState({step:current},'',`#step-${current+1}`);
+    window.scrollTo({top:0,behavior:'auto'});sidebar.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');
+  }
+  function goTo(index){if(index<0||index>=steps.length)return;completed.add(current);current=index;render();}
+  const navRow=document.createElement('div');navRow.className='nav-row';navRow.innerHTML='<button class="nav-btn" id="prevBtn" type="button">&#8592; Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next &#8594;</button>';content.appendChild(navRow);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(current-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(current+1));
+  nav.addEventListener('click',event=>{const button=event.target.closest('.step-link');if(button)goTo(Number(button.dataset.step))});
+  menuBtn.addEventListener('click',()=>{const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
+  document.addEventListener('click',async event=>{const copy=event.target.closest('.copy-btn');if(copy){const code=copy.parentElement.querySelector('pre code')?.textContent??'';try{await navigator.clipboard.writeText(code);copy.textContent='Copied!'}catch{copy.textContent='Select & copy'}setTimeout(()=>copy.textContent='Copy',1200);return;}const option=event.target.closest('.quiz-option');if(option){const quiz=option.closest('.quiz');if(quiz.dataset.answered)return;const options=[...quiz.querySelectorAll('.quiz-option')];const choice=options.indexOf(option);const answer=Number(quiz.dataset.answer);quiz.dataset.answered='true';options.forEach(button=>button.disabled=true);option.classList.add(choice===answer?'correct':'wrong');if(choice!==answer)options[answer].classList.add('correct');const feedback=quiz.querySelector('.quiz-feedback');feedback.textContent=choice===answer?quiz.dataset.correct:`Not quite. ${quiz.dataset.correct}`;feedback.classList.add('show');}});
+  window.addEventListener('popstate',()=>{current=getHashStep();render(false)});window.addEventListener('hashchange',()=>{current=getHashStep();render(false)});
+  document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(event.key==='ArrowRight')goTo(current+1);if(event.key==='ArrowLeft')goTo(current-1)});
+  current=getHashStep();render(false);
+})();
+</script>
+</body>
+</html>

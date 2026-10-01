@@ -842,7 +842,9 @@
                     <div class="grid-3">
                         <div class="concept">
                             <strong>1. JDK 17 or 21</strong>
-                            <p>Spring Boot 3 requires Java 17 or higher. Check your version with <code>java -version</code>.</p>
+                            <p>Spring Boot 3 requires Java 17 or higher. Check your version with
+                                <code>java -version</code>.
+                            </p>
                         </div>
                         <div class="concept">
                             <strong>2. VS Code or IntelliJ</strong>
@@ -940,7 +942,8 @@
 
                     <div class="callout">
                         <span class="label">TIP</span>
-                        <p>Click <strong>"Generate"</strong> (or press <code>Ctrl+Enter</code> / <code>Cmd+Enter</code>) to
+                        <p>Click <strong>"Generate"</strong> (or press <code>Ctrl+Enter</code> / <code>Cmd+Enter</code>)
+                            to
                             download <code>student-crud-hibernate.zip</code>.</p>
                     </div>
                 </section>
@@ -964,8 +967,10 @@ code .</code></pre>
 
                     <h2>Target Directory Structure</h2>
                     <div class="flow">student-crud-hibernate/<br>├── pom.xml<br>└── src/<br>&nbsp;&nbsp;&nbsp;&nbsp;└──
-                        main/<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── java/com/example/studentcrudhibernate/<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├──
-                        StudentCrudHibernateApplication.java&nbsp;&nbsp;&nbsp;(Main Entrypoint)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├──
+                        main/<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──
+                        java/com/example/studentcrudhibernate/<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├──
+                        StudentCrudHibernateApplication.java&nbsp;&nbsp;&nbsp;(Main
+                        Entrypoint)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├──
                         entity/Student.java&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Hibernate
                         Entity)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├──
                         repository/StudentRepository.java&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(JPA
@@ -1009,7 +1014,9 @@ code .</code></pre>
                         <span class="step-kicker">STEP 5 · CONFIGURATION</span>
                         <h1>Configure Hibernate &amp; H2 Database</h1>
                         <p class="lede">Unlike standalone Hibernate which needs <code>hibernate.cfg.xml</code>, Spring
-                            Boot configures Hibernate directly in <code>src/main/resources/application.properties</code>.</p>
+                            Boot configures Hibernate directly in
+                            <code>src/main/resources/application.properties</code>.
+                        </p>
                     </header>
 
                     <p>Open <code>src/main/resources/application.properties</code> and replace its content with:</p>
@@ -1069,7 +1076,8 @@ spring.jpa.database-platform=org.hibernate.dialect.H2Dialect</code></pre>
                         </tr>
                         <tr>
                             <td><code>spring.jpa.show-sql=true</code></td>
-                            <td>Shows the exact SQL statements Hibernate generates for each CRUD request in the terminal.
+                            <td>Shows the exact SQL statements Hibernate generates for each CRUD request in the
+                                terminal.
                             </td>
                         </tr>
                     </table>
@@ -1080,11 +1088,13 @@ spring.jpa.database-platform=org.hibernate.dialect.H2Dialect</code></pre>
                     <header class="step-header">
                         <span class="step-kicker">STEP 6 · ENTITY MAPPING</span>
                         <h1>Create the Student Entity</h1>
-                        <p class="lede">An entity is a plain Java class annotated with <code>@Entity</code>. Hibernate maps
+                        <p class="lede">An entity is a plain Java class annotated with <code>@Entity</code>. Hibernate
+                            maps
                             each instance of this class to a row in the database table.</p>
                     </header>
 
-                    <p>Create a package named <code>entity</code> inside <code>com.example.studentcrudhibernate</code> and
+                    <p>Create a package named <code>entity</code> inside <code>com.example.studentcrudhibernate</code>
+                        and
                         create a file named <code>Student.java</code>.</p>
 
                     <div class="code-wrap">
@@ -1177,18 +1187,22 @@ public class Student {
                         </tr>
                         <tr>
                             <td><code>@GeneratedValue(strategy = IDENTITY)</code></td>
-                            <td>Tells the database to automatically generate and increment primary key values (1, 2, 3...).</td>
+                            <td>Tells the database to automatically generate and increment primary key values (1, 2,
+                                3...).</td>
                         </tr>
                         <tr>
                             <td><code>@Column(nullable = false)</code></td>
-                            <td>Maps field to column and configures constraints like <code>NOT NULL</code> and <code>UNIQUE</code>.</td>
+                            <td>Maps field to column and configures constraints like <code>NOT NULL</code> and
+                                <code>UNIQUE</code>.
+                            </td>
                         </tr>
                     </table>
 
                     <div class="panel orange">
                         <strong>Why is the no-argument constructor mandatory?</strong>
                         <p>When Hibernate loads records from the database, it uses Java Reflection to instantiate the
-                            object first using the default <code>Student()</code> constructor, and then sets field values.
+                            object first using the default <code>Student()</code> constructor, and then sets field
+                            values.
                             Without this constructor, Hibernate throws an <code>InstantiationException</code>.</p>
                     </div>
                 </section>
@@ -1198,12 +1212,15 @@ public class Student {
                     <header class="step-header">
                         <span class="step-kicker">STEP 7 · DATA ACCESS LAYER</span>
                         <h1>Create the StudentRepository</h1>
-                        <p class="lede">Spring Data JPA provides <code>JpaRepository</code>, which handles all SQL queries
+                        <p class="lede">Spring Data JPA provides <code>JpaRepository</code>, which handles all SQL
+                            queries
                             and Hibernate session transactions under the hood with zero boilerplate code.</p>
                     </header>
 
-                    <p>Create a package named <code>repository</code> inside <code>com.example.studentcrudhibernate</code>
-                        and create an interface named <code>StudentRepository.java</code>.</p>
+                    <p>Create a package named <code>repository</code> inside
+                        <code>com.example.studentcrudhibernate</code>
+                        and create an interface named <code>StudentRepository.java</code>.
+                    </p>
 
                     <div class="code-wrap">
                         <button class="copy-btn" type="button">Copy</button>
@@ -1220,7 +1237,8 @@ public interface StudentRepository extends JpaRepository&lt;Student, Long&gt; {
                     </div>
 
                     <h2>What JpaRepository Gives You for Free</h2>
-                    <p>By extending <code>JpaRepository&lt;Student, Long&gt;</code>, Hibernate dynamically implements this
+                    <p>By extending <code>JpaRepository&lt;Student, Long&gt;</code>, Hibernate dynamically implements
+                        this
                         interface with complete CRUD capabilities:</p>
                     <table class="comparison">
                         <tr>
@@ -1256,7 +1274,8 @@ public interface StudentRepository extends JpaRepository&lt;Student, Long&gt; {
                     </table>
 
                     <div class="panel mint">
-                        <strong>The Magic:</strong> You write zero SQL queries. Hibernate inspects the entity, generates the
+                        <strong>The Magic:</strong> You write zero SQL queries. Hibernate inspects the entity, generates
+                        the
                         correct dialect-specific SQL, runs it against H2, maps the result set into <code>Student</code>
                         objects, and returns them as a <code>List&lt;Student&gt;</code>!
                     </div>
@@ -1267,12 +1286,15 @@ public interface StudentRepository extends JpaRepository&lt;Student, Long&gt; {
                     <header class="step-header">
                         <span class="step-kicker">STEP 8 · REST CONTROLLER</span>
                         <h1>Create StudentController &amp; Inject Repository</h1>
-                        <p class="lede">The controller handles incoming HTTP requests, invokes the repository, and returns
+                        <p class="lede">The controller handles incoming HTTP requests, invokes the repository, and
+                            returns
                             JSON responses with proper HTTP status codes.</p>
                     </header>
 
-                    <p>Create a package named <code>controller</code> inside <code>com.example.studentcrudhibernate</code>
-                        and create <code>StudentController.java</code>.</p>
+                    <p>Create a package named <code>controller</code> inside
+                        <code>com.example.studentcrudhibernate</code>
+                        and create <code>StudentController.java</code>.
+                    </p>
 
                     <div class="code-wrap">
                         <button class="copy-btn" type="button">Copy</button>
@@ -1308,7 +1330,8 @@ public class StudentController {
                         </tr>
                         <tr>
                             <td><code>@RestController</code></td>
-                            <td>Combines <code>@Controller</code> and <code>@ResponseBody</code>. Returns data serialized
+                            <td>Combines <code>@Controller</code> and <code>@ResponseBody</code>. Returns data
+                                serialized
                                 directly into JSON.</td>
                         </tr>
                         <tr>
@@ -1317,7 +1340,8 @@ public class StudentController {
                         </tr>
                         <tr>
                             <td><code>StudentRepository studentRepository</code></td>
-                            <td>Spring's Dependency Injection injects the Hibernate-managed repository bean at runtime.</td>
+                            <td>Spring's Dependency Injection injects the Hibernate-managed repository bean at runtime.
+                            </td>
                         </tr>
                     </table>
                 </section>
@@ -1327,7 +1351,8 @@ public class StudentController {
                     <header class="step-header">
                         <span class="step-kicker">STEP 9 · READ OPERATIONS</span>
                         <h1>Implement GET Endpoints (List &amp; Find by ID)</h1>
-                        <p class="lede">Add methods to retrieve all students as a list and to search for a single student
+                        <p class="lede">Add methods to retrieve all students as a list and to search for a single
+                            student
                             by ID with clean 404 handling.</p>
                     </header>
 
@@ -1341,7 +1366,8 @@ public class StudentController {
     }</code></pre>
                     </div>
 
-                    <div class="flow">HTTP GET /api/students<br>↓<br>getAllStudents() calls studentRepository.findAll()<br>↓<br>Hibernate
+                    <div class="flow">HTTP GET /api/students<br>↓<br>getAllStudents() calls
+                        studentRepository.findAll()<br>↓<br>Hibernate
                         runs: SELECT id, name, email, course FROM students<br>↓<br>Maps DB records into
                         List&lt;Student&gt;<br>↓<br>Jackson converts List to JSON array → 200 OK</div>
 
@@ -1364,11 +1390,14 @@ public class StudentController {
                         </tr>
                         <tr>
                             <td><code>@PathVariable Long id</code></td>
-                            <td>Extracts the numeric ID directly from the URL path (e.g. <code>/api/students/1</code>).</td>
+                            <td>Extracts the numeric ID directly from the URL path (e.g. <code>/api/students/1</code>).
+                            </td>
                         </tr>
                         <tr>
                             <td><code>studentRepository.findById(id)</code></td>
-                            <td>Returns an <code>Optional&lt;Student&gt;</code>, preventing <code>NullPointerException</code>.</td>
+                            <td>Returns an <code>Optional&lt;Student&gt;</code>, preventing
+                                <code>NullPointerException</code>.
+                            </td>
                         </tr>
                         <tr>
                             <td><code>.map(ResponseEntity::ok)</code></td>
@@ -1403,7 +1432,8 @@ public class StudentController {
                     </div>
 
                     <div class="flow">HTTP POST /api/students with JSON body<br>↓<br>@RequestBody converts JSON to
-                        Student object (Transient state)<br>↓<br>studentRepository.save(student)<br>↓<br>Hibernate executes:
+                        Student object (Transient state)<br>↓<br>studentRepository.save(student)<br>↓<br>Hibernate
+                        executes:
                         INSERT INTO students (name, email, course) VALUES (?, ?, ?)<br>↓<br>Database assigns new ID
                         (e.g., 1)<br>↓<br>Returns saved Student with ID → 201 CREATED</div>
 
@@ -1458,7 +1488,8 @@ public class StudentController {
     }</code></pre>
                     </div>
 
-                    <div class="flow">HTTP DELETE /api/students/1<br>↓<br>Check if record exists via existsById(1)<br>↓<br>studentRepository.deleteById(1)<br>↓<br>Hibernate
+                    <div class="flow">HTTP DELETE /api/students/1<br>↓<br>Check if record exists via
+                        existsById(1)<br>↓<br>studentRepository.deleteById(1)<br>↓<br>Hibernate
                         executes: DELETE FROM students WHERE id = ?<br>↓<br>Returns empty response with 204 NO CONTENT
                     </div>
 
@@ -1497,7 +1528,8 @@ public class StudentController {
                     <header class="step-header">
                         <span class="step-kicker">STEP 12 · COMPLETE CODE</span>
                         <h1>Full StudentController.java</h1>
-                        <p class="lede">Review the complete controller file. Ensure your file matches this code exactly.</p>
+                        <p class="lede">Review the complete controller file. Ensure your file matches this code exactly.
+                        </p>
                     </header>
 
                     <div class="code-wrap">
@@ -1591,7 +1623,8 @@ mvnw.cmd spring-boot:run</code></pre>
 
                     <h2>Inspect the Console Output</h2>
                     <p>Watch the startup logs carefully. Because we enabled <code>spring.jpa.show-sql=true</code> and
-                        <code>ddl-auto=update</code>, Hibernate outputs:</p>
+                        <code>ddl-auto=update</code>, Hibernate outputs:
+                    </p>
 
                     <div class="code-wrap">
                         <button class="copy-btn" type="button">Copy</button>
@@ -1659,7 +1692,8 @@ Hibernate:
                     <div class="callout">
                         <span class="label">IMPORTANT</span>
                         <p>Make sure the JDBC URL is set to <code>jdbc:h2:mem:studentdb</code> before clicking
-                            <strong>Connect</strong>. If you leave the default test URL, you won't see your tables!</p>
+                            <strong>Connect</strong>. If you leave the default test URL, you won't see your tables!
+                        </p>
                     </div>
 
                     <h2>What You Will See</h2>
@@ -1780,12 +1814,14 @@ Hibernate:
                         <tr>
                             <td><strong>1. Transient</strong></td>
                             <td><code>@RequestBody Student student</code> arrives as JSON and is instantiated via
-                                <code>new Student()</code>.</td>
+                                <code>new Student()</code>.
+                            </td>
                             <td>Has no database ID yet. Not associated with Hibernate Session.</td>
                         </tr>
                         <tr>
                             <td><strong>2. Persistent</strong></td>
-                            <td>After <code>studentRepository.save(student)</code> or <code>findById()</code> is called.</td>
+                            <td>After <code>studentRepository.save(student)</code> or <code>findById()</code> is called.
+                            </td>
                             <td>Managed by Hibernate Session. Has an assigned primary key. Any field changes are tracked
                                 automatically.</td>
                         </tr>
@@ -1832,10 +1868,12 @@ Hibernate:
                     <!-- Quiz 1 -->
                     <div class="quiz" data-answer="1"
                         data-correct="Correct! @GeneratedValue(strategy = GenerationType.IDENTITY) instructs the underlying database to generate and increment primary key values automatically.">
-                        <strong>Quiz 1: Which annotation tells Hibernate that the primary key should be auto-incremented by the database?</strong>
+                        <strong>Quiz 1: Which annotation tells Hibernate that the primary key should be auto-incremented
+                            by the database?</strong>
                         <div class="quiz-options">
                             <button class="quiz-option" type="button">@AutoIncrement</button>
-                            <button class="quiz-option" type="button">@GeneratedValue(strategy = GenerationType.IDENTITY)</button>
+                            <button class="quiz-option" type="button">@GeneratedValue(strategy =
+                                GenerationType.IDENTITY)</button>
                             <button class="quiz-option" type="button">@PrimaryKey(auto = true)</button>
                             <button class="quiz-option" type="button">@SequenceGeneratorOnly</button>
                         </div>
@@ -1845,11 +1883,14 @@ Hibernate:
                     <!-- Quiz 2 -->
                     <div class="quiz" data-answer="2"
                         data-correct="Correct! Hibernate uses Java Reflection to instantiate entity instances when retrieving rows from the database. A default no-argument constructor is required for this.">
-                        <strong>Quiz 2: Why does Hibernate require an empty no-argument constructor in Student.java?</strong>
+                        <strong>Quiz 2: Why does Hibernate require an empty no-argument constructor in
+                            Student.java?</strong>
                         <div class="quiz-options">
-                            <button class="quiz-option" type="button">Because Java does not compile classes without an empty constructor.</button>
+                            <button class="quiz-option" type="button">Because Java does not compile classes without an
+                                empty constructor.</button>
                             <button class="quiz-option" type="button">To make the object immutable.</button>
-                            <button class="quiz-option" type="button">Hibernate uses Java reflection to instantiate objects from database result sets.</button>
+                            <button class="quiz-option" type="button">Hibernate uses Java reflection to instantiate
+                                objects from database result sets.</button>
                             <button class="quiz-option" type="button">To speed up database network requests.</button>
                         </div>
                         <div class="quiz-feedback"></div>
@@ -1860,7 +1901,8 @@ Hibernate:
                         data-correct="Correct! Extending JpaRepository provides ready-to-use CRUD methods including findAll(), findById(), save(), and deleteById() implemented dynamically by Hibernate.">
                         <strong>Quiz 3: What does extending JpaRepository&lt;Student, Long&gt; provide?</strong>
                         <div class="quiz-options">
-                            <button class="quiz-option" type="button">Complete CRUD operations with automatic SQL generation without writing implementation code.</button>
+                            <button class="quiz-option" type="button">Complete CRUD operations with automatic SQL
+                                generation without writing implementation code.</button>
                             <button class="quiz-option" type="button">HTML web pages with CSS styling.</button>
                             <button class="quiz-option" type="button">JWT token authentication filters.</button>
                             <button class="quiz-option" type="button">A Docker container image.</button>
@@ -1874,7 +1916,9 @@ Hibernate:
                         <div>
                             Just swap two things:
                             <ol>
-                                <li>In <code>pom.xml</code>, replace the <code>h2</code> dependency with <code>mysql-connector-j</code>.</li>
+                                <li>In <code>pom.xml</code>, replace the <code>h2</code> dependency with
+                                    <code>mysql-connector-j</code>.
+                                </li>
                                 <li>In <code>application.properties</code>, set:
                                     <pre><code>spring.datasource.url=jdbc:mysql://localhost:3306/student_db
 spring.datasource.username=root
@@ -1882,29 +1926,39 @@ spring.datasource.password=yourpassword
 spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect</code></pre>
                                 </li>
                             </ol>
-                            Zero changes to your <code>Student.java</code>, <code>StudentRepository.java</code>, or <code>StudentController.java</code> code are needed!
+                            Zero changes to your <code>Student.java</code>, <code>StudentRepository.java</code>, or
+                            <code>StudentController.java</code> code are needed!
                         </div>
                     </details>
 
                     <details class="reveal">
                         <summary>What is the difference between save() for new vs. existing entities?</summary>
                         <div>
-                            When you pass an entity with <code>id == null</code>, Hibernate recognizes it as <strong>new</strong> and executes an <code>INSERT INTO</code> statement. When the entity has an existing non-null <code>id</code> that already exists in the database, Hibernate executes an <code>UPDATE</code> statement.
+                            When you pass an entity with <code>id == null</code>, Hibernate recognizes it as
+                            <strong>new</strong> and executes an <code>INSERT INTO</code> statement. When the entity has
+                            an existing non-null <code>id</code> that already exists in the database, Hibernate executes
+                            an <code>UPDATE</code> statement.
                         </div>
                     </details>
 
                     <details class="reveal">
                         <summary>Why use ResponseEntity instead of returning raw Student objects?</summary>
                         <div>
-                            <code>ResponseEntity</code> lets you control HTTP status codes (such as returning <code>201 Created</code> on POST, <code>204 No Content</code> on DELETE, and <code>404 Not Found</code> when a student ID does not exist).
+                            <code>ResponseEntity</code> lets you control HTTP status codes (such as returning
+                            <code>201 Created</code> on POST, <code>204 No Content</code> on DELETE, and
+                            <code>404 Not Found</code> when a student ID does not exist).
                         </div>
                     </details>
 
                     <h2>Completion Checklist</h2>
                     <ul class="checklist">
                         <li>I created a Spring Boot project with Spring Web, Spring Data JPA, and H2.</li>
-                        <li>I configured Hibernate properties and enabled the H2 console in <code>application.properties</code>.</li>
-                        <li>I created a <code>Student</code> entity with <code>@Entity</code>, <code>@Id</code>, and <code>@GeneratedValue</code>.</li>
+                        <li>I configured Hibernate properties and enabled the H2 console in
+                            <code>application.properties</code>.
+                        </li>
+                        <li>I created a <code>Student</code> entity with <code>@Entity</code>, <code>@Id</code>, and
+                            <code>@GeneratedValue</code>.
+                        </li>
                         <li>I created <code>StudentRepository</code> extending <code>JpaRepository</code>.</li>
                         <li>I built <code>StudentController</code> with GET, POST, PUT, and DELETE endpoints.</li>
                         <li>I verified Hibernate's automatic DDL SQL generation in the console logs.</li>
