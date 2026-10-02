@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Firestore Database in Flutter — Flutter Codelab</title>
+  <meta name="description" content="Master Cloud Firestore in Flutter: NoSQL document database structures, CRUD operations, type-safe Dart models with withConverter, queries, indexes, and real-time StreamBuilder updates.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root{
+      --blue:#2856d8;
+      --blue-dark:#17348e;
+      --blue-light:#e4ebff;
+      --ink:#101010;
+      --paper:#f5f7fb;
+      --white:#fff;
+      --yellow:#ffd83d;
+      --mint:#75e6c5;
+      --pink:#ff9bb7;
+      --orange:#ffb866;
+      --border:3px solid var(--ink);
+      --shadow:6px 6px 0 var(--ink);
+      --shadow-sm:4px 4px 0 var(--ink);
+      --sidebar:292px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:auto}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}
+    button,a{font:inherit}
+    button{cursor:pointer}
+    :focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+    .app{min-height:100vh}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}
+    .brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+    .eyebrow,.progress-meta,.step-number,.step-kicker,.label{font-family:"DM Mono",monospace}
+    .eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+    .brand h2{margin:5px 0 3px;font-size:1.36rem;line-height:1.08}
+    .brand p{margin:0;font-size:.84rem;font-weight:600}
+    .auth-badge{display:inline-flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+    .auth-badge span{padding:2px 7px;font-size:.65rem;font-family:"DM Mono",monospace;font-weight:700;border:2px solid var(--ink)}
+    .b-nosql{background:var(--yellow)}
+    .b-crud{background:var(--mint)}
+    .b-models{background:var(--pink)}
+    .b-realtime{background:var(--orange)}
+    .progress-wrap{margin:0 2px 20px;color:#fff}
+    .progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}
+    .progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}
+    .progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}
+    .steps{display:grid;gap:8px}
+    .step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}
+    .step-link:hover{background:rgba(255,255,255,.14)}
+    .step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}
+    .step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}
+    .step-status{text-align:center}
+    .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}
+    .menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+    .menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}
+    .mobile-title{flex:1;padding:8px 10px;font-weight:800}
+    main{margin-left:var(--sidebar);min-height:100vh}
+    .content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}
+    .step-view{display:none}
+    .step-view.active{display:block;animation:stepIn .18s ease-out}
+    @keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}
+    .step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}
+    h1,h2,h3{line-height:1.08}
+    h1{margin:0 0 12px;font-size:clamp(1.9rem,4.5vw,3.4rem);letter-spacing:-.04em}
+    h2{margin:30px 0 12px;font-size:clamp(1.4rem,2.8vw,2.1rem)}
+    h3{margin:22px 0 9px;font-size:1.15rem}
+    .lede{max-width:780px;margin:0;font-size:1.06rem}
+    .objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+    .panel,.concept,.quiz,.reveal{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+    .panel{padding:22px;margin:20px 0}
+    .panel.blue{background:var(--blue-light)}
+    .panel.mint{background:var(--mint)}
+    .panel.pink{background:var(--pink)}
+    .panel.yellow{background:var(--yellow)}
+    .panel.orange{background:var(--orange)}
+    .callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+    .callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}
+    .grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid-3{display:grid;gap:16px;grid-template-columns:repeat(3,minmax(0,1fr))}
+    .concept{padding:18px}
+    .concept strong{font-size:1.05rem}
+    .concept p:last-child{margin-bottom:0}
+    .code-wrap{position:relative;margin:18px 0}
+    pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.84rem;line-height:1.62;tab-size:2}
+    .copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}
+    code:not(pre code){padding:1px 5px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}
+    ul,ol{padding-left:1.35rem}
+    li{margin:7px 0}
+    .comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}
+    .comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}
+    .comparison th{color:#fff;background:var(--blue)}
+    .quiz{padding:20px;margin:20px 0}
+    .quiz-options{display:grid;gap:9px;margin-top:14px}
+    .quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}
+    .quiz-option:hover{background:var(--blue-light)}
+    .quiz-option.correct{background:var(--mint)}
+    .quiz-option.wrong{background:var(--pink)}
+    .quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}
+    .quiz-feedback.show{display:block}
+    .reveal{margin:18px 0}
+    .reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}
+    .reveal>div{padding:15px 16px}
+    .challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}
+    .challenge h3{margin-top:0;color:var(--yellow)}
+    .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto;white-space:pre}
+    .screen-stack{display:grid;gap:12px;margin:22px 0}
+    .screen-card{padding:16px;background:#fff;border:3px solid var(--ink);box-shadow:var(--shadow-sm);font-weight:800}
+    .screen-card.active{background:var(--mint)}
+    .checklist{list-style:none;padding:0}
+    .checklist li{position:relative;padding-left:30px}
+    .checklist li::before{content:"□";position:absolute;left:0;font-size:1.25rem;font-weight:900}
+    .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}
+    .nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}
+    .nav-btn.primary{color:#fff;background:var(--blue)}
+    .nav-btn:disabled{opacity:.35;cursor:not-allowed}
+    .finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}
+    .references a{color:var(--blue-dark);font-weight:700}
+    @media(max-width:850px){
+      :root{--sidebar:270px;--mobile-bar-height:65px}
+      .sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}
+      .sidebar.open{transform:none}
+      .mobile-bar{display:flex;height:var(--mobile-bar-height)}
+      main{margin-left:0}
+      .content{width:min(940px,calc(100% - 28px));padding-top:24px}
+    }
+    @media(max-width:680px){
+      .grid-2,.grid-3{grid-template-columns:1fr}
+      .content{width:calc(100% - 18px);padding-top:16px}
+      .step-header{padding:20px 16px}
+      .panel,.concept,.quiz{padding:16px}
+      .nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}
+      .nav-btn{min-width:0;flex:1;padding:11px 10px}
+      pre{padding:16px 12px;font-size:.76rem}
+      .copy-btn{position:static;align-self:flex-end;margin-bottom:6px}
+      .code-wrap{display:flex;flex-direction:column}
+      .code-wrap pre{order:2}
+      .code-wrap .copy-btn{order:1}
+      .comparison{display:block;overflow-x:auto}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR NAVIGATION -->
+<aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+  <div class="brand">
+    <div class="eyebrow">Flutter Firebase Codelab</div>
+    <h2>Cloud Firestore</h2>
+    <p>Real-Time NoSQL Database</p>
+    <div class="auth-badge">
+      <span class="b-nosql">NOSQL</span>
+      <span class="b-crud">CRUD</span>
+      <span class="b-models">MODELS</span>
+      <span class="b-realtime">STREAM</span>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+    <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+  <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+</aside>
+
+<!-- MOBILE TOP BAR -->
+<div class="mobile-bar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Open navigation" aria-expanded="false">&#9776;</button>
+  <div class="mobile-title" id="mobileTitle">Cloud Firestore Database</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main><div class="content" id="content">
+
+<!-- STEP 1 -->
+<section class="step-view" data-title="NoSQL Architecture">
+<header class="step-header">
+  <span class="step-kicker">STEP 1 &middot; FOUNDATIONS</span>
+  <h1>NoSQL Document Architecture</h1>
+  <p class="lede">Understand how Cloud Firestore organizes real-time cloud data compared to traditional relational SQL databases.</p>
+</header>
+<div class="objective"><strong>By the end of this codelab:</strong> You will build real-time data-driven Flutter applications using Cloud Firestore, master Collections and Documents, perform CRUD operations, convert documents to/from custom Dart models with <code>withConverter</code>, run filtered queries, and stream real-time updates with <code>StreamBuilder</code>.</div>
+
+<h2>What is Cloud Firestore?</h2>
+<p><strong>Cloud Firestore</strong> is Google's flexible, scalable, cloud-hosted NoSQL document database designed for mobile, web, and server development. It keeps your app's data in sync across client apps in real-time through listeners, while offering powerful offline data caching for iOS, Android, and Web.</p>
+
+<div class="grid-2">
+  <div class="concept">
+    <span style="font-size:1.8rem">&#128451;&#65039;</span>
+    <strong>Document-Oriented NoSQL</strong>
+    <p>Unlike relational SQL databases that store data in rigid tables with rows and columns, Firestore stores lightweight, JSON-like key-value structures called <strong>Documents</strong> organized inside <strong>Collections</strong>.</p>
+  </div>
+  <div class="concept">
+    <span style="font-size:1.8rem">&#9889;</span>
+    <strong>Real-Time &amp; Offline First</strong>
+    <p>Firestore uses persistent WebSocket and gRPC connections to push live database changes to connected clients instantly. If the device goes offline, local cache handles reads and writes seamlessly, syncing when reconnected.</p>
+  </div>
+</div>
+
+<h2>SQL (Relational) vs. Firestore (NoSQL)</h2>
+<p>If you come from a SQL background (like SQLite, PostgreSQL, or MySQL), here is how concepts translate to Firestore:</p>
+
+<table class="comparison">
+  <tr><th>Relational Concept (SQL)</th><th>Cloud Firestore Concept</th><th>Key Differences</th></tr>
+  <tr>
+    <td><strong>Database / Schema</strong></td>
+    <td><strong>Firestore Database</strong></td>
+    <td>Firestore is schemaless &mdash; documents in the same collection don't need identical fields.</td>
+  </tr>
+  <tr>
+    <td><strong>Table</strong></td>
+    <td><strong>Collection</strong></td>
+    <td>A collection contains only documents; it cannot hold raw values directly.</td>
+  </tr>
+  <tr>
+    <td><strong>Row / Record</strong></td>
+    <td><strong>Document</strong></td>
+    <td>A set of key-value pairs (up to 1 MB). Each document has a unique ID within its collection.</td>
+  </tr>
+  <tr>
+    <td><strong>Column</strong></td>
+    <td><strong>Field</strong></td>
+    <td>Supports rich types including Strings, Numbers, Maps (nested objects), Arrays, and Timestamps.</td>
+  </tr>
+  <tr>
+    <td><strong>JOIN clause</strong></td>
+    <td><strong>Subcollection / Denormalization</strong></td>
+    <td>No JOIN operations! Queries are fast and shallow. Nested data is kept in subcollections or denormalized.</td>
+  </tr>
+</table>
+
+<h2>The Three Structural Pillars</h2>
+<div class="flow">Collection ("users")
+   └── Document ("user_alex")
+          ├── Field: name: "Alex Rivers"
+          ├── Field: email: "alex@example.com"
+          ├── Field: score: 450
+          └── Subcollection ("tasks")
+                 ├── Document ("task_001")
+                 │      ├── title: "Buy groceries"
+                 │      └── isDone: false
+                 └── Document ("task_002")
+                        ├── title: "Design Flutter UI"
+                        └── isDone: true</div>
+
+<div class="panel blue">
+  <strong>The Alternating Path Rule:</strong>
+  <p>Firestore paths ALWAYS alternate: <code>Collection / Document / Collection / Document</code>. You can never have a collection inside a collection or a document directly inside a document without a collection separating them!</p>
+  <ul>
+    <li><code>users</code> &rarr; Collection Reference</li>
+    <li><code>users/alex123</code> &rarr; Document Reference</li>
+    <li><code>users/alex123/tasks</code> &rarr; Collection Reference (Subcollection)</li>
+    <li><code>users/alex123/tasks/task456</code> &rarr; Document Reference</li>
+  </ul>
+</div>
+
+<h2>Supported Data Types in Documents</h2>
+<table class="comparison">
+  <tr><th>Firestore Type</th><th>Dart Representation</th><th>Example Value</th></tr>
+  <tr><td><code>string</code></td><td><code>String</code></td><td><code>"Flutter Developer"</code></td></tr>
+  <tr><td><code>number</code></td><td><code>int</code> or <code>double</code></td><td><code>42</code> or <code>19.99</code></td></tr>
+  <tr><td><code>boolean</code></td><td><code>bool</code></td><td><code>true</code> / <code>false</code></td></tr>
+  <tr><td><code>map</code></td><td><code>Map&lt;String, dynamic&gt;</code></td><td><code>{'city': 'Mumbai', 'pincode': 400001}</code></td></tr>
+  <tr><td><code>array</code></td><td><code>List&lt;dynamic&gt;</code></td><td><code>['flutter', 'firebase', 'dart']</code></td></tr>
+  <tr><td><code>timestamp</code></td><td><code>Timestamp</code></td><td><code>Timestamp.now()</code></td></tr>
+  <tr><td><code>geopoint</code></td><td><code>GeoPoint</code></td><td><code>GeoPoint(19.0760, 72.8777)</code></td></tr>
+  <tr><td><code>reference</code></td><td><code>DocumentReference</code></td><td>Pointers to another document in the database</td></tr>
+  <tr><td><code>null</code></td><td><code>null</code></td><td>Explicit empty value</td></tr>
+</table>
+
+<div class="quiz" data-answer="1" data-correct="Correct! Firestore paths must strictly alternate: Collection / Document / Collection / Document. A collection cannot be nested directly inside another collection.">
+  <h3>Quick Knowledge Check: Which of the following is a VALID Firestore path?</h3>
+  <div class="quiz-options">
+    <button class="quiz-option">/users/students/undergrads/john</button>
+    <button class="quiz-option">/courses/cs101/enrollments/student_99</button>
+    <button class="quiz-option">/projects/task_1/task_2</button>
+    <button class="quiz-option">/messages</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+</section>
+
+<!-- STEP 2 -->
+<section class="step-view" data-title="Setup & Dependencies">
+<header class="step-header">
+  <span class="step-kicker">STEP 2 &middot; ENVIRONMENT</span>
+  <h1>Setup Cloud Firestore in Flutter</h1>
+  <p class="lede">Provision a Firestore database instance in the Firebase Console and configure your Flutter project.</p>
+</header>
+
+<h2>1. Create Database in Firebase Console</h2>
+<ol>
+  <li>Navigate to the <a href="https://console.firebase.google.com" target="_blank" rel="noopener">Firebase Console</a> and open your project (e.g., <code>codelab-flutter-demo</code>).</li>
+  <li>In the left-hand navigation under <strong>Build</strong>, click <strong>Firestore Database</strong>.</li>
+  <li>Click <strong>Create database</strong>.</li>
+  <li>Select your database location (choose a region close to your target users, such as <code>asia-south1</code> or <code>us-central1</code>). <em>Note: Once chosen, this location cannot be changed!</em></li>
+  <li>Choose starting security rules: select <strong>Start in test mode</strong> for development (which permits reads and writes for 30 days while you build).</li>
+  <li>Click <strong>Enable</strong>.</li>
+</ol>
+
+<div class="panel yellow">
+  <strong>Test Mode Reminder:</strong>
+  <p>Test mode gives public read/write access to anyone who knows your project ID. It is convenient for learning and prototyping, but we will lock it down with production-ready Security Rules in Step 12!</p>
+</div>
+
+<h2>2. Add Dependencies to Flutter</h2>
+<p>In your Flutter project root terminal, run:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>flutter pub add cloud_firestore</code></pre>
+</div>
+
+<p>Your <code>pubspec.yaml</code> should now include both core and Firestore packages:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^3.12.0
+  cloud_firestore: ^5.6.5</code></pre>
+</div>
+
+<h2>3. Platform Setup Essentials</h2>
+<table class="comparison">
+  <tr><th>Platform</th><th>Configuration File</th><th>Setting Required</th></tr>
+  <tr>
+    <td><strong>Android</strong></td>
+    <td><code>android/app/build.gradle</code></td>
+    <td>Ensure <code>minSdkVersion 21</code> (or higher) is configured inside <code>defaultConfig</code>.</td>
+  </tr>
+  <tr>
+    <td><strong>iOS</strong></td>
+    <td><code>ios/Podfile</code></td>
+    <td>Ensure <code>platform :ios, '13.0'</code> (or higher) is set at the top of the Podfile.</td>
+  </tr>
+  <tr>
+    <td><strong>Web</strong></td>
+    <td><code>web/index.html</code></td>
+    <td>Handled automatically by <code>flutterfire configure</code> and <code>firebase_options.dart</code>.</td>
+  </tr>
+</table>
+
+<h2>4. Initialization in main.dart</h2>
+<p>Make sure Firebase Core is initialized before running the app:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  // 1. Ensure Flutter engine bindings are initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 2. Initialize Firebase with current platform options
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Firestore Demo',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2856D8)),
+        useMaterial3: true,
+      ),
+      home: const Scaffold(
+        body: Center(child: Text('Firebase Initialized!')),
+      ),
+    );
+  }
+}</code></pre>
+</div>
+
+<div class="panel mint">
+  <strong>Offline Cache Persistence is Automatic:</strong>
+  <p>On Android and iOS, Firestore enables offline persistence by default! Your app can read and write data even when disconnected, automatically queuing requests and synchronizing with the cloud when network returns.</p>
+</div>
+</section>
+
+<!-- STEP 3 -->
+<section class="step-view" data-title="References &amp; Paths">
+<header class="step-header">
+  <span class="step-kicker">STEP 3 &middot; CORE OBJECTS</span>
+  <h1>CollectionReference &amp; DocumentReference</h1>
+  <p class="lede">Discover how Flutter interacts with Firestore paths through reference objects before executing read or write requests.</p>
+</header>
+
+<h2>What is a Reference?</h2>
+<p>In Cloud Firestore, a <strong>Reference</strong> is simply a lightweight, local locator object that points to a specific path in your database. <em>Creating a reference does NOT perform any network requests or allocate server resources</em>.</p>
+
+<div class="grid-2">
+  <div class="concept">
+    <strong>CollectionReference</strong>
+    <p>Points to a collection containing documents. Used to add new documents, query items, or listen to all documents in the collection.</p>
+    <code>FirebaseFirestore.instance.collection('tasks')</code>
+  </div>
+  <div class="concept">
+    <strong>DocumentReference</strong>
+    <p>Points to a single document inside a collection. Used to read, write, update, or delete that specific document.</p>
+    <code>FirebaseFirestore.instance.collection('tasks').doc('id123')</code>
+  </div>
+</div>
+
+<h2>Obtaining the Firestore Singleton Instance</h2>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>// Get the default Cloud Firestore instance
+final FirebaseFirestore firestore = FirebaseFirestore.instance;</code></pre>
+</div>
+
+<h2>Auto-Generated IDs vs. Custom IDs</h2>
+<p>Firestore allows two ways to define document IDs:</p>
+
+<div class="grid-2">
+  <div class="panel yellow">
+    <strong>1. Auto-Generated Document ID</strong>
+    <p>Calling <code>.doc()</code> with no arguments generates a cryptographically random, collision-resistant 20-character string locally:</p>
+    <div class="code-wrap">
+      <button class="copy-btn">Copy</button>
+      <pre><code>// Creates a reference with a generated ID (e.g. '7kF9mK2v0qP3zL8wY1tB')
+final newDocRef = firestore.collection('tasks').doc();
+print('Generated Document ID: ${newDocRef.id}');</code></pre>
+    </div>
+  </div>
+  <div class="panel mint">
+    <strong>2. Explicit / Custom Document ID</strong>
+    <p>Passing an ID string specifies the exact document identifier. Perfect for linking user profiles to their Firebase Auth <code>uid</code>:</p>
+    <div class="code-wrap">
+      <button class="copy-btn">Copy</button>
+      <pre><code>final currentUserId = 'auth_uid_12345';
+// Points directly to /users/auth_uid_12345
+final userDocRef = firestore.collection('users').doc(currentUserId);</code></pre>
+    </div>
+  </div>
+</div>
+
+<h2>Navigating Subcollections</h2>
+<p>To point to a subcollection, simply chain <code>collection()</code> and <code>doc()</code>:</p>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>// Method A: Chained calls
+final reviewsRef = firestore
+    .collection('products')
+    .doc('laptop_x1')
+    .collection('reviews');
+
+// Method B: Slash-separated path string
+final reviewDocRef = firestore.doc('products/laptop_x1/reviews/rev_99');</code></pre>
+</div>
+
+<div class="callout">
+  <span class="label">RULE OF THUMB</span>
+  <p>Use <code>collection.doc()</code> when creating a reference with a custom ID or pre-generating an ID before writing. Use <code>collection.add()</code> when you want to write data and generate the ID in a single step.</p>
+</div>
+
+<div class="quiz" data-answer="2" data-correct="Correct! Creating a reference just creates a local path pointer. No network activity occurs until you call an operation like get(), set(), add(), delete(), or snapshots().">
+  <h3>Does calling <code>firestore.collection('users').doc('user123')</code> fetch data over the network?</h3>
+  <div class="quiz-options">
+    <button class="quiz-option">Yes, it immediately downloads user123 from Google servers.</button>
+    <button class="quiz-option">Yes, but only if the user is authenticated.</button>
+    <button class="quiz-option">No, it simply instantiates a local locator object pointing to that database path.</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+</section>
+
+<!-- STEP 4 -->
+<section class="step-view" data-title="Create Operations">
+<header class="step-header">
+  <span class="step-kicker">STEP 4 &middot; CRUD: CREATE</span>
+  <h1>Writing &amp; Adding Documents</h1>
+  <p class="lede">Learn the different ways to write data to Firestore using <code>add()</code>, <code>set()</code>, and special <code>FieldValue</code> transformers.</p>
+</header>
+
+<h2>1. Adding with Auto-Generated ID: <code>collection.add()</code></h2>
+<p>The <code>add()</code> method creates a new document with an auto-generated ID and returns a <code>DocumentReference</code> pointing to the new document:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; addNewTask() async {
+  final tasksCollection = FirebaseFirestore.instance.collection('tasks');
+
+  try {
+    DocumentReference docRef = await tasksCollection.add({
+      'title': 'Install FlutterFire CLI',
+      'description': 'Configure Flutter with Firebase tools',
+      'isCompleted': false,
+      'priority': 1,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    print('Task created successfully with ID: ${docRef.id}');
+  } on FirebaseException catch (e) {
+    print('Failed to add task: ${e.message} (code: ${e.code})');
+  }
+}</code></pre>
+</div>
+
+<h2>2. Writing with Custom ID: <code>doc.set()</code></h2>
+<p>When you know the document ID in advance (e.g., storing a user profile under their Auth <code>uid</code>), use <code>set()</code>:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; saveUserProfile({
+  required String userId,
+  required String name,
+  required String email,
+}) async {
+  final userDoc = FirebaseFirestore.instance.collection('users').doc(userId);
+
+  await userDoc.set({
+    'name': name,
+    'email': email,
+    'role': 'student',
+    'createdAt': FieldValue.serverTimestamp(),
+  });
+}</code></pre>
+</div>
+
+<h2>3. Beware of <code>set()</code> Overwriting vs. <code>SetOptions(merge: true)</code></h2>
+<div class="grid-2">
+  <div class="panel pink">
+    <strong>Danger: Default set() Overwrites!</strong>
+    <p>If the document already exists, calling <code>doc.set({'score': 100})</code> without merge options will <strong>completely delete and replace</strong> all existing fields in that document!</p>
+  </div>
+  <div class="panel mint">
+    <strong>Safe Solution: SetOptions(merge: true)</strong>
+    <p>Passing <code>SetOptions(merge: true)</code> preserves any unmentioned fields and only creates or updates the specific fields passed:</p>
+    <div class="code-wrap">
+      <button class="copy-btn">Copy</button>
+      <pre><code>// Only updates 'score' or creates doc if missing;
+// existing fields like 'name' and 'email' are preserved!
+await userDoc.set(
+  {'score': 100},
+  SetOptions(merge: true),
+);</code></pre>
+    </div>
+  </div>
+</div>
+
+<h2>4. Server-Side Atomic Operations with <code>FieldValue</code></h2>
+<p>Firestore provides powerful atomic operators that evaluate directly on the server to prevent race conditions:</p>
+
+<table class="comparison">
+  <tr><th>Operation</th><th>Syntax</th><th>Why Use It?</th></tr>
+  <tr>
+    <td><strong>Server Timestamp</strong></td>
+    <td><code>FieldValue.serverTimestamp()</code></td>
+    <td>Prevents client clock drift; guarantees the exact UTC time the server processed the write.</td>
+  </tr>
+  <tr>
+    <td><strong>Atomic Increment</strong></td>
+    <td><code>FieldValue.increment(1)</code> or <code>FieldValue.increment(-5)</code></td>
+    <td>Atomically updates numerical counters without reading current value first &mdash; immune to race conditions!</td>
+  </tr>
+  <tr>
+    <td><strong>Array Union</strong></td>
+    <td><code>FieldValue.arrayUnion(['tag1', 'tag2'])</code></td>
+    <td>Appends elements to an array field only if they do not already exist (set semantics).</td>
+  </tr>
+  <tr>
+    <td><strong>Array Remove</strong></td>
+    <td><code>FieldValue.arrayRemove(['tag1'])</code></td>
+    <td>Removes all occurrences of the specified elements from an array field.</td>
+  </tr>
+</table>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>// Example: Increment views and add a tag atomically
+await firestore.collection('articles').doc('flutter_tips').set({
+  'viewCount': FieldValue.increment(1),
+  'tags': FieldValue.arrayUnion(['flutter', 'dart']),
+  'lastViewedAt': FieldValue.serverTimestamp(),
+}, SetOptions(merge: true));</code></pre>
+</div>
+</section>
+
+<!-- STEP 5 -->
+<section class="step-view" data-title="Read Operations">
+<header class="step-header">
+  <span class="step-kicker">STEP 5 &middot; CRUD: READ</span>
+  <h1>Reading Documents &amp; Collections</h1>
+  <p class="lede">Fetch data on-demand using one-time asynchronous <code>get()</code> calls and extract field values safely.</p>
+</header>
+
+<h2>1. Reading a Single Document: <code>doc.get()</code></h2>
+<p>Calling <code>get()</code> on a <code>DocumentReference</code> returns a <code>DocumentSnapshot</code>. Always verify <code>snapshot.exists</code> before trying to access the data:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; fetchUserProfile(String userId) async {
+  final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
+
+  try {
+    final DocumentSnapshot snapshot = await docRef.get();
+
+    if (snapshot.exists) {
+      // Extract data map safely
+      final data = snapshot.data() as Map&lt;String, dynamic&gt;;
+      final name = data['name'] as String? ?? 'Anonymous';
+      final email = data['email'] as String? ?? 'No email';
+      print('User found: $name ($email)');
+    } else {
+      print('User document does not exist!');
+    }
+  } on FirebaseException catch (e) {
+    print('Failed to read document: ${e.message}');
+  }
+}</code></pre>
+</div>
+
+<h2>2. Reading an Entire Collection: <code>collection.get()</code></h2>
+<p>Calling <code>get()</code> on a <code>CollectionReference</code> returns a <code>QuerySnapshot</code> containing an iterable list of <code>docs</code>:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; fetchAllTasks() async {
+  final querySnapshot = await FirebaseFirestore.instance
+      .collection('tasks')
+      .get();
+
+  print('Total tasks retrieved: ${querySnapshot.size}');
+
+  for (var docSnapshot in querySnapshot.docs) {
+    final id = docSnapshot.id;
+    final data = docSnapshot.data();
+    print('Task [$id]: ${data['title']} (Completed: ${data['isCompleted']})');
+  }
+}</code></pre>
+</div>
+
+<h2>Controlling Cache vs. Server Source</h2>
+<p>By default, <code>get()</code> reads from the server and falls back to local cache if offline. You can control this behavior with <code>GetOptions</code>:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>// Read exclusively from local device cache (0 cloud read cost!)
+final cachedSnapshot = await docRef.get(
+  const GetOptions(source: Source.cache),
+);
+
+// Force fetch from server, bypassing local cache
+final serverSnapshot = await docRef.get(
+  const GetOptions(source: Source.server),
+);</code></pre>
+</div>
+
+<div class="grid-2">
+  <div class="concept">
+    <strong>When to use get()</strong>
+    <p>Use <code>get()</code> for one-time checks: login profile load, checking if a username is available, or generating a static invoice/report.</p>
+  </div>
+  <div class="concept">
+    <strong>When to use snapshots()</strong>
+    <p>Use <code>snapshots()</code> (covered in Step 9) whenever the UI must react live to changes made by the user, teammates, or backend Cloud Functions.</p>
+  </div>
+</div>
+</section>
+
+<!-- STEP 6 -->
+<section class="step-view" data-title="Update &amp; Delete">
+<header class="step-header">
+  <span class="step-kicker">STEP 6 &middot; CRUD: UPDATE &amp; DELETE</span>
+  <h1>Updating &amp; Deleting Documents</h1>
+  <p class="lede">Modify existing records without overwriting other fields, perform nested map updates, and remove documents.</p>
+</header>
+
+<h2>1. Updating Fields with <code>doc.update()</code></h2>
+<p>The <code>update()</code> method modifies specific fields of an existing document without affecting any other fields:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; markTaskCompleted(String taskId) async {
+  final docRef = FirebaseFirestore.instance.collection('tasks').doc(taskId);
+
+  try {
+    await docRef.update({
+      'isCompleted': true,
+      'completedAt': FieldValue.serverTimestamp(),
+    });
+    print('Task marked as completed!');
+  } on FirebaseException catch (e) {
+    if (e.code == 'not-found') {
+      print('Cannot update: Document does not exist!');
+    } else {
+      print('Update error: ${e.message}');
+    }
+  }
+}</code></pre>
+</div>
+
+<div class="panel yellow">
+  <strong>Vital Distinction: update() vs. set()</strong>
+  <ul>
+    <li><code>update()</code> <strong>fails</strong> with error code <code>not-found</code> if the document does not already exist.</li>
+    <li><code>set(..., SetOptions(merge: true))</code> will <strong>create</strong> the document if it doesn't exist, and merge fields if it does.</li>
+  </ul>
+</div>
+
+<h2>2. Updating Nested Maps with Dot Notation</h2>
+<p>Suppose your document has a nested map field: <code>address: { city: "Pune", state: "MH" }</code>. If you update it directly with <code>{'address': {'city': 'Nagpur'}}</code>, the <code>state</code> field will be lost!</p>
+<p>To safely update nested keys without erasing siblings, use <strong>Dot Notation</strong>:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>// Safe: Only modifies city, keeps state intact!
+await firestore.collection('users').doc('user123').update({
+  'address.city': 'Nagpur',
+});</code></pre>
+</div>
+
+<h2>3. Deleting Specific Fields: <code>FieldValue.delete()</code></h2>
+<p>To remove a field from a document entirely:</p>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>await docRef.update({
+  'temporaryPromoCode': FieldValue.delete(),
+});</code></pre>
+</div>
+
+<h2>4. Deleting a Document: <code>doc.delete()</code></h2>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; deleteTask(String taskId) async {
+  try {
+    await FirebaseFirestore.instance.collection('tasks').doc(taskId).delete();
+    print('Task deleted!');
+  } on FirebaseException catch (e) {
+    print('Delete failed: ${e.message}');
+  }
+}</code></pre>
+</div>
+
+<div class="callout">
+  <span class="label">SUBCOLLECTION ALERT</span>
+  <p>In Cloud Firestore, <strong>deleting a document does NOT delete its subcollections</strong>! Subcollections remain orphaned at their paths. If you want to delete subcollections, you must delete their documents explicitly or trigger a Cloud Function to clean them up.</p>
+</div>
+</section>
+
+<!-- STEP 7 -->
+<section class="step-view" data-title="Custom Dart Models">
+<header class="step-header">
+  <span class="step-kicker">STEP 7 &middot; TYPE SAFETY</span>
+  <h1>Custom Dart Models with <code>withConverter</code></h1>
+  <p class="lede">Eliminate brittle <code>Map&lt;String, dynamic&gt;</code> code and typos by converting Firestore documents into type-safe Dart classes.</p>
+</header>
+
+<h2>Why Convert to Dart Models?</h2>
+<div class="grid-2">
+  <div class="panel pink">
+    <strong>Without Models (Fragile):</strong>
+    <p>Using raw maps means typing string keys repeatedly: <code>doc['title']</code>. A simple typo like <code>doc['titel']</code> fails silently at runtime with <code>null</code>!</p>
+  </div>
+  <div class="panel mint">
+    <strong>With Models (Type-Safe):</strong>
+    <p>Get full IDE auto-completion, compile-time type checking, refactoring support, and clean null-safety guarantees: <code>task.title</code>.</p>
+  </div>
+</div>
+
+<h2>1. Define the <code>TaskModel</code> Class</h2>
+<p>A complete Dart model with <code>fromFirestore</code> and <code>toFirestore</code>:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>import 'package:cloud_firestore/cloud_firestore.dart';
+
+class TaskModel {
+  final String id;
+  final String title;
+  final String description;
+  final bool isCompleted;
+  final int priority; // 1 = Low, 2 = Medium, 3 = High
+  final DateTime? dueDate;
+  final DateTime createdAt;
+
+  TaskModel({
+    required this.id,
+    required this.title,
+    this.description = '',
+    this.isCompleted = false,
+    this.priority = 1,
+    this.dueDate,
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+
+  // FACTORY: Convert Firestore DocumentSnapshot into TaskModel
+  factory TaskModel.fromFirestore(
+    DocumentSnapshot&lt;Map&lt;String, dynamic&gt;&gt; snapshot,
+    SnapshotOptions? options,
+  ) {
+    final data = snapshot.data();
+    return TaskModel(
+      id: snapshot.id,
+      title: data?['title'] as String? ?? 'Untitled',
+      description: data?['description'] as String? ?? '',
+      isCompleted: data?['isCompleted'] as bool? ?? false,
+      priority: data?['priority'] as int? ?? 1,
+      dueDate: (data?['dueDate'] as Timestamp?)?.toDate(),
+      createdAt: (data?['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+    );
+  }
+
+  // METHOD: Convert TaskModel instance into Map for Firestore
+  Map&lt;String, dynamic&gt; toFirestore() {
+    return {
+      'title': title,
+      'description': description,
+      'isCompleted': isCompleted,
+      'priority': priority,
+      if (dueDate != null) 'dueDate': Timestamp.fromDate(dueDate!),
+      'createdAt': Timestamp.fromDate(createdAt),
+    };
+  }
+
+  // Handy copyWith method for state updates
+  TaskModel copyWith({
+    String? title,
+    String? description,
+    bool? isCompleted,
+    int? priority,
+    DateTime? dueDate,
+  }) {
+    return TaskModel(
+      id: id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      isCompleted: isCompleted ?? this.isCompleted,
+      priority: priority ?? this.priority,
+      dueDate: dueDate ?? this.dueDate,
+      createdAt: createdAt,
+    );
+  }
+}</code></pre>
+</div>
+
+<h2>2. Connect with <code>withConverter&lt;T&gt;()</code></h2>
+<p>Firestore offers the incredible <code>withConverter&lt;T&gt;()</code> method on collections and documents. It attaches serialization logic once, returning a strongly-typed <code>CollectionReference&lt;TaskModel&gt;</code>:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>class TaskRepository {
+  // Create a strongly-typed CollectionReference
+  static final CollectionReference&lt;TaskModel&gt; tasksRef = FirebaseFirestore
+      .instance
+      .collection('tasks')
+      .withConverter&lt;TaskModel&gt;(
+        fromFirestore: TaskModel.fromFirestore,
+        toFirestore: (TaskModel task, _) =&gt; task.toFirestore(),
+      );
+
+  // Type-safe ADD: Notice we pass a TaskModel object, not a Map!
+  static Future&lt;DocumentReference&lt;TaskModel&gt;&gt; addTask(TaskModel task) async {
+    return await tasksRef.add(task);
+  }
+
+  // Type-safe GET: Returns TaskModel directly!
+  static Future&lt;TaskModel?&gt; getTask(String taskId) async {
+    final docSnapshot = await tasksRef.doc(taskId).get();
+    return docSnapshot.data(); // Returns TaskModel?
+  }
+}</code></pre>
+</div>
+
+<div class="panel blue">
+  <strong>Why withConverter is the Gold Standard:</strong>
+  <p>When you use <code>withConverter</code>, all query operations, snapshots, and <code>StreamBuilder</code> snapshots automatically emit strongly typed <code>TaskModel</code> instances. You never have to manually map or cast JSON maps in your widgets again!</p>
+</div>
+</section>
+
+<!-- STEP 8 -->
+<section class="step-view" data-title="Queries &amp; Sorting">
+<header class="step-header">
+  <span class="step-kicker">STEP 8 &middot; QUERYING</span>
+  <h1>Querying, Filtering &amp; Sorting Records</h1>
+  <p class="lede">Fetch exactly what you need using <code>where()</code>, <code>orderBy()</code>, <code>limit()</code>, and composite indexes.</p>
+</header>
+
+<h2>1. Filtering with <code>where()</code></h2>
+<p>Firestore lets you construct rich queries by chaining filter criteria:</p>
+
+<table class="comparison">
+  <tr><th>Operator</th><th>Example Code</th><th>Use Case</th></tr>
+  <tr>
+    <td><code>isEqualTo</code></td>
+    <td><code>.where('isCompleted', isEqualTo: false)</code></td>
+    <td>Exact match</td>
+  </tr>
+  <tr>
+    <td><code>isNotEqualTo</code></td>
+    <td><code>.where('status', isNotEqualTo: 'archived')</code></td>
+    <td>Excluding values</td>
+  </tr>
+  <tr>
+    <td><code>isGreaterThan</code></td>
+    <td><code>.where('priority', isGreaterThan: 1)</code></td>
+    <td>Numeric / Date range</td>
+  </tr>
+  <tr>
+    <td><code>whereIn</code></td>
+    <td><code>.where('category', whereIn: ['work', 'urgent'])</code></td>
+    <td>Match any value in list (max 30 items)</td>
+  </tr>
+  <tr>
+    <td><code>arrayContains</code></td>
+    <td><code>.where('tags', arrayContains: 'flutter')</code></td>
+    <td>Checks if array field contains item</td>
+  </tr>
+  <tr>
+    <td><code>arrayContainsAny</code></td>
+    <td><code>.where('tags', arrayContainsAny: ['dart', 'firebase'])</code></td>
+    <td>Matches any tag in list (max 30 items)</td>
+  </tr>
+</table>
+
+<h2>2. Ordering and Limiting</h2>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>// Query: Uncompleted tasks, sorted by priority (high to low), limited to 10
+final Query&lt;TaskModel&gt; urgentTasksQuery = TaskRepository.tasksRef
+    .where('isCompleted', isEqualTo: false)
+    .orderBy('priority', descending: true)
+    .limit(10);</code></pre>
+</div>
+
+<h2>3. Composite Queries &amp; The Index Requirement</h2>
+<div class="panel yellow">
+  <strong>Understanding Composite Indexes:</strong>
+  <p>Firestore queries are ultra-fast because every query uses an index. For simple queries (e.g. filtering by <code>isCompleted</code> only), Firestore creates single-field indexes automatically.</p>
+  <p>However, when you <strong>filter on one field and sort on another</strong> (or filter on multiple fields), Firestore requires a <strong>Composite Index</strong>.</p>
+</div>
+
+<h3>What Happens When an Index is Missing?</h3>
+<p>If you run a query that requires an index that hasn't been built yet, Firestore will throw a <code>FirebaseException</code> with code <code>failed-precondition</code> and log a direct clickable URL in your debug console:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>[cloud_firestore/failed-precondition] The query requires an index. You can create it here:
+https://console.firebase.google.com/v1/r/project/codelab-demo/firestore/indexes?create_composite=...</code></pre>
+</div>
+
+<div class="callout">
+  <span class="label">PRO TIP</span>
+  <p>Click the link directly in your VS Code / Android Studio debug console! It opens the Firebase Console with the required fields pre-filled. Just click <strong>Create Index</strong>, wait 1-2 minutes for it to build, and re-run your app.</p>
+</div>
+
+<h2>4. Pagination Basics with <code>startAfterDocument</code></h2>
+<p>To implement "Load More" infinite scroll without reading all documents at once:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>// Fetch the first page of 10 tasks
+final firstPageSnapshot = await TaskRepository.tasksRef
+    .orderBy('createdAt', descending: true)
+    .limit(10)
+    .get();
+
+final lastVisibleDoc = firstPageSnapshot.docs.last;
+
+// Fetch the next page of 10 tasks starting after the last item
+final nextPageSnapshot = await TaskRepository.tasksRef
+    .orderBy('createdAt', descending: true)
+    .startAfterDocument(lastVisibleDoc)
+    .limit(10)
+    .get();</code></pre>
+</div>
+</section>
+
+<!-- STEP 9 -->
+<section class="step-view" data-title="Real-Time Updates">
+<header class="step-header">
+  <span class="step-kicker">STEP 9 &middot; REACTIVE UI</span>
+  <h1>Real-Time Updates with <code>StreamBuilder</code></h1>
+  <p class="lede">Transform your Flutter interface into a live, reactive experience using <code>snapshots()</code> and <code>StreamBuilder</code>.</p>
+</header>
+
+<h2>How Real-Time Snapshots Work</h2>
+<p>Instead of making one-off network requests with <code>get()</code>, calling <code>snapshots()</code> opens a persistent stream. Any time data is added, modified, or removed in the cloud (or by other users), Firestore pushes an updated snapshot down to your Flutter app automatically.</p>
+
+<div class="flow">Device A updates Task #42
+           ↓
+Cloud Firestore Database
+           ↓ (Websocket / gRPC push)
+Device B receives snapshot &amp; rebuilds StreamBuilder UI instantly!</div>
+
+<h2>The 4 Essential StreamBuilder States</h2>
+<p>When building with <code>StreamBuilder</code>, always gracefully handle all four UI states:</p>
+
+<table class="comparison">
+  <tr><th>State</th><th>Condition</th><th>Recommended UI</th></tr>
+  <tr>
+    <td><strong>1. Loading</strong></td>
+    <td><code>snapshot.connectionState == ConnectionState.waiting</code></td>
+    <td><code>CircularProgressIndicator()</code> or Shimmer skeleton.</td>
+  </tr>
+  <tr>
+    <td><strong>2. Error</strong></td>
+    <td><code>snapshot.hasError</code></td>
+    <td>Error banner / message showing <code>snapshot.error</code>.</td>
+  </tr>
+  <tr>
+    <td><strong>3. Empty</strong></td>
+    <td><code>!snapshot.hasData || snapshot.data!.docs.isEmpty</code></td>
+    <td>Friendly empty state illustration or text: "No tasks yet!".</td>
+  </tr>
+  <tr>
+    <td><strong>4. Active Data</strong></td>
+    <td><code>snapshot.hasData && snapshot.data!.docs.isNotEmpty</code></td>
+    <td><code>ListView.builder</code> displaying real-time records.</td>
+  </tr>
+</table>
+
+<h2>Clean StreamBuilder Implementation</h2>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>class RealTimeTaskList extends StatelessWidget {
+  const RealTimeTaskList({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // 1. Point to our type-safe query
+    final Stream&lt;QuerySnapshot&lt;TaskModel&gt;&gt; taskStream = TaskRepository.tasksRef
+        .orderBy('createdAt', descending: true)
+        .snapshots();
+
+    // 2. StreamBuilder subscribes and automatically unmounts listener on dispose
+    return StreamBuilder&lt;QuerySnapshot&lt;TaskModel&gt;&gt;(
+      stream: taskStream,
+      builder: (context, snapshot) {
+        // STATE 1: ERROR
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Error loading tasks: ${snapshot.error}'),
+          );
+        }
+
+        // STATE 2: LOADING INITIAL DATA
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // STATE 3: EMPTY DATA
+        final List&lt;QueryDocumentSnapshot&lt;TaskModel&gt;&gt; docs =
+            snapshot.data?.docs ?? [];
+
+        if (docs.isEmpty) {
+          return const Center(
+            child: Text(
+              'No tasks found. Tap + to add one!',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          );
+        }
+
+        // STATE 4: SUCCESS - RENDER REAL-TIME LIST
+        return ListView.separated(
+          itemCount: docs.length,
+          separatorBuilder: (_, __) =&gt; const Divider(height: 1),
+          itemBuilder: (context, index) {
+            final TaskModel task = docs[index].data();
+
+            return ListTile(
+              leading: Checkbox(
+                value: task.isCompleted,
+                onChanged: (bool? value) {
+                  // Toggle completed in Firestore
+                  TaskRepository.tasksRef.doc(task.id).update({
+                    'isCompleted': value ?? false,
+                  });
+                },
+              ),
+              title: Text(
+                task.title,
+                style: TextStyle(
+                  decoration: task.isCompleted
+                      ? TextDecoration.lineThrough
+                      : null,
+                ),
+              ),
+              subtitle: Text(task.description),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                onPressed: () {
+                  TaskRepository.tasksRef.doc(task.id).delete();
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}</code></pre>
+</div>
+
+<div class="panel mint">
+  <strong>No Manual setState() Needed:</strong>
+  <p><code>StreamBuilder</code> handles subscription lifecycle automatically. It calls <code>setState()</code> under the hood whenever new events arrive and cancels the stream subscription when the widget is disposed, preventing memory leaks!</p>
+</div>
+</section>
+
+<!-- STEP 10 -->
+<section class="step-view" data-title="Hands-On App: TaskFlow">
+<header class="step-header">
+  <span class="step-kicker">STEP 10 &middot; COMPLETE PROJECT</span>
+  <h1>Complete Real-Time App: "TaskFlow"</h1>
+  <p class="lede">Assemble all concepts into a complete, runnable real-time Flutter application with filtering, sorting, and full CRUD.</p>
+</header>
+
+<p>Here is the complete, self-contained Flutter application code. You can replace your <code>lib/main.dart</code> with this file after configuring Firebase!</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const TaskFlowApp());
+}
+
+// -------------------------------------------------------------
+// 1. DATA MODEL
+// -------------------------------------------------------------
+class Task {
+  final String id;
+  final String title;
+  final String description;
+  final bool isCompleted;
+  final int priority; // 1 = Low, 2 = Medium, 3 = High
+  final DateTime createdAt;
+
+  Task({
+    required this.id,
+    required this.title,
+    this.description = '',
+    this.isCompleted = false,
+    this.priority = 1,
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+
+  factory Task.fromFirestore(
+    DocumentSnapshot&lt;Map&lt;String, dynamic&gt;&gt; snapshot,
+    SnapshotOptions? options,
+  ) {
+    final data = snapshot.data();
+    return Task(
+      id: snapshot.id,
+      title: data?['title'] as String? ?? '',
+      description: data?['description'] as String? ?? '',
+      isCompleted: data?['isCompleted'] as bool? ?? false,
+      priority: data?['priority'] as int? ?? 1,
+      createdAt: (data?['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+    );
+  }
+
+  Map&lt;String, dynamic&gt; toFirestore() {
+    return {
+      'title': title,
+      'description': description,
+      'isCompleted': isCompleted,
+      'priority': priority,
+      'createdAt': Timestamp.fromDate(createdAt),
+    };
+  }
+}
+
+// -------------------------------------------------------------
+// 2. FIRESTORE SERVICE
+// -------------------------------------------------------------
+class FirestoreService {
+  static final CollectionReference&lt;Task&gt; tasksRef = FirebaseFirestore
+      .instance
+      .collection('tasks')
+      .withConverter&lt;Task&gt;(
+        fromFirestore: Task.fromFirestore,
+        toFirestore: (task, _) =&gt; task.toFirestore(),
+      );
+
+  // Stream with dynamic filter
+  static Stream&lt;QuerySnapshot&lt;Task&gt;&gt; getTasksStream({String filter = 'all'}) {
+    Query&lt;Task&gt; query = tasksRef.orderBy('createdAt', descending: true);
+
+    if (filter == 'active') {
+      query = query.where('isCompleted', isEqualTo: false);
+    } else if (filter == 'completed') {
+      query = query.where('isCompleted', isEqualTo: true);
+    }
+
+    return query.snapshots();
+  }
+
+  static Future&lt;void&gt; addTask(String title, String desc, int priority) async {
+    await tasksRef.add(
+      Task(id: '', title: title, description: desc, priority: priority),
+    );
+  }
+
+  static Future&lt;void&gt; toggleTaskStatus(String id, bool currentStatus) async {
+    await tasksRef.doc(id).update({'isCompleted': !currentStatus});
+  }
+
+  static Future&lt;void&gt; deleteTask(String id) async {
+    await tasksRef.doc(id).delete();
+  }
+}
+
+// -------------------------------------------------------------
+// 3. UI APPLICATION
+// -------------------------------------------------------------
+class TaskFlowApp extends StatelessWidget {
+  const TaskFlowApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'TaskFlow',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2856D8)),
+        useMaterial3: true,
+      ),
+      home: const TaskFlowHomeScreen(),
+    );
+  }
+}
+
+class TaskFlowHomeScreen extends StatefulWidget {
+  const TaskFlowHomeScreen({super.key});
+
+  @override
+  State&lt;TaskFlowHomeScreen&gt; createState() =&gt; _TaskFlowHomeScreenState();
+}
+
+class _TaskFlowHomeScreenState extends State&lt;TaskFlowHomeScreen&gt; {
+  String _currentFilter = 'all'; // 'all', 'active', 'completed'
+
+  void _showAddTaskDialog() {
+    final titleController = TextEditingController();
+    final descController = TextEditingController();
+    int priority = 1;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Create New Task',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: titleController,
+                    decoration: const InputDecoration(
+                      labelText: 'Task Title',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: descController,
+                    decoration: const InputDecoration(
+                      labelText: 'Description (optional)',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Text('Priority: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ChoiceChip(
+                        label: const Text('Low'),
+                        selected: priority == 1,
+                        onSelected: (_) =&gt; setModalState(() =&gt; priority = 1),
+                      ),
+                      const SizedBox(width: 8),
+                      ChoiceChip(
+                        label: const Text('Med'),
+                        selected: priority == 2,
+                        onSelected: (_) =&gt; setModalState(() =&gt; priority = 2),
+                      ),
+                      const SizedBox(width: 8),
+                      ChoiceChip(
+                        label: const Text('High'),
+                        selected: priority == 3,
+                        onSelected: (_) =&gt; setModalState(() =&gt; priority = 3),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2856D8),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: () async {
+                      if (titleController.text.trim().isEmpty) return;
+                      await FirestoreService.addTask(
+                        titleController.text.trim(),
+                        descController.text.trim(),
+                        priority,
+                      );
+                      if (context.mounted) Navigator.pop(context);
+                    },
+                    child: const Text('Save to Firestore'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Color _getPriorityColor(int priority) {
+    switch (priority) {
+      case 3: return Colors.red.shade700;
+      case 2: return Colors.orange.shade800;
+      default: return Colors.blue.shade700;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('TaskFlow &middot; Real-Time Firestore', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: const Color(0xFF2856D8),
+        foregroundColor: Colors.white,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                const Text('Filter: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(width: 8),
+                ChoiceChip(
+                  label: const Text('All'),
+                  selected: _currentFilter == 'all',
+                  onSelected: (_) =&gt; setState(() =&gt; _currentFilter = 'all'),
+                ),
+                const SizedBox(width: 6),
+                ChoiceChip(
+                  label: const Text('Active'),
+                  selected: _currentFilter == 'active',
+                  onSelected: (_) =&gt; setState(() =&gt; _currentFilter = 'active'),
+                ),
+                const SizedBox(width: 6),
+                ChoiceChip(
+                  label: const Text('Completed'),
+                  selected: _currentFilter == 'completed',
+                  onSelected: (_) =&gt; setState(() =&gt; _currentFilter = 'completed'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      body: StreamBuilder&lt;QuerySnapshot&lt;Task&gt;&gt;(
+        stream: FirestoreService.getTasksStream(filter: _currentFilter),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+          if (docs.isEmpty) {
+            return const Center(
+              child: Text('No tasks found under this filter.', style: TextStyle(color: Colors.grey)),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: docs.length,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            itemBuilder: (context, index) {
+              final task = docs[index].data();
+
+              return Dismissible(
+                key: Key(task.id),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 20),
+                  color: Colors.red,
+                  child: const Icon(Icons.delete, color: Colors.white),
+                ),
+                onDismissed: (_) {
+                  FirestoreService.deleteTask(task.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Deleted "${task.title}"')),
+                  );
+                },
+                child: Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                  child: ListTile(
+                    leading: Checkbox(
+                      value: task.isCompleted,
+                      onChanged: (_) {
+                        FirestoreService.toggleTaskStatus(task.id, task.isCompleted);
+                      },
+                    ),
+                    title: Text(
+                      task.title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                    subtitle: task.description.isNotEmpty ? Text(task.description) : null,
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _getPriorityColor(task.priority).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: _getPriorityColor(task.priority)),
+                      ),
+                      child: Text(
+                        task.priority == 3 ? 'HIGH' : task.priority == 2 ? 'MED' : 'LOW',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: _getPriorityColor(task.priority),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAddTaskDialog,
+        backgroundColor: const Color(0xFF2856D8),
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text('New Task'),
+      ),
+    );
+  }
+}</code></pre>
+</div>
+</section>
+
+<!-- STEP 11 -->
+<section class="step-view" data-title="Transactions &amp; Batches">
+<header class="step-header">
+  <span class="step-kicker">STEP 11 &middot; ADVANCED WRITES</span>
+  <h1>Batched Writes &amp; Transactions</h1>
+  <p class="lede">Execute atomic multi-document operations and prevent race conditions with transactions.</p>
+</header>
+
+<h2>1. Batched Writes (Up to 500 Operations)</h2>
+<p>A <strong>Batched Write</strong> allows you to combine up to 500 <code>set()</code>, <code>update()</code>, and <code>delete()</code> operations into a single atomic request. Either <em>all</em> operations succeed, or <em>none</em> of them apply:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; markAllTasksCompleted(List&lt;String&gt; taskIds) async {
+  final firestore = FirebaseFirestore.instance;
+  // 1. Create a WriteBatch instance
+  final WriteBatch batch = firestore.batch();
+
+  // 2. Queue multiple update/set/delete operations
+  for (final id in taskIds) {
+    final docRef = firestore.collection('tasks').doc(id);
+    batch.update(docRef, {
+      'isCompleted': true,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  // 3. Commit the batch atomically
+  try {
+    await batch.commit();
+    print('All tasks marked as completed in a single atomic batch!');
+  } on FirebaseException catch (e) {
+    print('Batch failed: ${e.message}');
+  }
+}</code></pre>
+</div>
+
+<h2>2. Transactions (Atomic Read-Then-Write)</h2>
+<p>Transactions are essential when a write operation depends on the <strong>current value</strong> of a document (e.g. transferring money, booking tickets, or adjusting stock inventory).</p>
+<p>If another client modifies the document while the transaction is running, Firestore automatically retries the transaction to ensure mathematical consistency.</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; transferFunds({
+  required String senderId,
+  required String recipientId,
+  required double amount,
+}) async {
+  final firestore = FirebaseFirestore.instance;
+  final senderRef = firestore.collection('accounts').doc(senderId);
+  final recipientRef = firestore.collection('accounts').doc(recipientId);
+
+  await firestore.runTransaction((Transaction transaction) async {
+    // STEP 1: MUST PERFORM ALL READS FIRST
+    final senderDoc = await transaction.get(senderRef);
+    final recipientDoc = await transaction.get(recipientRef);
+
+    if (!senderDoc.exists || !recipientDoc.exists) {
+      throw Exception('One or both accounts do not exist!');
+    }
+
+    final double senderBalance = (senderDoc.data()?['balance'] as num).toDouble();
+    if (senderBalance &lt; amount) {
+      throw Exception('Insufficient funds!');
+    }
+
+    final double recipientBalance = (recipientDoc.data()?['balance'] as num).toDouble();
+
+    // STEP 2: PERFORM ALL WRITES
+    transaction.update(senderRef, {'balance': senderBalance - amount});
+    transaction.update(recipientRef, {'balance': recipientBalance + amount});
+  });
+
+  print('Funds transferred atomically!');
+}</code></pre>
+</div>
+
+<div class="panel pink">
+  <strong>Golden Rule of Transactions:</strong>
+  <p>In a Firestore transaction, <strong>all read operations must execute BEFORE any write operations</strong>! You cannot read a document after calling <code>transaction.set()</code> or <code>transaction.update()</code> within the same callback.</p>
+</div>
+</section>
+
+<!-- STEP 12 -->
+<section class="step-view" data-title="Security Rules">
+<header class="step-header">
+  <span class="step-kicker">STEP 12 &middot; PRODUCTION SECURITY</span>
+  <h1>Firestore Security Rules</h1>
+  <p class="lede">Protect your database on Google Cloud servers so malicious clients cannot tamper with or read private data.</p>
+</header>
+
+<div class="panel pink">
+  <strong>Never Trust the Client:</strong>
+  <p>Client-side Flutter code can be inspected, decompiled, or bypassed by attackers using custom HTTP requests. Security in Firebase is enforced strictly on the server through <strong>Firestore Security Rules</strong>.</p>
+</div>
+
+<h2>Basic Structure of <code>firestore.rules</code></h2>
+<p>Rules match document paths and allow or deny operations based on authentication status and request payload:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth != null &amp;&amp; request.auth.uid == userId;
+    }
+
+    // 1. User Profiles: Anyone signed in can read, only the user can write
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+
+    // 2. Tasks: Only allow users to access their own tasks
+    match /tasks/{taskId} {
+      allow read, write: if isAuthenticated() &amp;&amp;
+                            request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() &amp;&amp;
+                       resource.data.userId == request.auth.uid;
+    }
+  }
+}</code></pre>
+</div>
+
+<h2><code>request.resource</code> vs. <code>resource</code></h2>
+<table class="comparison">
+  <tr><th>Object</th><th>What It Represents</th><th>Typical Use Case</th></tr>
+  <tr>
+    <td><code>request.auth</code></td>
+    <td>Authentication token of the caller (<code>uid</code>, <code>email</code>, custom claims).</td>
+    <td>Check if user is logged in (<code>request.auth != null</code>).</td>
+  </tr>
+  <tr>
+    <td><code>resource.data</code></td>
+    <td>Data of the document <strong>as it currently exists</strong> on the server.</td>
+    <td>Verify ownership before deleting or updating.</td>
+  </tr>
+  <tr>
+    <td><code>request.resource.data</code></td>
+    <td>The <strong>incoming data</strong> being written to the database.</td>
+    <td>Validate schema types, required fields, and values.</td>
+  </tr>
+</table>
+
+<h2>Schema Validation Example</h2>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>// Ensure incoming task has a title of at least 3 characters and valid priority
+match /tasks/{taskId} {
+  allow create: if request.auth != null
+    &amp;&amp; request.resource.data.title is string
+    &amp;&amp; request.resource.data.title.size() &gt;= 3
+    &amp;&amp; request.resource.data.priority in [1, 2, 3];
+}</code></pre>
+</div>
+</section>
+
+<!-- STEP 13 -->
+<section class="step-view" data-title="Troubleshooting">
+<header class="step-header">
+  <span class="step-kicker">STEP 13 &middot; DIAGNOSTICS</span>
+  <h1>Troubleshooting Common Errors</h1>
+  <p class="lede">Quickly diagnose and fix the most frequent Firestore errors encountered in Flutter development.</p>
+</header>
+
+<table class="comparison">
+  <tr><th>Error Code / Message</th><th>Root Cause</th><th>Immediate Fix</th></tr>
+  <tr>
+    <td><code>permission-denied</code></td>
+    <td>Security rules evaluated to <code>false</code>, test mode expired, or user is not signed in.</td>
+    <td>Check Firebase Console &rarr; Firestore &rarr; Rules tab. Ensure user is authenticated or adjust rules for testing.</td>
+  </tr>
+  <tr>
+    <td><code>failed-precondition: Missing index</code></td>
+    <td>Query combines multiple equality/inequality filters or sorts across fields without a composite index.</td>
+    <td>Click the generated console link in the debug log to automatically create the required composite index.</td>
+  </tr>
+  <tr>
+    <td><code>not-found</code></td>
+    <td>Attempted to call <code>doc.update()</code> on a document path that does not exist.</td>
+    <td>Use <code>doc.set(..., SetOptions(merge: true))</code> instead if you want to create the doc when missing.</td>
+  </tr>
+  <tr>
+    <td><code>Null check operator used on null value</code></td>
+    <td>Accessing a document field that was missing or null in Firestore without a fallback.</td>
+    <td>Use null-coalescing operators in model deserialization: <code>data?['title'] as String? ?? 'Untitled'</code>.</td>
+  </tr>
+  <tr>
+    <td><code>A WriteBatch can contain at most 500 operations</code></td>
+    <td>Exceeded the maximum 500 writes permitted per batch commit.</td>
+    <td>Chunk your write operations into batches of 400-500 items and commit sequentially.</td>
+  </tr>
+  <tr>
+    <td><code>minSdkVersion error during build</code></td>
+    <td>Android Gradle project has <code>minSdkVersion</code> set to 16 or 19.</td>
+    <td>Open <code>android/app/build.gradle</code> and set <code>minSdkVersion 21</code>.</td>
+  </tr>
+</table>
+
+<div class="quiz" data-answer="2" data-correct="Correct! Click the direct link printed in your terminal or IDE debug console to immediately create the exact composite index in the Firebase Console.">
+  <h3>What is the easiest way to resolve a <code>failed-precondition</code> missing index error?</h3>
+  <div class="quiz-options">
+    <button class="quiz-option">Delete your database and start over.</button>
+    <button class="quiz-option">Remove all where clauses from your app.</button>
+    <button class="quiz-option">Click the generated URL in the debug console to create the composite index in Firebase Console.</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+</section>
+
+<!-- STEP 14 -->
+<section class="step-view" data-title="Revision &amp; Checklist">
+<header class="step-header">
+  <span class="step-kicker">STEP 14 &middot; COMPLETION</span>
+  <h1>Revision &amp; Knowledge Checklist</h1>
+  <p class="lede">Review key takeaways and test your complete mastery of Cloud Firestore in Flutter.</p>
+</header>
+
+<div class="reveal">
+  <summary>What is the difference between a CollectionReference and a DocumentReference?</summary>
+  <div>A <code>CollectionReference</code> points to a collection of documents (e.g. <code>tasks</code>) and is used for querying and adding items. A <code>DocumentReference</code> points to a single document within a collection (e.g. <code>tasks/task_123</code>) and is used to read, update, set, or delete that specific item.</div>
+</div>
+
+<div class="reveal">
+  <summary>Why use withConverter instead of raw Map&lt;String, dynamic&gt;?</summary>
+  <div><code>withConverter</code> transforms collections and documents into type-safe Dart classes with compile-time checks, IDE autocomplete, and centralized serialization. It prevents runtime typos (e.g. <code>doc['titl']</code> returning null) and makes <code>StreamBuilder</code> code much cleaner.</div>
+</div>
+
+<div class="reveal">
+  <summary>Why use FieldValue.serverTimestamp() instead of DateTime.now()?</summary>
+  <div><code>DateTime.now()</code> uses the client device's clock, which can be wrong, set to a different timezone, or intentionally manipulated. <code>FieldValue.serverTimestamp()</code> guarantees the exact UTC time when Google Cloud servers processed the write.</div>
+</div>
+
+<div class="reveal">
+  <summary>What happens if a parent document is deleted when it has subcollections?</summary>
+  <div>In Cloud Firestore, deleting a document does NOT delete its subcollections! Subcollections remain stored under their paths and must be deleted explicitly if desired.</div>
+</div>
+
+<h2>Completion Checklist</h2>
+<ul class="checklist">
+  <li>I understand the NoSQL document/collection architecture and alternating path rule.</li>
+  <li>I enabled Cloud Firestore in the Firebase Console and selected a region.</li>
+  <li>I added <code>cloud_firestore</code> to <code>pubspec.yaml</code> and initialized Firebase Core.</li>
+  <li>I can distinguish between <code>CollectionReference</code> and <code>DocumentReference</code>.</li>
+  <li>I know how to perform CREATE operations using <code>add()</code>, <code>set()</code>, and <code>SetOptions(merge: true)</code>.</li>
+  <li>I can use atomic <code>FieldValue</code> operators (serverTimestamp, increment, arrayUnion).</li>
+  <li>I can perform READ operations using one-time <code>get()</code> and inspect <code>snapshot.exists</code>.</li>
+  <li>I can UPDATE fields safely using <code>update()</code> and dot notation for nested maps.</li>
+  <li>I can DELETE fields with <code>FieldValue.delete()</code> and documents with <code>delete()</code>.</li>
+  <li>I built a type-safe model with <code>fromFirestore</code>, <code>toFirestore</code>, and <code>withConverter</code>.</li>
+  <li>I know how to query with <code>where()</code>, <code>orderBy()</code>, <code>limit()</code>, and handle composite indexes.</li>
+  <li>I can build reactive UIs using <code>snapshots()</code> and <code>StreamBuilder</code> handling all 4 connection states.</li>
+  <li>I understand batched writes and transactions for atomic data integrity.</li>
+  <li>I know how to protect user data using server-side Security Rules.</li>
+</ul>
+
+<div class="finish">
+  <h2>Cloud Firestore Codelab Complete! &#127881;</h2>
+  <p>Congratulations! You have mastered Cloud Firestore in Flutter &mdash; from NoSQL fundamentals and type-safe Dart modeling to real-time streams and production security rules. You are now equipped to build scalable, reactive, enterprise-grade cloud applications!</p>
+</div>
+</section>
+
+</div></main></div>
+
+<!-- JAVASCRIPT NAVIGATION & INTERACTION SCRIPT -->
+<script>
+(() => {
+  const steps = [...document.querySelectorAll('.step-view')];
+  const titles = steps.map(step => step.dataset.title);
+  const nav = document.getElementById('stepNav');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const content = document.getElementById('content');
+  const completed = new Set();
+  let current = 0;
+
+  // Build sidebar step links
+  nav.innerHTML = titles.map((title, index) =>
+    `<button class="step-link" data-step="${index}" type="button">
+      <span class="step-number">${String(index + 1).padStart(2, '0')}</span>
+      <span>${title}</span>
+      <span class="step-status" aria-hidden="true"></span>
+    </button>`
+  ).join('');
+
+  const getHashStep = () => {
+    const match = location.hash.match(/^#step-(\d+)$/);
+    const value = match ? Number(match[1]) - 1 : 0;
+    return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+  };
+
+  function render(updateHash = true) {
+    current = Math.max(0, Math.min(current, steps.length - 1));
+
+    steps.forEach((step, index) => {
+      const active = index === current;
+      step.classList.toggle('active', active);
+      step.setAttribute('aria-hidden', String(!active));
+    });
+
+    document.querySelectorAll('.step-link').forEach((button, index) => {
+      button.classList.toggle('active', index === current);
+      button.setAttribute('aria-current', index === current ? 'step' : 'false');
+      button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '';
+    });
+
+    const percent = Math.round(((current + 1) / steps.length) * 100);
+    document.getElementById('progressBar').style.width = `${percent}%`;
+    document.getElementById('progressText').textContent = `${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+    document.getElementById('mobileTitle').textContent = titles[current];
+
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === steps.length - 1;
+    document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+
+    if (updateHash) {
+      history.pushState({ step: current }, '', `#step-${current + 1}`);
+    }
+
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    sidebar.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= steps.length) return;
+    completed.add(current);
+    current = index;
+    render();
+  }
+
+  // Create bottom nav buttons
+  const navRow = document.createElement('div');
+  navRow.className = 'nav-row';
+  navRow.innerHTML = `
+    <button class="nav-btn" id="prevBtn" type="button">← Previous</button>
+    <button class="nav-btn primary" id="nextBtn" type="button">Next →</button>
+  `;
+  content.appendChild(navRow);
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+  nav.addEventListener('click', event => {
+    const button = event.target.closest('.step-link');
+    if (button) goTo(Number(button.dataset.step));
+  });
+
+  menuBtn.addEventListener('click', () => {
+    const open = sidebar.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+  });
+
+  // Global click handler for copy & quiz buttons
+  document.addEventListener('click', async event => {
+    const copy = event.target.closest('.copy-btn');
+    if (copy) {
+      const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+      try {
+        await navigator.clipboard.writeText(code);
+        copy.textContent = 'Copied!';
+      } catch {
+        copy.textContent = 'Select & copy';
+      }
+      setTimeout(() => copy.textContent = 'Copy', 1200);
+      return;
+    }
+
+    const option = event.target.closest('.quiz-option');
+    if (option) {
+      const quiz = option.closest('.quiz');
+      if (quiz.dataset.answered) return;
+      const options = [...quiz.querySelectorAll('.quiz-option')];
+      const choice = options.indexOf(option);
+      const answer = Number(quiz.dataset.answer);
+      quiz.dataset.answered = 'true';
+      options.forEach(button => button.disabled = true);
+      option.classList.add(choice === answer ? 'correct' : 'wrong');
+      if (choice !== answer) options[answer].classList.add('correct');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
+      feedback.classList.add('show');
+    }
+  });
+
+  window.addEventListener('popstate', () => { current = getHashStep(); render(false); });
+  window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+
+  document.addEventListener('keydown', event => {
+    if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+    if (event.key === 'ArrowRight') goTo(current + 1);
+    if (event.key === 'ArrowLeft') goTo(current - 1);
+  });
+
+  current = getHashStep();
+  render(false);
+})();
+</script>
+</body>
+</html>
