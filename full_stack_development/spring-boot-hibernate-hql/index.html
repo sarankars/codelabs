@@ -1,0 +1,2159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot Hibernate Query Language (HQL) — Step-by-Step Codelab</title>
+    <meta name="description"
+        content="Learn how to master Hibernate Query Language (HQL) in Spring Boot. Extend your Student CRUD REST API with custom object-oriented queries, filtering, pattern matching, projections, aggregations, and bulk updates.">
+    <meta name="theme-color" content="#2856d8">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+        :root {
+            --blue: #2856d8;
+            --blue-dark: #17348e;
+            --blue-light: #e4ebff;
+            --ink: #101010;
+            --paper: #f5f7fb;
+            --white: #fff;
+            --yellow: #ffd83d;
+            --mint: #75e6c5;
+            --pink: #ff9bb7;
+            --orange: #ffb866;
+            --purple: #9d72ff;
+            --border: 3px solid var(--ink);
+            --shadow: 6px 6px 0 var(--ink);
+            --shadow-sm: 4px 4px 0 var(--ink);
+            --sidebar: 292px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: auto;
+        }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: "Space Grotesk", system-ui, sans-serif;
+            line-height: 1.55;
+        }
+
+        button,
+        a {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        :focus-visible {
+            outline: 4px solid var(--yellow);
+            outline-offset: 3px;
+        }
+
+        .app {
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: var(--sidebar);
+            padding: 22px 18px;
+            background: var(--blue);
+            border-right: var(--border);
+            overflow: auto;
+            z-index: 20;
+        }
+
+        .brand {
+            padding: 16px;
+            margin-bottom: 20px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .eyebrow,
+        .progress-meta,
+        .step-number,
+        .step-kicker,
+        .label,
+        .footer-note,
+        .http-badge {
+            font-family: "DM Mono", monospace;
+        }
+
+        .eyebrow {
+            font-size: .72rem;
+            font-weight: 500;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .brand h2 {
+            margin: 5px 0 3px;
+            font-size: 1.32rem;
+            line-height: 1.05;
+        }
+
+        .brand p {
+            margin: 0;
+            font-size: .83rem;
+            font-weight: 600;
+        }
+
+        .progress-wrap {
+            margin: 0 2px 20px;
+            color: #fff;
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 7px;
+            font-size: .72rem;
+        }
+
+        .progress-track {
+            height: 16px;
+            padding: 2px;
+            background: #fff;
+            border: var(--border);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: var(--yellow);
+            transition: width .2s ease;
+        }
+
+        .steps {
+            display: grid;
+            gap: 7px;
+        }
+
+        .step-link {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 34px 1fr 18px;
+            align-items: center;
+            gap: 9px;
+            padding: 8px;
+            color: #fff;
+            background: transparent;
+            border: 3px solid transparent;
+            text-align: left;
+            font-weight: 700;
+            font-size: .88rem;
+            line-height: 1.15;
+        }
+
+        .step-link:hover {
+            background: rgba(255, 255, 255, .14);
+        }
+
+        .step-link.active {
+            color: var(--ink);
+            background: #fff;
+            border-color: var(--ink);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border: 2px solid currentColor;
+            font-size: .75rem;
+        }
+
+        .step-status {
+            text-align: center;
+            font-weight: 900;
+        }
+
+        .mobile-bar {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--blue);
+            border-bottom: var(--border);
+        }
+
+        .menu-btn,
+        .mobile-title {
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .menu-btn {
+            width: 46px;
+            height: 42px;
+            font-size: 1.25rem;
+            font-weight: 900;
+        }
+
+        .mobile-title {
+            flex: 1;
+            padding: 8px 10px;
+            font-weight: 800;
+        }
+
+        main {
+            margin-left: var(--sidebar);
+            min-height: 100vh;
+        }
+
+        .content {
+            width: min(980px, calc(100% - 48px));
+            margin: 0 auto;
+            padding: 42px 0 32px;
+        }
+
+        .step-view {
+            display: none;
+        }
+
+        .step-view.active {
+            display: block;
+            animation: stepIn .18s ease-out;
+        }
+
+        @keyframes stepIn {
+            from {
+                opacity: .35;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .step-header {
+            padding: 28px;
+            margin-bottom: 24px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .step-kicker {
+            display: inline-block;
+            margin-bottom: 13px;
+            padding: 5px 9px;
+            color: #fff;
+            background: var(--blue);
+            border: 2px solid var(--ink);
+            font-size: .72rem;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.08;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: clamp(1.85rem, 4.6vw, 3.2rem);
+            letter-spacing: -.04em;
+        }
+
+        h2 {
+            margin: 32px 0 12px;
+            font-size: clamp(1.35rem, 2.7vw, 2.05rem);
+        }
+
+        h3 {
+            margin: 22px 0 9px;
+            font-size: 1.15rem;
+        }
+
+        .lede {
+            max-width: 780px;
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        .objective {
+            margin-top: 20px;
+            padding: 14px 16px;
+            background: var(--yellow);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 700;
+        }
+
+        .panel,
+        .concept,
+        .quiz,
+        .reveal {
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .panel {
+            padding: 22px;
+            margin: 20px 0;
+        }
+
+        .panel.blue {
+            background: var(--blue-light);
+        }
+
+        .panel.mint {
+            background: var(--mint);
+        }
+
+        .panel.pink {
+            background: var(--pink);
+        }
+
+        .panel.yellow {
+            background: var(--yellow);
+        }
+
+        .panel.orange {
+            background: var(--orange);
+        }
+
+        .panel.purple {
+            background: #f1ebff;
+        }
+
+        .callout {
+            padding: 16px 18px;
+            margin: 20px 0;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .callout .label {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 3px 7px;
+            color: #fff;
+            background: var(--ink);
+            border: 2px solid var(--ink);
+            font-size: .72rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid-3 {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .concept {
+            padding: 18px;
+        }
+
+        .concept strong {
+            font-size: 1.05rem;
+        }
+
+        .concept p:last-child {
+            margin-bottom: 0;
+        }
+
+        .code-wrap {
+            position: relative;
+            margin: 18px 0;
+        }
+
+        pre {
+            margin: 0;
+            padding: 20px;
+            overflow: auto;
+            color: #f7f7f7;
+            background: #111;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-family: "DM Mono", ui-monospace, monospace;
+            font-size: .84rem;
+            line-height: 1.62;
+            tab-size: 2;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 2;
+            padding: 5px 9px;
+            background: var(--yellow);
+            border: 2px solid var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+            font-size: .75rem;
+            font-weight: 800;
+        }
+
+        .copy-btn:hover {
+            background: #ffe066;
+        }
+
+        code:not(pre code) {
+            padding: 1px 5px;
+            background: #e8edf7;
+            border: 1px solid #9da9bb;
+            font-family: "DM Mono", monospace;
+            font-size: .88em;
+        }
+
+        ul,
+        ol {
+            padding-left: 1.35rem;
+        }
+
+        li {
+            margin: 7px 0;
+        }
+
+        .comparison {
+            width: 100%;
+            margin: 18px 0;
+            background: #fff;
+            border: var(--border);
+            border-collapse: collapse;
+        }
+
+        .comparison th,
+        .comparison td {
+            padding: 11px;
+            border: 2px solid var(--ink);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .comparison th {
+            color: #fff;
+            background: var(--blue);
+        }
+
+        .http-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border: 2px solid var(--ink);
+            font-weight: 700;
+            font-size: .75rem;
+        }
+
+        .http-badge.get {
+            background: var(--mint);
+        }
+
+        .http-badge.post {
+            background: var(--yellow);
+        }
+
+        .http-badge.put {
+            background: var(--orange);
+        }
+
+        .http-badge.delete {
+            background: var(--pink);
+        }
+
+        .quiz {
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 9px;
+            margin-top: 14px;
+        }
+
+        .quiz-option {
+            text-align: left;
+            padding: 11px 13px;
+            background: #fff;
+            border: 2px solid var(--ink);
+            font-weight: 700;
+        }
+
+        .quiz-option:hover {
+            background: var(--blue-light);
+        }
+
+        .quiz-option.correct {
+            background: var(--mint);
+        }
+
+        .quiz-option.wrong {
+            background: var(--pink);
+        }
+
+        .quiz-feedback {
+            display: none;
+            margin-top: 13px;
+            padding: 10px;
+            border: 2px solid var(--ink);
+            font-weight: 700;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+        }
+
+        .reveal {
+            margin: 18px 0;
+        }
+
+        .reveal summary {
+            padding: 13px 16px;
+            cursor: pointer;
+            background: var(--blue-light);
+            font-weight: 800;
+        }
+
+        .reveal>div {
+            padding: 15px 16px;
+        }
+
+        .flow {
+            margin: 20px 0;
+            padding: 20px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-family: "DM Mono", monospace;
+            line-height: 1.85;
+            overflow: auto;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .checklist li::before {
+            content: "□";
+            position: absolute;
+            left: 0;
+            font-size: 1.25rem;
+            font-weight: 900;
+        }
+
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            margin-top: 34px;
+            padding-top: 20px;
+            border-top: var(--border);
+        }
+
+        .nav-btn {
+            min-width: 130px;
+            padding: 12px 18px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 900;
+        }
+
+        .nav-btn.primary {
+            color: #fff;
+            background: var(--blue);
+        }
+
+        .nav-btn:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+
+        .finish {
+            padding: 24px;
+            margin-top: 24px;
+            background: var(--mint);
+            border: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        @media(max-width:850px) {
+            :root {
+                --sidebar: 270px;
+                --mobile-bar-height: 65px;
+            }
+
+            .sidebar {
+                inset: var(--mobile-bar-height) auto 0 0;
+                transform: translateX(-100%);
+                transition: transform .2s ease;
+            }
+
+            .sidebar.open {
+                transform: none;
+            }
+
+            .mobile-bar {
+                display: flex;
+                height: var(--mobile-bar-height);
+            }
+
+            main {
+                margin-left: 0;
+            }
+
+            .content {
+                width: min(940px, calc(100% - 28px));
+                padding-top: 24px;
+            }
+        }
+
+        @media(max-width:680px) {
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .content {
+                width: calc(100% - 18px);
+                padding-top: 16px;
+            }
+
+            .step-header {
+                padding: 20px 16px;
+            }
+
+            .panel,
+            .concept,
+            .quiz {
+                padding: 16px;
+            }
+
+            .nav-row {
+                position: sticky;
+                bottom: 0;
+                z-index: 10;
+                padding: 12px 0;
+                background: var(--paper);
+            }
+
+            .nav-btn {
+                min-width: 0;
+                flex: 1;
+                padding: 11px 10px;
+            }
+
+            pre {
+                padding: 16px 12px;
+                font-size: .76rem;
+            }
+
+            .copy-btn {
+                position: static;
+                align-self: flex-end;
+                margin-bottom: 6px;
+            }
+
+            .code-wrap {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .code-wrap pre {
+                order: 2;
+            }
+
+            .code-wrap .copy-btn {
+                order: 1;
+            }
+
+            .comparison {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+            <div class="brand">
+                <div class="eyebrow">SPRING BOOT &amp; HIBERNATE</div>
+                <h2>Hibernate Query Language</h2>
+                <p>Object-Oriented Queries in Action</p>
+            </div>
+            <div class="progress-wrap">
+                <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+                <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                    aria-valuenow="0">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+            <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+        </aside>
+
+        <div class="mobile-bar">
+            <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation"
+                aria-expanded="false">☰</button>
+            <div class="mobile-title" id="mobileTitle">Hibernate Query Language (HQL)</div>
+        </div>
+
+        <main>
+            <div class="content" id="content">
+
+                <!-- STEP 1 -->
+                <section class="step-view" data-title="Overview &amp; Context">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 1 · OVERVIEW</span>
+                        <h1>Hibernate Query Language (HQL)</h1>
+                        <p class="lede">Learn how to write expressive, object-oriented queries in Spring Boot using
+                            Hibernate Query Language (HQL). We continue directly from our Student CRUD application to add
+                            advanced filtering, search, projections, aggregations, and bulk updates.</p>
+                    </header>
+
+                    <div class="objective">
+                        <strong>Goal:</strong> Extend the <code>student-crud-hibernate</code> application by replacing
+                        strict primary-key CRUD lookups with flexible <strong>Hibernate Query Language (HQL)</strong>
+                        requests using Spring Data JPA's <code>@Query</code> annotation.
+                    </div>
+
+                    <div class="panel blue">
+                        <strong>📌 Direct Continuation Notice:</strong>
+                        <p>This codelab continues from our previous practical codelab:
+                            <a href="../spring-boot-hibernate-crud/index.html" style="color:var(--blue-dark);font-weight:700;text-decoration:underline;">
+                                Spring Boot &amp; Hibernate Student CRUD API
+                            </a>.
+                            If you already built that project, open it up! If not, Step 2 gives you the starter code to jump straight in.
+                        </p>
+                    </div>
+
+                    <h2>Why Do We Need Hibernate Query Language?</h2>
+                    <p>In our previous CRUD codelab, <code>JpaRepository</code> gave us basic operations out of the box:</p>
+                    <ul>
+                        <li><code>findAll()</code> — Returns every row in the table.</li>
+                        <li><code>findById(id)</code> — Returns one student by primary key ID.</li>
+                        <li><code>save(student)</code> — Persists or updates one student.</li>
+                        <li><code>deleteById(id)</code> — Removes one student by primary key ID.</li>
+                    </ul>
+                    <p>However, real-world backend applications need answers to questions like:</p>
+                    <ul>
+                        <li><em>"Find all students enrolled in 'Computer Science'."</em></li>
+                        <li><em>"Search students whose name contains 'ali' regardless of uppercase or lowercase."</em></li>
+                        <li><em>"Get a list of distinct available courses without duplicate names."</em></li>
+                        <li><em>"Count how many students belong to each department for an analytics chart."</em></li>
+                        <li><em>"Transfer all students from 'Legacy AI' to 'Generative AI' in one single atomic operation."</em></li>
+                    </ul>
+
+                    <p><strong>Hibernate Query Language (HQL)</strong> gives us full power to query Java objects directly without binding our application code to any specific database dialect or SQL vendor.</p>
+
+                    <h2>The Core Architecture</h2>
+                    <div class="flow">
+[HTTP Client / Postman]
+       │
+       ▼ (GET /api/students/search/course?course=Computer Science)
+[StudentController]
+       │
+       ▼ calls repository method
+[StudentRepository: @Query("SELECT s FROM Student s WHERE s.course = :course")]
+       │
+       ▼ (HQL Object Query: refers to Student entity and s.course field)
+[Hibernate ORM Engine (AST Query Parser &amp; Dialect Translator)]
+       │
+       ▼ (Translates HQL into native SQL: SELECT s1_0.id, s1_0.name, ... FROM students s1_0 WHERE s1_0.course = ?)
+[H2 / MySQL / PostgreSQL Relational Database]
+       │
+       ▼ (Result rows converted back into List&lt;Student&gt; entities)
+[Response JSON Payload returned to client]
+                    </div>
+                </section>
+
+                <!-- STEP 2 -->
+                <section class="step-view" data-title="Baseline project &amp; seeds">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 2 · PROJECT BASELINE</span>
+                        <h1>Reviewing Baseline &amp; Adding Seed Data</h1>
+                        <p class="lede">Verify our <code>Student</code> entity, repository, and configuration, then add sample data so we can immediately see meaningful query results.</p>
+                    </header>
+
+                    <h2>1. The Student Entity Reminder</h2>
+                    <p>In <code>src/main/java/com/example/studentcrudhibernate/entity/Student.java</code>, our entity has 4 attributes:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.studentcrudhibernate.entity;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "students")
+public class Student {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
+    @Column(name = "course")
+    private String course;
+
+    public Student() {}
+
+    public Student(String name, String email, String course) {
+        this.name = name;
+        this.email = email;
+        this.course = course;
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getCourse() { return course; }
+    public void setCourse(String course) { this.course = course; }
+}</code></pre>
+                    </div>
+
+                    <h2>2. Ensure SQL Logging is Active in application.properties</h2>
+                    <p>In <code>src/main/resources/application.properties</code>, ensure the following properties are set so we can watch Hibernate translate our HQL queries into SQL in the terminal:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code># Server Port
+server.port=8080
+
+# H2 In-Memory Database
+spring.datasource.url=jdbc:h2:mem:studentdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# Hibernate Configuration
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# Enable H2 Web Console
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console</code></pre>
+                    </div>
+
+                    <h2>3. Add DataInitializer for Instant Testing Data</h2>
+                    <p>To test searches, sorting, and counts, we need a variety of student records loaded on startup. Create a new class named <code>DataInitializer.java</code> in package <code>com.example.studentcrudhibernate.config</code>:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.studentcrudhibernate.config;
+
+import com.example.studentcrudhibernate.entity.Student;
+import com.example.studentcrudhibernate.repository.StudentRepository;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+public class DataInitializer implements CommandLineRunner {
+
+    private final StudentRepository studentRepository;
+
+    public DataInitializer(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        if (studentRepository.count() == 0) {
+            studentRepository.saveAll(List.of(
+                new Student("Alice Johnson", "alice@university.edu", "Computer Science"),
+                new Student("Bob Smith", "bob@techcorp.com", "Information Technology"),
+                new Student("Charlie Brown", "charlie@university.edu", "Computer Science"),
+                new Student("Diana Prince", "diana@amazon.com", "Data Science"),
+                new Student("Evan Wright", "evan@university.edu", "Information Technology"),
+                new Student("Fiona Gallagher", "fiona@global.org", "Computer Science"),
+                new Student("George Clark", "george@techcorp.com", "Data Science")
+            ));
+            System.out.println(">>> Pre-populated 7 sample students for HQL testing.");
+        }
+    }
+}</code></pre>
+                    </div>
+
+                    <div class="panel mint">
+                        <strong>💡 Why use CommandLineRunner?</strong>
+                        <p>Spring Boot executes any bean implementing <code>CommandLineRunner</code> immediately after the application context has loaded. This automatically seeds our in-memory H2 database every time the server starts up!</p>
+                    </div>
+                </section>
+
+                <!-- STEP 3 -->
+                <section class="step-view" data-title="HQL vs Native SQL">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 3 · CORE CONCEPTS</span>
+                        <h1>HQL vs. Native SQL: The Rules</h1>
+                        <p class="lede">Understand the syntax philosophy of Hibernate Query Language before writing queries. The key concept: HQL talks to Java classes, not relational tables.</p>
+                    </header>
+
+                    <h2>The Fundamental Difference</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Native SQL</th>
+                            <th>Hibernate Query Language (HQL)</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Target</strong></td>
+                            <td>Database tables and columns (<code>students</code>, <code>first_name</code>)</td>
+                            <td>Java Entity classes and fields (<code>Student</code>, <code>name</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Portability</strong></td>
+                            <td>Tied to a specific database dialect (MySQL, Oracle, PostgreSQL)</td>
+                            <td>Completely database-independent; Hibernate handles the dialect translation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Result Type</strong></td>
+                            <td>Raw database rows / Object[] records</td>
+                            <td>Strongly-typed Java Entity objects (<code>List&lt;Student&gt;</code>) or custom DTOs</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Case Sensitivity</strong></td>
+                            <td>Often case-insensitive depending on database OS and engine</td>
+                            <td>Keywords (<code>SELECT</code>, <code>FROM</code>) are case-insensitive; Java Entity &amp; field names (<code>Student</code>, <code>course</code>) <strong>ARE case-sensitive</strong>!</td>
+                        </tr>
+                    </table>
+
+                    <h2>The Anatomy of an HQL Query</h2>
+                    <div class="code-wrap">
+                        <pre><code>SELECT s FROM Student s WHERE s.course = :courseName ORDER BY s.name ASC
+  ▲    ▲      ▲     ▲           ▲             ▲              ▲        ▲
+  │    │      │     │           │             │              │        │
+  │    │      │     │           │             │              │        └─ Order direction
+  │    │      │     │           │             │              └─ Entity property 'name'
+  │    │      │     │           │             └─ Named parameter placeholder
+  │    │      │     │           └─ Entity property 'course'
+  │    │      │     └─ Entity alias (mandatory in HQL when projecting)
+  │    │      └─ Java Entity Class Name (NOT database table name 'students'!)
+  │    └─ Select target: the alias referring to the Student object
+  └─ HQL Keyword (case-insensitive)</code></pre>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="concept">
+                            <strong>✅ Valid HQL</strong>
+                            <p><code>SELECT s FROM Student s WHERE s.email = :email</code></p>
+                            <p style="color:#0a7c42;margin-top:8px;">References the Java class <code>Student</code> and property <code>email</code>.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>❌ Invalid HQL (Common Pitfall)</strong>
+                            <p><code>SELECT * FROM students WHERE email = :email</code></p>
+                            <p style="color:#d81e3a;margin-top:8px;"><code>students</code> is a table name, not an entity! And <code>*</code> is not valid in HQL.</p>
+                        </div>
+                    </div>
+
+                    <h2>How Do We Write HQL in Spring Data JPA?</h2>
+                    <p>In Spring Boot, we declare repository interface methods annotated with <code>@Query</code>:</p>
+                    <div class="code-wrap">
+                        <pre><code>@Query("SELECT s FROM Student s WHERE s.course = :course")
+List&lt;Student&gt; findStudentsByCourse(@Param("course") String course);</code></pre>
+                    </div>
+                    <p>Notice that we <strong>omit</strong> <code>nativeQuery = true</code>. Because <code>nativeQuery</code> defaults to <code>false</code>, Spring Data JPA feeds the query directly into the Hibernate HQL engine!</p>
+                </section>
+
+                <!-- STEP 4 -->
+                <section class="step-view" data-title="Request 1: Exact filter">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 4 · REQUEST 1</span>
+                        <h1>Filter by Course with Named Parameters</h1>
+                        <p class="lede">Implement our first HQL query to retrieve all students belonging to a specified course using secure named parameter binding.</p>
+                    </header>
+
+                    <h2>1. Why Named Parameters Over Positional Parameters?</h2>
+                    <p>Hibernate supports two types of query parameters:</p>
+                    <ul>
+                        <li><strong>Positional Parameters:</strong> <code>WHERE s.course = ?1</code> (fragile if parameters are reordered).</li>
+                        <li><strong>Named Parameters:</strong> <code>WHERE s.course = :course</code> with <code>@Param("course")</code> (clear, robust, and self-documenting).</li>
+                    </ul>
+
+                    <h2>2. Add Method to StudentRepository.java</h2>
+                    <p>Open <code>src/main/java/com/example/studentcrudhibernate/repository/StudentRepository.java</code> and add the following HQL method:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.studentcrudhibernate.repository;
+
+import com.example.studentcrudhibernate.entity.Student;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface StudentRepository extends JpaRepository&lt;Student, Long&gt; {
+
+    // Request 1: HQL Exact Match Filter
+    @Query("SELECT s FROM Student s WHERE s.course = :course")
+    List&lt;Student&gt; findByCourseHql(@Param("course") String course);
+
+}</code></pre>
+                    </div>
+
+                    <h2>3. Expose the Controller Endpoint</h2>
+                    <p>Open <code>src/main/java/com/example/studentcrudhibernate/controller/StudentController.java</code> and add the corresponding GET endpoint:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>@GetMapping("/search/course")
+public ResponseEntity&lt;List&lt;Student&gt;&gt; getStudentsByCourse(@RequestParam String course) {
+    List&lt;Student&gt; students = studentRepository.findByCourseHql(course);
+    return ResponseEntity.ok(students);
+}</code></pre>
+                    </div>
+
+                    <h2>4. What Hibernate Executes Under the Hood</h2>
+                    <p>When an HTTP request comes in for <code>/api/students/search/course?course=Computer Science</code>, Hibernate parses your HQL string into an Abstract Syntax Tree (AST), maps <code>Student</code> to the <code>students</code> table, and produces this parameterized native SQL:</p>
+                    <div class="code-wrap">
+                        <pre><code>Hibernate: 
+    select
+        s1_0.id,
+        s1_0.course,
+        s1_0.email,
+        s1_0.name 
+    from
+        students s1_0 
+    where
+        s1_0.course=?</code></pre>
+                    </div>
+
+                    <div class="panel yellow">
+                        <strong>🛡️ Built-in SQL Injection Protection:</strong>
+                        <p>Because Hibernate binds <code>:course</code> as a prepared statement parameter (<code>?</code>), user inputs like <code>' OR 1=1 --</code> are treated as literal strings and cannot compromise your database!</p>
+                    </div>
+                </section>
+
+                <!-- STEP 5 -->
+                <section class="step-view" data-title="Request 2: Pattern search">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 5 · REQUEST 2</span>
+                        <h1>Search with LIKE and Case Insensitivity</h1>
+                        <p class="lede">Build a search bar endpoint that matches substrings in student names using HQL's <code>LIKE</code> operator, <code>CONCAT()</code>, and <code>LOWER()</code> functions.</p>
+                    </header>
+
+                    <h2>The Challenge with Case-Sensitive Searches</h2>
+                    <p>In standard SQL, comparing strings with <code>LIKE '%john%'</code> might fail to find <code>Alice Johnson</code> if the database engine enforces case sensitivity. In HQL, we achieve universal, cross-database case insensitivity by converting both sides to lowercase:</p>
+                    <div class="code-wrap">
+                        <pre><code>SELECT s FROM Student s WHERE LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))</code></pre>
+                    </div>
+
+                    <h2>1. Add Search Method to StudentRepository.java</h2>
+                    <p>Add this query method to <code>StudentRepository.java</code>:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>// Request 2: HQL Substring Search with Case Insensitivity
+@Query("SELECT s FROM Student s WHERE LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+List&lt;Student&gt; searchByNameKeyword(@Param("keyword") String keyword);</code></pre>
+                    </div>
+
+                    <h2>2. Add Endpoint to StudentController.java</h2>
+                    <p>In <code>StudentController.java</code>, expose the search endpoint:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>@GetMapping("/search/name")
+public ResponseEntity&lt;List&lt;Student&gt;&gt; searchStudentsByName(@RequestParam String keyword) {
+    List&lt;Student&gt; results = studentRepository.searchByNameKeyword(keyword);
+    return ResponseEntity.ok(results);
+}</code></pre>
+                    </div>
+
+                    <h2>3. How CONCAT() Works in HQL</h2>
+                    <p>Instead of manually appending <code>%</code> in Java code (e.g., <code>"%" + keyword + "%"</code>), HQL allows you to use the standard <code>CONCAT('%', :keyword, '%')</code> function directly inside the query string. Hibernate translates this to the appropriate SQL string concatenation syntax for your current database (e.g., <code>CONCAT()</code> in MySQL/H2 or <code>||</code> in Oracle/PostgreSQL).</p>
+                </section>
+
+                <!-- STEP 6 -->
+                <section class="step-view" data-title="Request 3: Multi-condition &amp; IN">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 6 · REQUEST 3</span>
+                        <h1>Multi-Condition Filtering (AND &amp; IN Expressions)</h1>
+                        <p class="lede">Combine logical operators (<code>AND</code>, <code>OR</code>) and list memberships (<code>IN</code>) to build complex filter criteria.</p>
+                    </header>
+
+                    <h2>Scenario A: Course AND Email Domain Filter</h2>
+                    <p>Imagine finding all students in a particular course who registered with a specific university or organization email domain (e.g., students in <code>Computer Science</code> with domain <code>university.edu</code>).</p>
+
+                    <h2>Scenario B: Finding Students Across Multiple Selected Courses (IN Clause)</h2>
+                    <p>Allow the client to pass a list of courses (e.g. <code>["Computer Science", "Data Science"]</code>) and return students enrolled in any of them.</p>
+
+                    <h2>1. Add Methods to StudentRepository.java</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>// Request 3A: HQL Multi-Condition (Course + Email Domain)
+@Query("SELECT s FROM Student s WHERE s.course = :course AND LOWER(s.email) LIKE LOWER(CONCAT('%@', :domain))")
+List&lt;Student&gt; findByCourseAndEmailDomain(
+    @Param("course") String course,
+    @Param("domain") String domain
+);
+
+// Request 3B: HQL IN Clause with a List parameter
+@Query("SELECT s FROM Student s WHERE s.course IN :courses")
+List&lt;Student&gt; findByCoursesList(@Param("courses") List&lt;String&gt; courses);</code></pre>
+                    </div>
+
+                    <div class="panel mint">
+                        <strong>💡 How HQL handles Collections:</strong>
+                        <p>When you pass a <code>List&lt;String&gt;</code> to <code>:courses</code> in an HQL <code>IN</code> clause, Hibernate automatically expands the list into the appropriate number of SQL placeholders (e.g., <code>IN (?, ?)</code>). You never need to build strings dynamically!</p>
+                    </div>
+
+                    <h2>2. Add Endpoints to StudentController.java</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>@GetMapping("/search/filter")
+public ResponseEntity&lt;List&lt;Student&gt;&gt; filterByCourseAndDomain(
+        @RequestParam String course,
+        @RequestParam String domain) {
+    List&lt;Student&gt; students = studentRepository.findByCourseAndEmailDomain(course, domain);
+    return ResponseEntity.ok(students);
+}
+
+@GetMapping("/search/by-courses")
+public ResponseEntity&lt;List&lt;Student&gt;&gt; getStudentsByCoursesList(@RequestParam List&lt;String&gt; courses) {
+    List&lt;Student&gt; students = studentRepository.findByCoursesList(courses);
+    return ResponseEntity.ok(students);
+}</code></pre>
+                    </div>
+                </section>
+
+                <!-- STEP 7 -->
+                <section class="step-view" data-title="Request 4: Ordering &amp; Sorting">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 7 · REQUEST 4</span>
+                        <h1>Sorting with HQL ORDER BY</h1>
+                        <p class="lede">Learn how to sort query results using HQL's <code>ORDER BY</code> clause across single and multiple entity fields.</p>
+                    </header>
+
+                    <h2>1. Ordering by Multiple Attributes in HQL</h2>
+                    <p>Suppose we want all students neatly grouped by their course name alphabetically, and within each course, sorted alphabetically by student name:</p>
+                    <div class="code-wrap">
+                        <pre><code>SELECT s FROM Student s ORDER BY s.course ASC, s.name ASC</code></pre>
+                    </div>
+
+                    <h2>2. Add Query to StudentRepository.java</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>// Request 4: HQL Order By Multi-Field
+@Query("SELECT s FROM Student s ORDER BY s.course ASC, s.name ASC")
+List&lt;Student&gt; findAllSortedByCourseAndName();</code></pre>
+                    </div>
+
+                    <h2>3. Add Endpoint to StudentController.java</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>@GetMapping("/sorted")
+public ResponseEntity&lt;List&lt;Student&gt;&gt; getAllSorted() {
+    return ResponseEntity.ok(studentRepository.findAllSortedByCourseAndName());
+}</code></pre>
+                    </div>
+
+                    <h2>HQL ORDER BY vs. Spring Data Sort Parameter</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>Approach</th>
+                            <th>When to Use</th>
+                            <th>Code Example</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Static HQL ORDER BY</strong></td>
+                            <td>When the sorting order is fixed business logic (e.g., student roster must always be grouped by course then name).</td>
+                            <td><code>@Query("SELECT s FROM Student s ORDER BY s.course ASC, s.name ASC")</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dynamic Sort Parameter</strong></td>
+                            <td>When the client/UI dynamically chooses the column and direction (e.g. clicking table headers).</td>
+                            <td><code>@Query("SELECT s FROM Student s WHERE s.course = :course")<br>List&lt;Student&gt; findByCourse(String course, Sort sort);</code></td>
+                        </tr>
+                    </table>
+                </section>
+
+                <!-- STEP 8 -->
+                <section class="step-view" data-title="Request 5: Projections &amp; DTOs">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 8 · REQUEST 5</span>
+                        <h1>Projections &amp; Custom DTOs in HQL</h1>
+                        <p class="lede">Improve performance and tailor payloads by selecting only the specific fields you need instead of loading entire entity records.</p>
+                    </header>
+
+                    <h2>The Overhead of Fetching Full Entities</h2>
+                    <p>When you execute <code>SELECT s FROM Student s</code>, Hibernate fetches all columns (<code>id</code>, <code>name</code>, <code>email</code>, <code>course</code>) and creates managed entity objects inside the Hibernate Persistence Context. If all you need is a dropdown list of distinct course names, this wastes CPU and memory!</p>
+
+                    <h2>Part A: Distinct Single-Field Projection</h2>
+                    <p>To get a list of all distinct course offerings:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>// Request 5A: Distinct Course Names
+@Query("SELECT DISTINCT s.course FROM Student s ORDER BY s.course ASC")
+List&lt;String&gt; findDistinctCourses();</code></pre>
+                    </div>
+
+                    <h2>Part B: Constructor Expression DTO Projection</h2>
+                    <p>HQL has a powerful feature called <strong>Constructor Expressions</strong>. You can instantiate lightweight Java Data Transfer Objects (DTOs) directly inside the HQL query!</p>
+
+                    <p>Create a package named <code>com.example.studentcrudhibernate.dto</code> and create <code>StudentSummaryDTO.java</code>:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.studentcrudhibernate.dto;
+
+public class StudentSummaryDTO {
+
+    private String name;
+    private String course;
+
+    // Hibernate requires this constructor matching the HQL SELECT expression!
+    public StudentSummaryDTO(String name, String course) {
+        this.name = name;
+        this.course = course;
+    }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getCourse() { return course; }
+    public void setCourse(String course) { this.course = course; }
+}</code></pre>
+                    </div>
+
+                    <h2>Add Constructor Expression Query to StudentRepository.java</h2>
+                    <p>In HQL, use the <code>new</code> operator with the full package name of your DTO:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>// Request 5B: HQL DTO Constructor Expression
+@Query("SELECT new com.example.studentcrudhibernate.dto.StudentSummaryDTO(s.name, s.course) FROM Student s ORDER BY s.name ASC")
+List&lt;StudentSummaryDTO&gt; findStudentSummaries();</code></pre>
+                    </div>
+
+                    <h2>Add Endpoints to StudentController.java</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>@GetMapping("/courses")
+public ResponseEntity&lt;List&lt;String&gt;&gt; getDistinctCourses() {
+    return ResponseEntity.ok(studentRepository.findDistinctCourses());
+}
+
+@GetMapping("/summaries")
+public ResponseEntity&lt;List&lt;StudentSummaryDTO&gt;&gt; getStudentSummaries() {
+    return ResponseEntity.ok(studentRepository.findStudentSummaries());
+}</code></pre>
+                    </div>
+
+                    <div class="panel mint">
+                        <strong>🚀 Performance Benefit:</strong>
+                        <p>DTO projections created via HQL constructor expressions are <em>read-only POJOs</em>. Hibernate does not track them in its first-level session cache (dirty checking), resulting in faster execution and lower memory usage for read-heavy operations!</p>
+                    </div>
+                </section>
+
+                <!-- STEP 9 -->
+                <section class="step-view" data-title="Request 6: Aggregates &amp; GROUP BY">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 9 · REQUEST 6</span>
+                        <h1>Aggregations with COUNT &amp; GROUP BY</h1>
+                        <p class="lede">HQL supports SQL aggregate functions like <code>COUNT()</code>, <code>AVG()</code>, <code>SUM()</code>, <code>MIN()</code>, and <code>MAX()</code> combined with <code>GROUP BY</code> and <code>HAVING</code>.</p>
+                    </header>
+
+                    <h2>Use Case: Course Enrollment Statistics</h2>
+                    <p>We want to return a breakdown showing how many students are enrolled in each course, sorted from most popular to least popular.</p>
+
+                    <h2>1. Create CourseStatsDTO.java</h2>
+                    <p>Create <code>CourseStatsDTO.java</code> in package <code>com.example.studentcrudhibernate.dto</code>:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.studentcrudhibernate.dto;
+
+public class CourseStatsDTO {
+
+    private String courseName;
+    private Long studentCount;
+
+    // HQL COUNT(s) returns a java.lang.Long
+    public CourseStatsDTO(String courseName, Long studentCount) {
+        this.courseName = courseName;
+        this.studentCount = studentCount;
+    }
+
+    public String getCourseName() { return courseName; }
+    public void setCourseName(String courseName) { this.courseName = courseName; }
+
+    public Long getStudentCount() { return studentCount; }
+    public void setStudentCount(Long studentCount) { this.studentCount = studentCount; }
+}</code></pre>
+                    </div>
+
+                    <h2>2. Add Aggregate Query to StudentRepository.java</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>// Request 6A: HQL Aggregation with GROUP BY
+@Query("SELECT new com.example.studentcrudhibernate.dto.CourseStatsDTO(s.course, COUNT(s)) " +
+       "FROM Student s GROUP BY s.course ORDER BY COUNT(s) DESC")
+List&lt;CourseStatsDTO&gt; getEnrollmentStats();
+
+// Request 6B: HQL HAVING Clause (Only courses with at least N students)
+@Query("SELECT new com.example.studentcrudhibernate.dto.CourseStatsDTO(s.course, COUNT(s)) " +
+       "FROM Student s GROUP BY s.course HAVING COUNT(s) >= :minStudents ORDER BY COUNT(s) DESC")
+List&lt;CourseStatsDTO&gt; getPopularCourses(@Param("minStudents") Long minStudents);</code></pre>
+                    </div>
+
+                    <h2>3. Add Endpoints to StudentController.java</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>@GetMapping("/stats/enrollments")
+public ResponseEntity&lt;List&lt;CourseStatsDTO&gt;&gt; getEnrollmentStatistics() {
+    return ResponseEntity.ok(studentRepository.getEnrollmentStats());
+}
+
+@GetMapping("/stats/popular")
+public ResponseEntity&lt;List&lt;CourseStatsDTO&gt;&gt; getPopularCourses(@RequestParam(defaultValue = "2") Long min) {
+    return ResponseEntity.ok(studentRepository.getPopularCourses(min));
+}</code></pre>
+                    </div>
+
+                    <div class="panel orange">
+                        <strong>⚠️ Notice the return type of COUNT:</strong>
+                        <p>In HQL, <code>COUNT(s)</code> always returns a 64-bit <code>java.lang.Long</code>, NOT an <code>Integer</code>. Your DTO constructor must declare <code>Long</code> for the count parameter, otherwise Hibernate will throw a constructor mismatch exception (<code>QueryException</code>)!</p>
+                    </div>
+                </section>
+
+                <!-- STEP 10 -->
+                <section class="step-view" data-title="Request 7: Bulk UPDATE">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 10 · REQUEST 7</span>
+                        <h1>Bulk Updates with HQL (@Modifying)</h1>
+                        <p class="lede">Execute direct database updates across hundreds of records in a single statement without loading them into memory.</p>
+                    </header>
+
+                    <h2>The Problem with Standard JPA Updates</h2>
+                    <p>To transfer 500 students from "Information Technology" to "Software Engineering" using basic JPA:</p>
+                    <ol>
+                        <li>JPA executes <code>SELECT</code> and fetches all 500 students into memory.</li>
+                        <li>Your loop calls <code>student.setCourse("Software Engineering")</code> 500 times.</li>
+                        <li>On transaction commit, Hibernate dirty checking triggers <strong>500 individual SQL UPDATE statements</strong>!</li>
+                    </ol>
+
+                    <h2>The HQL Bulk Solution</h2>
+                    <p>An HQL bulk update translates into a <strong>single SQL UPDATE query</strong> executed directly inside the database:</p>
+                    <div class="code-wrap">
+                        <pre><code>UPDATE Student s SET s.course = :newCourse WHERE s.course = :oldCourse</code></pre>
+                    </div>
+
+                    <h2>Required Annotations: @Modifying and @Transactional</h2>
+                    <ul>
+                        <li><code>@Modifying</code> — Informs Spring Data JPA that this query is a DML (Data Manipulation Language) statement (UPDATE or DELETE), not a SELECT query.</li>
+                        <li><code>@Transactional</code> — Required because database modification queries must execute inside a write transaction.</li>
+                        <li><code>clearAutomatically = true</code> — Clears Hibernate's first-level persistence context after the update so subsequent queries don't read outdated cached entities.</li>
+                    </ul>
+
+                    <h2>1. Add Bulk Update Query to StudentRepository.java</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
+
+// Request 7: HQL Bulk Update
+@Modifying(clearAutomatically = true)
+@Transactional
+@Query("UPDATE Student s SET s.course = :newCourse WHERE s.course = :oldCourse")
+int transferStudentsCourse(
+    @Param("oldCourse") String oldCourse,
+    @Param("newCourse") String newCourse
+);</code></pre>
+                    </div>
+
+                    <h2>2. Add Endpoint to StudentController.java</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>@PutMapping("/transfer-course")
+public ResponseEntity&lt;String&gt; transferCourse(
+        @RequestParam String oldCourse,
+        @RequestParam String newCourse) {
+    int updatedCount = studentRepository.transferStudentsCourse(oldCourse, newCourse);
+    return ResponseEntity.ok("Successfully transferred " + updatedCount + " students from " + oldCourse + " to " + newCourse);
+}</code></pre>
+                    </div>
+
+                    <div class="panel yellow">
+                        <strong>Return Type:</strong>
+                        <p>HQL UPDATE and DELETE repository methods return an <code>int</code> or <code>Integer</code> representing the count of rows modified in the database.</p>
+                    </div>
+                </section>
+
+                <!-- STEP 11 -->
+                <section class="step-view" data-title="Request 8: Bulk DELETE">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 11 · REQUEST 8</span>
+                        <h1>Bulk Deletes with HQL</h1>
+                        <p class="lede">Delete batches of entities matching specific criteria using an HQL DELETE statement.</p>
+                    </header>
+
+                    <h2>1. HQL Bulk Delete Syntax</h2>
+                    <p>Just like bulk updates, HQL bulk deletes execute directly on the database engine without fetching entity records:</p>
+                    <div class="code-wrap">
+                        <pre><code>DELETE FROM Student s WHERE s.course = :course</code></pre>
+                    </div>
+
+                    <h2>2. Add Method to StudentRepository.java</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>// Request 8: HQL Bulk Delete
+@Modifying(clearAutomatically = true)
+@Transactional
+@Query("DELETE FROM Student s WHERE s.course = :course")
+int deleteStudentsByCourse(@Param("course") String course);</code></pre>
+                    </div>
+
+                    <h2>3. Add Endpoint to StudentController.java</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>@DeleteMapping("/by-course")
+public ResponseEntity&lt;String&gt; deleteByCourse(@RequestParam String course) {
+    int deletedCount = studentRepository.deleteStudentsByCourse(course);
+    return ResponseEntity.ok("Successfully deleted " + deletedCount + " students from course: " + course);
+}</code></pre>
+                    </div>
+
+                    <h2>What Hibernate Logs in the Console</h2>
+                    <div class="code-wrap">
+                        <pre><code>Hibernate: 
+    delete 
+    from
+        students 
+    where
+        course=?</code></pre>
+                    </div>
+                    <p>A single efficient DELETE statement removes all matching records at once!</p>
+                </section>
+
+                <!-- STEP 12 -->
+                <section class="step-view" data-title="Complete codebase">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 12 · COMPLETE FILES</span>
+                        <h1>Complete Code Reference</h1>
+                        <p class="lede">Review the full, production-ready source code for our repository, DTOs, and controller.</p>
+                    </header>
+
+                    <h2>1. StudentRepository.java (Complete)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.studentcrudhibernate.repository;
+
+import com.example.studentcrudhibernate.dto.CourseStatsDTO;
+import com.example.studentcrudhibernate.dto.StudentSummaryDTO;
+import com.example.studentcrudhibernate.entity.Student;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Repository
+public interface StudentRepository extends JpaRepository&lt;Student, Long&gt; {
+
+    // 1. Exact Course Filter
+    @Query("SELECT s FROM Student s WHERE s.course = :course")
+    List&lt;Student&gt; findByCourseHql(@Param("course") String course);
+
+    // 2. Case-Insensitive Substring Search
+    @Query("SELECT s FROM Student s WHERE LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List&lt;Student&gt; searchByNameKeyword(@Param("keyword") String keyword);
+
+    // 3A. Multiple Conditions (Course + Email Domain)
+    @Query("SELECT s FROM Student s WHERE s.course = :course AND LOWER(s.email) LIKE LOWER(CONCAT('%@', :domain))")
+    List&lt;Student&gt; findByCourseAndEmailDomain(
+        @Param("course") String course,
+        @Param("domain") String domain
+    );
+
+    // 3B. IN Clause with Collection
+    @Query("SELECT s FROM Student s WHERE s.course IN :courses")
+    List&lt;Student&gt; findByCoursesList(@Param("courses") List&lt;String&gt; courses);
+
+    // 4. Multi-Attribute Sorting
+    @Query("SELECT s FROM Student s ORDER BY s.course ASC, s.name ASC")
+    List&lt;Student&gt; findAllSortedByCourseAndName();
+
+    // 5A. Distinct Course Names
+    @Query("SELECT DISTINCT s.course FROM Student s ORDER BY s.course ASC")
+    List&lt;String&gt; findDistinctCourses();
+
+    // 5B. DTO Constructor Expression Projection
+    @Query("SELECT new com.example.studentcrudhibernate.dto.StudentSummaryDTO(s.name, s.course) " +
+           "FROM Student s ORDER BY s.name ASC")
+    List&lt;StudentSummaryDTO&gt; findStudentSummaries();
+
+    // 6A. Aggregate Count with GROUP BY
+    @Query("SELECT new com.example.studentcrudhibernate.dto.CourseStatsDTO(s.course, COUNT(s)) " +
+           "FROM Student s GROUP BY s.course ORDER BY COUNT(s) DESC")
+    List&lt;CourseStatsDTO&gt; getEnrollmentStats();
+
+    // 6B. Filter Aggregates with HAVING
+    @Query("SELECT new com.example.studentcrudhibernate.dto.CourseStatsDTO(s.course, COUNT(s)) " +
+           "FROM Student s GROUP BY s.course HAVING COUNT(s) >= :minStudents ORDER BY COUNT(s) DESC")
+    List&lt;CourseStatsDTO&gt; getPopularCourses(@Param("minStudents") Long minStudents);
+
+    // 7. Bulk Update
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("UPDATE Student s SET s.course = :newCourse WHERE s.course = :oldCourse")
+    int transferStudentsCourse(
+        @Param("oldCourse") String oldCourse,
+        @Param("newCourse") String newCourse
+    );
+
+    // 8. Bulk Delete
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("DELETE FROM Student s WHERE s.course = :course")
+    int deleteStudentsByCourse(@Param("course") String course);
+}</code></pre>
+                    </div>
+
+                    <h2>2. StudentController.java (Complete with HQL Endpoints)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.studentcrudhibernate.controller;
+
+import com.example.studentcrudhibernate.dto.CourseStatsDTO;
+import com.example.studentcrudhibernate.dto.StudentSummaryDTO;
+import com.example.studentcrudhibernate.entity.Student;
+import com.example.studentcrudhibernate.repository.StudentRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/students")
+public class StudentController {
+
+    private final StudentRepository studentRepository;
+
+    public StudentController(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
+    }
+
+    // ------------------------------------------------------------------------
+    // Standard CRUD Endpoints (from previous codelab)
+    // ------------------------------------------------------------------------
+    @GetMapping
+    public List&lt;Student&gt; getAllStudents() {
+        return studentRepository.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity&lt;Student&gt; getStudentById(@PathVariable Long id) {
+        return studentRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;Student&gt; createStudent(@RequestBody Student student) {
+        Student saved = studentRepository.save(student);
+        return new ResponseEntity&lt;&gt;(saved, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity&lt;Student&gt; updateStudent(@PathVariable Long id, @RequestBody Student details) {
+        return studentRepository.findById(id)
+                .map(existing -&gt; {
+                    existing.setName(details.getName());
+                    existing.setEmail(details.getEmail());
+                    existing.setCourse(details.getCourse());
+                    return ResponseEntity.ok(studentRepository.save(existing));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity&lt;Void&gt; deleteStudent(@PathVariable Long id) {
+        if (!studentRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        studentRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ------------------------------------------------------------------------
+    // New Hibernate Query Language (HQL) Endpoints
+    // ------------------------------------------------------------------------
+
+    // Request 1: Exact Course Filter
+    @GetMapping("/search/course")
+    public ResponseEntity&lt;List&lt;Student&gt;&gt; getStudentsByCourse(@RequestParam String course) {
+        return ResponseEntity.ok(studentRepository.findByCourseHql(course));
+    }
+
+    // Request 2: Keyword Name Search
+    @GetMapping("/search/name")
+    public ResponseEntity&lt;List&lt;Student&gt;&gt; searchByName(@RequestParam String keyword) {
+        return ResponseEntity.ok(studentRepository.searchByNameKeyword(keyword));
+    }
+
+    // Request 3A: Multi-Condition Filter
+    @GetMapping("/search/filter")
+    public ResponseEntity&lt;List&lt;Student&gt;&gt; filterByCourseAndDomain(
+            @RequestParam String course,
+            @RequestParam String domain) {
+        return ResponseEntity.ok(studentRepository.findByCourseAndEmailDomain(course, domain));
+    }
+
+    // Request 3B: In-Courses List Filter
+    @GetMapping("/search/by-courses")
+    public ResponseEntity&lt;List&lt;Student&gt;&gt; getByCoursesList(@RequestParam List&lt;String&gt; courses) {
+        return ResponseEntity.ok(studentRepository.findByCoursesList(courses));
+    }
+
+    // Request 4: Multi-Attribute Sorting
+    @GetMapping("/sorted")
+    public ResponseEntity&lt;List&lt;Student&gt;&gt; getSortedStudents() {
+        return ResponseEntity.ok(studentRepository.findAllSortedByCourseAndName());
+    }
+
+    // Request 5A: Distinct Course Offerings
+    @GetMapping("/courses")
+    public ResponseEntity&lt;List&lt;String&gt;&gt; getDistinctCourses() {
+        return ResponseEntity.ok(studentRepository.findDistinctCourses());
+    }
+
+    // Request 5B: Lightweight DTO Summaries
+    @GetMapping("/summaries")
+    public ResponseEntity&lt;List&lt;StudentSummaryDTO&gt;&gt; getSummaries() {
+        return ResponseEntity.ok(studentRepository.findStudentSummaries());
+    }
+
+    // Request 6A: Course Enrollment Counts
+    @GetMapping("/stats/enrollments")
+    public ResponseEntity&lt;List&lt;CourseStatsDTO&gt;&gt; getEnrollmentStats() {
+        return ResponseEntity.ok(studentRepository.getEnrollmentStats());
+    }
+
+    // Request 6B: Popular Courses with Minimum Threshold
+    @GetMapping("/stats/popular")
+    public ResponseEntity&lt;List&lt;CourseStatsDTO&gt;&gt; getPopularCourses(
+            @RequestParam(defaultValue = "2") Long min) {
+        return ResponseEntity.ok(studentRepository.getPopularCourses(min));
+    }
+
+    // Request 7: Bulk Course Transfer
+    @PutMapping("/transfer-course")
+    public ResponseEntity&lt;String&gt; transferCourse(
+            @RequestParam String oldCourse,
+            @RequestParam String newCourse) {
+        int count = studentRepository.transferStudentsCourse(oldCourse, newCourse);
+        return ResponseEntity.ok("Updated " + count + " students.");
+    }
+
+    // Request 8: Bulk Delete by Course
+    @DeleteMapping("/by-course")
+    public ResponseEntity&lt;String&gt; deleteByCourse(@RequestParam String course) {
+        int count = studentRepository.deleteStudentsByCourse(course);
+        return ResponseEntity.ok("Deleted " + count + " students.");
+    }
+}</code></pre>
+                    </div>
+                </section>
+
+                <!-- STEP 13 -->
+                <section class="step-view" data-title="Run &amp; observe logs">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 13 · VERIFICATION</span>
+                        <h1>Run Application &amp; Observe Hibernate SQL</h1>
+                        <p class="lede">Start the Spring Boot application and watch Hibernate dynamically generate and format SQL statements from our HQL queries.</p>
+                    </header>
+
+                    <h2>1. Start the Server</h2>
+                    <p>In your terminal inside the project directory, run:</p>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>./mvnw spring-boot:run</code></pre>
+                    </div>
+
+                    <h2>2. Verify Seed Data Logs</h2>
+                    <p>Check the console output for the initialization message:</p>
+                    <div class="code-wrap">
+                        <pre><code>2026-10-06T09:30:15.112+05:30  INFO 85102 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+>>> Pre-populated 7 sample students for HQL testing.</code></pre>
+                    </div>
+
+                    <h2>3. Comparing HQL to Console SQL Logs</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>HQL Query Written in Repository</th>
+                            <th>Native SQL Generated by Hibernate in Console</th>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT s FROM Student s WHERE s.course = :course</code></td>
+                            <td><code>select s1_0.id, s1_0.course, s1_0.email, s1_0.name from students s1_0 where s1_0.course=?</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT DISTINCT s.course FROM Student s ORDER BY s.course ASC</code></td>
+                            <td><code>select distinct s1_0.course from students s1_0 order by s1_0.course asc</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT s.course, COUNT(s) FROM Student s GROUP BY s.course</code></td>
+                            <td><code>select s1_0.course, count(s1_0.id) from students s1_0 group by s1_0.course</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>UPDATE Student s SET s.course = :newCourse WHERE s.course = :oldCourse</code></td>
+                            <td><code>update students set course=? where course=?</code></td>
+                        </tr>
+                    </table>
+
+                    <h2>4. Inspecting the H2 Web Console</h2>
+                    <p>Open your browser and navigate to <code>http://localhost:8080/h2-console</code>:</p>
+                    <ul>
+                        <li><strong>JDBC URL:</strong> <code>jdbc:h2:mem:studentdb</code></li>
+                        <li><strong>User Name:</strong> <code>sa</code></li>
+                        <li><strong>Password:</strong> <em>(leave blank)</em></li>
+                    </ul>
+                    <p>Click <strong>Connect</strong> and run <code>SELECT * FROM STUDENTS;</code> to verify the initial 7 rows.</p>
+                </section>
+
+                <!-- STEP 14 -->
+                <section class="step-view" data-title="Test APIs with cURL">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 14 · TESTING</span>
+                        <h1>Test All HQL Endpoints with cURL &amp; Postman</h1>
+                        <p class="lede">Test all 8 new HQL requests using cURL commands in your terminal or inside Postman to verify filtering, searching, aggregations, and bulk mutations.</p>
+                    </header>
+
+                    <h2>1. Exact Course Filter (GET)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl "http://localhost:8080/api/students/search/course?course=Computer%20Science"</code></pre>
+                    </div>
+                    <p><strong>Response (200 OK):</strong></p>
+                    <div class="code-wrap">
+                        <pre><code>[
+  {"id":1,"name":"Alice Johnson","email":"alice@university.edu","course":"Computer Science"},
+  {"id":3,"name":"Charlie Brown","email":"charlie@university.edu","course":"Computer Science"},
+  {"id":6,"name":"Fiona Gallagher","email":"fiona@global.org","course":"Computer Science"}
+]</code></pre>
+                    </div>
+
+                    <h2>2. Case-Insensitive Keyword Name Search (GET)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl "http://localhost:8080/api/students/search/name?keyword=john"</code></pre>
+                    </div>
+                    <p><strong>Response (200 OK):</strong> Matches "Alice <strong>John</strong>son" even though we searched with lowercase "john":</p>
+                    <div class="code-wrap">
+                        <pre><code>[
+  {"id":1,"name":"Alice Johnson","email":"alice@university.edu","course":"Computer Science"}
+]</code></pre>
+                    </div>
+
+                    <h2>3. Multi-Condition Filter: Course + Email Domain (GET)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl "http://localhost:8080/api/students/search/filter?course=Computer%20Science&domain=university.edu"</code></pre>
+                    </div>
+                    <p><strong>Response (200 OK):</strong> Only students in Computer Science with a <code>@university.edu</code> email:</p>
+                    <div class="code-wrap">
+                        <pre><code>[
+  {"id":1,"name":"Alice Johnson","email":"alice@university.edu","course":"Computer Science"},
+  {"id":3,"name":"Charlie Brown","email":"charlie@university.edu","course":"Computer Science"}
+]</code></pre>
+                    </div>
+
+                    <h2>4. Multiple Courses IN Filter (GET)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl "http://localhost:8080/api/students/search/by-courses?courses=Information%20Technology,Data%20Science"</code></pre>
+                    </div>
+                    <p><strong>Response (200 OK):</strong> 4 students returned matching either Information Technology or Data Science.</p>
+
+                    <h2>5. Multi-Attribute Sorting (GET)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl "http://localhost:8080/api/students/sorted"</code></pre>
+                    </div>
+                    <p><strong>Response (200 OK):</strong> Returns all students ordered by course (Computer Science first, then Data Science, then Information Technology), and within each course sorted by student name ascending.</p>
+
+                    <h2>6. Distinct Course Names (GET)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl "http://localhost:8080/api/students/courses"</code></pre>
+                    </div>
+                    <p><strong>Response (200 OK):</strong> Clean list of unique course names:</p>
+                    <div class="code-wrap">
+                        <pre><code>["Computer Science","Data Science","Information Technology"]</code></pre>
+                    </div>
+
+                    <h2>7. DTO Summaries (GET)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl "http://localhost:8080/api/students/summaries"</code></pre>
+                    </div>
+                    <p><strong>Response (200 OK):</strong> Lightweight DTO objects containing only <code>name</code> and <code>course</code> without <code>id</code> or <code>email</code>:</p>
+                    <div class="code-wrap">
+                        <pre><code>[
+  {"name":"Alice Johnson","course":"Computer Science"},
+  {"name":"Bob Smith","course":"Information Technology"},
+  {"name":"Charlie Brown","course":"Computer Science"}
+]</code></pre>
+                    </div>
+
+                    <h2>8. Aggregation Stats: Enrollment Breakdown (GET)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl "http://localhost:8080/api/students/stats/enrollments"</code></pre>
+                    </div>
+                    <p><strong>Response (200 OK):</strong></p>
+                    <div class="code-wrap">
+                        <pre><code>[
+  {"courseName":"Computer Science","studentCount":3},
+  {"courseName":"Data Science","studentCount":2},
+  {"courseName":"Information Technology","studentCount":2}
+]</code></pre>
+                    </div>
+
+                    <h2>9. Bulk Course Transfer (PUT)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl -X PUT "http://localhost:8080/api/students/transfer-course?oldCourse=Information%20Technology&newCourse=Cyber%20Security"</code></pre>
+                    </div>
+                    <p><strong>Response (200 OK):</strong></p>
+                    <div class="code-wrap">
+                        <pre><code>Updated 2 students.</code></pre>
+                    </div>
+
+                    <h2>10. Bulk Delete by Course (DELETE)</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>curl -X DELETE "http://localhost:8080/api/students/by-course?course=Cyber%20Security"</code></pre>
+                    </div>
+                    <p><strong>Response (200 OK):</strong></p>
+                    <div class="code-wrap">
+                        <pre><code>Deleted 2 students.</code></pre>
+                    </div>
+                </section>
+
+                <!-- STEP 15 -->
+                <section class="step-view" data-title="Comparison &amp; Pitfalls">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 15 · ARCHITECTURAL GUIDE</span>
+                        <h1>HQL vs Native SQL vs Query Methods</h1>
+                        <p class="lede">When should you use Spring Data derived query methods, when should you write HQL, and when should you drop down to native SQL?</p>
+                    </header>
+
+                    <h2>Decision Matrix</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>Technique</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                            <th>Best Used When</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Spring Data Derived Methods</strong><br><code>findByCourse(String c)</code></td>
+                            <td>Zero query strings, auto-generated by method naming convention.</td>
+                            <td>Method names become unwieldy with multiple conditions or joins.</td>
+                            <td>Simple lookups on 1 or 2 fields (<code>findByName</code>, <code>existsByEmail</code>).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hibernate Query Language (HQL)</strong><br><code>@Query("SELECT s FROM...")</code></td>
+                            <td>Full object-oriented query power, database portable, type-safe DTO projections, bulk DML.</td>
+                            <td>Requires learning HQL syntax and testing query strings.</td>
+                            <td><strong>Recommended standard</strong> for all non-trivial searches, filtering, sorting, aggregations, and bulk updates.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Native SQL</strong><br><code>@Query(value="...", nativeQuery=true)</code></td>
+                            <td>Can use vendor-specific SQL extensions, window functions, and database-specific features.</td>
+                            <td>Tied to a specific database; breaks portability; cannot project to arbitrary Java DTOs easily.</td>
+                            <td>Only when using proprietary database-specific features not supported by HQL (e.g. JSON columns, specialized spatial indexes).</td>
+                        </tr>
+                    </table>
+
+                    <h2>Top 4 HQL Pitfalls &amp; How to Avoid Them</h2>
+                    <div class="grid-2">
+                        <div class="concept">
+                            <strong>1. Querying Table Name Instead of Entity</strong>
+                            <p>Writing <code>FROM students</code> instead of <code>FROM Student</code> causes <code>org.hibernate.hql.internal.ast.QuerySyntaxException: students is not mapped</code>. Always use the Java class name!</p>
+                        </div>
+                        <div class="concept">
+                            <strong>2. Missing @Modifying on DML</strong>
+                            <p>Calling an <code>UPDATE</code> or <code>DELETE</code> HQL query without <code>@Modifying</code> throws <code>InvalidDataAccessApiUsageException: Not supported for DDL/DML statements</code>.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>3. Forgetting Case Sensitivity of Attributes</strong>
+                            <p>If your Java field is <code>private String email;</code>, writing <code>s.Email</code> or <code>s.EMAIL</code> will fail. Java field names in HQL are strictly case-sensitive!</p>
+                        </div>
+                        <div class="concept">
+                            <strong>4. Integer vs Long in COUNT() DTOs</strong>
+                            <p>HQL <code>COUNT()</code> always produces a 64-bit <code>Long</code>. Declaring <code>int</code> in your DTO constructor causes a reflective constructor lookup failure.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 16 -->
+                <section class="step-view" data-title="Revision &amp; Quiz">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 16 · KNOWLEDGE CHECK</span>
+                        <h1>Knowledge Check &amp; Completion</h1>
+                        <p class="lede">Test your understanding of Hibernate Query Language (HQL) with interactive questions, review the final checklist, and celebrate your mastery.</p>
+                    </header>
+
+                    <h2>Interactive Knowledge Check</h2>
+
+                    <!-- Quiz 1 -->
+                    <div class="quiz" data-answer="1" data-correct="Correct! In HQL, you must query the Java Entity class name ('Student'), not the database table name ('students').">
+                        <strong>Question 1: What is the correct HQL query to retrieve all student entities?</strong>
+                        <div class="quiz-options">
+                            <button class="quiz-option" type="button">A) SELECT * FROM students</button>
+                            <button class="quiz-option" type="button">B) SELECT s FROM Student s</button>
+                            <button class="quiz-option" type="button">C) GET ALL FROM Student</button>
+                            <button class="quiz-option" type="button">D) SELECT * FROM Student</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+
+                    <!-- Quiz 2 -->
+                    <div class="quiz" data-answer="2" data-correct="Correct! In HQL, entity class and property names match Java code and ARE case-sensitive, while HQL keywords (like SELECT and WHERE) are case-insensitive.">
+                        <strong>Question 2: Which statement regarding case sensitivity in HQL is TRUE?</strong>
+                        <div class="quiz-options">
+                            <button class="quiz-option" type="button">A) HQL is 100% case-insensitive everywhere.</button>
+                            <button class="quiz-option" type="button">B) Keywords are case-sensitive, but entity names are not.</button>
+                            <button class="quiz-option" type="button">C) Keywords are case-insensitive, but entity class and property names are case-sensitive.</button>
+                            <button class="quiz-option" type="button">D) Both keywords and property names must always be written in UPPERCASE.</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+
+                    <!-- Quiz 3 -->
+                    <div class="quiz" data-answer="0" data-correct="Correct! Named parameters in HQL are prefixed with a colon (:) such as ':course' and mapped with @Param('course').">
+                        <strong>Question 3: How do you declare a named parameter inside an HQL query?</strong>
+                        <div class="quiz-options">
+                            <button class="quiz-option" type="button">A) Using a colon prefix, like :courseName</button>
+                            <button class="quiz-option" type="button">B) Using a dollar prefix, like $courseName</button>
+                            <button class="quiz-option" type="button">C) Using curly braces, like {courseName}</button>
+                            <button class="quiz-option" type="button">D) Using an @ symbol, like @courseName</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+
+                    <!-- Quiz 4 -->
+                    <div class="quiz" data-answer="2" data-correct="Correct! @Modifying informs Spring Data JPA that the query executes an UPDATE or DELETE DML operation.">
+                        <strong>Question 4: Which annotation is mandatory when writing an HQL UPDATE or DELETE query in a Spring Data repository?</strong>
+                        <div class="quiz-options">
+                            <button class="quiz-option" type="button">A) @Mutate</button>
+                            <button class="quiz-option" type="button">B) @UpdateQuery</button>
+                            <button class="quiz-option" type="button">C) @Modifying</button>
+                            <button class="quiz-option" type="button">D) @ReadOnly(false)</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+
+                    <!-- Quiz 5 -->
+                    <div class="quiz" data-answer="1" data-correct="Correct! HQL constructor expressions use 'SELECT new com.example.dto.MyDTO(...) FROM Student s' to project directly into lightweight DTO objects.">
+                        <strong>Question 5: How does HQL project query results directly into a custom DTO class?</strong>
+                        <div class="quiz-options">
+                            <button class="quiz-option" type="button">A) CAST(s AS MyDTO)</button>
+                            <button class="quiz-option" type="button">B) SELECT new fully.qualified.package.MyDTO(s.name, s.course) FROM Student s</button>
+                            <button class="quiz-option" type="button">C) TO_DTO(MyDTO.class, s)</button>
+                            <button class="quiz-option" type="button">D) MAP s INTO MyDTO</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+
+                    <h2>Completion Checklist</h2>
+                    <ul class="checklist">
+                        <li>I understand the fundamental difference between HQL (Entity-based) and native SQL (Table-based).</li>
+                        <li>I seeded sample student data using a Spring Boot <code>CommandLineRunner</code>.</li>
+                        <li>I wrote an exact filter query using named parameters (<code>:course</code>) and <code>@Param</code>.</li>
+                        <li>I implemented case-insensitive substring searching with <code>LOWER()</code>, <code>LIKE</code>, and <code>CONCAT()</code>.</li>
+                        <li>I used <code>AND</code> and <code>IN</code> clauses to filter across collections.</li>
+                        <li>I sorted query results with multi-attribute <code>ORDER BY</code> clauses.</li>
+                        <li>I built lightweight, high-performance DTO projections using HQL constructor expressions (<code>SELECT new ...</code>).</li>
+                        <li>I aggregated statistics using <code>COUNT(s)</code>, <code>GROUP BY</code>, and <code>HAVING</code>.</li>
+                        <li>I performed atomic bulk modifications with <code>UPDATE</code> and <code>DELETE</code> using <code>@Modifying</code> and <code>@Transactional</code>.</li>
+                        <li>I verified native SQL translation in the console logs and tested all endpoints with cURL.</li>
+                    </ul>
+
+                    <div class="finish">
+                        <h2>Congratulations! You Mastered Hibernate Query Language 🎉</h2>
+                        <p>You have expanded your Spring Boot &amp; Hibernate Student application from basic primary key CRUD into a sophisticated data access engine capable of handling complex searches, pattern matching, custom projections, aggregations, and high-performance bulk operations.</p>
+                        <p style="margin-top:12px;font-weight:700;">You are now fully equipped to write clean, type-safe, database-independent queries for any enterprise Java application!</p>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        (() => {
+            const steps = [...document.querySelectorAll('.step-view')];
+            const titles = steps.map(step => step.dataset.title);
+            const nav = document.getElementById('stepNav');
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const content = document.getElementById('content');
+            const completed = new Set();
+            let current = 0;
+
+            nav.innerHTML = titles.map((title, index) =>
+                `<button class="step-link" data-step="${index}" type="button">
+                    <span class="step-number">${String(index + 1).padStart(2, '0')}</span>
+                    <span>${title}</span>
+                    <span class="step-status" aria-hidden="true"></span>
+                </button>`
+            ).join('');
+
+            const getHashStep = () => {
+                const match = location.hash.match(/^#step-(\d+)$/);
+                const value = match ? Number(match[1]) - 1 : 0;
+                return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+            };
+
+            function render(updateHash = true) {
+                current = Math.max(0, Math.min(current, steps.length - 1));
+                steps.forEach((step, index) => {
+                    const active = index === current;
+                    step.classList.toggle('active', active);
+                    step.setAttribute('aria-hidden', String(!active));
+                });
+
+                document.querySelectorAll('.step-link').forEach((button, index) => {
+                    button.classList.toggle('active', index === current);
+                    button.setAttribute('aria-current', index === current ? 'step' : 'false');
+                    button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '';
+                });
+
+                const percent = Math.round(((current + 1) / steps.length) * 100);
+                document.getElementById('progressBar').style.width = `${percent}%`;
+                document.getElementById('progressText').textContent = `${percent}%`;
+                document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+                document.getElementById('mobileTitle').textContent = titles[current];
+                document.getElementById('prevBtn').disabled = current === 0;
+                document.getElementById('nextBtn').disabled = current === steps.length - 1;
+                document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Finish Lesson 🎉' : 'Next →';
+
+                if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+                window.scrollTo({ top: 0, behavior: 'auto' });
+                sidebar.classList.remove('open');
+                menuBtn.setAttribute('aria-expanded', 'false');
+            }
+
+            function goTo(index) {
+                if (index < 0 || index >= steps.length) return;
+                completed.add(current);
+                current = index;
+                render();
+            }
+
+            const navRow = document.createElement('div');
+            navRow.className = 'nav-row';
+            navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next →</button>';
+            content.appendChild(navRow);
+
+            document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+            document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+            nav.addEventListener('click', event => {
+                const button = event.target.closest('.step-link');
+                if (button) goTo(Number(button.dataset.step));
+            });
+
+            menuBtn.addEventListener('click', () => {
+                const open = sidebar.classList.toggle('open');
+                menuBtn.setAttribute('aria-expanded', String(open));
+            });
+
+            document.addEventListener('click', async event => {
+                const copy = event.target.closest('.copy-btn');
+                if (copy) {
+                    const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+                    try {
+                        await navigator.clipboard.writeText(code);
+                        copy.textContent = 'Copied!';
+                    } catch {
+                        copy.textContent = 'Select & copy';
+                    }
+                    setTimeout(() => copy.textContent = 'Copy', 1200);
+                    return;
+                }
+
+                const option = event.target.closest('.quiz-option');
+                if (option) {
+                    const quiz = option.closest('.quiz');
+                    if (quiz.dataset.answered) return;
+                    const options = [...quiz.querySelectorAll('.quiz-option')];
+                    const choice = options.indexOf(option);
+                    const answer = Number(quiz.dataset.answer);
+                    quiz.dataset.answered = 'true';
+                    options.forEach(button => button.disabled = true);
+                    option.classList.add(choice === answer ? 'correct' : 'wrong');
+                    if (choice !== answer) options[answer].classList.add('correct');
+                    const feedback = quiz.querySelector('.quiz-feedback');
+                    feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
+                    feedback.classList.add('show');
+                }
+            });
+
+            window.addEventListener('popstate', () => {
+                current = getHashStep();
+                render(false);
+            });
+            window.addEventListener('hashchange', () => {
+                current = getHashStep();
+                render(false);
+            });
+
+            document.addEventListener('keydown', event => {
+                if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+                if (event.key === 'ArrowRight') goTo(current + 1);
+                if (event.key === 'ArrowLeft') goTo(current - 1);
+            });
+
+            current = getHashStep();
+            render(false);
+        })();
+    </script>
+</body>
+
+</html>
