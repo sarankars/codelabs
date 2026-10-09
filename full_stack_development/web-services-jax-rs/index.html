@@ -1,0 +1,2266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Services &amp; JAX-RS: Comprehensive Theoretical Guide &amp; 5-Marks Exam Mastery</title>
+    <meta name="description"
+        content="Master theoretical concepts of Web Services: Introduction, Architecture, SOAP vs REST, RESTful Principles, Building RESTful Services with JAX-RS, Parameter Annotations, and 5-Marks university exam questions with model answers.">
+    <meta name="theme-color" content="#2856d8">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+        :root {
+            --blue: #2856d8;
+            --blue-dark: #17348e;
+            --blue-light: #e4ebff;
+            --ink: #101010;
+            --paper: #f5f7fb;
+            --white: #fff;
+            --yellow: #ffd83d;
+            --yellow-light: #fff9db;
+            --mint: #75e6c5;
+            --mint-light: #e6faf4;
+            --pink: #ff9bb7;
+            --orange: #ffb866;
+            --purple: #9d72ff;
+            --purple-light: #f2edff;
+            --border: 3px solid var(--ink);
+            --shadow: 6px 6px 0 var(--ink);
+            --shadow-sm: 4px 4px 0 var(--ink);
+            --sidebar: 300px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: auto;
+        }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: "Space Grotesk", system-ui, sans-serif;
+            line-height: 1.6;
+        }
+
+        button,
+        a {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        :focus-visible {
+            outline: 4px solid var(--yellow);
+            outline-offset: 3px;
+        }
+
+        .app {
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: var(--sidebar);
+            padding: 22px 18px;
+            background: var(--blue);
+            border-right: var(--border);
+            overflow-y: auto;
+            z-index: 20;
+        }
+
+        .brand {
+            padding: 16px;
+            margin-bottom: 20px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .eyebrow,
+        .progress-meta,
+        .step-number,
+        .step-kicker,
+        .label,
+        .footer-note,
+        .exam-tag {
+            font-family: "DM Mono", monospace;
+        }
+
+        .eyebrow {
+            font-size: .72rem;
+            font-weight: 500;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--blue-dark);
+        }
+
+        .brand h2 {
+            margin: 5px 0 3px;
+            font-size: 1.35rem;
+            line-height: 1.1;
+        }
+
+        .brand p {
+            margin: 0;
+            font-size: .82rem;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .progress-wrap {
+            margin: 0 2px 20px;
+            color: #fff;
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 7px;
+            font-size: .72rem;
+        }
+
+        .progress-track {
+            height: 16px;
+            padding: 2px;
+            background: #fff;
+            border: var(--border);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: var(--yellow);
+            transition: width .2s ease;
+        }
+
+        .steps {
+            display: grid;
+            gap: 8px;
+        }
+
+        .step-link {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 32px 1fr 18px;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 8px;
+            color: #fff;
+            background: transparent;
+            border: 3px solid transparent;
+            text-align: left;
+            font-weight: 700;
+            font-size: .88rem;
+            line-height: 1.2;
+            text-decoration: none;
+        }
+
+        .step-link:hover {
+            background: rgba(255, 255, 255, .16);
+        }
+
+        .step-link.active {
+            color: var(--ink);
+            background: #fff;
+            border-color: var(--ink);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border: 2px solid currentColor;
+            font-size: .75rem;
+            font-weight: 700;
+        }
+
+        .step-status {
+            text-align: center;
+            font-weight: 900;
+        }
+
+        .mobile-bar {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--blue);
+            border-bottom: var(--border);
+        }
+
+        .menu-btn,
+        .mobile-title {
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .menu-btn {
+            width: 46px;
+            height: 42px;
+            font-size: 1.25rem;
+            font-weight: 900;
+        }
+
+        .mobile-title {
+            flex: 1;
+            padding: 8px 10px;
+            font-weight: 800;
+            font-size: .92rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        main {
+            margin-left: var(--sidebar);
+            min-height: 100vh;
+        }
+
+        .content {
+            width: min(980px, calc(100% - 48px));
+            margin: 0 auto;
+            padding: 42px 0 32px;
+        }
+
+        .step-view {
+            display: none;
+        }
+
+        .step-view.active {
+            display: block;
+            animation: stepIn .18s ease-out;
+        }
+
+        @keyframes stepIn {
+            from {
+                opacity: .35;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .step-header {
+            padding: 28px;
+            margin-bottom: 24px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .step-kicker {
+            display: inline-block;
+            margin-bottom: 12px;
+            padding: 4px 10px;
+            color: #fff;
+            background: var(--blue);
+            border: 2px solid var(--ink);
+            font-size: .72rem;
+            letter-spacing: .05em;
+            font-weight: 700;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.12;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: clamp(1.9rem, 4.5vw, 3.2rem);
+            letter-spacing: -.03em;
+        }
+
+        h2 {
+            margin: 34px 0 14px;
+            font-size: clamp(1.4rem, 2.8vw, 1.95rem);
+            border-bottom: 2px dashed #ccd3e2;
+            padding-bottom: 6px;
+        }
+
+        h3 {
+            margin: 22px 0 9px;
+            font-size: 1.18rem;
+        }
+
+        .lede {
+            max-width: 820px;
+            margin: 0;
+            font-size: 1.08rem;
+            color: #222;
+        }
+
+        .objective {
+            margin-top: 20px;
+            padding: 14px 16px;
+            background: var(--yellow);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 700;
+            font-size: .96rem;
+        }
+
+        .panel,
+        .concept,
+        .quiz,
+        .reveal,
+        .exam-box {
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .panel {
+            padding: 22px;
+            margin: 22px 0;
+        }
+
+        .panel.blue {
+            background: var(--blue-light);
+        }
+
+        .panel.mint {
+            background: var(--mint-light);
+        }
+
+        .panel.pink {
+            background: #ffe9ef;
+        }
+
+        .panel.yellow {
+            background: var(--yellow-light);
+        }
+
+        .panel.orange {
+            background: #fff1e0;
+        }
+
+        .panel.purple {
+            background: var(--purple-light);
+        }
+
+        .callout {
+            padding: 16px 18px;
+            margin: 22px 0;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .callout .label {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 3px 7px;
+            color: #fff;
+            background: var(--ink);
+            border: 2px solid var(--ink);
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        .grid-2 {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            margin: 18px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            gap: 14px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin: 18px 0;
+        }
+
+        .concept {
+            padding: 18px;
+        }
+
+        .concept strong {
+            font-size: 1.05rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .concept p:last-child {
+            margin-bottom: 0;
+        }
+
+        .code-wrap {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        pre {
+            margin: 0;
+            padding: 20px;
+            overflow-x: auto;
+            color: #f7f7f7;
+            background: #111;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-family: "DM Mono", ui-monospace, monospace;
+            font-size: .85rem;
+            line-height: 1.62;
+            tab-size: 2;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 9px;
+            right: 9px;
+            z-index: 2;
+            padding: 5px 10px;
+            background: var(--yellow);
+            border: 2px solid var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+            font-size: .74rem;
+            font-weight: 800;
+        }
+
+        .copy-btn:hover {
+            background: #fff;
+        }
+
+        code:not(pre code) {
+            padding: 2px 6px;
+            background: #e8edf7;
+            border: 1px solid #9da9bb;
+            font-family: "DM Mono", monospace;
+            font-size: .88em;
+            border-radius: 2px;
+        }
+
+        ul,
+        ol {
+            padding-left: 1.35rem;
+        }
+
+        li {
+            margin: 7px 0;
+        }
+
+        .comparison {
+            width: 100%;
+            margin: 20px 0;
+            background: #fff;
+            border: var(--border);
+            border-collapse: collapse;
+        }
+
+        .comparison th,
+        .comparison td {
+            padding: 12px;
+            border: 2px solid var(--ink);
+            text-align: left;
+            vertical-align: top;
+            font-size: .92rem;
+        }
+
+        .comparison th {
+            color: #fff;
+            background: var(--blue);
+            font-weight: 700;
+        }
+
+        .quiz {
+            padding: 22px;
+            margin: 26px 0;
+            background: #fff;
+        }
+
+        .quiz h3 {
+            margin-top: 0;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .quiz-option {
+            text-align: left;
+            padding: 12px 14px;
+            background: #fff;
+            border: 2px solid var(--ink);
+            font-weight: 700;
+            font-size: .92rem;
+            transition: background .12s;
+        }
+
+        .quiz-option:hover:not(:disabled) {
+            background: var(--blue-light);
+        }
+
+        .quiz-option.correct {
+            background: var(--mint) !important;
+        }
+
+        .quiz-option.wrong {
+            background: var(--pink) !important;
+        }
+
+        .quiz-feedback {
+            display: none;
+            margin-top: 14px;
+            padding: 12px;
+            border: 2px solid var(--ink);
+            font-weight: 700;
+            font-size: .92rem;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+        }
+
+        .reveal {
+            margin: 18px 0;
+        }
+
+        .reveal summary {
+            padding: 14px 18px;
+            cursor: pointer;
+            background: var(--blue-light);
+            font-weight: 800;
+            font-size: .98rem;
+        }
+
+        .reveal>div {
+            padding: 16px 18px;
+            line-height: 1.65;
+        }
+
+        .flow {
+            margin: 20px 0;
+            padding: 20px;
+            background: #161c28;
+            color: #87e8de;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-family: "DM Mono", monospace;
+            line-height: 1.75;
+            overflow-x: auto;
+            font-size: .83rem;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            position: relative;
+            padding-left: 32px;
+            margin: 12px 0;
+        }
+
+        .checklist li::before {
+            content: "✔";
+            position: absolute;
+            left: 0;
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: var(--blue);
+        }
+
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            margin-top: 38px;
+            padding-top: 22px;
+            border-top: var(--border);
+        }
+
+        .nav-btn {
+            min-width: 140px;
+            padding: 12px 20px;
+            background: #fff;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 900;
+            font-size: .92rem;
+        }
+
+        .nav-btn.primary {
+            color: #fff;
+            background: var(--blue);
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 var(--ink);
+        }
+
+        .nav-btn:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+
+        .finish {
+            padding: 24px;
+            margin-top: 28px;
+            background: var(--mint);
+            border: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        /* Dedicated 5-Marks Exam Box Styling */
+        .exam-box {
+            margin: 28px 0;
+            background: #fff;
+            border: 3px solid var(--ink);
+            box-shadow: 6px 6px 0 var(--ink);
+            overflow: hidden;
+        }
+
+        .exam-box-header {
+            background: var(--yellow);
+            padding: 12px 18px;
+            border-bottom: 3px solid var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .exam-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--ink);
+            color: #fff;
+            padding: 4px 10px;
+            font-size: .75rem;
+            font-weight: 800;
+            border-radius: 2px;
+            font-family: "DM Mono", monospace;
+        }
+
+        .exam-marks {
+            background: var(--blue);
+            color: #fff;
+            padding: 4px 10px;
+            font-size: .75rem;
+            font-weight: 800;
+            border: 2px solid var(--ink);
+            font-family: "DM Mono", monospace;
+        }
+
+        .exam-question-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin: 0;
+            color: var(--ink);
+            width: 100%;
+        }
+
+        .exam-body {
+            padding: 20px;
+            background: #fafbff;
+        }
+
+        .exam-rubric {
+            display: flex;
+            gap: 12px;
+            background: #edf2fc;
+            padding: 10px 14px;
+            border: 2px solid #b3c2e5;
+            font-size: .82rem;
+            font-family: "DM Mono", monospace;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .exam-rubric span {
+            font-weight: 600;
+        }
+
+        .exam-answer {
+            background: #fff;
+            padding: 18px;
+            border: 2px solid var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+        }
+
+        .exam-answer h4 {
+            margin: 14px 0 6px;
+            color: var(--blue-dark);
+            font-size: 1rem;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 4px;
+        }
+
+        .exam-answer h4:first-child {
+            margin-top: 0;
+        }
+
+        .exam-tip {
+            margin-top: 16px;
+            padding: 10px 14px;
+            background: #fff9db;
+            border-left: 4px solid #f59f00;
+            font-size: .86rem;
+            font-weight: 600;
+        }
+
+        @media(max-width:880px) {
+            :root {
+                --sidebar: 270px;
+                --mobile-bar-height: 65px;
+            }
+
+            .sidebar {
+                inset: var(--mobile-bar-height) auto 0 0;
+                transform: translateX(-100%);
+                transition: transform .2s ease;
+            }
+
+            .sidebar.open {
+                transform: none;
+            }
+
+            .mobile-bar {
+                display: flex;
+                height: var(--mobile-bar-height);
+            }
+
+            main {
+                margin-left: 0;
+            }
+
+            .content {
+                width: min(940px, calc(100% - 28px));
+                padding-top: 24px;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width:680px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .content {
+                width: calc(100% - 18px);
+                padding-top: 16px;
+            }
+
+            .step-header {
+                padding: 20px 16px;
+            }
+
+            .panel,
+            .concept,
+            .quiz,
+            .exam-box {
+                padding: 16px;
+            }
+
+            .exam-body {
+                padding: 14px;
+            }
+
+            .nav-row {
+                position: sticky;
+                bottom: 0;
+                z-index: 10;
+                padding: 12px 0;
+                background: var(--paper);
+            }
+
+            .nav-btn {
+                min-width: 0;
+                flex: 1;
+                padding: 11px 10px;
+            }
+
+            pre {
+                padding: 16px 12px;
+                font-size: .76rem;
+            }
+
+            .copy-btn {
+                position: static;
+                align-self: flex-end;
+                margin-bottom: 6px;
+            }
+
+            .code-wrap {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .code-wrap pre {
+                order: 2;
+            }
+
+            .code-wrap .copy-btn {
+                order: 1;
+            }
+
+            .comparison {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+            <div class="brand">
+                <div class="eyebrow">Academic &amp; Concept Guide</div>
+                <h2>Web Services &amp; JAX-RS</h2>
+                <p>Theory, Architectures, Protocols &amp; 5-Marks Exam Mastery</p>
+            </div>
+            <div class="progress-wrap">
+                <div class="progress-meta"><span>PROGRESS</span><span id="progressText">0%</span></div>
+                <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                    aria-valuenow="0">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+            <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+        </aside>
+
+        <!-- MOBILE TOP BAR -->
+        <div class="mobile-bar">
+            <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation"
+                aria-expanded="false">☰</button>
+            <div class="mobile-title" id="mobileTitle">Web Services Theory &amp; Exam Guide</div>
+        </div>
+
+        <!-- MAIN CONTENT AREA -->
+        <main>
+            <div class="content" id="content">
+
+                <!-- ========================================================================= -->
+                <!-- STEP 1: INTRODUCTION TO WEB SERVICES -->
+                <!-- ========================================================================= -->
+                <section class="step-view" data-title="1. Web Services Intro">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 1 · FOUNDATIONS</span>
+                        <h1>Introduction to Web Services</h1>
+                        <p class="lede">Discover what Web Services are, why distributed systems rely on them, the
+                            problems with legacy RPC/RMI, and the classic Web Service Architecture (Provider, Requester,
+                            Registry).</p>
+                    </header>
+                    <div class="objective"><strong>Target Outcome:</strong> Define Web Services according to the W3C
+                        standard, explain the 3 architectural roles (Publish, Find, Bind), and describe key
+                        characteristics for university exams.</div>
+
+                    <h2>1. What is a Web Service?</h2>
+                    <p>In distributed enterprise computing, different systems are implemented using diverse programming
+                        languages (Java, Python, C#, Node.js) and hosted on disparate operating systems (Linux, Windows,
+                        macOS). These systems need to exchange data seamlessly over local networks or the internet.</p>
+
+                    <div class="panel blue">
+                        <strong>Official W3C Definition:</strong>
+                        <p>A <strong>Web Service</strong> is a software system designed to support interoperable
+                            machine-to-machine (M2M) interaction over a network. It has an interface described in a
+                            machine-processable format and communicates using standard internet protocols (typically
+                            HTTP) and structured message formats (XML or JSON).</p>
+                    </div>
+
+                    <h2>2. Why Web Services? Legacy Distributed Computing Limitations</h2>
+                    <p>Before web services, distributed computing relied on technologies such as <strong>CORBA</strong>
+                        (Common Object Request Broker Architecture), <strong>DCOM</strong> (Distributed Component Object
+                        Model), and <strong>Java RMI</strong> (Remote Method Invocation). These had severe drawbacks:
+                    </p>
+
+                    <div class="grid-2">
+                        <div class="concept">
+                            <strong>Platform &amp; Language Lock-in</strong>
+                            <p>Java RMI only worked between Java programs. DCOM was tightly bound to Microsoft Windows.
+                                Cross-language and cross-platform communication was extremely painful.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>Firewall Blocking</strong>
+                            <p>Legacy RPC protocols used custom, dynamic network ports that corporate firewalls blocked
+                                by default. Web Services use standard <strong>HTTP port 80</strong> and <strong>HTTPS
+                                    port 443</strong>, effortlessly traversing firewalls.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>Tight Coupling</strong>
+                            <p>Client and server had to share identical binary stubs and skeleton classes. Any minor
+                                method signature change broke all existing clients.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>Heavyweight Binary Wire Formats</strong>
+                            <p>Data was encoded in proprietary binary streams rather than open, human-readable,
+                                self-describing text formats like JSON or XML.</p>
+                        </div>
+                    </div>
+
+                    <h2>3. Core Characteristics of Web Services</h2>
+                    <ul>
+                        <li><strong>Interoperability:</strong> Any client (e.g. an iOS app written in Swift or a Python
+                            script) can talk to a Java backend.</li>
+                        <li><strong>Loose Coupling:</strong> The client and service are independent; the client only
+                            needs to know the service's contract or API specification.</li>
+                        <li><strong>Standard Communication Protocols:</strong> Relies on universally available protocols
+                            such as HTTP, HTTPS, TCP/IP.</li>
+                        <li><strong>Self-Describing Messages:</strong> Data payloads (JSON or XML) clearly define what
+                            each field means without requiring shared compiled code.</li>
+                        <li><strong>Synchronous &amp; Asynchronous:</strong> Supports immediate request-response calls
+                            as well as long-running asynchronous notifications.</li>
+                    </ul>
+
+                    <h2>4. Web Services Architecture (The SOA Triangle)</h2>
+                    <p>The Service-Oriented Architecture (SOA) of web services is based on three primary roles and three
+                        fundamental operations:</p>
+
+                    <div class="flow">
+                        +-----------------------------------+
+                        | SERVICE REGISTRY |
+                        | (UDDI / API Gateway / Directory)|
+                        +-----------------------------------+
+                        ^ ^
+                        | |
+                        1. PUBLISH | | 2. FIND
+                        (Registers WSDL | | (Discovers URL
+                        or OpenAPI) | | &amp; contract)
+                        | |
+                        +-----------------------+ +-----------------------+
+                        | SERVICE PROVIDER | | SERVICE REQUESTER |
+                        | (Server hosting API) | | (Client/Consumer) |
+                        +-----------------------+ +-----------------------+
+                        ^ |
+                        | |
+                        +---------------------+
+                        3. BIND
+                        (Invokes Service over HTTP)
+                    </div>
+
+                    <div class="grid-3">
+                        <div class="concept">
+                            <strong>1. Service Provider</strong>
+                            <p>Creates the web service, defines its contract/interface, and hosts it on a server
+                                accessible over the network.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>2. Service Requester (Client)</strong>
+                            <p>The consumer that needs the functionality. Discovers the service and sends requests to
+                                execute remote operations.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>3. Service Registry</strong>
+                            <p>A searchable central repository (like UDDI for SOAP or API Gateways/Swagger Hub for REST)
+                                where providers publish service definitions.</p>
+                        </div>
+                    </div>
+
+                    <!-- 5-MARKS EXAM CORNER -->
+                    <div class="exam-box">
+                        <div class="exam-box-header">
+                            <span class="exam-badge">EXAM CORNER</span>
+                            <span class="exam-marks">5 MARKS QUESTION</span>
+                            <h3 class="exam-question-title">Q1: Define a Web Service. Explain the Web Service
+                                Architecture (Publish, Find, Bind) with a neat diagram and state its key advantages.
+                            </h3>
+                        </div>
+                        <div class="exam-body">
+                            <div class="exam-rubric">
+                                <span>Rubric:</span> Definition of Web Service (1 Mark) | Architecture Diagram (1.5
+                                Marks) | Explanation of 3 Roles &amp; Operations (1.5 Marks) | Key Advantages (1 Mark)
+                            </div>
+                            <div class="exam-answer">
+                                <h4>1. Definition (1 Mark):</h4>
+                                <p>A <strong>Web Service</strong> is a software component designed for
+                                    machine-to-machine interaction over a network using open internet standards (such as
+                                    HTTP, XML, JSON). It provides platform-independent, language-neutral communication
+                                    between heterogeneous systems.</p>
+
+                                <h4>2. Architecture &amp; Operations (3 Marks):</h4>
+                                <p>The Web Service Architecture consists of three primary roles and operations:</p>
+                                <ul>
+                                    <li><strong>Service Provider:</strong> Develops and deploys the web service.
+                                        Operation: <strong>Publish</strong> — registers service interface and address in
+                                        the registry.</li>
+                                    <li><strong>Service Registry:</strong> Central directory of services. Allows
+                                        providers to advertise services and requesters to locate them.</li>
+                                    <li><strong>Service Requester:</strong> The client application. Operation:
+                                        <strong>Find</strong> — queries registry for service; Operation:
+                                        <strong>Bind</strong> — connects directly to the provider and invokes methods
+                                        over HTTP.</li>
+                                </ul>
+
+                                <h4>3. Key Advantages (1 Mark):</h4>
+                                <ul>
+                                    <li><strong>Platform &amp; Language Independence:</strong> Java client can
+                                        communicate with a .NET or Python service.</li>
+                                    <li><strong>Firewall Friendly:</strong> Uses standard port 80 (HTTP) and 443
+                                        (HTTPS).</li>
+                                    <li><strong>Loose Coupling:</strong> Changes to internal server implementation do
+                                        not break client code.</li>
+                                </ul>
+                                <div class="exam-tip">💡 <strong>Exam Tip:</strong> Draw the triangle with arrows
+                                    labeled 1. Publish, 2. Find, and 3. Bind clearly to get full marks for the diagram!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz" data-answer="1"
+                        data-correct="Correct! Interoperability means systems written in different programming languages and running on different operating systems can seamlessly communicate.">
+                        <h3>Quick Knowledge Check: What does 'Interoperability' mean in the context of Web Services?
+                        </h3>
+                        <div class="quiz-options">
+                            <button class="quiz-option">All client applications must be compiled using the exact same
+                                version of the Java JDK.</button>
+                            <button class="quiz-option">Applications built on different platforms and programming
+                                languages can seamlessly exchange data.</button>
+                            <button class="quiz-option">Services can only be hosted inside Apache Tomcat on a Linux
+                                server.</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <!-- ========================================================================= -->
+                <!-- STEP 2: TYPES OF WEB SERVICES: SOAP VS REST -->
+                <!-- ========================================================================= -->
+                <section class="step-view" data-title="2. Types: SOAP vs. REST">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 2 · ARCHITECTURAL TYPES</span>
+                        <h1>Types of Web Services: SOAP vs. REST</h1>
+                        <p class="lede">Learn the two primary types of web services used in industry: contract-first
+                            SOAP (Simple Object Access Protocol) and resource-oriented REST (Representational State
+                            Transfer).</p>
+                    </header>
+                    <div class="objective"><strong>Target Outcome:</strong> Detail SOAP structure, define REST
+                        fundamentals, and construct a comprehensive head-to-head comparison table for exams.</div>
+
+                    <h2>1. The Two Dominant Web Service Types</h2>
+                    <p>In modern computing, web services are classified into two broad categories based on their design
+                        philosophy and protocol constraints:</p>
+                    <div class="grid-2">
+                        <div class="concept">
+                            <strong>1. SOAP (Simple Object Access Protocol)</strong>
+                            <p>A heavyweight, formal, standardized <strong>protocol</strong> governed by W3C.
+                                Exclusively uses XML for message formatting and enforces a strict contract defined by a
+                                WSDL (Web Services Description Language) file.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>2. REST (Representational State Transfer)</strong>
+                            <p>A lightweight <strong>architectural style</strong> (not a protocol) governed by
+                                principles formulated by Roy Fielding. Treats everything as a <em>Resource</em>
+                                identified by a URI and uses standard HTTP methods.</p>
+                        </div>
+                    </div>
+
+                    <h2>2. Deep Dive: SOAP Web Services</h2>
+                    <p>SOAP relies on standard XML structures. Every SOAP message is an XML document composed of four
+                        distinct elements:</p>
+
+                    <div class="flow">
+                        +====================================================================+
+                        | &lt;soap:Envelope&gt; (Root element that defines the XML document) |
+                        | |
+                        | +--------------------------------------------------------------+ |
+                        | | &lt;soap:Header&gt; (Optional: Metadata like Authentication, | |
+                        | | WS-Security tokens, Transactions) | |
+                        | +--------------------------------------------------------------+ |
+                        | |
+                        | +--------------------------------------------------------------+ |
+                        | | &lt;soap:Body&gt; (Mandatory: Actual payload / RPC request) | |
+                        | | | |
+                        | | +----------------------------------------------------+ | |
+                        | | | &lt;soap:Fault&gt; (Optional: Error &amp; Exception details | | |
+                        | | +----------------------------------------------------+ | |
+                        | +--------------------------------------------------------------+ |
+                        +====================================================================+
+                    </div>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>&lt;!-- Example of a SOAP Request Message --&gt;
+&lt;soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"&gt;
+    &lt;soap:Header&gt;
+        &lt;auth:Token&gt;XYZ-12345&lt;/auth:Token&gt;
+    &lt;/soap:Header&gt;
+    &lt;soap:Body&gt;
+        &lt;m:GetStudentDetails xmlns:m="http://example.com/students"&gt;
+            &lt;m:StudentId&gt;101&lt;/m:StudentId&gt;
+        &lt;/m:GetStudentDetails&gt;
+    &lt;/soap:Body&gt;
+&lt;/soap:Envelope&gt;</code></pre>
+                    </div>
+
+                    <h3>Key Supporting Standards for SOAP (WS-* Stack):</h3>
+                    <ul>
+                        <li><strong>WSDL (Web Services Description Language):</strong> An XML document that describes
+                            the service: available methods, parameter data types, return types, and endpoint URL.</li>
+                        <li><strong>UDDI (Universal Description, Discovery, and Integration):</strong> XML-based
+                            directory registry for publishing and finding SOAP services.</li>
+                        <li><strong>WS-Security:</strong> Enterprise-grade message-level security, encryption, and
+                            digital signatures.</li>
+                    </ul>
+
+                    <h2>3. Deep Dive: RESTful Web Services</h2>
+                    <p>REST stands for <strong>Representational State Transfer</strong>. Unlike SOAP, it is not a rigid
+                        protocol with strict XML wrappers. Instead, it leverages the native capabilities of the
+                        <strong>World Wide Web and HTTP protocol</strong>.</p>
+                    <ul>
+                        <li><strong>Resources:</strong> Every entity (Student, Course, Order) is a resource identified
+                            by a unique, logical URI (e.g., <code>/api/students/101</code>).</li>
+                        <li><strong>Representations:</strong> Resources can be represented in multiple formats, most
+                            commonly <strong>JSON</strong> (JavaScript Object Notation), but also XML, HTML, or plain
+                            text.</li>
+                        <li><strong>Standard Verbs:</strong> Uses HTTP methods (<code>GET</code>, <code>POST</code>,
+                            <code>PUT</code>, <code>DELETE</code>) as standard actions rather than custom remote
+                            procedure names.</li>
+                    </ul>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>// Example of a REST JSON Representation
+{
+    "id": 101,
+    "name": "Aarav Sharma",
+    "department": "Computer Science",
+    "email": "aarav@example.com"
+}</code></pre>
+                    </div>
+
+                    <h2>4. Head-to-Head Comparison: SOAP vs. REST</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>Parameter</th>
+                            <th>SOAP (Simple Object Access Protocol)</th>
+                            <th>REST (Representational State Transfer)</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Nature</strong></td>
+                            <td>A formal, strict <strong>protocol</strong> with W3C standards.</td>
+                            <td>An <strong>architectural style</strong> with design constraints.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Message Format</strong></td>
+                            <td><strong>XML only</strong>. Heavyweight tag envelopes.</td>
+                            <td><strong>JSON</strong> (predominant), XML, YAML, plain text. Lightweight.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Contract / Schema</strong></td>
+                            <td>Strict contract defined via <strong>WSDL</strong>.</td>
+                            <td>No mandatory contract; optional documentation via OpenAPI/Swagger.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Transport Protocols</strong></td>
+                            <td>Transport-independent: HTTP, HTTPS, SMTP, JMS, TCP.</td>
+                            <td>Strictly operates over <strong>HTTP / HTTPS</strong>.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Performance &amp; Bandwidth</strong></td>
+                            <td>Slower and consumes more bandwidth due to verbose XML parsing.</td>
+                            <td>Faster and lightweight; minimal payload overhead with JSON.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Caching Support</strong></td>
+                            <td>Cannot be cached natively because requests are sent via HTTP POST.</td>
+                            <td><strong>Directly cacheable</strong> via HTTP GET caching headers (ETag, Cache-Control).
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Security Standards</strong></td>
+                            <td>Enterprise-grade <strong>WS-Security</strong> (message-level encryption, signatures).
+                            </td>
+                            <td>Transport-level security via <strong>HTTPS / SSL</strong>, plus OAuth 2.0 and JWT.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Best Used For</strong></td>
+                            <td>Banking, financial transactions, telecom, enterprise integrations requiring ACID and
+                                WS-Security.</td>
+                            <td>Mobile apps, web apps, public APIs, cloud microservices.</td>
+                        </tr>
+                    </table>
+
+                    <!-- 5-MARKS EXAM CORNER -->
+                    <div class="exam-box">
+                        <div class="exam-box-header">
+                            <span class="exam-badge">EXAM CORNER</span>
+                            <span class="exam-marks">5 MARKS QUESTION</span>
+                            <h3 class="exam-question-title">Q2: Differentiate between SOAP and RESTful Web Services in
+                                detail (Provide at least 5 distinct comparison points).</h3>
+                        </div>
+                        <div class="exam-body">
+                            <div class="exam-rubric">
+                                <span>Rubric:</span> Definitions of SOAP &amp; REST (1 Mark) | 5 Comparison Criteria
+                                with Explanation (4 Marks)
+                            </div>
+                            <div class="exam-answer">
+                                <h4>1. Fundamental Definitions (1 Mark):</h4>
+                                <p><strong>SOAP</strong> is a formal W3C protocol relying on XML and WSDL contracts.
+                                    <strong>REST</strong> is an architectural style based on HTTP principles using
+                                    resource URIs and lightweight data formats like JSON.</p>
+
+                                <h4>2. Comparison Points (4 Marks):</h4>
+                                <ul>
+                                    <li><strong>1. Protocol vs Architectural Style:</strong> SOAP is a rigid protocol
+                                        with strict message formats; REST is an architectural style based on HTTP
+                                        constraints.</li>
+                                    <li><strong>2. Data Formats:</strong> SOAP permits <em>only XML</em>, leading to
+                                        verbose payloads. REST supports multiple formats, defaulting to <em>JSON</em>,
+                                        which is concise and fast to parse.</li>
+                                    <li><strong>3. Contract Dependency:</strong> SOAP enforces a rigid contract via a
+                                        <em>WSDL</em> file. REST does not mandate a formal contract; endpoints are
+                                        identified by URIs.</li>
+                                    <li><strong>4. Caching:</strong> SOAP requests cannot be cached by intermediate
+                                        proxies because all calls typically use HTTP POST. REST GET queries are natively
+                                        cacheable.</li>
+                                    <li><strong>5. Bandwidth &amp; Speed:</strong> SOAP has high network overhead due to
+                                        XML Envelope/Header wrappers. REST is lightweight, making it ideal for mobile
+                                        devices and high-traffic web applications.</li>
+                                </ul>
+                                <div class="exam-tip">💡 <strong>Exam Tip:</strong> Constructing a comparison table with
+                                    clear column headers (Parameter, SOAP, REST) consistently yields full marks in
+                                    university exams!</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz" data-answer="2"
+                        data-correct="Correct! SOAP messages can only be formatted in XML, whereas REST supports JSON, XML, Plain Text, and HTML.">
+                        <h3>Quick Knowledge Check: Which data format is supported by SOAP messages?</h3>
+                        <div class="quiz-options">
+                            <button class="quiz-option">Both JSON and XML interchangeably</button>
+                            <button class="quiz-option">JSON only</button>
+                            <button class="quiz-option">XML only</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <!-- ========================================================================= -->
+                <!-- STEP 3: REST ARCHITECTURE & HTTP PRINCIPLES -->
+                <!-- ========================================================================= -->
+                <section class="step-view" data-title="3. REST Architecture &amp; HTTP">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 3 · REST PRINCIPLES</span>
+                        <h1>REST Architecture &amp; HTTP Protocol</h1>
+                        <p class="lede">Explore Roy Fielding's 6 core architectural constraints of REST, HTTP verbs and
+                            their idempotency rules, and HTTP status codes.</p>
+                    </header>
+                    <div class="objective"><strong>Target Outcome:</strong> Explain the 6 architectural constraints of
+                        REST, classify HTTP methods as safe or idempotent, and map status codes to REST operations.
+                    </div>
+
+                    <h2>1. The 6 Architectural Constraints of REST</h2>
+                    <p>In his landmark 2000 doctoral dissertation, computer scientist <strong>Dr. Roy Fielding</strong>
+                        defined the 6 foundational constraints that an architecture must follow to be considered truly
+                        <strong>RESTful</strong>:</p>
+
+                    <div class="grid-2">
+                        <div class="concept">
+                            <strong>1. Client-Server Separation</strong>
+                            <p>Separates user interface concerns (Client) from data storage concerns (Server). Enhances
+                                portability of user interfaces across platforms (Web, iOS, Android) and allows
+                                independent evolution.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>2. Statelessness (Stateless)</strong>
+                            <p>No client session context is stored on the server between requests. <strong>Every request
+                                    from the client must contain all information</strong> (headers, authentication
+                                tokens, parameters) necessary for the server to process it.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>3. Cacheability (Cacheable)</strong>
+                            <p>Responses must implicitly or explicitly define themselves as cacheable or non-cacheable.
+                                Well-managed caching eliminates client-server interactions, improving scalability.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>4. Uniform Interface</strong>
+                            <p>The central differentiator of REST. All interactions follow a uniform contract via:
+                                Resource identification in URIs, Resource manipulation through representations,
+                                Self-descriptive messages, and HATEOAS.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="concept">
+                            <strong>5. Layered System</strong>
+                            <p>The client cannot tell whether it is connected directly to the end server or to an
+                                intermediary (proxy, cache, API gateway, load balancer). Improves system scalability and
+                                security.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>6. Code on Demand (Optional)</strong>
+                            <p>Servers can temporarily extend client functionality by transferring executable code (e.g.
+                                JavaScript or compiled applets). This is the only <em>optional</em> constraint.</p>
+                        </div>
+                    </div>
+
+                    <h2>2. HTTP Verbs: Safe vs. Idempotent Methods</h2>
+                    <p>In RESTful design, remote operations are performed using standard HTTP methods. Two critical
+                        mathematical properties govern these methods for exams:</p>
+                    <ul>
+                        <li><strong>Safe Method:</strong> A method that does <em>not modify</em> any server-side
+                            resource state. It is strictly read-only (e.g. <code>GET</code>, <code>HEAD</code>).</li>
+                        <li><strong>Idempotent Method:</strong> Making the same request <em>multiple times</em> produces
+                            the exact same server state as making it once (e.g. <code>GET</code>, <code>PUT</code>,
+                            <code>DELETE</code>).</li>
+                    </ul>
+
+                    <table class="comparison">
+                        <tr>
+                            <th>HTTP Verb</th>
+                            <th>CRUD Operation</th>
+                            <th>Safe?</th>
+                            <th>Idempotent?</th>
+                            <th>Typical URI Example</th>
+                        </tr>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td>Read / Retrieve</td>
+                            <td>✔ <strong>Yes</strong></td>
+                            <td>✔ <strong>Yes</strong></td>
+                            <td><code>GET /api/students/101</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>POST</code></td>
+                            <td>Create / Insert</td>
+                            <td>❌ No</td>
+                            <td>❌ <strong>No</strong></td>
+                            <td><code>POST /api/students</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>PUT</code></td>
+                            <td>Full Replace / Update</td>
+                            <td>❌ No</td>
+                            <td>✔ <strong>Yes</strong></td>
+                            <td><code>PUT /api/students/101</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>PATCH</code></td>
+                            <td>Partial Modification</td>
+                            <td>❌ No</td>
+                            <td>❌ No (usually)</td>
+                            <td><code>PATCH /api/students/101</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE</code></td>
+                            <td>Remove</td>
+                            <td>❌ No</td>
+                            <td>✔ <strong>Yes</strong></td>
+                            <td><code>DELETE /api/students/101</code></td>
+                        </tr>
+                    </table>
+
+                    <div class="panel yellow">
+                        <strong>Why POST is NOT Idempotent:</strong>
+                        <p>If a client sends <code>POST /api/students</code> with body <code>{"name":"John"}</code> 5
+                            times, the server creates 5 separate student records with 5 different IDs. Conversely,
+                            sending <code>DELETE /api/students/101</code> 5 times deletes record 101 on the first call
+                            and leaves it deleted for subsequent calls — the resource remains in the same state.</p>
+                    </div>
+
+                    <h2>3. Standard HTTP Status Code Categories</h2>
+                    <table class="comparison">
+                        <tr>
+                            <th>Range</th>
+                            <th>Meaning</th>
+                            <th>Prominent Examples in REST</th>
+                        </tr>
+                        <tr>
+                            <td><strong>2xx</strong></td>
+                            <td>Success</td>
+                            <td><code>200 OK</code> (Success), <code>201 Created</code> (Resource created via POST),
+                                <code>204 No Content</code> (Delete success).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3xx</strong></td>
+                            <td>Redirection</td>
+                            <td><code>301 Moved Permanently</code>, <code>304 Not Modified</code> (Cache valid).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4xx</strong></td>
+                            <td>Client Errors</td>
+                            <td><code>400 Bad Request</code> (Invalid JSON), <code>401 Unauthorized</code> (Missing
+                                auth), <code>403 Forbidden</code>, <code>404 Not Found</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5xx</strong></td>
+                            <td>Server Errors</td>
+                            <td><code>500 Internal Server Error</code> (Unhandled exception),
+                                <code>503 Service Unavailable</code>.</td>
+                        </tr>
+                    </table>
+
+                    <!-- 5-MARKS EXAM CORNER -->
+                    <div class="exam-box">
+                        <div class="exam-box-header">
+                            <span class="exam-badge">EXAM CORNER</span>
+                            <span class="exam-marks">5 MARKS QUESTION</span>
+                            <h3 class="exam-question-title">Q3: Explain the core architectural constraints of REST.
+                                Differentiate between Safe and Idempotent HTTP methods.</h3>
+                        </div>
+                        <div class="exam-body">
+                            <div class="exam-rubric">
+                                <span>Rubric:</span> Explanation of REST Constraints (3 Marks) | Definitions of Safe
+                                &amp; Idempotent Methods with Table (2 Marks)
+                            </div>
+                            <div class="exam-answer">
+                                <h4>1. Architectural Constraints of REST (3 Marks):</h4>
+                                <ul>
+                                    <li><strong>Client-Server:</strong> Decouples UI logic from data storage for
+                                        independent scalability.</li>
+                                    <li><strong>Stateless:</strong> Server retains no client session context; each
+                                        request carries complete authentication and state details.</li>
+                                    <li><strong>Cacheable:</strong> Responses must explicitly define whether caching is
+                                        permitted.</li>
+                                    <li><strong>Uniform Interface:</strong> Consistent URI naming, standard HTTP
+                                        methods, and self-describing JSON representations.</li>
+                                    <li><strong>Layered System:</strong> Architecture accommodates intermediate proxies,
+                                        gateways, and load balancers invisibly.</li>
+                                    <li><strong>Code on Demand (Optional):</strong> Client functionality can be extended
+                                        dynamically via downloaded scripts.</li>
+                                </ul>
+
+                                <h4>2. Safe vs. Idempotent HTTP Methods (2 Marks):</h4>
+                                <ul>
+                                    <li><strong>Safe Methods:</strong> Do not modify server resource state (read-only).
+                                        Example: <code>GET</code>, <code>HEAD</code>.</li>
+                                    <li><strong>Idempotent Methods:</strong> Invoking the method multiple times with the
+                                        same input produces the exact same server state as a single invocation. Example:
+                                        <code>GET</code>, <code>PUT</code>, <code>DELETE</code>. (Note:
+                                        <code>POST</code> is NOT idempotent).</li>
+                                </ul>
+                                <div class="exam-tip">💡 <strong>Exam Tip:</strong> Mentioning that POST is neither safe
+                                    nor idempotent is a frequent trick question in exams!</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz" data-answer="1"
+                        data-correct="Correct! An idempotent operation produces the exact same server state regardless of whether it is executed 1 time or 100 times.">
+                        <h3>Quick Knowledge Check: What does it mean when an HTTP method is termed 'Idempotent'?</h3>
+                        <div class="quiz-options">
+                            <button class="quiz-option">It encrypts all data sent across the network using SSL.</button>
+                            <button class="quiz-option">Calling the method multiple times produces the exact same server
+                                state as calling it once.</button>
+                            <button class="quiz-option">The server caches the response indefinitely in memory.</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <!-- ========================================================================= -->
+                <!-- STEP 4: BUILDING RESTFUL SERVICES WITH JAX-RS -->
+                <!-- ========================================================================= -->
+                <section class="step-view" data-title="4. Building REST with JAX-RS">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 4 · JAX-RS FRAMEWORK</span>
+                        <h1>Building RESTful Web Services with JAX-RS</h1>
+                        <p class="lede">Understand the JAX-RS specification, how the request dispatch pipeline works,
+                            and the core resource and HTTP method annotations.</p>
+                    </header>
+                    <div class="objective"><strong>Target Outcome:</strong> Explain the purpose of JAX-RS, list its
+                        major implementations, and utilize @Path, @GET, @POST, @Produces, and @Consumes in Java
+                        resources.</div>
+
+                    <h2>1. What is JAX-RS?</h2>
+                    <p><strong>JAX-RS</strong> stands for <strong>Java API for RESTful Web Services</strong> (now
+                        standardized under the <strong>Jakarta RESTful Web Services</strong> umbrella). It is a standard
+                        Java specification (JSR 339, JSR 370) that provides a set of annotations and interfaces for
+                        building RESTful web services in Java.</p>
+
+                    <div class="panel mint">
+                        <strong>Specification vs. Implementation:</strong>
+                        <p>Just as JPA is a specification implemented by Hibernate, <strong>JAX-RS is a
+                                specification</strong> that defines interfaces and annotations. Concrete runtime
+                            implementations include:</p>
+                        <ul>
+                            <li><strong>Jersey:</strong> The official reference implementation developed originally by
+                                Sun/Oracle.</li>
+                            <li><strong>RESTEasy:</strong> The JBoss / Red Hat implementation (standard in WildFly and
+                                Quarkus).</li>
+                            <li><strong>Apache CXF:</strong> An open-source enterprise services framework by Apache.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <h2>2. JAX-RS Request Lifecycle &amp; Dispatcher Architecture</h2>
+                    <p>When an incoming HTTP request hits the web application container (e.g. Apache Tomcat), it passes
+                        through the JAX-RS pipeline:</p>
+
+                    <div class="flow">
+                        CLIENT (Browser / Postman / Mobile)
+                        | Sends HTTP Request: GET /api/students/101
+                        v
+                        +-------------------------------------------------------------------------------+
+                        | SERVLET CONTAINER (Apache Tomcat / Jetty) |
+                        | * Routes URI matching '/api/*' to the JAX-RS Dispatcher Servlet. |
+                        +-------------------------------------------------------------------------------+
+                        |
+                        v
+                        +-------------------------------------------------------------------------------+
+                        | JAX-RS SERVLET DISPATCHER (org.glassfish.jersey.servlet.ServletContainer) |
+                        | |
+                        | 1. Resource Matching: Matches URI path against `@Path` annotations. |
+                        | 2. Method Matching: Matches HTTP verb (GET) against `@GET` annotation. |
+                        | 3. Parameter Binding: Extracts {id} via `@PathParam("id")`. |
+                        | 4. Content Negotiation: Checks 'Accept' header against `@Produces`. |
+                        | 5. Entity Providers: Serializes Java POJO ➔ JSON via Jackson/JSON-B. |
+                        +-------------------------------------------------------------------------------+
+                        |
+                        v
+                        YOUR JAVA RESOURCE CLASS (@Path("/students")) ➔ Returns Student POJO
+                        |
+                        v (Converted to JSON by MessageBodyWriter)
+                        CLIENT receives: 200 OK with JSON Payload
+                    </div>
+
+                    <h2>3. Core JAX-RS Annotations</h2>
+                    <div class="grid-2">
+                        <div class="concept">
+                            <strong>@Path</strong>
+                            <p>Identifies the URI path template to which the resource class or method responds (e.g.
+                                <code>@Path("/students")</code>).</p>
+                        </div>
+                        <div class="concept">
+                            <strong>HTTP Method Designators</strong>
+                            <p><code>@GET</code>, <code>@POST</code>, <code>@PUT</code>, <code>@DELETE</code>,
+                                <code>@HEAD</code>, <code>@OPTIONS</code> map the Java method to corresponding HTTP
+                                verbs.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>@Produces</strong>
+                            <p>Defines the MIME media types that the method can produce and return to the client (e.g.
+                                <code>@Produces(MediaType.APPLICATION_JSON)</code>).</p>
+                        </div>
+                        <div class="concept">
+                            <strong>@Consumes</strong>
+                            <p>Defines the MIME media types of payloads that the method can accept from the client in
+                                the request body (e.g. <code>@Consumes(MediaType.APPLICATION_JSON)</code>).</p>
+                        </div>
+                    </div>
+
+                    <h2>4. A Minimal JAX-RS Resource Class</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.resource;
+
+import com.example.model.Student;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import java.util.Arrays;
+import java.util.List;
+
+@Path("/students") // Base URI: /api/students
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class StudentResource {
+
+    // Handles HTTP GET /api/students
+    @GET
+    public List&lt;Student&gt; getAllStudents() {
+        return Arrays.asList(
+            new Student(1, "Rohan Patel", "IT"),
+            new Student(2, "Sneha Gupta", "Computer Science")
+        );
+    }
+
+    // Handles HTTP POST /api/students
+    @POST
+    public String addStudent(Student student) {
+        // Business logic to save student
+        return "Student " + student.getName() + " registered successfully!";
+    }
+}</code></pre>
+                    </div>
+
+                    <!-- 5-MARKS EXAM CORNER -->
+                    <div class="exam-box">
+                        <div class="exam-box-header">
+                            <span class="exam-badge">EXAM CORNER</span>
+                            <span class="exam-marks">5 MARKS QUESTION</span>
+                            <h3 class="exam-question-title">Q4: What is JAX-RS? Explain the core JAX-RS annotations
+                                (@Path, @GET, @POST, @Produces, @Consumes) with a suitable code example.</h3>
+                        </div>
+                        <div class="exam-body">
+                            <div class="exam-rubric">
+                                <span>Rubric:</span> Definition of JAX-RS &amp; Implementations (1 Mark) | Explanation
+                                of 5 Core Annotations (2 Marks) | Java Resource Code Example (2 Marks)
+                            </div>
+                            <div class="exam-answer">
+                                <h4>1. Definition of JAX-RS (1 Mark):</h4>
+                                <p><strong>JAX-RS (Java API for RESTful Web Services)</strong> is a Jakarta EE
+                                    specification that provides standardized annotations to develop RESTful web services
+                                    in Java. Prominent implementations include <strong>Jersey</strong>,
+                                    <strong>RESTEasy</strong>, and <strong>Apache CXF</strong>.</p>
+
+                                <h4>2. Core Annotations (2 Marks):</h4>
+                                <ul>
+                                    <li><code>@Path("...")</code>: Specifies the relative URI path for the resource
+                                        class or method.</li>
+                                    <li><code>@GET</code>: Indicates that the annotated method responds to HTTP GET
+                                        requests.</li>
+                                    <li><code>@POST</code>: Indicates that the annotated method creates resources via
+                                        HTTP POST requests.</li>
+                                    <li><code>@Produces(MediaType.APPLICATION_JSON)</code>: Declares the media format of
+                                        the response returned to the client.</li>
+                                    <li><code>@Consumes(MediaType.APPLICATION_JSON)</code>: Declares the media format of
+                                        the request payload accepted from the client.</li>
+                                </ul>
+
+                                <h4>3. Code Example (2 Marks):</h4>
+                                <pre><code>@Path("/courses")
+@Produces(MediaType.APPLICATION_JSON)
+public class CourseResource {
+    @GET
+    public Course getFeaturedCourse() {
+        return new Course(101, "Cloud Computing");
+    }
+}</code></pre>
+                                <div class="exam-tip">💡 <strong>Exam Tip:</strong> Mention Jersey as the reference
+                                    implementation of JAX-RS to demonstrate depth of knowledge!</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz" data-answer="0"
+                        data-correct="Correct! Jersey is the official reference implementation of the JAX-RS specification originally developed by Sun/Oracle.">
+                        <h3>Quick Knowledge Check: Which of the following is the official reference implementation of
+                            the JAX-RS specification?</h3>
+                        <div class="quiz-options">
+                            <button class="quiz-option">Jersey</button>
+                            <button class="quiz-option">Hibernate</button>
+                            <button class="quiz-option">Apache Struts</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <!-- ========================================================================= -->
+                <!-- STEP 5: JAX-RS PARAMETERS, RESPONSES & EXCEPTION MAPPING -->
+                <!-- ========================================================================= -->
+                <section class="step-view" data-title="5. Parameters &amp; Responses">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 5 · ADVANCED JAX-RS</span>
+                        <h1>JAX-RS Parameters, Responses &amp; Exception Mapping</h1>
+                        <p class="lede">Master parameter extraction annotations (@PathParam, @QueryParam, @HeaderParam,
+                            @FormParam), custom status codes with ResponseBuilder, and ExceptionMapper.</p>
+                    </header>
+                    <div class="objective"><strong>Target Outcome:</strong> Differentiate all parameter annotations,
+                        build customized HTTP responses with status codes, and write global exception mappers.</div>
+
+                    <h2>1. JAX-RS Parameter Binding Annotations</h2>
+                    <p>Clients send input to REST endpoints in multiple ways: inside the URI path, as query strings, in
+                        HTTP headers, or inside form bodies. JAX-RS provides dedicated annotations to extract these
+                        parameters:</p>
+
+                    <div class="grid-2">
+                        <div class="concept">
+                            <strong>1. @PathParam</strong>
+                            <p>Extracts values directly from the URI path template.<br>
+                                <code>URI: /api/students/105</code><br>
+                                <code>@GET @Path("/{id}")</code><br>
+                                <code>public Student getStudent(@PathParam("id") int id)</code>
+                            </p>
+                        </div>
+                        <div class="concept">
+                            <strong>2. @QueryParam</strong>
+                            <p>Extracts key-value query parameters appended to the URL after <code>?</code>.<br>
+                                <code>URI: /api/students?dept=CS&amp;minGpa=3.5</code><br>
+                                <code>public List&lt;Student&gt; filter(@QueryParam("dept") String dept)</code>
+                            </p>
+                        </div>
+                        <div class="concept">
+                            <strong>3. @HeaderParam</strong>
+                            <p>Extracts values from the HTTP Request Headers.<br>
+                                <code>Header: Authorization: Bearer token123</code><br>
+                                <code>public Response auth(@HeaderParam("Authorization") String token)</code>
+                            </p>
+                        </div>
+                        <div class="concept">
+                            <strong>4. @FormParam</strong>
+                            <p>Extracts HTML form input fields sent via <code>POST</code> with
+                                <code>application/x-www-form-urlencoded</code>.<br>
+                                <code>public Response submit(@FormParam("username") String user)</code>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="concept">
+                            <strong>5. @MatrixParam</strong>
+                            <p>Extracts matrix parameters separated by semicolons within a URI segment (e.g.
+                                <code>/students/2026;semester=fall</code>).</p>
+                        </div>
+                        <div class="concept">
+                            <strong>6. @CookieParam</strong>
+                            <p>Extracts cookie values sent by the client's web browser in the HTTP Cookie header.</p>
+                        </div>
+                    </div>
+
+                    <h2>2. The `Response` API and HTTP Status Codes</h2>
+                    <p>Instead of returning raw Java objects, robust enterprise APIs return the JAX-RS
+                        <strong><code>jakarta.ws.rs.core.Response</code></strong> object. This provides complete control
+                        over the HTTP status code, entity body, and response headers:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+
+// 1. Return 200 OK with Data
+return Response.ok(student).build();
+
+// 2. Return 201 Created with Location URI
+URI location = URI.create("/api/students/" + newStudent.getId());
+return Response.created(location).entity(newStudent).build();
+
+// 3. Return 404 Not Found with custom error message
+return Response.status(Status.NOT_FOUND)
+               .entity("Student with ID " + id + " does not exist.")
+               .build();
+
+// 4. Return 204 No Content for successful deletion
+return Response.noContent().build();</code></pre>
+                    </div>
+
+                    <h2>3. Global Error Handling with `ExceptionMapper`</h2>
+                    <p>In production web services, you should never allow unhandled Java stack traces to leak to the
+                        client. JAX-RS provides the <strong><code>ExceptionMapper&lt;E&gt;</code></strong> interface to
+                        intercept exceptions and translate them into friendly HTTP error responses:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.exception;
+
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
+
+@Provider // Marks class as a JAX-RS component extension
+public class StudentNotFoundExceptionMapper implements ExceptionMapper&lt;StudentNotFoundException&gt; {
+
+    @Override
+    public Response toResponse(StudentNotFoundException exception) {
+        ErrorMessage error = new ErrorMessage("STUDENT_NOT_FOUND", exception.getMessage(), 404);
+        return Response.status(Response.Status.NOT_FOUND)
+                       .entity(error)
+                       .build();
+    }
+}</code></pre>
+                    </div>
+
+                    <h2>4. Complete CRUD REST Resource Example</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code>package com.example.resource;
+
+import com.example.model.Student;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import java.util.*;
+
+@Path("/students")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class FullStudentResource {
+
+    // 1. GET ALL with optional query filtering
+    @GET
+    public Response getAllStudents(@QueryParam("dept") String department) {
+        // Retrieve and return list
+        return Response.ok(studentDatabase.getAll(department)).build();
+    }
+
+    // 2. GET BY ID using PathParam
+    @GET
+    @Path("/{id}")
+    public Response getStudentById(@PathParam("id") int id) {
+        Student s = studentDatabase.find(id);
+        if (s == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        return Response.ok(s).build();
+    }
+
+    // 3. CREATE via POST
+    @POST
+    public Response createStudent(Student student) {
+        Student created = studentDatabase.save(student);
+        return Response.status(Response.Status.CREATED).entity(created).build();
+    }
+
+    // 4. UPDATE via PUT
+    @PUT
+    @Path("/{id}")
+    public Response updateStudent(@PathParam("id") int id, Student student) {
+        Student updated = studentDatabase.update(id, student);
+        return Response.ok(updated).build();
+    }
+
+    // 5. DELETE via DELETE
+    @DELETE
+    @Path("/{id}")
+    public Response deleteStudent(@PathParam("id") int id) {
+        studentDatabase.delete(id);
+        return Response.noContent().build(); // 204 No Content
+    }
+}</code></pre>
+                    </div>
+
+                    <!-- 5-MARKS EXAM CORNER -->
+                    <div class="exam-box">
+                        <div class="exam-box-header">
+                            <span class="exam-badge">EXAM CORNER</span>
+                            <span class="exam-marks">5 MARKS QUESTION</span>
+                            <h3 class="exam-question-title">Q5: Explain the different parameter binding annotations in
+                                JAX-RS (@PathParam, @QueryParam, @HeaderParam, @FormParam). Provide code examples.</h3>
+                        </div>
+                        <div class="exam-body">
+                            <div class="exam-rubric">
+                                <span>Rubric:</span> Explanation of 4 Annotations (2 Marks) | Distinguishing URI vs
+                                Query vs Header vs Body (1.5 Marks) | Code snippet demonstrating usage (1.5 Marks)
+                            </div>
+                            <div class="exam-answer">
+                                <h4>1. The 4 Key Parameter Annotations (2 Marks):</h4>
+                                <ul>
+                                    <li><strong>@PathParam:</strong> Binds a template variable inside the URI path (e.g.
+                                        <code>@Path("/orders/{id}")</code> ➔ <code>@PathParam("id")</code>). Used for
+                                        identifying specific resources.</li>
+                                    <li><strong>@QueryParam:</strong> Binds query string parameters found after the
+                                        <code>?</code> symbol in the URL (e.g. <code>/orders?status=shipped</code> ➔
+                                        <code>@QueryParam("status")</code>). Used for filtering, sorting, pagination.
+                                    </li>
+                                    <li><strong>@HeaderParam:</strong> Binds HTTP request header values (e.g.
+                                        <code>User-Agent</code>, <code>Authorization</code>).</li>
+                                    <li><strong>@FormParam:</strong> Binds form field values submitted via standard HTML
+                                        POST forms (<code>application/x-www-form-urlencoded</code>).</li>
+                                </ul>
+
+                                <h4>2. Code Demonstration (2 Marks):</h4>
+                                <pre><code>@GET
+@Path("/search/{category}")
+public Response searchProducts(
+    @PathParam("category") String category,       // From URI path
+    @QueryParam("maxPrice") double maxPrice,       // From ?maxPrice=500
+    @HeaderParam("User-Agent") String clientAgent  // From HTTP headers
+) {
+    // Process search logic
+    return Response.ok(results).build();
+}</code></pre>
+
+                                <h4>3. Key Distinctions (1 Mark):</h4>
+                                <p><code>@PathParam</code> is part of the hierarchical resource identifier;
+                                    <code>@QueryParam</code> modifies the query (optional filter);
+                                    <code>@HeaderParam</code> conveys client metadata; <code>@FormParam</code> extracts
+                                    POST body payload fields.</p>
+                                <div class="exam-tip">💡 <strong>Exam Tip:</strong> Showing a URL sample like
+                                    `/search/electronics?maxPrice=500` alongside the Java method makes your answer
+                                    crystal clear to the examiner!</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz" data-answer="1"
+                        data-correct="Correct! @QueryParam extracts values from the URL query string following the ? symbol (e.g. ?page=2&limit=20).">
+                        <h3>Quick Knowledge Check: To read `?category=books` from the request URL
+                            `https://api.com/items?category=books`, which JAX-RS annotation is used?</h3>
+                        <div class="quiz-options">
+                            <button class="quiz-options-btn quiz-option">@PathParam("category")</button>
+                            <button class="quiz-options-btn quiz-option">@QueryParam("category")</button>
+                            <button class="quiz-options-btn quiz-option">@FormParam("category")</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <!-- ========================================================================= -->
+                <!-- STEP 6: MASTER 5-MARKS EXAM QUESTION BANK -->
+                <!-- ========================================================================= -->
+                <section class="step-view" data-title="6. Master 5-Marks Exam Bank">
+                    <header class="step-header">
+                        <span class="step-kicker">STEP 6 · EXAM READINESS</span>
+                        <h1>Master 5-Marks Exam Question Bank</h1>
+                        <p class="lede">A curated collection of the top 8 university exam questions on Web Services and
+                            JAX-RS with complete 5-mark answer templates, rubrics, and exam tips.</p>
+                    </header>
+                    <div class="objective"><strong>Exam Strategy:</strong> In university exams, a 5-mark question
+                        requires 1 clear definition, 1 diagram or comparison table, 3 to 4 technical bullet points, and
+                        1 practical code/syntax snippet.</div>
+
+                    <h2>Top 8 High-Yield 5-Marks University Questions</h2>
+
+                    <details class="reveal" open>
+                        <summary>Question 1: Define Web Services and explain the SOA Architecture (Provider, Requester,
+                            Registry).</summary>
+                        <div>
+                            <h4>Model Answer (5 Marks):</h4>
+                            <p><strong>Definition:</strong> A Web Service is a software system designed for
+                                interoperable machine-to-machine communication over a network using open standard
+                                protocols like HTTP, XML, and JSON.</p>
+                            <ul>
+                                <li><strong>Service Provider:</strong> The server that builds and deploys the web
+                                    service. It performs the <strong>Publish</strong> operation to advertise its service
+                                    in the Service Registry.</li>
+                                <li><strong>Service Registry:</strong> The central broker/directory (e.g., UDDI or API
+                                    Gateway) where providers register service definitions and consumers search for
+                                    available services.</li>
+                                <li><strong>Service Requester:</strong> The client application that requires
+                                    functionality. It executes the <strong>Find</strong> operation on the Registry to
+                                    retrieve the contract, and executes the <strong>Bind</strong> operation to invoke
+                                    the Provider over HTTP.</li>
+                            </ul>
+                        </div>
+                    </details>
+
+                    <details class="reveal">
+                        <summary>Question 2: Compare SOAP and RESTful Web Services in detail (Provide at least 5
+                            points).</summary>
+                        <div>
+                            <h4>Model Answer (5 Marks):</h4>
+                            <ul>
+                                <li><strong>1. Protocol vs Architectural Style:</strong> SOAP is a strict W3C protocol;
+                                    REST is an architectural style based on HTTP principles.</li>
+                                <li><strong>2. Message Formats:</strong> SOAP supports <em>XML only</em>; REST supports
+                                    <em>JSON, XML, Plain Text, HTML</em>.</li>
+                                <li><strong>3. Contract:</strong> SOAP enforces a strict <em>WSDL contract</em>; REST
+                                    uses URI endpoints without requiring a formal contract.</li>
+                                <li><strong>4. Caching:</strong> SOAP cannot be cached natively (sent via POST); REST
+                                    GET responses are natively cacheable.</li>
+                                <li><strong>5. Performance:</strong> SOAP is heavyweight due to XML envelope processing;
+                                    REST is lightweight and faster.</li>
+                            </ul>
+                        </div>
+                    </details>
+
+                    <details class="reveal">
+                        <summary>Question 3: Explain the 6 architectural constraints of REST.</summary>
+                        <div>
+                            <h4>Model Answer (5 Marks):</h4>
+                            <ul>
+                                <li><strong>1. Client-Server:</strong> Separates UI concerns from data storage concerns.
+                                </li>
+                                <li><strong>2. Statelessness:</strong> Every client request contains all data needed;
+                                    server stores no session state.</li>
+                                <li><strong>3. Cacheability:</strong> Responses must explicitly define whether they are
+                                    cacheable.</li>
+                                <li><strong>4. Uniform Interface:</strong> Consistent URI naming, standard HTTP verbs,
+                                    and self-descriptive representations.</li>
+                                <li><strong>5. Layered System:</strong> Client cannot tell if it connects to the end
+                                    server or an intermediary proxy.</li>
+                                <li><strong>6. Code on Demand (Optional):</strong> Server can deliver executable scripts
+                                    (like JavaScript) to the client.</li>
+                            </ul>
+                        </div>
+                    </details>
+
+                    <details class="reveal">
+                        <summary>Question 4: Differentiate between Safe and Idempotent HTTP methods in RESTful Web
+                            Services.</summary>
+                        <div>
+                            <h4>Model Answer (5 Marks):</h4>
+                            <ul>
+                                <li><strong>Safe Methods:</strong> Methods that do not modify server-side resource state
+                                    (read-only). Examples: <code>GET</code>, <code>HEAD</code>. Calling them causes zero
+                                    side effects.</li>
+                                <li><strong>Idempotent Methods:</strong> Methods where executing the request multiple
+                                    times with identical parameters results in the exact same server state as executing
+                                    it once. Examples: <code>GET</code>, <code>PUT</code>, <code>DELETE</code>.</li>
+                                <li><strong>Why POST is NOT Idempotent:</strong> Each POST call creates a new resource
+                                    with a new identifier. Calling POST 5 times creates 5 new records.</li>
+                            </ul>
+                        </div>
+                    </details>
+
+                    <details class="reveal">
+                        <summary>Question 5: Explain the role of JAX-RS and list its popular implementations.</summary>
+                        <div>
+                            <h4>Model Answer (5 Marks):</h4>
+                            <p><strong>JAX-RS (Java API for RESTful Web Services)</strong> is a standardized Jakarta EE
+                                specification that simplifies the creation of RESTful web services in Java using
+                                declarative annotations.</p>
+                            <ul>
+                                <li><strong>Specification Nature:</strong> JAX-RS defines interfaces and annotations
+                                    (e.g. <code>@Path</code>, <code>@GET</code>, <code>@Produces</code>) without
+                                    providing the runtime engine.</li>
+                                <li><strong>Implementations:</strong>
+                                    <ul>
+                                        <li><strong>Jersey:</strong> The official reference implementation developed by
+                                            Sun/Oracle.</li>
+                                        <li><strong>RESTEasy:</strong> The Red Hat / JBoss implementation used in
+                                            WildFly and Quarkus.</li>
+                                        <li><strong>Apache CXF:</strong> An open-source enterprise services framework by
+                                            Apache.</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </details>
+
+                    <details class="reveal">
+                        <summary>Question 6: Explain Parameter Annotations in JAX-RS (@PathParam, @QueryParam,
+                            @HeaderParam, @FormParam).</summary>
+                        <div>
+                            <h4>Model Answer (5 Marks):</h4>
+                            <ul>
+                                <li><code>@PathParam("id")</code>: Extracts values embedded inside the URI path (e.g.
+                                    <code>/users/{id}</code>).</li>
+                                <li><code>@QueryParam("dept")</code>: Extracts key-value query parameters from the URL
+                                    query string (e.g. <code>/users?dept=IT</code>).</li>
+                                <li><code>@HeaderParam("Authorization")</code>: Extracts metadata from HTTP Request
+                                    headers.</li>
+                                <li><code>@FormParam("username")</code>: Extracts fields submitted in an HTML form POST
+                                    body.</li>
+                            </ul>
+                            <pre><code>@GET @Path("/students/{id}")
+public Response getStudent(@PathParam("id") int id, @QueryParam("format") String fmt) {
+    // Process student id and format
+    return Response.ok().build();
+}</code></pre>
+                        </div>
+                    </details>
+
+                    <details class="reveal">
+                        <summary>Question 7: How is exception handling implemented in JAX-RS using ExceptionMapper?
+                        </summary>
+                        <div>
+                            <h4>Model Answer (5 Marks):</h4>
+                            <p><strong>ExceptionMapper&lt;E&gt;</strong> is a JAX-RS interface used to intercept
+                                unhandled application exceptions and convert them into standardized, clean HTTP error
+                                responses (e.g. 404 Not Found or 400 Bad Request).</p>
+                            <pre><code>@Provider
+public class EntityNotFoundMapper implements ExceptionMapper&lt;EntityNotFoundException&gt; {
+    @Override
+    public Response toResponse(EntityNotFoundException ex) {
+        return Response.status(Response.Status.NOT_FOUND)
+                       .entity(new ErrorResponse("404", ex.getMessage()))
+                       .type(MediaType.APPLICATION_JSON)
+                       .build();
+    }
+}</code></pre>
+                            <p>The <code>@Provider</code> annotation automatically registers the mapper with the JAX-RS
+                                runtime.</p>
+                        </div>
+                    </details>
+
+                    <details class="reveal">
+                        <summary>Question 8: Write a complete JAX-RS Resource class demonstrating CRUD operations with
+                            proper HTTP verbs and status codes.</summary>
+                        <div>
+                            <h4>Model Answer (5 Marks):</h4>
+                            <pre><code>@Path("/books")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class BookResource {
+    @GET
+    public Response getAll() { return Response.ok(bookService.findAll()).build(); }
+
+    @GET @Path("/{id}")
+    public Response getOne(@PathParam("id") int id) {
+        Book b = bookService.find(id);
+        return (b != null) ? Response.ok(b).build() : Response.status(404).build();
+    }
+
+    @POST
+    public Response create(Book b) {
+        Book created = bookService.save(b);
+        return Response.status(Response.Status.CREATED).entity(created).build();
+    }
+
+    @PUT @Path("/{id}")
+    public Response update(@PathParam("id") int id, Book b) {
+        return Response.ok(bookService.update(id, b)).build();
+    }
+
+    @DELETE @Path("/{id}")
+    public Response delete(@PathParam("id") int id) {
+        bookService.delete(id);
+        return Response.noContent().build(); // 204
+    }
+}</code></pre>
+                        </div>
+                    </details>
+
+                    <h2>Exam Success Checklist</h2>
+                    <ul class="checklist">
+                        <li>I can define Web Services and draw the SOA Triangle (Provider, Requester, Registry).</li>
+                        <li>I can explain 5 distinct differences between SOAP and REST in a comparison table.</li>
+                        <li>I know the 6 core architectural constraints of REST defined by Roy Fielding.</li>
+                        <li>I can explain why GET and DELETE are idempotent, but POST is not.</li>
+                        <li>I know the difference between the JAX-RS specification and implementations like Jersey and
+                            RESTEasy.</li>
+                        <li>I can write JAX-RS resources with <code>@Path</code>, <code>@GET</code>, <code>@POST</code>,
+                            <code>@Produces</code>, and <code>@Consumes</code>.</li>
+                        <li>I understand how to use <code>@PathParam</code>, <code>@QueryParam</code>, and
+                            <code>@HeaderParam</code>.</li>
+                        <li>I can handle exceptions gracefully using <code>ExceptionMapper&lt;E&gt;</code> and
+                            <code>@Provider</code>.</li>
+                    </ul>
+
+                    <div class="finish">
+                        <h2>Congratulations! Web Services &amp; JAX-RS Mastery Complete 🎉</h2>
+                        <p>You have comprehensively reviewed every theoretical concept of Web Services, SOAP vs REST,
+                            RESTful architecture, and JAX-RS programming, alongside model answers for all standard
+                            5-mark university exam questions!</p>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- SCRIPT FOR PROGRESS, INTERACTION, AND QUIZZES -->
+    <script>
+        (() => {
+            const steps = [...document.querySelectorAll('.step-view')];
+            const titles = steps.map(step => step.dataset.title);
+            const nav = document.getElementById('stepNav');
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const content = document.getElementById('content');
+            const completed = new Set();
+            let current = 0;
+
+            // Build navigation menu
+            nav.innerHTML = titles.map((title, index) =>
+                `<button class="step-link" data-step="${index}" type="button">
+                    <span class="step-number">${String(index + 1).padStart(2, '0')}</span>
+                    <span>${title}</span>
+                    <span class="step-status" aria-hidden="true"></span>
+                </button>`
+            ).join('');
+
+            const getHashStep = () => {
+                const match = location.hash.match(/^#step-(\d+)$/);
+                const value = match ? Number(match[1]) - 1 : 0;
+                return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+            };
+
+            function render(updateHash = true) {
+                current = Math.max(0, Math.min(current, steps.length - 1));
+                steps.forEach((step, index) => {
+                    const active = index === current;
+                    step.classList.toggle('active', active);
+                    step.setAttribute('aria-hidden', String(!active));
+                });
+                document.querySelectorAll('.step-link').forEach((button, index) => {
+                    button.classList.toggle('active', index === current);
+                    button.setAttribute('aria-current', index === current ? 'step' : 'false');
+                    button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '';
+                });
+
+                const percent = Math.round(((current + 1) / steps.length) * 100);
+                document.getElementById('progressBar').style.width = `${percent}%`;
+                document.getElementById('progressText').textContent = `${percent}%`;
+                document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+                document.getElementById('mobileTitle').textContent = titles[current];
+
+                document.getElementById('prevBtn').disabled = current === 0;
+                document.getElementById('nextBtn').disabled = current === steps.length - 1;
+                document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Course Complete 🎓' : 'Next Step →';
+
+                if (updateHash) history.pushState({ step: current }, '', `#step-${current + 1}`);
+                window.scrollTo({ top: 0, behavior: 'auto' });
+                sidebar.classList.remove('open');
+                menuBtn.setAttribute('aria-expanded', 'false');
+            }
+
+            function goTo(index) {
+                if (index < 0 || index >= steps.length) return;
+                completed.add(current);
+                current = index;
+                render();
+            }
+
+            // Create Bottom Navigation Bar
+            const navRow = document.createElement('div');
+            navRow.className = 'nav-row';
+            navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">← Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next Step →</button>';
+            content.appendChild(navRow);
+
+            document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+            document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+            nav.addEventListener('click', event => {
+                const button = event.target.closest('.step-link');
+                if (button) goTo(Number(button.dataset.step));
+            });
+
+            menuBtn.addEventListener('click', () => {
+                const open = sidebar.classList.toggle('open');
+                menuBtn.setAttribute('aria-expanded', String(open));
+            });
+
+            // Copy and Quiz Handlers
+            document.addEventListener('click', async event => {
+                const copy = event.target.closest('.copy-btn');
+                if (copy) {
+                    const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+                    try {
+                        await navigator.clipboard.writeText(code);
+                        copy.textContent = 'Copied!';
+                    } catch {
+                        copy.textContent = 'Select & copy';
+                    }
+                    setTimeout(() => copy.textContent = 'Copy', 1300);
+                    return;
+                }
+
+                const option = event.target.closest('.quiz-option');
+                if (option) {
+                    const quiz = option.closest('.quiz');
+                    if (quiz.dataset.answered) return;
+                    const options = [...quiz.querySelectorAll('.quiz-option')];
+                    const choice = options.indexOf(option);
+                    const answer = Number(quiz.dataset.answer);
+                    quiz.dataset.answered = 'true';
+                    options.forEach(button => button.disabled = true);
+                    option.classList.add(choice === answer ? 'correct' : 'wrong');
+                    if (choice !== answer) options[answer].classList.add('correct');
+                    const feedback = quiz.querySelector('.quiz-feedback');
+                    feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
+                    feedback.classList.add('show');
+                }
+            });
+
+            window.addEventListener('popstate', () => { current = getHashStep(); render(false); });
+            window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', event => {
+                if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+                if (event.key === 'ArrowRight') goTo(current + 1);
+                if (event.key === 'ArrowLeft') goTo(current - 1);
+            });
+
+            current = getHashStep();
+            render(false);
+        })();
+    </script>
+</body>
+
+</html>

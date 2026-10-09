@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Cloud Storage in Flutter — Flutter Codelab</title>
+  <meta name="description" content="Learn how to store, upload, track, download, and manage images, videos, and files in Flutter using Firebase Cloud Storage and Cloud Firestore.">
+  <meta name="theme-color" content="#2856d8">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+    :root {
+      --blue: #2856d8;
+      --blue-dark: #17348e;
+      --blue-light: #e4ebff;
+      --ink: #101010;
+      --paper: #f5f7fb;
+      --white: #fff;
+      --yellow: #ffd83d;
+      --mint: #75e6c5;
+      --pink: #ff9bb7;
+      --orange: #ffb866;
+      --purple: #cfbaf0;
+      --border: 3px solid var(--ink);
+      --shadow: 6px 6px 0 var(--ink);
+      --shadow-sm: 4px 4px 0 var(--ink);
+      --sidebar: 292px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: auto; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      line-height: 1.55;
+    }
+    button, a { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 4px solid var(--yellow); outline-offset: 3px; }
+    .app { min-height: 100vh; }
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar);
+      padding: 22px 18px;
+      background: var(--blue);
+      border-right: var(--border);
+      overflow-y: auto;
+      z-index: 20;
+    }
+    .brand {
+      padding: 16px;
+      margin-bottom: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .eyebrow, .progress-meta, .step-number, .step-kicker, .label {
+      font-family: "DM Mono", monospace;
+    }
+    .eyebrow {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .brand h2 {
+      margin: 5px 0 3px;
+      font-size: 1.36rem;
+      line-height: 1.08;
+    }
+    .brand p {
+      margin: 0;
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+    .auth-badge {
+      display: inline-flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .auth-badge span {
+      padding: 2px 7px;
+      font-size: 0.65rem;
+      font-family: "DM Mono", monospace;
+      font-weight: 700;
+      border: 2px solid var(--ink);
+    }
+    .b-files { background: var(--yellow); }
+    .b-upload { background: var(--mint); }
+    .b-progress { background: var(--pink); }
+    .b-security { background: var(--orange); }
+    .progress-wrap {
+      margin: 0 2px 20px;
+      color: #fff;
+    }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+      font-size: 0.72rem;
+    }
+    .progress-track {
+      height: 16px;
+      padding: 2px;
+      background: #fff;
+      border: var(--border);
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: var(--yellow);
+      transition: width 0.2s ease;
+    }
+    .steps {
+      display: grid;
+      gap: 8px;
+    }
+    .step-link {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 34px 1fr 18px;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 8px;
+      color: #fff;
+      background: transparent;
+      border: 3px solid transparent;
+      text-align: left;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+    .step-link:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+    .step-link.active {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--ink);
+      box-shadow: var(--shadow-sm);
+    }
+    .step-number {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 2px solid currentColor;
+      font-size: 0.78rem;
+    }
+    .step-status {
+      text-align: center;
+    }
+    .mobile-bar {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: var(--blue);
+      border-bottom: var(--border);
+    }
+    .menu-btn, .mobile-title {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .menu-btn {
+      width: 46px;
+      height: 42px;
+      font-size: 1.25rem;
+      font-weight: 900;
+    }
+    .mobile-title {
+      flex: 1;
+      padding: 8px 10px;
+      font-weight: 800;
+    }
+    main {
+      margin-left: var(--sidebar);
+      min-height: 100vh;
+    }
+    .content {
+      width: min(980px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 42px 0 28px;
+    }
+    .step-view {
+      display: none;
+    }
+    .step-view.active {
+      display: block;
+      animation: stepIn 0.18s ease-out;
+    }
+    @keyframes stepIn {
+      from { opacity: 0.35; transform: translateY(5px); }
+      to { opacity: 1; transform: none; }
+    }
+    .step-header {
+      padding: 28px;
+      margin-bottom: 24px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow);
+    }
+    .step-kicker {
+      display: inline-block;
+      margin-bottom: 13px;
+      padding: 5px 9px;
+      color: #fff;
+      background: var(--blue);
+      border: 2px solid var(--ink);
+      font-size: 0.72rem;
+    }
+    h1, h2, h3 { line-height: 1.08; }
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(1.9rem, 4.5vw, 3.4rem);
+      letter-spacing: -0.04em;
+    }
+    h2 {
+      margin: 30px 0 12px;
+      font-size: clamp(1.4rem, 2.8vw, 2.1rem);
+    }
+    h3 {
+      margin: 22px 0 9px;
+      font-size: 1.15rem;
+    }
+    .lede {
+      max-width: 780px;
+      margin: 0;
+      font-size: 1.06rem;
+    }
+    .objective {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700;
+    }
+    .panel, .concept, .quiz, .reveal {
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .panel {
+      padding: 22px;
+      margin: 20px 0;
+    }
+    .panel.blue { background: var(--blue-light); }
+    .panel.mint { background: var(--mint); }
+    .panel.pink { background: var(--pink); }
+    .panel.yellow { background: var(--yellow); }
+    .panel.orange { background: var(--orange); }
+    .panel.purple { background: var(--purple); }
+    .callout {
+      padding: 16px 18px;
+      margin: 20px 0;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .callout .label {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 3px 7px;
+      color: #fff;
+      background: var(--ink);
+      border: 2px solid var(--ink);
+      font-size: 0.72rem;
+    }
+    .grid-2 {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .grid-3 {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .concept {
+      padding: 18px;
+    }
+    .concept strong {
+      display: block;
+      margin: 8px 0 4px;
+      font-size: 1.05rem;
+    }
+    .concept p:last-child {
+      margin-bottom: 0;
+    }
+    .code-wrap {
+      position: relative;
+      margin: 18px 0;
+    }
+    pre {
+      margin: 0;
+      padding: 20px;
+      overflow-x: auto;
+      color: #f7f7f7;
+      background: #111;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", ui-monospace, monospace;
+      font-size: 0.84rem;
+      line-height: 1.62;
+      tab-size: 2;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      padding: 5px 9px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+    code:not(pre code) {
+      padding: 1px 5px;
+      background: #e8edf7;
+      border: 1px solid #9da9bb;
+      font-family: "DM Mono", monospace;
+      font-size: 0.88em;
+    }
+    ul, ol {
+      padding-left: 1.35rem;
+    }
+    li {
+      margin: 7px 0;
+    }
+    .comparison {
+      width: 100%;
+      margin: 18px 0;
+      background: #fff;
+      border: var(--border);
+      border-collapse: collapse;
+    }
+    .comparison th, .comparison td {
+      padding: 11px;
+      border: 2px solid var(--ink);
+      text-align: left;
+      vertical-align: top;
+    }
+    .comparison th {
+      color: #fff;
+      background: var(--blue);
+    }
+    .quiz {
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .quiz-options {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px;
+    }
+    .quiz-option {
+      text-align: left;
+      padding: 11px 13px;
+      background: #fff;
+      border: 2px solid var(--ink);
+      font-weight: 700;
+    }
+    .quiz-option:hover {
+      background: var(--blue-light);
+    }
+    .quiz-option.correct {
+      background: var(--mint);
+    }
+    .quiz-option.wrong {
+      background: var(--pink);
+    }
+    .quiz-feedback {
+      display: none;
+      margin-top: 13px;
+      padding: 10px;
+      border: 2px solid var(--ink);
+      font-weight: 700;
+    }
+    .quiz-feedback.show {
+      display: block;
+    }
+    .reveal {
+      margin: 18px 0;
+    }
+    .reveal summary {
+      padding: 13px 16px;
+      cursor: pointer;
+      background: var(--blue-light);
+      font-weight: 800;
+    }
+    .reveal > div {
+      padding: 15px 16px;
+    }
+    .challenge {
+      padding: 22px;
+      margin: 24px 0;
+      color: #fff;
+      background: var(--ink);
+      border: var(--border);
+      box-shadow: var(--shadow);
+    }
+    .challenge h3 {
+      margin-top: 0;
+      color: var(--yellow);
+    }
+    .flow {
+      margin: 20px 0;
+      padding: 20px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-family: "DM Mono", monospace;
+      line-height: 1.8;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .checklist {
+      list-style: none;
+      padding: 0;
+    }
+    .checklist li {
+      position: relative;
+      padding-left: 30px;
+    }
+    .checklist li::before {
+      content: "□";
+      position: absolute;
+      left: 0;
+      font-size: 1.25rem;
+      font-weight: 900;
+    }
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: var(--border);
+    }
+    .nav-btn {
+      min-width: 130px;
+      padding: 12px 18px;
+      background: #fff;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 900;
+    }
+    .nav-btn.primary {
+      color: #fff;
+      background: var(--blue);
+    }
+    .nav-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .finish {
+      padding: 20px;
+      margin-top: 24px;
+      background: var(--mint);
+      border: var(--border);
+      box-shadow: var(--shadow);
+    }
+    @media (max-width: 850px) {
+      :root { --sidebar: 270px; --mobile-bar-height: 65px; }
+      .sidebar {
+        inset: var(--mobile-bar-height) auto 0 0;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease;
+      }
+      .sidebar.open { transform: none; }
+      .mobile-bar { display: flex; height: var(--mobile-bar-height); }
+      main { margin-left: 0; }
+      .content { width: min(940px, calc(100% - 28px)); padding-top: 24px; }
+    }
+    @media (max-width: 680px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .content { width: calc(100% - 18px); padding-top: 16px; }
+      .step-header { padding: 20px 16px; }
+      .panel, .concept, .quiz { padding: 16px; }
+      .nav-row {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        padding: 12px 0;
+        background: var(--paper);
+      }
+      .nav-btn { min-width: 0; flex: 1; padding: 11px 10px; }
+      pre { padding: 16px 12px; font-size: 0.76rem; }
+      .copy-btn { position: static; align-self: flex-end; margin-bottom: 6px; }
+      .code-wrap { display: flex; flex-direction: column; }
+      .code-wrap pre { order: 2; }
+      .code-wrap .copy-btn { order: 1; }
+      .comparison { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR NAVIGATION -->
+<aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+  <div class="brand">
+    <div class="eyebrow">Flutter Firebase Codelab</div>
+    <h2>Firebase Storage</h2>
+    <p>File &amp; Media Management</p>
+    <div class="auth-badge">
+      <span class="b-files">FILES</span>
+      <span class="b-upload">UPLOAD</span>
+      <span class="b-progress">PROGRESS</span>
+      <span class="b-security">SECURITY</span>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+    <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+  <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+</aside>
+
+<!-- MOBILE TOP BAR -->
+<div class="mobile-bar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Open navigation" aria-expanded="false">&#9776;</button>
+  <div class="mobile-title" id="mobileTitle">Firebase Storage</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main><div class="content" id="content">
+
+<!-- STEP 1 -->
+<section class="step-view" data-title="Why Cloud Storage?">
+<header class="step-header">
+  <span class="step-kicker">STEP 1 &middot; FOUNDATIONS</span>
+  <h1>Why Firebase Cloud Storage?</h1>
+  <p class="lede">Learn why apps need dedicated file storage, how it compares to Cloud Firestore, and the golden architecture for handling user media in Flutter.</p>
+</header>
+<div class="objective"><strong>By the end of this codelab:</strong> You will master Firebase Cloud Storage in Flutter! You will pick photos from camera/gallery, upload raw bytes and files, track live progress percentages with reactive indicators, fetch secure download URLs, connect storage files with Firestore documents, delete files cleanly, and enforce strict backend Security Rules.</div>
+
+<h2>The Big Question: Why Not Put Photos in Firestore?</h2>
+<p>In the previous codelabs, you learned how to store user profiles and tasks in Cloud Firestore. When beginners want to add profile photos or post attachments, their first instinct is often to encode the photo as a Base64 text string and save it into a Firestore document. <strong>Why is that a bad idea?</strong></p>
+
+<div class="grid-2">
+  <div class="concept">
+    <span style="font-size:1.8rem">&#128196;</span>
+    <strong>Cloud Firestore (Text &amp; Data)</strong>
+    <p>Best for lightweight, structured text (names, prices, timestamps). Each Firestore document has a hard maximum size limit of <strong>1 MB</strong>. A single phone camera photo is often 4 MB to 12 MB, which will immediately crash your Firestore write!</p>
+  </div>
+  <div class="concept">
+    <span style="font-size:1.8rem">&#128450;&#65039;</span>
+    <strong>Firebase Cloud Storage (Binary Files)</strong>
+    <p>Built specifically for large binary blobs: images, videos, audio notes, PDFs, and ZIP archives. Powered by Google Cloud Storage, it can effortlessly store files up to <strong>5 Terabytes</strong> each with automatic global CDN caching!</p>
+  </div>
+</div>
+
+<h2>The Golden 2-Step Architecture</h2>
+<p>Every professional mobile application (Instagram, WhatsApp, Uber, Twitter) uses this exact division of labor:</p>
+
+<div class="flow">📱 User picks Photo (3 MB)
+   │
+   ├─► STEP 1: Upload raw photo to Firebase Storage
+   │          URL returned: "https://firebasestorage.googleapis.com/.../photo.jpg"
+   │
+   └─► STEP 2: Save the small HTTPS URL + caption into Cloud Firestore!
+              {
+                "userId": "usr_9981",
+                "caption": "Sunset at the beach 🌅",
+                "imageUrl": "https://firebasestorage.googleapis.com/...",
+                "uploadedAt": 1728500000
+              }</div>
+
+<div class="panel mint">
+  <strong>Simple Analogy:</strong> Think of <strong>Firebase Storage</strong> as a giant secure warehouse or Google Drive where large physical boxes are kept. Think of <strong>Firestore</strong> as the library index card that records what is in the box and holds the secret key (the Download URL) pointing to its shelf!
+</div>
+
+<div class="quiz" data-answer="1" data-correct="Correct! Large binary media must go to Firebase Cloud Storage, while Firestore stores the download URL and metadata.">
+  <h3>Where should you store a 6 MB video recorded by a user in your Flutter app?</h3>
+  <div class="quiz-options">
+    <button class="quiz-option">Inside a Firestore document as a Base64 string.</button>
+    <button class="quiz-option">In Firebase Cloud Storage, and store its Download URL in Firestore.</button>
+    <button class="quiz-option">In SharedPreferences on the user's phone.</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+</section>
+
+<!-- STEP 2 -->
+<section class="step-view" data-title="Setup &amp; Dependencies">
+<header class="step-header">
+  <span class="step-kicker">STEP 2 &middot; ENVIRONMENT</span>
+  <h1>Setup &amp; Package Dependencies</h1>
+  <p class="lede">Add the official FlutterFire storage plugin and media picker, and configure platform permissions for Android, iOS, and Web.</p>
+</header>
+
+<h2>1. Add Flutter Dependencies</h2>
+<p>Run these commands in your Flutter terminal root to install <code>firebase_storage</code> and <code>image_picker</code>:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>flutter pub add firebase_storage
+flutter pub add image_picker</code></pre>
+</div>
+
+<p>Your <code>pubspec.yaml</code> file will now look like this:</p>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^3.12.0
+  firebase_auth: ^5.5.1
+  cloud_firestore: ^5.6.5
+  firebase_storage: ^12.4.4
+  image_picker: ^1.1.2</code></pre>
+</div>
+
+<h2>2. Platform Permissions Setup</h2>
+<p>To let users pick photos from their device camera or gallery, mobile operating systems require explicit permission strings:</p>
+
+<h3>Android Configuration</h3>
+<p>Open <code>android/app/src/main/AndroidManifest.xml</code> and ensure your application permissions are declared inside the <code>&lt;manifest&gt;</code> tag:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;!-- Required for Internet access to upload/download --&gt;
+    &lt;uses-permission android:name="android.permission.INTERNET"/&gt;
+
+    &lt;!-- Required for picking media on modern Android (API 33+) --&gt;
+    &lt;uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/&gt;
+    &lt;uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/&gt;
+
+    &lt;!-- Required for picking media on legacy Android (API &lt; 33) --&gt;
+    &lt;uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" /&gt;
+    &lt;uses-permission android:name="android.permission.CAMERA"/&gt;
+    ...
+&lt;/manifest&gt;</code></pre>
+</div>
+
+<h3>iOS Configuration</h3>
+<p>Open <code>ios/Runner/Info.plist</code> and add these descriptive keys inside the <code>&lt;dict&gt;</code> tag. Apple rejects apps if these descriptions are missing or empty:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>&lt;key&gt;NSPhotoLibraryUsageDescription&lt;/key&gt;
+&lt;string&gt;This app needs access to your photo library so you can pick an image to upload.&lt;/string&gt;
+&lt;key&gt;NSCameraUsageDescription&lt;/key&gt;
+&lt;string&gt;This app needs access to your camera so you can snap a new photo.&lt;/string&gt;
+&lt;key&gt;NSMicrophoneUsageDescription&lt;/key&gt;
+&lt;string&gt;This app needs access to your microphone when recording video with audio.&lt;/string&gt;</code></pre>
+</div>
+
+<h2>3. Initializing in main.dart</h2>
+<p>As you learned in the Firebase Setup codelab, initialize Firebase Core before running the widget tree:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MyApp());
+}</code></pre>
+</div>
+</section>
+
+<!-- STEP 3 -->
+<section class="step-view" data-title="Storage References">
+<header class="step-header">
+  <span class="step-kicker">STEP 3 &middot; FILE PATHS</span>
+  <h1>Storage References &amp; Paths</h1>
+  <p class="lede">Understand how files are addressed in Firebase Storage using hierarchical references.</p>
+</header>
+
+<h2>What is a Reference?</h2>
+<p>In Firebase Cloud Storage, you interact with files through an object called a <strong>Reference</strong> (<code>Reference</code>). A reference is a lightweight pointer to a location in your cloud bucket. It does not download or upload anything by itself; it simply points to a destination path.</p>
+
+<div class="flow">root ref (/)
+ │
+ ├── "avatars" (folder)
+ │    └── "user_123.jpg"  &lt;--- Reference pointing to this file!
+ │
+ └── "posts" (folder)
+      └── "2026"
+           └── "vacation.png"</div>
+
+<h2>How to Create References in Dart</h2>
+<p>Get the root storage instance using <code>FirebaseStorage.instance.ref()</code>, then use <code>.child()</code> to navigate folders:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>import 'package:firebase_storage/firebase_storage.dart';
+
+// 1. Get the root bucket reference
+final storageRef = FirebaseStorage.instance.ref();
+
+// 2. Point to a folder called 'avatars'
+final avatarsRef = storageRef.child('avatars');
+
+// 3. Point to a specific file inside 'avatars'
+final userAvatarRef = avatarsRef.child('user_abc.jpg');
+
+// Or build the complete path in a single child call:
+final directRef = FirebaseStorage.instance.ref().child('avatars/user_abc.jpg');</code></pre>
+</div>
+
+<h2>Useful Reference Properties</h2>
+<table class="comparison">
+  <tr><th>Property / Method</th><th>Example Output</th><th>What it tells you</th></tr>
+  <tr>
+    <td><code>ref.name</code></td>
+    <td><code>"user_abc.jpg"</code></td>
+    <td>The filename at the end of the path.</td>
+  </tr>
+  <tr>
+    <td><code>ref.fullPath</code></td>
+    <td><code>"avatars/user_abc.jpg"</code></td>
+    <td>The complete cloud path from bucket root.</td>
+  </tr>
+  <tr>
+    <td><code>ref.bucket</code></td>
+    <td><code>"my-app-codelab.firebasestorage.app"</code></td>
+    <td>The Google Cloud Storage bucket name.</td>
+  </tr>
+  <tr>
+    <td><code>ref.parent</code></td>
+    <td>Reference to <code>"avatars"</code></td>
+    <td>Points to the folder one level up.</td>
+  </tr>
+</table>
+
+<div class="panel yellow">
+  <strong>Pro-Tip for Clean Structure:</strong> Always prefix user files with their unique User ID (UID):
+  <br><code>final userRef = FirebaseStorage.instance.ref().child('users/$uid/avatar.jpg');</code>
+  <br>This makes writing <strong>Security Rules</strong> simple and prevents users from overwriting each other's uploads!
+</div>
+
+<div class="quiz" data-answer="2" data-correct="Correct! ref.child('posts/header.png') points to the file header.png inside the posts folder.">
+  <h3>Which line correctly points to a file named 'header.png' in the 'posts' folder?</h3>
+  <div class="quiz-options">
+    <button class="quiz-option">FirebaseStorage.instance.collection('posts').doc('header.png')</button>
+    <button class="quiz-option">FirebaseStorage.instance.getFile('posts', 'header.png')</button>
+    <button class="quiz-option">FirebaseStorage.instance.ref().child('posts/header.png')</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+</section>
+
+<!-- STEP 4 -->
+<section class="step-view" data-title="Picking Images">
+<header class="step-header">
+  <span class="step-kicker">STEP 4 &middot; USER INPUT</span>
+  <h1>Picking Images with ImagePicker</h1>
+  <p class="lede">Allow users to select an image from the Photo Gallery or take a photo with the Camera in Flutter.</p>
+</header>
+
+<h2>Understanding XFile (The Cross-Platform Hero)</h2>
+<p>When using the <code>image_picker</code> package, picked files are returned as an <strong><code>XFile</code></strong> object. Why is this important?</p>
+<ul>
+  <li>On mobile (Android &amp; iOS), a file exists at a local file system path like <code>/data/user/0/.../image.jpg</code>.</li>
+  <li>On Flutter Web, browsers have no direct filesystem access! Files exist as raw in-memory blobs.</li>
+  <li><strong><code>XFile</code> works everywhere!</strong> It provides <code>xfile.path</code> on mobile AND <code>xfile.readAsBytes()</code> which works seamlessly on Web, Mobile, and Desktop!</li>
+</ul>
+
+<h2>Image Picker Helper Method</h2>
+<p>Here is a clean Dart method to pick an image from the gallery or camera:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>import 'package:image_picker/image_picker.dart';
+
+class MediaService {
+  final ImagePicker _picker = ImagePicker();
+
+  // Pick an image from device gallery
+  Future&lt;XFile?&gt; pickFromGallery() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,  // Good practice: resize large camera images
+      maxHeight: 1024,
+      imageQuality: 85, // Compresses to 85% to save bandwidth &amp; storage costs
+    );
+    return image;
+  }
+
+  // Snap a new picture with the device camera
+  Future&lt;XFile?&gt; snapFromCamera() async {
+    final XFile? photo = await _picker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
+    return photo;
+  }
+}</code></pre>
+</div>
+
+<h2>Previewing the Picked Image in UI</h2>
+<p>Once picked, you can preview the photo to the user before they hit "Upload". Using <code>readAsBytes()</code> lets you preview on both mobile and web effortlessly:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+class ImagePickerPreview extends StatefulWidget {
+  const ImagePickerPreview({super.key});
+
+  @override
+  State&lt;ImagePickerPreview&gt; createState() =&gt; _ImagePickerPreviewState();
+}
+
+class _ImagePickerPreviewState extends State&lt;ImagePickerPreview&gt; {
+  XFile? _pickedFile;
+  Uint8List? _previewBytes;
+
+  Future&lt;void&gt; _pickImage() async {
+    final picker = ImagePicker();
+    final XFile? picked = await picker.pickImage(source: ImageSource.gallery);
+    
+    if (picked != null) {
+      final bytes = await picked.readAsBytes();
+      setState(() {
+        _pickedFile = picked;
+        _previewBytes = bytes;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (_previewBytes != null)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.memory(
+              _previewBytes!,
+              width: 180,
+              height: 180,
+              fit: BoxFit.cover,
+            ),
+          )
+        else
+          Container(
+            width: 180,
+            height: 180,
+            color: Colors.grey.shade200,
+            child: const Icon(Icons.add_photo_alternate, size: 60, color: Colors.grey),
+          ),
+        const SizedBox(height: 12),
+        ElevatedButton.icon(
+          onPressed: _pickImage,
+          icon: const Icon(Icons.photo_library),
+          label: const Text('Choose Photo'),
+        ),
+      ],
+    );
+  }
+}</code></pre>
+</div>
+</section>
+
+<!-- STEP 5 -->
+<section class="step-view" data-title="Uploading Files">
+<header class="step-header">
+  <span class="step-kicker">STEP 5 &middot; CORE OPERATION</span>
+  <h1>Uploading to Cloud Storage</h1>
+  <p class="lede">Upload local files, raw bytes, or strings to Firebase Cloud Storage with proper metadata.</p>
+</header>
+
+<h2>The Three Upload Methods</h2>
+<p>Firebase Storage provides three different methods depending on what format your data is in:</p>
+
+<table class="comparison">
+  <tr><th>Method</th><th>Parameters</th><th>Best Used For</th></tr>
+  <tr>
+    <td><code>putData()</code></td>
+    <td><code>Uint8List bytes, [SettableMetadata]</code></td>
+    <td><strong>Recommended!</strong> Works identically across Mobile, Web, and Desktop. Works directly with <code>XFile.readAsBytes()</code>.</td>
+  </tr>
+  <tr>
+    <td><code>putFile()</code></td>
+    <td><code>File file, [SettableMetadata]</code></td>
+    <td>Mobile/Desktop only (requires <code>dart:io</code>). Will crash if run on Flutter Web.</td>
+  </tr>
+  <tr>
+    <td><code>putString()</code></td>
+    <td><code>String data, {PutStringFormat}</code></td>
+    <td>Text files, Base64 strings, or raw data URLs.</td>
+  </tr>
+</table>
+
+<h2>Writing the Upload Function</h2>
+<p>Here is the standard, production-ready upload function using <code>putData()</code>. Always provide a <code>SettableMetadata</code> with the correct <code>contentType</code> (e.g. <code>image/jpeg</code> or <code>image/png</code>) so the browser knows how to render the image instead of downloading it as a raw binary file!</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>import 'dart:typed_data';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+
+Future&lt;String&gt; uploadImageToStorage({
+  required XFile xfile,
+  required String folderName,
+}) async {
+  // 1. Read bytes from XFile (cross-platform safe)
+  final Uint8List fileBytes = await xfile.readAsBytes();
+
+  // 2. Generate a unique filename using timestamp
+  final String fileName = '${DateTime.now().millisecondsSinceEpoch}_${xfile.name}';
+
+  // 3. Create reference to the storage destination
+  final Reference storageRef = FirebaseStorage.instance
+      .ref()
+      .child('$folderName/$fileName');
+
+  // 4. Specify metadata (mime-type)
+  final SettableMetadata metadata = SettableMetadata(
+    contentType: xfile.mimeType ?? 'image/jpeg',
+    customMetadata: {
+      'pickedBy': 'flutter_app',
+    },
+  );
+
+  // 5. Start the upload task
+  final UploadTask uploadTask = storageRef.putData(fileBytes, metadata);
+
+  // 6. Wait for upload to complete
+  final TaskSnapshot snapshot = await uploadTask;
+
+  // 7. Retrieve and return the public HTTPS download URL
+  final String downloadUrl = await snapshot.ref.getDownloadURL();
+  return downloadUrl;
+}</code></pre>
+</div>
+
+<div class="panel pink">
+  <strong>Common Mistake:</strong> Omitting <code>contentType: 'image/jpeg'</code>! If you upload raw bytes without metadata, Firebase defaults to <code>application/octet-stream</code>. When a user opens the download URL in a web browser, the browser will force-download the file instead of displaying it inline!
+</div>
+</section>
+
+<!-- STEP 6 -->
+<section class="step-view" data-title="Tracking Progress">
+<header class="step-header">
+  <span class="step-kicker">STEP 6 &middot; USER EXPERIENCE</span>
+  <h1>Live Upload Progress &amp; Pause/Resume</h1>
+  <p class="lede">Show responsive progress bars, byte transfer counters, and control uploads with pause, resume, and cancel.</p>
+</header>
+
+<h2>Why Show Progress?</h2>
+<p>When users upload 5 MB images over mobile data or slow 3G connections, uploads can take several seconds. Without feedback, users think the app is frozen and tap buttons repeatedly. <code>UploadTask</code> provides a real-time reactive Stream of <strong><code>TaskSnapshot</code></strong> events!</p>
+
+<h2>The Upload Lifecycle States</h2>
+<div class="grid-2">
+  <div class="concept">
+    <strong>TaskState.running</strong>
+    <p>File is actively transmitting bytes to Google Cloud servers.</p>
+  </div>
+  <div class="concept">
+    <strong>TaskState.paused</strong>
+    <p>Upload is suspended by user action or network interruption.</p>
+  </div>
+  <div class="concept">
+    <strong>TaskState.success</strong>
+    <p>All bytes received and verified. Download URL is now ready!</p>
+  </div>
+  <div class="concept">
+    <strong>TaskState.canceled</strong>
+    <p>User cancelled the upload or app was closed.</p>
+  </div>
+</div>
+
+<h2>Listening to Progress Events</h2>
+<p>Calculate progress by dividing <code>bytesTransferred</code> by <code>totalBytes</code>:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>final UploadTask task = storageRef.putData(fileBytes, metadata);
+
+// Listen to live stream updates
+task.snapshotEvents.listen((TaskSnapshot snapshot) {
+  switch (snapshot.state) {
+    case TaskState.running:
+      final double progress = snapshot.bytesTransferred / snapshot.totalBytes;
+      final int percent = (progress * 100).toInt();
+      debugPrint('Uploading: $percent% (${snapshot.bytesTransferred} / ${snapshot.totalBytes} bytes)');
+      break;
+    case TaskState.paused:
+      debugPrint('Upload paused.');
+      break;
+    case TaskState.success:
+      debugPrint('Upload finished successfully! 🎉');
+      break;
+    case TaskState.canceled:
+      debugPrint('Upload was canceled.');
+      break;
+    case TaskState.error:
+      debugPrint('Upload failed with error.');
+      break;
+  }
+});</code></pre>
+</div>
+
+<h2>Controlling Tasks (Pause, Resume, Cancel)</h2>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>// Pause an active upload
+task.pause();
+
+// Resume a paused upload
+task.resume();
+
+// Cancel and discard partial upload
+task.cancel();</code></pre>
+</div>
+
+<h2>Building a Reactive Progress UI Widget</h2>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>class UploadProgressBar extends StatelessWidget {
+  final UploadTask task;
+
+  const UploadProgressBar({super.key, required this.task});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder&lt;TaskSnapshot&gt;(
+      stream: task.snapshotEvents,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox.shrink();
+
+        final data = snapshot.data!;
+        final double ratio = data.totalBytes &gt; 0 
+            ? data.bytesTransferred / data.totalBytes 
+            : 0;
+        final int percentage = (ratio * 100).clamp(0, 100).toInt();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LinearProgressIndicator(
+              value: ratio,
+              minHeight: 8,
+              backgroundColor: Colors.grey.shade300,
+              valueColor: const AlwaysStoppedAnimation(Color(0xFF2856D8)),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '$percentage% uploaded',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+                Text(
+                  '${(data.bytesTransferred / 1024).toStringAsFixed(0)} KB / ${(data.totalBytes / 1024).toStringAsFixed(0)} KB',
+                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+}</code></pre>
+</div>
+</section>
+
+<!-- STEP 7 -->
+<section class="step-view" data-title="Download URLs">
+<header class="step-header">
+  <span class="step-kicker">STEP 7 &middot; MEDIA DISPLAY</span>
+  <h1>Getting Download URLs &amp; Displaying Media</h1>
+  <p class="lede">Generate secure tokenized download URLs and display network images cleanly in Flutter widgets.</p>
+</header>
+
+<h2>What is a Download URL?</h2>
+<p>Once a file finishes uploading to Firebase Cloud Storage, you call <code>await ref.getDownloadURL()</code>. This generates a permanent, secure HTTPS link that looks like this:</p>
+
+<div class="flow">https://firebasestorage.googleapis.com/v0/b/project.firebasestorage.app/o/avatars%2Fuser.jpg?alt=media&amp;token=9a8b7c6d-1234-5678-90ab</div>
+
+<div class="panel blue">
+  <strong>How the token works:</strong> Anyone with this link can view or download the file without needing Firebase SDKs or API keys! If you ever need to revoke access to the link, you can revoke or regenerate the download token inside the Firebase Console.
+</div>
+
+<h2>Displaying the Image in Flutter</h2>
+<p>Use Flutter's built-in <code>Image.network()</code> widget. Always provide a <code>loadingBuilder</code> and <code>errorBuilder</code> to handle slow connections or bad URLs gracefully:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Widget buildStorageImage(String downloadUrl) {
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(16),
+    child: Image.network(
+      downloadUrl,
+      width: double.infinity,
+      height: 240,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        final double? progress = loadingProgress.expectedTotalBytes != null
+            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+            : null;
+        return Container(
+          height: 240,
+          color: Colors.grey.shade100,
+          child: Center(
+            child: CircularProgressIndicator(value: progress),
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          height: 240,
+          color: Colors.red.shade50,
+          child: const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.broken_image, size: 48, color: Colors.red),
+                SizedBox(height: 8),
+                Text('Could not load image', style: TextStyle(color: Colors.red)),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}</code></pre>
+</div>
+</section>
+
+<!-- STEP 8 -->
+<section class="step-view" data-title="Storage + Firestore">
+<header class="step-header">
+  <span class="step-kicker">STEP 8 &middot; ARCHITECTURE</span>
+  <h1>Linking Storage with Firestore</h1>
+  <p class="lede">Connect Cloud Storage files with Cloud Firestore database documents to build real-world feeds, profiles, and galleries.</p>
+</header>
+
+<h2>The Complete End-to-End Workflow</h2>
+<p>Now let's connect the knowledge from our Firestore codelab with Storage! When creating a social post, product listing, or profile avatar:</p>
+
+<ol>
+  <li><strong>Pick:</strong> User chooses a photo using <code>ImagePicker</code>.</li>
+  <li><strong>Upload:</strong> Stream bytes to <code>FirebaseStorage</code>.</li>
+  <li><strong>URL:</strong> Retrieve the resulting <code>downloadURL</code>.</li>
+  <li><strong>Firestore Write:</strong> Add a new document to Firestore <code>posts</code> collection storing the title, the download URL, the storage path (for deletion later!), and a server timestamp.</li>
+</ol>
+
+<h2>Full Dart Implementation</h2>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>import 'dart:typed_data';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+
+class PostRepository {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+
+  Future&lt;void&gt; createPost({
+    required XFile imageFile,
+    required String caption,
+    required String userId,
+  }) async {
+    // Step 1: Read raw bytes
+    final Uint8List bytes = await imageFile.readAsBytes();
+
+    // Step 2: Create a unique path in Storage
+    final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    final String storagePath = 'user_posts/$userId/$timestamp.jpg';
+    final Reference ref = _storage.ref().child(storagePath);
+
+    // Step 3: Upload bytes to Storage with metadata
+    final metadata = SettableMetadata(contentType: 'image/jpeg');
+    final uploadTask = ref.putData(bytes, metadata);
+    final snapshot = await uploadTask;
+
+    // Step 4: Get download URL
+    final String downloadUrl = await snapshot.ref.getDownloadURL();
+
+    // Step 5: Save record to Firestore collection
+    await _firestore.collection('posts').add({
+      'userId': userId,
+      'caption': caption,
+      'imageUrl': downloadUrl,
+      'storagePath': storagePath, // Save path so we can delete the file later!
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+}</code></pre>
+</div>
+
+<div class="panel mint">
+  <strong>Key Insight:</strong> Always save the <code>storagePath</code> inside the Firestore document! Later, when a user taps "Delete Post", you won't need to guess where the file lives in Storage—you simply call <code>FirebaseStorage.instance.ref(storagePath).delete()</code>!
+</div>
+</section>
+
+<!-- STEP 9 -->
+<section class="step-view" data-title="Downloading Files">
+<header class="step-header">
+  <span class="step-kicker">STEP 9 &middot; READ OPERATIONS</span>
+  <h1>Downloading &amp; Reading Files</h1>
+  <p class="lede">Download files directly into memory as bytes or save them to the device filesystem.</p>
+</header>
+
+<h2>Two Ways to Download</h2>
+<p>While <code>Image.network(url)</code> is great for displaying pictures on screen, sometimes your app needs to process raw file bytes (like parsing a PDF, applying image filters, or saving a file for offline access).</p>
+
+<div class="grid-2">
+  <div class="concept">
+    <strong>1. Download to Memory (getData)</strong>
+    <p>Fetches the file directly into a <code>Uint8List</code> buffer in RAM. Always specify a safe maximum size (e.g. 10 MB) to prevent Out-Of-Memory (OOM) crashes on low-end devices!</p>
+  </div>
+  <div class="concept">
+    <strong>2. Download to Disk (writeToFile)</strong>
+    <p>Saves the file directly into local storage (like device cache or documents folder). Great for background downloads of large PDFs or videos.</p>
+  </div>
+</div>
+
+<h2>Example 1: Download File into Memory</h2>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>import 'dart:typed_data';
+import 'package:firebase_storage/firebase_storage.dart';
+
+Future&lt;Uint8List?&gt; downloadFileBytes(String storagePath) async {
+  final ref = FirebaseStorage.instance.ref().child(storagePath);
+
+  try {
+    // Set max size limit (e.g. 5 MegaBytes = 5 * 1024 * 1024)
+    const int maxSizeBytes = 5 * 1024 * 1024;
+    final Uint8List? data = await ref.getData(maxSizeBytes);
+    return data;
+  } on FirebaseException catch (e) {
+    debugPrint('Download failed: ${e.code} - ${e.message}');
+    return null;
+  }
+}</code></pre>
+</div>
+
+<h2>Example 2: Download Directly to Device Storage</h2>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+
+Future&lt;File&gt; downloadToFile({
+  required String storagePath,
+  required String localFilePath,
+}) async {
+  final ref = FirebaseStorage.instance.ref().child(storagePath);
+  final File localFile = File(localFilePath);
+
+  // Download directly to local storage file
+  final DownloadTask downloadTask = ref.writeToFile(localFile);
+  await downloadTask;
+  return localFile;
+}</code></pre>
+</div>
+</section>
+
+<!-- STEP 10 -->
+<section class="step-view" data-title="Listing Files">
+<header class="step-header">
+  <span class="step-kicker">STEP 10 &middot; FOLDER EXPLORATION</span>
+  <h1>Listing &amp; Browsing Files</h1>
+  <p class="lede">Browse folders, list bucket contents, and paginate through cloud files like a file explorer.</p>
+</header>
+
+<h2>Listing Methods: listAll() vs list()</h2>
+<p>Just like exploring files in Finder or File Explorer, Firebase Storage allows you to inspect what files and subdirectories exist under any reference:</p>
+
+<table class="comparison">
+  <tr><th>Method</th><th>Behavior</th><th>Best For</th></tr>
+  <tr>
+    <td><code>ref.listAll()</code></td>
+    <td>Fetches <strong>ALL</strong> items and subfolders in one single call.</td>
+    <td>Small folders (e.g. a user's uploaded gallery of 10-20 images).</td>
+  </tr>
+  <tr>
+    <td><code>ref.list(ListOptions)</code></td>
+    <td>Fetches a <strong>paginated page</strong> of items with a limit and next page token.</td>
+    <td>Large buckets with hundreds or thousands of files to prevent app slowdown.</td>
+  </tr>
+</table>
+
+<h2>Inspecting ListResult</h2>
+<p>When you call <code>listAll()</code>, you receive a <code>ListResult</code> containing two collections:</p>
+<ul>
+  <li><code>result.items</code>: A list of <code>Reference</code> objects pointing to files in that folder.</li>
+  <li><code>result.prefixes</code>: A list of <code>Reference</code> objects pointing to sub-folders!</li>
+</ul>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>import 'package:firebase_storage/firebase_storage.dart';
+
+Future&lt;List&lt;String&gt;&gt; fetchAllUserImageUrls(String userId) async {
+  final folderRef = FirebaseStorage.instance.ref().child('user_posts/$userId');
+
+  // 1. Fetch all items in the folder
+  final ListResult result = await folderRef.listAll();
+
+  // 2. Map every file reference to its download URL
+  final List&lt;String&gt; urls = [];
+  for (final Reference fileRef in result.items) {
+    final String url = await fileRef.getDownloadURL();
+    urls.add(url);
+  }
+
+  return urls;
+}</code></pre>
+</div>
+
+<h2>Paginated Listing with ListOptions</h2>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; fetchPageOfFiles({String? nextPageToken}) async {
+  final folderRef = FirebaseStorage.instance.ref().child('public_photos');
+
+  // Request up to 10 files at a time
+  final ListResult page = await folderRef.list(ListOptions(
+    maxResults: 10,
+    pageToken: nextPageToken,
+  ));
+
+  for (var file in page.items) {
+    debugPrint('File found: ${file.name}');
+  }
+
+  // Save page.nextPageToken to load the next 10 items when user scrolls!
+  if (page.nextPageToken != null) {
+    debugPrint('Next token: ${page.nextPageToken}');
+  }
+}</code></pre>
+</div>
+</section>
+
+<!-- STEP 11 -->
+<section class="step-view" data-title="File Metadata">
+<header class="step-header">
+  <span class="step-kicker">STEP 11 &middot; ATTRIBUTES</span>
+  <h1>Working with File Metadata</h1>
+  <p class="lede">Read file sizes, creation dates, content types, and store custom developer key-value pairs.</p>
+</header>
+
+<h2>What is File Metadata?</h2>
+<p>Every file in Firebase Storage has metadata attached to it. Firebase provides two metadata objects:</p>
+<ul>
+  <li><strong><code>FullMetadata</code>:</strong> Read-only properties generated by Google Cloud (byte size, upload time, MD5 hash).</li>
+  <li><strong><code>SettableMetadata</code>:</strong> Writable attributes that you can set and update (content-type, cache-control, custom tags).</li>
+</ul>
+
+<h2>Inspecting FullMetadata</h2>
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; printFileDetails(Reference fileRef) async {
+  final FullMetadata meta = await fileRef.getMetadata();
+
+  debugPrint('File Name: ${meta.name}');
+  debugPrint('Size in Bytes: ${meta.size}');
+  debugPrint('Size in KB: ${(meta.size! / 1024).toStringAsFixed(1)} KB');
+  debugPrint('Content-Type: ${meta.contentType}');
+  debugPrint('Uploaded At: ${meta.timeCreated}');
+  debugPrint('Updated At: ${meta.updated}');
+
+  // Custom key-value tags attached by developer
+  debugPrint('Custom Tags: ${meta.customMetadata}');
+}</code></pre>
+</div>
+
+<h2>Updating Metadata on an Existing File</h2>
+<p>You can update attributes without re-uploading the file bytes using <code>updateMetadata()</code>:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; tagFileAsVerified(Reference fileRef) async {
+  final SettableMetadata newMetadata = SettableMetadata(
+    cacheControl: 'public, max-age=3600', // Cache on client for 1 hour
+    customMetadata: {
+      'status': 'verified',
+      'moderatedBy': 'admin_team',
+    },
+  );
+
+  final FullMetadata updated = await fileRef.updateMetadata(newMetadata);
+  debugPrint('Updated metadata status: ${updated.customMetadata?['status']}');
+}</code></pre>
+</div>
+</section>
+
+<!-- STEP 12 -->
+<section class="step-view" data-title="Deleting Files">
+<header class="step-header">
+  <span class="step-kicker">STEP 12 &middot; CLEANUP</span>
+  <h1>Deleting Files Safely</h1>
+  <p class="lede">Prevent storage bloat and orphaned files by deleting cloud media when user posts are removed.</p>
+</header>
+
+<h2>Deleting by Storage Reference</h2>
+<p>To delete a file from Storage, simply call <code>.delete()</code> on its reference:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; deleteStorageFile(String storagePath) async {
+  try {
+    final ref = FirebaseStorage.instance.ref().child(storagePath);
+    await ref.delete();
+    debugPrint('File $storagePath deleted successfully!');
+  } on FirebaseException catch (e) {
+    if (e.code == 'object-not-found') {
+      debugPrint('File was already deleted or never existed.');
+    } else {
+      debugPrint('Error deleting file: ${e.code} - ${e.message}');
+    }
+  }
+}</code></pre>
+</div>
+
+<h2>Deleting Directly from a Download URL</h2>
+<p>What if your code only has the <code>https://firebasestorage.googleapis.com/...</code> download URL and you don't know the exact path? You can obtain the reference directly using <code>refFromURL()</code>!</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; deleteFileByUrl(String downloadUrl) async {
+  try {
+    // Automatically extracts the path and bucket from the HTTPS URL!
+    final Reference ref = FirebaseStorage.instance.refFromURL(downloadUrl);
+    await ref.delete();
+    debugPrint('File deleted successfully via URL!');
+  } on FirebaseException catch (e) {
+    debugPrint('Delete failed: ${e.message}');
+  }
+}</code></pre>
+</div>
+
+<h2>Coordinated Delete: Storage + Firestore</h2>
+<p>Always delete the storage asset when deleting the Firestore document. If you only delete the Firestore document, the photo remains forever in Storage, continuing to charge you storage fees for files no one can ever find (an "orphaned file")!</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>Future&lt;void&gt; deletePostAndPhoto({
+  required String postId,
+  required String storagePath,
+}) async {
+  // 1. Delete binary photo in Cloud Storage
+  try {
+    await FirebaseStorage.instance.ref().child(storagePath).delete();
+  } catch (e) {
+    debugPrint('Notice: Storage file missing or could not delete: $e');
+  }
+
+  // 2. Delete index record in Cloud Firestore
+  await FirebaseFirestore.instance.collection('posts').doc(postId).delete();
+}</code></pre>
+</div>
+</section>
+
+<!-- STEP 13 -->
+<section class="step-view" data-title="Hands-On App: SnapVault">
+<header class="step-header">
+  <span class="step-kicker">STEP 13 &middot; COMPLETE DEMO</span>
+  <h1>Hands-On App: SnapVault</h1>
+  <p class="lede">A complete, fully runnable Flutter application bringing everything together: pick photos, see live upload progress, store post in Firestore, and display a live photo feed.</p>
+</header>
+
+<div class="panel yellow">
+  <strong>What this app demonstrates:</strong>
+  <br>&bull; Picking photos from gallery using <code>ImagePicker</code>
+  <br>&bull; Cross-platform bytes handling with <code>putData()</code>
+  <br>&bull; Real-time animated progress bar with percentage counter
+  <br>&bull; Live Firestore feed displaying images with <code>StreamBuilder</code>
+  <br>&bull; Atomic deletion of both Storage photo and Firestore record
+</div>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const SnapVaultApp());
+}
+
+class SnapVaultApp extends StatelessWidget {
+  const SnapVaultApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'SnapVault - Firebase Storage',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2856D8)),
+        useMaterial3: true,
+      ),
+      home: const SnapVaultHomeScreen(),
+    );
+  }
+}
+
+class SnapVaultHomeScreen extends StatefulWidget {
+  const SnapVaultHomeScreen({super.key});
+
+  @override
+  State&lt;SnapVaultHomeScreen&gt; createState() =&gt; _SnapVaultHomeScreenState();
+}
+
+class _SnapVaultHomeScreenState extends State&lt;SnapVaultHomeScreen&gt; {
+  final ImagePicker _picker = ImagePicker();
+  final TextEditingController _captionController = TextEditingController();
+
+  XFile? _selectedFile;
+  Uint8List? _previewBytes;
+  UploadTask? _activeUploadTask;
+  double _uploadProgress = 0.0;
+  bool _isUploading = false;
+
+  // 1. Pick Image
+  Future&lt;void&gt; _pickImage(ImageSource source) async {
+    final XFile? file = await _picker.pickImage(
+      source: source,
+      maxWidth: 1200,
+      imageQuality: 85,
+    );
+
+    if (file != null) {
+      final bytes = await file.readAsBytes();
+      setState(() {
+        _selectedFile = file;
+        _previewBytes = bytes;
+      });
+    }
+  }
+
+  // 2. Upload to Storage &amp; Write to Firestore
+  Future&lt;void&gt; _uploadAndPost() async {
+    if (_selectedFile == null || _previewBytes == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a photo first!')),
+      );
+      return;
+    }
+
+    final String caption = _captionController.text.trim();
+    if (caption.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a caption!')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isUploading = true;
+      _uploadProgress = 0.0;
+    });
+
+    try {
+      final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      final String storagePath = 'snapvault_photos/$timestamp.jpg';
+      final Reference ref = FirebaseStorage.instance.ref().child(storagePath);
+
+      final metadata = SettableMetadata(
+        contentType: 'image/jpeg',
+        customMetadata: {'caption': caption},
+      );
+
+      // Start upload task
+      final UploadTask task = ref.putData(_previewBytes!, metadata);
+      setState(() { _activeUploadTask = task; });
+
+      // Track progress
+      task.snapshotEvents.listen((TaskSnapshot snapshot) {
+        if (snapshot.totalBytes &gt; 0) {
+          setState(() {
+            _uploadProgress = snapshot.bytesTransferred / snapshot.totalBytes;
+          });
+        }
+      });
+
+      // Await completion
+      final TaskSnapshot completedSnapshot = await task;
+      final String downloadUrl = await completedSnapshot.ref.getDownloadURL();
+
+      // Save to Firestore
+      await FirebaseFirestore.instance.collection('snaps').add({
+        'caption': caption,
+        'imageUrl': downloadUrl,
+        'storagePath': storagePath,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      // Reset Form
+      setState(() {
+        _selectedFile = null;
+        _previewBytes = null;
+        _captionController.clear();
+        _activeUploadTask = null;
+        _isUploading = false;
+        _uploadProgress = 0.0;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Photo uploaded to SnapVault! 🎉')),
+        );
+      }
+    } catch (e) {
+      setState(() { _isUploading = false; });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: $e')),
+        );
+      }
+    }
+  }
+
+  // 3. Delete Photo from Storage and Firestore
+  Future&lt;void&gt; _deleteSnap(String docId, String storagePath) async {
+    try {
+      // Delete binary file in Storage
+      await FirebaseStorage.instance.ref().child(storagePath).delete();
+    } catch (_) {
+      // Proceed even if already gone
+    }
+
+    // Delete Firestore document
+    await FirebaseFirestore.instance.collection('snaps').doc(docId).delete();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Photo deleted!')),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _captionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('SnapVault', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: const Color(0xFF2856D8),
+        foregroundColor: Colors.white,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // UPLOAD CARD
+            Card(
+              elevation: 3,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    if (_previewBytes != null)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.memory(
+                          _previewBytes!,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    else
+                      Container(
+                        height: 140,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.add_photo_alternate_outlined, size: 50, color: Colors.grey),
+                        ),
+                      ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: _isUploading ? null : () =&gt; _pickImage(ImageSource.gallery),
+                          icon: const Icon(Icons.photo_library),
+                          label: const Text('Gallery'),
+                        ),
+                        const SizedBox(width: 12),
+                        OutlinedButton.icon(
+                          onPressed: _isUploading ? null : () =&gt; _pickImage(ImageSource.camera),
+                          icon: const Icon(Icons.camera_alt),
+                          label: const Text('Camera'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _captionController,
+                      decoration: const InputDecoration(
+                        labelText: 'Write a caption...',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (_isUploading) ...[
+                      LinearProgressIndicator(value: _uploadProgress),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Uploading: ${(_uploadProgress * 100).toInt()}%',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    ElevatedButton.icon(
+                      onPressed: _isUploading ? null : _uploadAndPost,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2856D8),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 46),
+                      ),
+                      icon: const Icon(Icons.cloud_upload),
+                      label: const Text('Upload to SnapVault', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // LIVE FEED HEADER
+            const Text(
+              'Recent Cloud Snaps',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+
+            // LIVE FIRESTORE FEED
+            StreamBuilder&lt;QuerySnapshot&gt;(
+              stream: FirebaseFirestore.instance
+                  .collection('snaps')
+                  .orderBy('createdAt', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final docs = snapshot.data?.docs ?? [];
+                if (docs.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Center(
+                      child: Text('No photos uploaded yet! Snap one above.'),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final data = docs[index].data() as Map&lt;String, dynamic&gt;;
+                    final String docId = docs[index].id;
+                    final String imageUrl = data['imageUrl'] ?? '';
+                    final String caption = data['caption'] ?? '';
+                    final String storagePath = data['storagePath'] ?? '';
+
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      clipBehavior: Clip.antiAlias,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Image.network(
+                            imageUrl,
+                            height: 220,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return Container(
+                                height: 220,
+                                color: Colors.grey.shade100,
+                                child: const Center(child: CircularProgressIndicator()),
+                              );
+                            },
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    caption,
+                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                  onPressed: () =&gt; _deleteSnap(docId, storagePath),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+</div>
+</section>
+
+<!-- STEP 14 -->
+<section class="step-view" data-title="Storage Security Rules">
+<header class="step-header">
+  <span class="step-kicker">STEP 14 &middot; SECURITY</span>
+  <h1>Firebase Storage Security Rules</h1>
+  <p class="lede">Protect cloud assets from unauthorized uploads, enforce size quotas, and restrict file MIME types.</p>
+</header>
+
+<h2>Why Security Rules are Critical</h2>
+<p>Unlike traditional servers where backend PHP or Node.js code handles uploads, Flutter connects <strong>directly from the client device to Google Cloud Storage</strong>. If your rules allow anyone to write, a malicious attacker could upload gigabytes of junk files and run up your billing!</p>
+
+<h2>Storage Rules Syntax vs Firestore Rules</h2>
+<p>Storage rules start with <code>service firebase.storage</code> instead of <code>service cloud.firestore</code>:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Your path rules go here!
+  }
+}</code></pre>
+</div>
+
+<h2>Rule Example 1: User-Isolated Avatar Folders</h2>
+<p>Only allow authenticated users to read and write to their own dedicated folder (<code>users/{userId}/...</code>):</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /users/{userId}/{allPaths=**} {
+      // Anyone logged in can view avatars
+      allow read: if request.auth != null;
+      
+      // Only the folder owner can upload or delete their photos!
+      allow write: if request.auth != null &amp;&amp; request.auth.uid == userId;
+    }
+  }
+}</code></pre>
+</div>
+
+<h2>Rule Example 2: Validating Size and File Types</h2>
+<p>You can inspect the incoming file using <code>request.resource</code> before accepting it:</p>
+
+<div class="code-wrap">
+  <button class="copy-btn">Copy</button>
+  <pre><code>rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /snapvault_photos/{fileName} {
+      // Anyone can read public photos
+      allow read: if true;
+
+      // Allow write ONLY if:
+      // 1. User is signed in
+      // 2. File size is under 5 MegaBytes (5 * 1024 * 1024 bytes)
+      // 3. File is an image (image/jpeg, image/png, image/webp)
+      allow write: if request.auth != null
+                   &amp;&amp; request.resource.size &lt; 5 * 1024 * 1024
+                   &amp;&amp; request.resource.contentType.matches('image/.*');
+    }
+  }
+}</code></pre>
+</div>
+
+<div class="challenge">
+  <h3>Security Rules Best Practices</h3>
+  <ol>
+    <li>Never leave rules as <code>allow read, write: if true;</code> in production.</li>
+    <li>Always check <code>request.resource.size</code> to prevent users from uploading massive 1 GB files that blow up your quota.</li>
+    <li>Check <code>request.resource.contentType.matches('image/.*')</code> so malicious users cannot upload executable <code>.exe</code> or script files to your bucket.</li>
+  </ol>
+</div>
+</section>
+
+<!-- STEP 15 -->
+<section class="step-view" data-title="Troubleshooting">
+<header class="step-header">
+  <span class="step-kicker">STEP 15 &middot; DEBUGGING</span>
+  <h1>Troubleshooting &amp; Common Pitfalls</h1>
+  <p class="lede">Diagnose and resolve common Firebase Storage runtime exceptions and platform issues.</p>
+</header>
+
+<table class="comparison">
+  <tr><th>Error Symptom</th><th>Root Cause</th><th>Immediate Fix</th></tr>
+  <tr>
+    <td><code>[storage/unauthorized] User does not have permission</code></td>
+    <td>Firebase Security Rules rejected the request (e.g. user is not signed in or size limit was exceeded).</td>
+    <td>Check Firebase Console &gt; Storage &gt; Rules. Verify <code>request.auth != null</code> matches your login state.</td>
+  </tr>
+  <tr>
+    <td><code>[storage/object-not-found] No object exists at desired reference</code></td>
+    <td>Attempting to fetch <code>getDownloadURL()</code> on a path that does not exist or before upload finished.</td>
+    <td>Ensure you <code>await task</code> completely before requesting the download URL, and double check your reference path.</td>
+  </tr>
+  <tr>
+    <td><code>Unsupported operation: Platform._operatingSystem</code> on Web</td>
+    <td>Using <code>File(path)</code> from <code>dart:io</code> inside Flutter Web code.</td>
+    <td>Use <code>xfile.readAsBytes()</code> and <code>putData(bytes)</code> which works identically on Web and Mobile!</td>
+  </tr>
+  <tr>
+    <td>App crashes when opening Gallery or Camera</td>
+    <td>Missing permissions in AndroidManifest.xml or iOS Info.plist.</td>
+    <td>Add <code>READ_MEDIA_IMAGES</code> to Android manifest and <code>NSPhotoLibraryUsageDescription</code> to iOS Info.plist.</td>
+  </tr>
+  <tr>
+    <td>CORS error on Flutter Web (<code>XMLHttpRequest error</code>)</td>
+    <td>Browser blocked cross-origin requests to Google Cloud Storage bucket.</td>
+    <td>Deploy a CORS JSON configuration to your Firebase Storage bucket via Google Cloud CLI: <code>gcloud storage buckets update gs://&lt;bucket-name&gt; --cors-file=cors.json</code>.</td>
+  </tr>
+  <tr>
+    <td>Browser downloads photo instead of displaying inline</td>
+    <td>File was uploaded without specifying <code>contentType: 'image/jpeg'</code> in <code>SettableMetadata</code>.</td>
+    <td>Always pass <code>SettableMetadata(contentType: 'image/jpeg')</code> into <code>putData()</code> or <code>putFile()</code>.</td>
+  </tr>
+</table>
+
+<div class="quiz" data-answer="0" data-correct="Correct! dart:io File is not supported on Web. Using putData() with Uint8List bytes works across all platforms!">
+  <h3>How can you make file uploads work identically on both Flutter Web and Mobile?</h3>
+  <div class="quiz-options">
+    <button class="quiz-option">Use XFile.readAsBytes() and ref.putData(bytes).</button>
+    <button class="quiz-option">Import dart:io and use ref.putFile(File(path)).</button>
+    <button class="quiz-option">Save files to SQLite database first.</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+</section>
+
+<!-- STEP 16 -->
+<section class="step-view" data-title="Revision &amp; Checklist">
+<header class="step-header">
+  <span class="step-kicker">STEP 16 &middot; KNOWLEDGE CHECK</span>
+  <h1>Revision &amp; Final Checklist</h1>
+  <p class="lede">Review key takeaways, test your complete understanding, and celebrate your mastery of Firebase Storage!</p>
+</header>
+
+<h2>Key Concept Flashcards</h2>
+<div class="reveal"><summary>What is the difference between Firestore and Firebase Storage?</summary><div>Firestore is a NoSQL document database for structured JSON-like text under 1 MB. Firebase Storage is an object store for large binary files (photos, videos, audio, documents) up to 5 TB.</div></div>
+
+<div class="reveal"><summary>Why should you always pass SettableMetadata with contentType?</summary><div>Without specifying `contentType: 'image/jpeg'`, Firebase defaults to `application/octet-stream`. Browsers will download the file as a raw attachment instead of displaying it inline in `Image.network()`.</div></div>
+
+<div class="reveal"><summary>Why save the storagePath inside the Firestore document?</summary><div>When a user deletes a post, you need the original storage path to delete the binary photo from Firebase Storage. Otherwise, the file becomes an orphaned asset continuing to incur storage costs!</div></div>
+
+<div class="reveal"><summary>How do you calculate upload progress?</summary><div>Listen to `UploadTask.snapshotEvents` and divide `snapshot.bytesTransferred` by `snapshot.totalBytes` to get a 0.0 to 1.0 progress ratio.</div></div>
+
+<h2>Student Mastery Checklist</h2>
+<ul class="checklist">
+  <li>I installed <code>firebase_storage</code> and <code>image_picker</code>.</li>
+  <li>I configured camera and gallery permissions for Android (<code>AndroidManifest.xml</code>) and iOS (<code>Info.plist</code>).</li>
+  <li>I understand how to build child references using <code>FirebaseStorage.instance.ref().child(...)</code>.</li>
+  <li>I can pick images using <code>ImagePicker().pickImage()</code>.</li>
+  <li>I know how to upload files cross-platform using <code>ref.putData(bytes, metadata)</code>.</li>
+  <li>I can track real-time upload progress using <code>UploadTask.snapshotEvents</code>.</li>
+  <li>I know how to retrieve the public download URL using <code>ref.getDownloadURL()</code>.</li>
+  <li>I understand the 2-step architecture: Upload media to Storage, save the URL in Firestore.</li>
+  <li>I can delete storage assets using <code>ref.delete()</code> or <code>refFromURL()</code>.</li>
+  <li>I know how to enforce file size quotas and content types in Storage Security Rules.</li>
+</ul>
+
+<div class="finish">
+  <h2>🎉 Congratulations! You have mastered Firebase Storage in Flutter!</h2>
+  <p>You now possess the complete toolkit to build rich, media-heavy apps: avatars, social media feeds, document viewers, and audio recorders. Combine this with Authentication and Firestore to build full-scale production apps!</p>
+</div>
+</section>
+
+</div></main>
+</div>
+
+<script>
+(() => {
+  const steps = [...document.querySelectorAll('.step-view')];
+  const titles = steps.map(step => step.dataset.title);
+  const nav = document.getElementById('stepNav');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const content = document.getElementById('content');
+  const completed = new Set();
+  let current = 0;
+
+  // Render sidebar steps
+  nav.innerHTML = titles.map((title, index) =>
+    `<button class="step-link" data-step="${index}" type="button">
+      <span class="step-number">${String(index + 1).padStart(2, '0')}</span>
+      <span>${title}</span>
+      <span class="step-status" aria-hidden="true"></span>
+    </button>`
+  ).join('');
+
+  const getHashStep = () => {
+    const match = location.hash.match(/^#step-(\d+)$/);
+    const value = match ? Number(match[1]) - 1 : 0;
+    return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+  };
+
+  function render(updateHash = true) {
+    current = Math.max(0, Math.min(current, steps.length - 1));
+
+    steps.forEach((step, index) => {
+      const active = index === current;
+      step.classList.toggle('active', active);
+      step.setAttribute('aria-hidden', String(!active));
+    });
+
+    document.querySelectorAll('.step-link').forEach((button, index) => {
+      button.classList.toggle('active', index === current);
+      button.setAttribute('aria-current', index === current ? 'step' : 'false');
+      button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '';
+    });
+
+    const percent = Math.round(((current + 1) / steps.length) * 100);
+    document.getElementById('progressBar').style.width = `${percent}%`;
+    document.getElementById('progressText').textContent = `${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+    document.getElementById('mobileTitle').textContent = titles[current];
+
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === steps.length - 1;
+    document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next →';
+
+    if (updateHash) {
+      history.pushState({ step: current }, '', `#step-${current + 1}`);
+    }
+
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    sidebar.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= steps.length) return;
+    completed.add(current);
+    current = index;
+    render();
+  }
+
+  // Create bottom nav buttons
+  const navRow = document.createElement('div');
+  navRow.className = 'nav-row';
+  navRow.innerHTML = `
+    <button class="nav-btn" id="prevBtn" type="button">← Previous</button>
+    <button class="nav-btn primary" id="nextBtn" type="button">Next →</button>
+  `;
+  content.appendChild(navRow);
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+  nav.addEventListener('click', event => {
+    const button = event.target.closest('.step-link');
+    if (button) goTo(Number(button.dataset.step));
+  });
+
+  menuBtn.addEventListener('click', () => {
+    const open = sidebar.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+  });
+
+  // Global click handler for copy & quiz buttons
+  document.addEventListener('click', async event => {
+    const copy = event.target.closest('.copy-btn');
+    if (copy) {
+      const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+      try {
+        await navigator.clipboard.writeText(code);
+        copy.textContent = 'Copied!';
+      } catch {
+        copy.textContent = 'Select & copy';
+      }
+      setTimeout(() => copy.textContent = 'Copy', 1200);
+      return;
+    }
+
+    const option = event.target.closest('.quiz-option');
+    if (option) {
+      const quiz = option.closest('.quiz');
+      if (quiz.dataset.answered) return;
+      const options = [...quiz.querySelectorAll('.quiz-option')];
+      const choice = options.indexOf(option);
+      const answer = Number(quiz.dataset.answer);
+      quiz.dataset.answered = 'true';
+      options.forEach(button => button.disabled = true);
+      option.classList.add(choice === answer ? 'correct' : 'wrong');
+      if (choice !== answer) options[answer].classList.add('correct');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
+      feedback.classList.add('show');
+    }
+  });
+
+  window.addEventListener('popstate', () => { current = getHashStep(); render(false); });
+  window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+
+  document.addEventListener('keydown', event => {
+    if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+    if (event.key === 'ArrowRight') goTo(current + 1);
+    if (event.key === 'ArrowLeft') goTo(current - 1);
+  });
+
+  current = getHashStep();
+  render(false);
+})();
+</script>
+</body>
+</html>
