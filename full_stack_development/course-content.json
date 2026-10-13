@@ -118,6 +118,26 @@
               "storageKey": ""
             }
           ]
+        },
+        {
+          "id": "topic-fsd-3-6-spring-boot-mongodb-crud",
+          "title": "Spring Boot & MongoDB CRUD Operations",
+          "description": "Connect Java Spring Boot to MongoDB, configure Spring Data MongoDB, define document models with @Document and @Id, build repositories with MongoRepository, and develop a complete Student CRUD REST API with validation and custom queries.",
+          "order": 5,
+          "resources": [
+            {
+              "id": "codelab-fsd-3-6-spring-boot-mongodb-crud",
+              "type": "codelab",
+              "title": "Program: Spring Boot & MongoDB Student CRUD API",
+              "order": 0,
+              "description": "In this hands-on codelab, connect Spring Boot 3 to MongoDB, model a Student document, create derived queries and custom JSON queries with MongoRepository, implement a clean Service layer, and test full CRUD operations with cURL and Postman.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/full_stack_development/spring-boot-mongodb-crud/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
         }
       ]
     }

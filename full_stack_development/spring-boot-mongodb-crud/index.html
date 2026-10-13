@@ -1,0 +1,2321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot &amp; MongoDB Student CRUD API — Step-by-Step Codelab</title>
+    <meta name="description"
+        content="Complete hands-on codelab teaching students how to connect MongoDB with Java Spring Boot, create a Student document model, and build a full CRUD REST API.">
+    <meta name="theme-color" content="#00684a">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+        :root {
+            --primary: #00684a;
+            --primary-dark: #004d37;
+            --primary-light: #e6f7ef;
+            --accent-mint: #00ed64;
+            --ink: #101010;
+            --paper: #f6f9f8;
+            --white: #ffffff;
+            --yellow: #ffd83d;
+            --pink: #ff9bb7;
+            --orange: #ff9f43;
+            --purple: #9d72ff;
+            --blue: #2856d8;
+            --border: 3px solid var(--ink);
+            --shadow: 6px 6px 0 var(--ink);
+            --shadow-sm: 4px 4px 0 var(--ink);
+            --sidebar: 300px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: auto;
+        }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+        }
+
+        button,
+        a {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        :focus-visible {
+            outline: 4px solid var(--yellow);
+            outline-offset: 3px;
+        }
+
+        .app {
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: var(--sidebar);
+            padding: 22px 18px;
+            background: var(--primary);
+            border-right: var(--border);
+            overflow-y: auto;
+            z-index: 20;
+            color: var(--white);
+        }
+
+        .brand {
+            padding: 16px;
+            margin-bottom: 20px;
+            background: var(--white);
+            color: var(--ink);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .eyebrow,
+        .progress-meta,
+        .step-number,
+        .step-kicker,
+        .label,
+        .footer-note,
+        .http-badge,
+        .tag {
+            font-family: "DM Mono", monospace;
+        }
+
+        .eyebrow {
+            font-size: .72rem;
+            font-weight: 500;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--primary-dark);
+        }
+
+        .brand h2 {
+            margin: 6px 0 4px;
+            font-size: 1.25rem;
+            line-height: 1.15;
+            font-weight: 700;
+        }
+
+        .brand p {
+            margin: 0;
+            font-size: .82rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .progress-wrap {
+            margin: 0 2px 20px;
+            color: var(--white);
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 7px;
+            font-size: .75rem;
+            font-weight: 500;
+        }
+
+        .progress-track {
+            height: 16px;
+            padding: 2px;
+            background: var(--white);
+            border: var(--border);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-mint);
+            transition: width .25s ease;
+        }
+
+        .steps {
+            display: grid;
+            gap: 8px;
+        }
+
+        .step-link {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 32px 1fr 20px;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            color: var(--white);
+            background: transparent;
+            border: 3px solid transparent;
+            text-align: left;
+            font-weight: 700;
+            font-size: .88rem;
+            line-height: 1.2;
+            transition: background 0.15s ease;
+        }
+
+        .step-link:hover {
+            background: rgba(255, 255, 255, .15);
+        }
+
+        .step-link.active {
+            color: var(--ink);
+            background: var(--white);
+            border-color: var(--ink);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border: 2px solid currentColor;
+            font-size: .75rem;
+            font-weight: 700;
+        }
+
+        .step-status {
+            text-align: center;
+            font-weight: 900;
+            color: var(--accent-mint);
+        }
+
+        .step-link.active .step-status {
+            color: var(--primary);
+        }
+
+        .mobile-bar {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--primary);
+            border-bottom: var(--border);
+        }
+
+        .menu-btn,
+        .mobile-title {
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .menu-btn {
+            width: 44px;
+            height: 42px;
+            font-size: 1.25rem;
+            font-weight: 900;
+            display: grid;
+            place-items: center;
+        }
+
+        .mobile-title {
+            flex: 1;
+            padding: 8px 12px;
+            font-weight: 700;
+            font-size: .95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        main {
+            margin-left: var(--sidebar);
+            min-height: 100vh;
+        }
+
+        .content {
+            width: min(980px, calc(100% - 56px));
+            margin: 0 auto;
+            padding: 42px 0 60px;
+        }
+
+        .step-view {
+            display: none;
+        }
+
+        .step-view.active {
+            display: block;
+            animation: stepIn .2s ease-out;
+        }
+
+        @keyframes stepIn {
+            from {
+                opacity: .35;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .step-header {
+            padding: 28px;
+            margin-bottom: 24px;
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .step-kicker {
+            display: inline-block;
+            margin-bottom: 12px;
+            padding: 5px 10px;
+            color: var(--white);
+            background: var(--primary);
+            border: 2px solid var(--ink);
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            line-height: 1.15;
+            color: var(--ink);
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: clamp(1.9rem, 4.5vw, 3.2rem);
+            letter-spacing: -.03em;
+        }
+
+        h2 {
+            margin: 36px 0 14px;
+            font-size: clamp(1.35rem, 2.7vw, 1.95rem);
+            letter-spacing: -.02em;
+        }
+
+        h3 {
+            margin: 24px 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .lede {
+            max-width: 820px;
+            margin: 0;
+            font-size: 1.08rem;
+            color: #2d3748;
+        }
+
+        .objective {
+            margin-top: 20px;
+            padding: 14px 18px;
+            background: var(--yellow);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 700;
+            font-size: .95rem;
+        }
+
+        .panel,
+        .concept,
+        .quiz,
+        .reveal,
+        .flow {
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .panel {
+            padding: 22px;
+            margin: 22px 0;
+        }
+
+        .panel.mint {
+            background: var(--primary-light);
+        }
+
+        .panel.yellow {
+            background: #fff8d6;
+        }
+
+        .panel.pink {
+            background: #ffe6ee;
+        }
+
+        .panel.blue {
+            background: #e9f0ff;
+        }
+
+        .panel.purple {
+            background: #f3ecff;
+        }
+
+        .callout {
+            padding: 16px 18px;
+            margin: 20px 0;
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .callout .label {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            color: var(--white);
+            background: var(--ink);
+            border: 2px solid var(--ink);
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        .callout.tip {
+            border-left: 10px solid var(--accent-mint);
+        }
+
+        .callout.warn {
+            border-left: 10px solid var(--orange);
+        }
+
+        .callout.info {
+            border-left: 10px solid var(--blue);
+        }
+
+        .grid-2 {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid-3 {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .concept {
+            padding: 18px;
+        }
+
+        .concept strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 1.05rem;
+        }
+
+        .concept p:last-child {
+            margin-bottom: 0;
+        }
+
+        .code-wrap {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        pre {
+            margin: 0;
+            padding: 22px 20px;
+            overflow-x: auto;
+            color: #f7f7f7;
+            background: #111417;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-family: "DM Mono", monospace;
+            font-size: .84rem;
+            line-height: 1.65;
+            tab-size: 2;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 2;
+            padding: 5px 10px;
+            background: var(--yellow);
+            color: var(--ink);
+            border: 2px solid var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+            font-size: .75rem;
+            font-weight: 800;
+            font-family: "DM Mono", monospace;
+            transition: transform 0.1s, background 0.1s;
+        }
+
+        .copy-btn:hover {
+            background: #ffe270;
+            transform: translate(-1px, -1px);
+        }
+
+        .copy-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0 var(--ink);
+        }
+
+        code:not(pre code) {
+            padding: 2px 6px;
+            background: #e7ede9;
+            border: 1px solid #b7c7be;
+            font-family: "DM Mono", monospace;
+            font-size: .88em;
+            color: #1a3026;
+            border-radius: 2px;
+        }
+
+        ul,
+        ol {
+            padding-left: 1.4rem;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        .comparison {
+            width: 100%;
+            margin: 22px 0;
+            background: var(--white);
+            border: var(--border);
+            border-collapse: collapse;
+        }
+
+        .comparison th,
+        .comparison td {
+            padding: 12px 14px;
+            border: 2px solid var(--ink);
+            text-align: left;
+            vertical-align: top;
+            font-size: .92rem;
+        }
+
+        .comparison th {
+            color: var(--white);
+            background: var(--primary);
+            font-weight: 700;
+        }
+
+        .comparison tr:nth-child(even) td {
+            background: #fbfdfc;
+        }
+
+        .http-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border: 2px solid var(--ink);
+            font-weight: 700;
+            font-size: .75rem;
+        }
+
+        .http-badge.get {
+            background: #8bf0ba;
+        }
+
+        .http-badge.post {
+            background: var(--yellow);
+        }
+
+        .http-badge.put {
+            background: var(--orange);
+        }
+
+        .http-badge.delete {
+            background: var(--pink);
+        }
+
+        .quiz {
+            padding: 22px;
+            margin: 24px 0;
+        }
+
+        .quiz-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .quiz-option {
+            text-align: left;
+            padding: 12px 15px;
+            background: var(--white);
+            border: 2px solid var(--ink);
+            font-weight: 700;
+            font-size: .92rem;
+            transition: background .15s ease;
+        }
+
+        .quiz-option:hover:not(:disabled) {
+            background: var(--primary-light);
+        }
+
+        .quiz-option.correct {
+            background: #76e3a0;
+            color: #063c1b;
+        }
+
+        .quiz-option.wrong {
+            background: var(--pink);
+            color: #610920;
+        }
+
+        .quiz-feedback {
+            display: none;
+            margin-top: 14px;
+            padding: 12px 14px;
+            border: 2px solid var(--ink);
+            font-weight: 700;
+            font-size: .9rem;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+        }
+
+        .reveal {
+            margin: 18px 0;
+        }
+
+        .reveal summary {
+            padding: 14px 18px;
+            cursor: pointer;
+            background: var(--primary-light);
+            font-weight: 800;
+            border-bottom: 2px solid transparent;
+            user-select: none;
+        }
+
+        .reveal[open] summary {
+            border-bottom: 2px solid var(--ink);
+        }
+
+        .reveal>div {
+            padding: 16px 18px;
+        }
+
+        .flow {
+            margin: 22px 0;
+            padding: 22px;
+            font-family: "DM Mono", monospace;
+            font-size: .88rem;
+            line-height: 1.8;
+            overflow-x: auto;
+            background: #fdfefe;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+            margin: 16px 0;
+        }
+
+        .checklist li {
+            position: relative;
+            padding-left: 32px;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+
+        .checklist li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            top: -2px;
+            width: 22px;
+            height: 22px;
+            background: var(--accent-mint);
+            border: 2px solid var(--ink);
+            display: grid;
+            place-items: center;
+            font-size: .75rem;
+            font-weight: 900;
+        }
+
+        .challenge {
+            margin: 24px 0;
+            padding: 22px;
+            background: #fffbe6;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .challenge h3 {
+            margin-top: 0;
+        }
+
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: var(--border);
+        }
+
+        .nav-btn {
+            min-width: 140px;
+            padding: 13px 20px;
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            font-weight: 800;
+            font-size: .92rem;
+            transition: transform .1s, box-shadow .1s;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 var(--ink);
+        }
+
+        .nav-btn:active:not(:disabled) {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0 var(--ink);
+        }
+
+        .nav-btn.primary {
+            color: var(--white);
+            background: var(--primary);
+        }
+
+        .nav-btn:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .finish {
+            padding: 28px;
+            margin: 28px 0;
+            background: #d4f8e8;
+            border: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .finish h2 {
+            margin-top: 0;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform .25s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-bar {
+                display: flex;
+            }
+
+            main {
+                margin-left: 0;
+            }
+
+            .content {
+                width: calc(100% - 32px);
+                padding: 24px 0 40px;
+            }
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <header class="mobile-bar" aria-label="Mobile Navigation">
+            <button class="menu-btn" id="menuBtn" type="button" aria-label="Toggle navigation menu"
+                aria-expanded="false">☰</button>
+            <div class="mobile-title" id="mobileTitle">Spring Boot + MongoDB Codelab</div>
+        </header>
+
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <div class="eyebrow">Full Stack Lab — Module 3</div>
+                <h2>Spring Boot + MongoDB</h2>
+                <p>Student CRUD API Codelab</p>
+            </div>
+
+            <div class="progress-wrap">
+                <div class="progress-meta">
+                    <span>Progress</span>
+                    <span id="progressText">0%</span>
+                </div>
+                <div class="progress-track" id="progressTrack" role="progressbar" aria-valuenow="0" aria-valuemin="0"
+                    aria-valuemax="100">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+
+            <nav class="steps" id="stepNav" aria-label="Codelab steps"></nav>
+        </aside>
+
+        <main>
+            <div class="content" id="content">
+
+                <!-- STEP 1: Introduction & Architecture -->
+                <section class="step-view active" data-title="Architecture &amp; Overview">
+                    <div class="step-header">
+                        <span class="step-kicker">Step 01 / 10</span>
+                        <h1>Spring Boot &amp; MongoDB CRUD API</h1>
+                        <p class="lede">
+                            Learn how to build a production-grade REST API in Java using Spring Boot 3 and MongoDB.
+                            You will understand the document-based NoSQL model, configure Spring Data MongoDB,
+                            create a comprehensive <code>Student</code> entity, and implement full CRUD operations.
+                        </p>
+                        <div class="objective">
+                            🎯 Goal: Understand the architecture of Spring Boot + MongoDB, differentiate NoSQL from
+                            Relational databases, and set up your local development environment.
+                        </div>
+                    </div>
+
+                    <h2>Why MongoDB with Spring Boot?</h2>
+                    <p>
+                        In previous modules, you worked with relational databases (MySQL, PostgreSQL, H2) where data
+                        is strictly stored in tables with rows and fixed columns governed by foreign keys and schemas.
+                        <strong>MongoDB</strong> is a leading <strong>NoSQL document database</strong> that stores data
+                        in flexible, JSON-like structures called <strong>BSON</strong> (Binary JSON).
+                    </p>
+
+                    <div class="grid-2">
+                        <div class="concept">
+                            <strong>Relational (SQL / Hibernate)</strong>
+                            <p>Data is organized into normalized tables with rows and columns. Schemas are rigid and
+                                alterations require schema migrations (ALTER TABLE). Relationships require JOINs.</p>
+                        </div>
+                        <div class="concept" style="background: var(--primary-light);">
+                            <strong>Document Store (MongoDB)</strong>
+                            <p>Data is stored in self-contained JSON/BSON documents inside collections. Schema is
+                                dynamic and polymorphic, allowing rich embedded arrays and nested sub-documents.</p>
+                        </div>
+                    </div>
+
+                    <h2>RDBMS vs MongoDB Terminology Mapping</h2>
+                    <table class="comparison">
+                        <thead>
+                            <tr>
+                                <th>Relational Database (SQL)</th>
+                                <th>MongoDB (NoSQL)</th>
+                                <th>Spring Boot Concept</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Database</td>
+                                <td>Database (e.g. <code>studentdb</code>)</td>
+                                <td>Configured in <code>application.properties</code></td>
+                            </tr>
+                            <tr>
+                                <td>Table</td>
+                                <td>Collection (e.g. <code>students</code>)</td>
+                                <td>Annotated with <code>@Document(collection="students")</code></td>
+                            </tr>
+                            <tr>
+                                <td>Row / Record</td>
+                                <td>Document (BSON JSON object)</td>
+                                <td>Instance of <code>Student</code> class</td>
+                            </tr>
+                            <tr>
+                                <td>Column / Field</td>
+                                <td>Field / Key-Value Pair</td>
+                                <td>Java class field (e.g. <code>String email</code>)</td>
+                            </tr>
+                            <tr>
+                                <td>Primary Key (ID)</td>
+                                <td><code>_id</code> (ObjectId or custom string)</td>
+                                <td>Field annotated with <code>@Id</code></td>
+                            </tr>
+                            <tr>
+                                <td>JpaRepository</td>
+                                <td>MongoRepository</td>
+                                <td><code>MongoRepository&lt;Student, String&gt;</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Application Architecture Flow</h2>
+                    <p>
+                        We will construct a standard multi-tiered Spring Boot enterprise architecture:
+                    </p>
+                    <div class="flow">
+[Client: Postman / cURL / Frontend]
+         │ (HTTP GET, POST, PUT, DELETE)
+         ▼
+[StudentController]  &lt;--- @RestController, receives JSON, handles HTTP statuses
+         │
+         ▼
+[StudentService]     &lt;--- Business validation, duplicate checks, transformations
+         │
+         ▼
+[StudentRepository]  &lt;--- MongoRepository&lt;Student, String&gt;, derives queries
+         │
+         ▼
+[Spring Data Mongo]  &lt;--- Converts Java POJO &lt;--&gt; BSON Document
+         │
+         ▼
+[MongoDB Instance]   &lt;--- Port 27017 (Local MongoDB or Atlas Cloud Cluster)
+                    </div>
+
+                    <h2>Prerequisites &amp; Environment Check</h2>
+                    <ul>
+                        <li><strong>Java 17+</strong> installed (Run <code>java -version</code> in terminal).</li>
+                        <li><strong>Maven 3.8+</strong> (or use the built-in Maven Wrapper <code>./mvnw</code>).</li>
+                        <li><strong>IDE</strong>: VS Code (with Extension Pack for Java &amp; Spring Boot Tools) or
+                            IntelliJ IDEA.</li>
+                        <li><strong>MongoDB Instance</strong>: Choose one of the following:
+                            <ul>
+                                <li><strong>Option A (Docker - Recommended)</strong>: <code>docker run -d -p 27017:27017 --name mongo-codelab mongo:latest</code></li>
+                                <li><strong>Option B (Local Community Server)</strong>: Installed locally via Homebrew / Windows Installer on default port <code>27017</code>.</li>
+                                <li><strong>Option C (MongoDB Atlas)</strong>: Free cloud cluster connection URI.</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <div class="quiz" data-answer="1"
+                        data-correct="Correct! In MongoDB, documents are grouped into collections, mirroring rows in tables.">
+                        <div class="quiz-title">Quick Check: What is the MongoDB equivalent of a SQL Table?</div>
+                        <div class="quiz-options">
+                            <button class="quiz-option" type="button">Document</button>
+                            <button class="quiz-option" type="button">Collection</button>
+                            <button class="quiz-option" type="button">BSON Index</button>
+                            <button class="quiz-option" type="button">Cluster</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <!-- STEP 2: Project Setup & Dependencies -->
+                <section class="step-view" data-title="Project Setup &amp; Dependencies">
+                    <div class="step-header">
+                        <span class="step-kicker">Step 02 / 10</span>
+                        <h1>Create the Spring Boot Project</h1>
+                        <p class="lede">
+                            Generate your project structure using Spring Initializr with the necessary Maven
+                            dependencies for Spring MVC, Spring Data MongoDB, and Bean Validation.
+                        </p>
+                        <div class="objective">
+                            🎯 Goal: Configure <code>pom.xml</code> with <code>spring-boot-starter-data-mongodb</code>
+                            and understand the starter library components.
+                        </div>
+                    </div>
+
+                    <h2>1. Using Spring Initializr (start.spring.io)</h2>
+                    <p>Navigate to <a href="https://start.spring.io/" target="_blank"
+                            rel="noopener">start.spring.io</a> or use the Spring Initializr extension in VS Code with the
+                        following metadata:</p>
+                    <ul>
+                        <li><strong>Project:</strong> Maven</li>
+                        <li><strong>Language:</strong> Java</li>
+                        <li><strong>Spring Boot:</strong> 3.2.x or 3.3.x (Latest stable 3.x)</li>
+                        <li><strong>Group:</strong> <code>com.example</code></li>
+                        <li><strong>Artifact:</strong> <code>student-mongodb-crud</code></li>
+                        <li><strong>Package name:</strong> <code>com.example.studentmongodb</code></li>
+                        <li><strong>Packaging:</strong> Jar</li>
+                        <li><strong>Java version:</strong> 17 or 21</li>
+                        <li><strong>Dependencies:</strong>
+                            <ol>
+                                <li><strong>Spring Web</strong> (<code>spring-boot-starter-web</code>): RESTful endpoints &amp; Jackson JSON parser.</li>
+                                <li><strong>Spring Data MongoDB</strong> (<code>spring-boot-starter-data-mongodb</code>): MongoDB driver &amp; MongoRepository.</li>
+                                <li><strong>Validation</strong> (<code>spring-boot-starter-validation</code>): Jakarta Bean validation annotations (<code>@NotBlank</code>, <code>@Email</code>).</li>
+                            </ol>
+                        </li>
+                    </ul>
+
+                    <h2>2. Complete <code>pom.xml</code> File</h2>
+                    <p>Your <code>pom.xml</code> will contain the following configuration:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+    &lt;parent&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+        &lt;version&gt;3.3.4&lt;/version&gt;
+        &lt;relativePath/&gt;
+    &lt;/parent&gt;
+
+    &lt;groupId&gt;com.example&lt;/groupId&gt;
+    &lt;artifactId&gt;student-mongodb-crud&lt;/artifactId&gt;
+    &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+    &lt;name&gt;student-mongodb-crud&lt;/name&gt;
+    &lt;description&gt;Spring Boot with MongoDB Student CRUD Demo&lt;/description&gt;
+
+    &lt;properties&gt;
+        &lt;java.version&gt;17&lt;/java.version&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;!-- Spring MVC &amp; Embedded Tomcat --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+
+        &lt;!-- Spring Data MongoDB Starter --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-data-mongodb&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+
+        &lt;!-- Jakarta Bean Validation (@NotBlank, @Email, @Min, @Max) --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-validation&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+
+        &lt;!-- Unit &amp; Integration Testing --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+&lt;/project&gt;</code></pre>
+                    </div>
+
+                    <h2>3. Project Directory Structure</h2>
+                    <p>Organize your packages cleanly following domain-driven layering:</p>
+                    <div class="flow">
+src/main/java/com/example/studentmongodb/
+├── StudentMongodbApplication.java  &lt;-- Main entry point
+├── controller/
+│   └── StudentController.java      &lt;-- REST endpoints (/api/students)
+├── exception/
+│   ├── ErrorResponse.java          &lt;-- Standard error DTO
+│   ├── GlobalExceptionHandler.java &lt;-- @RestControllerAdvice
+│   └── ResourceNotFoundException.java
+├── model/
+│   └── Student.java                &lt;-- MongoDB @Document entity
+├── repository/
+│   └── StudentRepository.java      &lt;-- Spring Data MongoRepository
+└── service/
+    └── StudentService.java         &lt;-- Business logic &amp; transactions
+src/main/resources/
+└── application.properties          &lt;-- MongoDB connection URI
+                    </div>
+
+                    <div class="callout tip">
+                        <span class="label">PRO TIP</span>
+                        <strong>No JPA/Hibernate dependencies needed!</strong>
+                        Do NOT include <code>spring-boot-starter-data-jpa</code> or JDBC drivers. Spring Data MongoDB
+                        operates independently of the Relational JPA / Hibernate ecosystem.
+                    </div>
+                </section>
+
+                <!-- STEP 3: MongoDB Configuration -->
+                <section class="step-view" data-title="MongoDB Configuration">
+                    <div class="step-header">
+                        <span class="step-kicker">Step 03 / 10</span>
+                        <h1>Configure the Database Connection</h1>
+                        <p class="lede">
+                            Connect Spring Boot to your MongoDB instance using <code>application.properties</code>.
+                            Learn connection string formats for both local MongoDB and MongoDB Atlas cloud.
+                        </p>
+                        <div class="objective">
+                            🎯 Goal: Configure <code>application.properties</code>, enable automatic index creation, and
+                            verify connectivity.
+                        </div>
+                    </div>
+
+                    <h2>1. Editing <code>src/main/resources/application.properties</code></h2>
+                    <p>
+                        Spring Boot makes connecting to MongoDB effortless. All connection details can be provided
+                        using the standard <code>spring.data.mongodb.uri</code> property.
+                    </p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code class="language-properties"># Application Server Port
+server.port=8080
+
+# -------------------------------------------------------------
+# OPTION A: Local MongoDB (Default port 27017, database: studentdb)
+# -------------------------------------------------------------
+spring.data.mongodb.uri=mongodb://localhost:27017/studentdb
+
+# Enable automatic index creation for @Indexed annotations
+spring.data.mongodb.auto-index-creation=true
+
+# Show logging for Spring Data MongoDB queries
+logging.level.org.springframework.data.mongodb.core.MongoTemplate=DEBUG</code></pre>
+                    </div>
+
+                    <div class="panel yellow">
+                        <h3>Connecting to MongoDB Atlas (Cloud)</h3>
+                        <p>If you are using a free MongoDB Atlas cluster, simply replace the URI with your Atlas SRV connection string:</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" type="button">Copy</button>
+                            <pre><code class="language-properties">spring.data.mongodb.uri=mongodb+srv://admin:YourSecurePassword@cluster0.abcde.mongodb.net/studentdb?retryWrites=true&amp;w=majority</code></pre>
+                        </div>
+                        <p><em>Note: Remember to whitelist your current IP address (or <code>0.0.0.0/0</code> for development) in the Atlas Network Access panel!</em></p>
+                    </div>
+
+                    <h2>2. Key Configuration Insights</h2>
+                    <div class="grid-2">
+                        <div class="concept">
+                            <strong>Dynamic Database Creation</strong>
+                            <p>You do not need to run <code>CREATE DATABASE studentdb;</code> upfront! MongoDB creates
+                                databases and collections lazily on the fly when the first document is written.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>auto-index-creation=true</strong>
+                            <p>In Spring Boot 3, automatic index creation is disabled by default for performance.
+                                Setting <code>spring.data.mongodb.auto-index-creation=true</code> guarantees that unique
+                                indices like <code>email</code> and <code>rollNumber</code> are automatically enforced.</p>
+                        </div>
+                    </div>
+
+                    <h2>3. Verifying MongoDB is Running Locally</h2>
+                    <p>Before launching Spring Boot, verify your MongoDB server status in a terminal:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code class="language-bash"># If using Docker:
+docker run -d --name mongodb -p 27017:27017 mongo:latest
+
+# If using mongosh (MongoDB Shell):
+mongosh --eval "db.version()"
+
+# Output will display the engine version, e.g., 7.0.x or 8.0.x</code></pre>
+                    </div>
+
+                    <div class="quiz" data-answer="2"
+                        data-correct="Correct! MongoDB creates databases and collections dynamically whenever the first document is inserted.">
+                        <div class="quiz-title">Knowledge Check: Do you need to create the 'studentdb' database manually before starting the app?</div>
+                        <div class="quiz-options">
+                            <button class="quiz-option" type="button">Yes, an exception will be thrown if it does not exist.</button>
+                            <button class="quiz-option" type="button">Yes, you must write a schema.sql file.</button>
+                            <button class="quiz-option" type="button">No, MongoDB automatically creates it upon the first write operation.</button>
+                            <button class="quiz-option" type="button">No, but only if you use SQLite in memory.</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <!-- STEP 4: Creating Student Model -->
+                <section class="step-view" data-title="Student Document Model">
+                    <div class="step-header">
+                        <span class="step-kicker">Step 04 / 10</span>
+                        <h1>Create the Student Document Model</h1>
+                        <p class="lede">
+                            Model the <code>Student</code> entity using Spring Data MongoDB annotations like
+                            <code>@Document</code>, <code>@Id</code>, <code>@Field</code>, and <code>@Indexed</code>.
+                        </p>
+                        <div class="objective">
+                            🎯 Goal: Build <code>Student.java</code>, understand BSON ObjectId mapping, and validate fields
+                            with Jakarta annotations.
+                        </div>
+                    </div>
+
+                    <h2>1. MongoDB Document Annotations</h2>
+                    <ul>
+                        <li><code>@Document(collection = "students")</code>: Marks this Java class as a MongoDB document and specifies the target collection name.</li>
+                        <li><code>@Id</code>: Marks the primary key field. In MongoDB, this maps directly to the <code>_id</code> field in BSON.</li>
+                        <li><code>@Indexed(unique = true)</code>: Requests an index on the field in MongoDB, enforcing unique constraint checks.</li>
+                        <li><code>@Field("field_name")</code>: Customizes the BSON key name if you want it different from the Java property name.</li>
+                    </ul>
+
+                    <div class="callout info">
+                        <span class="label">NOTE ON @Id IN MONGODB</span>
+                        Why is <code>id</code> a <code>String</code> instead of <code>Long</code>? MongoDB uses a 12-byte BSON
+                        <code>ObjectId</code> (represented as a 24-character hexadecimal string, e.g., <code>652d8b4e7a83f91038e21a4f</code>).
+                        Using <code>String id</code> allows Spring Data to automatically generate and convert between String and ObjectId!
+                    </div>
+
+                    <h2>2. Complete <code>Student.java</code> Implementation</h2>
+                    <p>Create <code>src/main/java/com/example/studentmongodb/model/Student.java</code>:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code class="language-java">package com.example.studentmongodb.model;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Document(collection = "students")
+public class Student {
+
+    @Id
+    private String id;
+
+    @NotBlank(message = "Roll number is required")
+    @Indexed(unique = true)
+    @Field("roll_number")
+    private String rollNumber;
+
+    @NotBlank(message = "First name is required")
+    @Field("first_name")
+    private String firstName;
+
+    @NotBlank(message = "Last name is required")
+    @Field("last_name")
+    private String lastName;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email format is invalid")
+    @Indexed(unique = true)
+    private String email;
+
+    @NotBlank(message = "Course is required")
+    private String course;
+
+    @Min(value = 0, message = "GPA cannot be negative")
+    @Max(value = 4, message = "GPA maximum is 4.0")
+    private Double gpa;
+
+    private List&lt;String&gt; skills = new ArrayList&lt;&gt;();
+
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    // Default Constructor (Required by Spring Data / Jackson)
+    public Student() {
+    }
+
+    // Parameterized Constructor (Convenience)
+    public Student(String rollNumber, String firstName, String lastName, String email, String course, Double gpa, List&lt;String&gt; skills) {
+        this.rollNumber = rollNumber;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.course = course;
+        this.gpa = gpa;
+        this.skills = skills != null ? skills : new ArrayList&lt;&gt;();
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getRollNumber() {
+        return rollNumber;
+    }
+
+    public void setRollNumber(String rollNumber) {
+        this.rollNumber = rollNumber;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getCourse() {
+        return course;
+    }
+
+    public void setCourse(String course) {
+        this.course = course;
+    }
+
+    public Double getGpa() {
+        return gpa;
+    }
+
+    public void setGpa(Double gpa) {
+        this.gpa = gpa;
+    }
+
+    public List&lt;String&gt; getSkills() {
+        return skills;
+    }
+
+    public void setSkills(List&lt;String&gt; skills) {
+        this.skills = skills;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "id='" + id + '\'' +
+                ", rollNumber='" + rollNumber + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", course='" + course + '\'' +
+                ", gpa=" + gpa +
+                ", skills=" + skills +
+                '}';
+    }
+}</code></pre>
+                    </div>
+
+                    <h2>3. Notice the Embedded List: <code>skills</code></h2>
+                    <p>
+                        In a traditional SQL database, storing a student's list of programming skills would require
+                        a separate table <code>student_skills</code> with a foreign key and join table.
+                        In MongoDB, it is simply an <strong>embedded array</strong> directly inside the student's document:
+                    </p>
+                    <div class="code-wrap">
+                        <pre><code class="language-json">{
+  "_id": ObjectId("652d8b4e7a83f91038e21a4f"),
+  "roll_number": "CS-101",
+  "first_name": "Aarav",
+  "last_name": "Sharma",
+  "email": "aarav@example.com",
+  "course": "Computer Science",
+  "gpa": 3.85,
+  "skills": ["Java", "Spring Boot", "MongoDB", "Docker"]
+}</code></pre>
+                    </div>
+                </section>
+
+                <!-- STEP 5: Building Student Repository -->
+                <section class="step-view" data-title="Student Repository">
+                    <div class="step-header">
+                        <span class="step-kicker">Step 05 / 10</span>
+                        <h1>Create the Student Repository</h1>
+                        <p class="lede">
+                            Spring Data provides the powerful <code>MongoRepository</code> interface, which supplies
+                            complete CRUD operations out of the box without writing a single line of implementation!
+                        </p>
+                        <div class="objective">
+                            🎯 Goal: Extend <code>MongoRepository&lt;Student, String&gt;</code>, add derived finder methods,
+                            and understand custom MongoDB JSON queries.
+                        </div>
+                    </div>
+
+                    <h2>1. Understanding <code>MongoRepository</code></h2>
+                    <p>
+                        By declaring an interface that extends <code>MongoRepository&lt;T, ID&gt;</code>, Spring Data
+                        creates a proxy bean at runtime containing pre-implemented methods:
+                    </p>
+                    <table class="comparison">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                                <th>MongoDB Operation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>save(student)</code></td>
+                                <td>Inserts if ID is null; updates if ID already exists</td>
+                                <td><code>db.students.insertOne()</code> or <code>replaceOne()</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>findById(id)</code></td>
+                                <td>Retrieves single document wrapped in <code>Optional</code></td>
+                                <td><code>db.students.findOne({ _id: ObjectId(...) })</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>findAll()</code></td>
+                                <td>Retrieves all documents in the collection as a List</td>
+                                <td><code>db.students.find({})</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>deleteById(id)</code></td>
+                                <td>Deletes document by primary key</td>
+                                <td><code>db.students.deleteOne({ _id: ObjectId(...) })</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>existsById(id)</code></td>
+                                <td>Checks if document with given ID exists</td>
+                                <td><code>db.students.countDocuments(...) &gt; 0</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>2. Complete <code>StudentRepository.java</code> Implementation</h2>
+                    <p>Create <code>src/main/java/com/example/studentmongodb/repository/StudentRepository.java</code>:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code class="language-java">package com.example.studentmongodb.repository;
+
+import com.example.studentmongodb.model.Student;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface StudentRepository extends MongoRepository&lt;Student, String&gt; {
+
+    // Derived Query: Find student by unique email
+    Optional&lt;Student&gt; findByEmail(String email);
+
+    // Derived Query: Find student by unique roll number
+    Optional&lt;Student&gt; findByRollNumber(String rollNumber);
+
+    // Derived Query: Find students by course (Case-insensitive)
+    List&lt;Student&gt; findByCourseIgnoreCase(String course);
+
+    // Derived Query: Find students with GPA greater than or equal to a threshold
+    List&lt;Student&gt; findByGpaGreaterThanEqual(Double minGpa);
+
+    // Custom MongoDB JSON Query: Filter by course and minimum GPA
+    @Query("{ 'course': ?0, 'gpa': { '$gte': ?1 } }")
+    List&lt;Student&gt; findStudentsByCourseAndMinimumGpa(String course, Double minGpa);
+
+    // Custom Query: Find students containing a specific skill in their array
+    @Query("{ 'skills': { '$regex': ?0, '$options': 'i' } }")
+    List&lt;Student&gt; findBySkill(String skillName);
+}</code></pre>
+                    </div>
+
+                    <h2>3. How Derived Query Methods Work</h2>
+                    <p>
+                        Notice methods like <code>findByCourseIgnoreCase</code> or <code>findByGpaGreaterThanEqual</code>.
+                        You never wrote SQL or Mongo queries for them! Spring Data parses the method name keywords
+                        (<code>findBy</code> + <code>[Property]</code> + <code>[Condition]</code>) and automatically translates
+                        them into BSON queries at runtime.
+                    </p>
+
+                    <div class="quiz" data-answer="0"
+                        data-correct="Correct! save() handles both inserting new documents and updating existing ones.">
+                        <div class="quiz-title">Quick Check: Which MongoRepository method updates an existing student?</div>
+                        <div class="quiz-options">
+                            <button class="quiz-option" type="button">save(student) when student.getId() matches an existing document</button>
+                            <button class="quiz-option" type="button">updateStudent(student)</button>
+                            <button class="quiz-option" type="button">modify(student)</button>
+                            <button class="quiz-option" type="button">db.update(student)</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <!-- STEP 6: Service Layer & Business Logic -->
+                <section class="step-view" data-title="Service Layer">
+                    <div class="step-header">
+                        <span class="step-kicker">Step 06 / 10</span>
+                        <h1>Implement the Service Layer</h1>
+                        <p class="lede">
+                            Encapsulate business logic, data validation, and database operations in a dedicated
+                            <code>StudentService</code> class.
+                        </p>
+                        <div class="objective">
+                            🎯 Goal: Implement create, read, update, delete, and search methods while enforcing business rules
+                            and throwing domain-specific exceptions.
+                        </div>
+                    </div>
+
+                    <h2>1. Custom Exception Class</h2>
+                    <p>Create <code>src/main/java/com/example/studentmongodb/exception/ResourceNotFoundException.java</code>:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code class="language-java">package com.example.studentmongodb.exception;
+
+public class ResourceNotFoundException extends RuntimeException {
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
+}</code></pre>
+                    </div>
+
+                    <h2>2. Complete <code>StudentService.java</code> Implementation</h2>
+                    <p>Create <code>src/main/java/com/example/studentmongodb/service/StudentService.java</code>:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code class="language-java">package com.example.studentmongodb.service;
+
+import com.example.studentmongodb.exception.ResourceNotFoundException;
+import com.example.studentmongodb.model.Student;
+import com.example.studentmongodb.repository.StudentRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class StudentService {
+
+    private final StudentRepository studentRepository;
+
+    // Dependency Injection via constructor
+    public StudentService(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
+    }
+
+    // CREATE: Save a new student with validation
+    public Student createStudent(Student student) {
+        // Prevent duplicate roll numbers
+        if (studentRepository.findByRollNumber(student.getRollNumber()).isPresent()) {
+            throw new IllegalArgumentException("Student with roll number " + student.getRollNumber() + " already exists!");
+        }
+
+        // Prevent duplicate emails
+        if (studentRepository.findByEmail(student.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Student with email " + student.getEmail() + " already exists!");
+        }
+
+        // Ensure id is null so MongoDB generates a fresh ObjectId
+        student.setId(null);
+        return studentRepository.save(student);
+    }
+
+    // READ ALL: Retrieve every student document
+    public List&lt;Student&gt; getAllStudents() {
+        return studentRepository.findAll();
+    }
+
+    // READ ONE: Retrieve student by ID or throw 404
+    public Student getStudentById(String id) {
+        return studentRepository.findById(id)
+                .orElseThrow(() -&gt; new ResourceNotFoundException("Student not found with ID: " + id));
+    }
+
+    // UPDATE: Modify an existing student
+    public Student updateStudent(String id, Student updatedData) {
+        Student existing = getStudentById(id);
+
+        // Check if updating to an email already taken by someone else
+        studentRepository.findByEmail(updatedData.getEmail()).ifPresent(found -&gt; {
+            if (!found.getId().equals(existing.getId())) {
+                throw new IllegalArgumentException("Email " + updatedData.getEmail() + " is already in use by another student!");
+            }
+        });
+
+        // Update fields
+        existing.setFirstName(updatedData.getFirstName());
+        existing.setLastName(updatedData.getLastName());
+        existing.setEmail(updatedData.getEmail());
+        existing.setCourse(updatedData.getCourse());
+        existing.setGpa(updatedData.getGpa());
+        if (updatedData.getSkills() != null) {
+            existing.setSkills(updatedData.getSkills());
+        }
+
+        return studentRepository.save(existing);
+    }
+
+    // DELETE: Remove student by ID
+    public void deleteStudent(String id) {
+        Student student = getStudentById(id);
+        studentRepository.delete(student);
+    }
+
+    // SEARCH: Filter by Course
+    public List&lt;Student&gt; getStudentsByCourse(String course) {
+        return studentRepository.findByCourseIgnoreCase(course);
+    }
+
+    // SEARCH: Filter by minimum GPA
+    public List&lt;Student&gt; getStudentsByMinGpa(Double minGpa) {
+        return studentRepository.findByGpaGreaterThanEqual(minGpa);
+    }
+
+    // SEARCH: Filter by Skill
+    public List&lt;Student&gt; getStudentsBySkill(String skill) {
+        return studentRepository.findBySkill(skill);
+    }
+}</code></pre>
+                    </div>
+
+                    <div class="callout tip">
+                        <span class="label">BEST PRACTICE</span>
+                        Notice constructor injection: <code>public StudentService(StudentRepository studentRepository)</code>.
+                        In modern Spring Boot, field injection (<code>@Autowired private StudentRepository repo;</code>) is
+                        discouraged because constructor injection enables clean unit testing and immutable fields.
+                    </div>
+                </section>
+
+                <!-- STEP 7: REST Controller & CRUD Endpoints -->
+                <section class="step-view" data-title="REST Controller &amp; CRUD">
+                    <div class="step-header">
+                        <span class="step-kicker">Step 07 / 10</span>
+                        <h1>Create the REST Controller</h1>
+                        <p class="lede">
+                            Expose HTTP endpoints to create, fetch, update, and delete students using Spring MVC
+                            annotations and HTTP status codes.
+                        </p>
+                        <div class="objective">
+                            🎯 Goal: Build <code>StudentController.java</code> with full REST conventions: 201 Created, 200 OK,
+                            and 204 No Content.
+                        </div>
+                    </div>
+
+                    <h2>REST API Endpoint Specifications</h2>
+                    <table class="comparison">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Endpoint URL</th>
+                                <th>Status Code</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="http-badge post">POST</span></td>
+                                <td><code>/api/students</code></td>
+                                <td><code>201 CREATED</code></td>
+                                <td>Create a new student document</td>
+                            </tr>
+                            <tr>
+                                <td><span class="http-badge get">GET</span></td>
+                                <td><code>/api/students</code></td>
+                                <td><code>200 OK</code></td>
+                                <td>Retrieve all students</td>
+                            </tr>
+                            <tr>
+                                <td><span class="http-badge get">GET</span></td>
+                                <td><code>/api/students/{id}</code></td>
+                                <td><code>200 OK</code></td>
+                                <td>Retrieve student by MongoDB ID</td>
+                            </tr>
+                            <tr>
+                                <td><span class="http-badge get">GET</span></td>
+                                <td><code>/api/students/search?course=...</code></td>
+                                <td><code>200 OK</code></td>
+                                <td>Filter students by course or min GPA</td>
+                            </tr>
+                            <tr>
+                                <td><span class="http-badge put">PUT</span></td>
+                                <td><code>/api/students/{id}</code></td>
+                                <td><code>200 OK</code></td>
+                                <td>Update existing student</td>
+                            </tr>
+                            <tr>
+                                <td><span class="http-badge delete">DELETE</span></td>
+                                <td><code>/api/students/{id}</code></td>
+                                <td><code>204 NO CONTENT</code></td>
+                                <td>Delete student document</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Complete <code>StudentController.java</code> Code</h2>
+                    <p>Create <code>src/main/java/com/example/studentmongodb/controller/StudentController.java</code>:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code class="language-java">package com.example.studentmongodb.controller;
+
+import com.example.studentmongodb.model.Student;
+import com.example.studentmongodb.service.StudentService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/students")
+@CrossOrigin(origins = "*") // Allows calls from frontend apps
+public class StudentController {
+
+    private final StudentService studentService;
+
+    public StudentController(StudentService studentService) {
+        this.studentService = studentService;
+    }
+
+    // 1. CREATE: POST /api/students
+    @PostMapping
+    public ResponseEntity&lt;Student&gt; createStudent(@Valid @RequestBody Student student) {
+        Student created = studentService.createStudent(student);
+        return new ResponseEntity&lt;&gt;(created, HttpStatus.CREATED);
+    }
+
+    // 2. READ ALL: GET /api/students
+    @GetMapping
+    public ResponseEntity&lt;List&lt;Student&gt;&gt; getAllStudents() {
+        List&lt;Student&gt; students = studentService.getAllStudents();
+        return ResponseEntity.ok(students);
+    }
+
+    // 3. READ ONE: GET /api/students/{id}
+    @GetMapping("/{id}")
+    public ResponseEntity&lt;Student&gt; getStudentById(@PathVariable String id) {
+        Student student = studentService.getStudentById(id);
+        return ResponseEntity.ok(student);
+    }
+
+    // 4. SEARCH / FILTER: GET /api/students/search?course=Computer%20Science&amp;minGpa=3.5
+    @GetMapping("/search")
+    public ResponseEntity&lt;List&lt;Student&gt;&gt; searchStudents(
+            @RequestParam(required = false) String course,
+            @RequestParam(required = false) Double minGpa,
+            @RequestParam(required = false) String skill) {
+
+        if (course != null) {
+            return ResponseEntity.ok(studentService.getStudentsByCourse(course));
+        } else if (minGpa != null) {
+            return ResponseEntity.ok(studentService.getStudentsByMinGpa(minGpa));
+        } else if (skill != null) {
+            return ResponseEntity.ok(studentService.getStudentsBySkill(skill));
+        }
+        return ResponseEntity.ok(studentService.getAllStudents());
+    }
+
+    // 5. UPDATE: PUT /api/students/{id}
+    @PutMapping("/{id}")
+    public ResponseEntity&lt;Student&gt; updateStudent(
+            @PathVariable String id,
+            @Valid @RequestBody Student student) {
+        Student updated = studentService.updateStudent(id, student);
+        return ResponseEntity.ok(updated);
+    }
+
+    // 6. DELETE: DELETE /api/students/{id}
+    @DeleteMapping("/{id}")
+    public ResponseEntity&lt;Void&gt; deleteStudent(@PathVariable String id) {
+        studentService.deleteStudent(id);
+        return ResponseEntity.noContent().build();
+    }
+}</code></pre>
+                    </div>
+
+                    <h2>Annotation Recap</h2>
+                    <div class="grid-3">
+                        <div class="concept">
+                            <strong>@RestController</strong>
+                            <p>Combines <code>@Controller</code> and <code>@ResponseBody</code> so every method return
+                                value is automatically serialized into JSON.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>@Valid</strong>
+                            <p>Enforces the validation annotations on <code>Student</code> (such as <code>@NotBlank</code>
+                                and <code>@Email</code>). If invalid, Spring automatically returns a 400 Bad Request.</p>
+                        </div>
+                        <div class="concept">
+                            <strong>@PathVariable vs @RequestParam</strong>
+                            <p><code>@PathVariable</code> extracts values embedded in the URI path (<code>/api/students/123</code>).
+                                <code>@RequestParam</code> reads query parameters (<code>?course=CS</code>).</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 8: Global Exception Handling -->
+                <section class="step-view" data-title="Global Exception Handling">
+                    <div class="step-header">
+                        <span class="step-kicker">Step 08 / 10</span>
+                        <h1>Global Exception Handling</h1>
+                        <p class="lede">
+                            Transform unhandled exceptions into uniform, developer-friendly JSON error payloads
+                            using <code>@RestControllerAdvice</code>.
+                        </p>
+                        <div class="objective">
+                            🎯 Goal: Return consistent HTTP 404, 400, and 500 error responses with timestamps and descriptive
+                            messages instead of raw stack traces.
+                        </div>
+                    </div>
+
+                    <h2>1. Standard Error DTO</h2>
+                    <p>Create <code>src/main/java/com/example/studentmongodb/exception/ErrorResponse.java</code>:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code class="language-java">package com.example.studentmongodb.exception;
+
+import java.time.LocalDateTime;
+
+public class ErrorResponse {
+    private LocalDateTime timestamp;
+    private int status;
+    private String error;
+    private String message;
+    private String path;
+
+    public ErrorResponse(int status, String error, String message, String path) {
+        this.timestamp = LocalDateTime.now();
+        this.status = status;
+        this.error = error;
+        this.message = message;
+        this.path = path;
+    }
+
+    // Getters and Setters
+    public LocalDateTime getTimestamp() { return timestamp; }
+    public int getStatus() { return status; }
+    public String getError() { return error; }
+    public String getMessage() { return message; }
+    public String getPath() { return path; }
+}</code></pre>
+                    </div>
+
+                    <h2>2. Complete <code>GlobalExceptionHandler.java</code></h2>
+                    <p>Create <code>src/main/java/com/example/studentmongodb/exception/GlobalExceptionHandler.java</code>:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code class="language-java">package com.example.studentmongodb.exception;
+
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    // 1. Handle ResourceNotFoundException -> 404 NOT FOUND
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity&lt;&gt;(error, HttpStatus.NOT_FOUND);
+    }
+
+    // 2. Handle IllegalArgumentException (Duplicates, bad state) -> 400 BAD REQUEST
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleBadRequest(IllegalArgumentException ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity&lt;&gt;(error, HttpStatus.BAD_REQUEST);
+    }
+
+    // 3. Handle Bean Validation Errors (@Valid failure) -> 400 BAD REQUEST
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        Map&lt;String, String&gt; validationErrors = new HashMap&lt;&gt;();
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            validationErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+
+        Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("error", "Validation Failed");
+        response.put("details", validationErrors);
+        response.put("path", request.getRequestURI());
+
+        return new ResponseEntity&lt;&gt;(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // 4. Generic Fallback -> 500 INTERNAL SERVER ERROR
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleGeneralException(Exception ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity&lt;&gt;(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}</code></pre>
+                    </div>
+                </section>
+
+                <!-- STEP 9: Testing CRUD API -->
+                <section class="step-view" data-title="Testing CRUD with cURL &amp; Postman">
+                    <div class="step-header">
+                        <span class="step-kicker">Step 09 / 10</span>
+                        <h1>Testing CRUD Operations &amp; MongoDB Verification</h1>
+                        <p class="lede">
+                            Run your Spring Boot application and execute end-to-end CRUD tests using cURL or Postman.
+                            Then inspect the saved BSON documents directly in MongoDB!
+                        </p>
+                        <div class="objective">
+                            🎯 Goal: Start the application, perform Create, Read, Update, and Delete requests, and inspect
+                            the MongoDB collection in <code>mongosh</code> or MongoDB Compass.
+                        </div>
+                    </div>
+
+                    <h2>1. Start the Application</h2>
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code class="language-bash"># In the project root directory:
+./mvnw spring-boot:run
+
+# Or run from VS Code Run &amp; Debug panel</code></pre>
+                    </div>
+                    <p>Verify console output displays: <code>Tomcat started on port 8080 (http) with context path '/'</code></p>
+
+                    <h2>2. Step-by-Step Test Scenarios</h2>
+
+                    <div class="panel">
+                        <h3>Test 1: CREATE Student (POST <code>/api/students</code>)</h3>
+                        <div class="code-wrap">
+                            <button class="copy-btn" type="button">Copy</button>
+                            <pre><code class="language-bash">curl -X POST http://localhost:8080/api/students \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rollNumber": "CS-2024-001",
+    "firstName": "Priya",
+    "lastName": "Patel",
+    "email": "priya.patel@university.edu",
+    "course": "Computer Science",
+    "gpa": 3.92,
+    "skills": ["Java", "Spring Boot", "MongoDB", "Kubernetes"]
+  }'</code></pre>
+                        </div>
+                        <p><strong>Expected Response (HTTP 201 Created):</strong></p>
+                        <div class="code-wrap">
+                            <pre><code class="language-json">{
+  "id": "6704f0a9b8e21c320914e1a0",
+  "rollNumber": "CS-2024-001",
+  "firstName": "Priya",
+  "lastName": "Patel",
+  "email": "priya.patel@university.edu",
+  "course": "Computer Science",
+  "gpa": 3.92,
+  "skills": ["Java", "Spring Boot", "MongoDB", "Kubernetes"],
+  "createdAt": "2026-10-13T07:55:00.123456"
+}</code></pre>
+                        </div>
+                        <p><em>Notice the generated 24-character hexadecimal MongoDB ObjectId in the <code>id</code> field! Copy this ID for subsequent tests.</em></p>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Test 2: GET ALL Students (GET <code>/api/students</code>)</h3>
+                        <div class="code-wrap">
+                            <button class="copy-btn" type="button">Copy</button>
+                            <pre><code class="language-bash">curl -X GET http://localhost:8080/api/students</code></pre>
+                        </div>
+                        <p>Returns a JSON array of all saved student documents with HTTP 200 OK.</p>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Test 3: GET Student by ID (GET <code>/api/students/{id}</code>)</h3>
+                        <div class="code-wrap">
+                            <button class="copy-btn" type="button">Copy</button>
+                            <pre><code class="language-bash">curl -X GET http://localhost:8080/api/students/6704f0a9b8e21c320914e1a0</code></pre>
+                        </div>
+                        <p>Returns the single student document matching that ID with HTTP 200 OK.</p>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Test 4: UPDATE Student (PUT <code>/api/students/{id}</code>)</h3>
+                        <div class="code-wrap">
+                            <button class="copy-btn" type="button">Copy</button>
+                            <pre><code class="language-bash">curl -X PUT http://localhost:8080/api/students/6704f0a9b8e21c320914e1a0 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rollNumber": "CS-2024-001",
+    "firstName": "Priya",
+    "lastName": "Patel",
+    "email": "priya.patel@university.edu",
+    "course": "Artificial Intelligence",
+    "gpa": 3.98,
+    "skills": ["Java", "Spring Boot", "MongoDB", "Kubernetes", "PyTorch"]
+  }'</code></pre>
+                        </div>
+                        <p>Returns the updated student document with HTTP 200 OK.</p>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Test 5: FILTER Students by Course (GET <code>/api/students/search?course=...</code>)</h3>
+                        <div class="code-wrap">
+                            <button class="copy-btn" type="button">Copy</button>
+                            <pre><code class="language-bash">curl -X GET "http://localhost:8080/api/students/search?course=Artificial%20Intelligence"</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Test 6: DELETE Student (DELETE <code>/api/students/{id}</code>)</h3>
+                        <div class="code-wrap">
+                            <button class="copy-btn" type="button">Copy</button>
+                            <pre><code class="language-bash">curl -i -X DELETE http://localhost:8080/api/students/6704f0a9b8e21c320914e1a0</code></pre>
+                        </div>
+                        <p>Returns <strong>HTTP/1.1 204 No Content</strong> with an empty body.</p>
+                    </div>
+
+                    <div class="panel pink">
+                        <h3>Test 7: Verify 404 Error Handling</h3>
+                        <p>Try fetching the deleted ID again:</p>
+                        <div class="code-wrap">
+                            <button class="copy-btn" type="button">Copy</button>
+                            <pre><code class="language-bash">curl -X GET http://localhost:8080/api/students/6704f0a9b8e21c320914e1a0</code></pre>
+                        </div>
+                        <p><strong>Expected Error JSON (HTTP 404 Not Found):</strong></p>
+                        <div class="code-wrap">
+                            <pre><code class="language-json">{
+  "timestamp": "2026-10-13T07:56:12.451",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Student not found with ID: 6704f0a9b8e21c320914e1a0",
+  "path": "/api/students/6704f0a9b8e21c320914e1a0"
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <h2>3. Verifying Documents in MongoDB Directly</h2>
+                    <p>Open <code>mongosh</code> or MongoDB Compass to see the underlying BSON documents stored in your database:</p>
+
+                    <div class="code-wrap">
+                        <button class="copy-btn" type="button">Copy</button>
+                        <pre><code class="language-javascript">// In mongosh:
+use studentdb
+
+// Show all collections
+show collections
+// -> students
+
+// Query documents
+db.students.find().pretty()
+
+// Count documents
+db.students.countDocuments()</code></pre>
+                    </div>
+                </section>
+
+                <!-- STEP 10: Summary & Exercises -->
+                <section class="step-view" data-title="Review &amp; Exercises">
+                    <div class="step-header">
+                        <span class="step-kicker">Step 10 / 10</span>
+                        <h1>Key Takeaways &amp; Practice Challenges</h1>
+                        <p class="lede">
+                            Consolidate your understanding of Spring Boot with MongoDB, compare it with Hibernate/JPA,
+                            and tackle advanced exercises.
+                        </p>
+                        <div class="objective">
+                            🎯 Goal: Review key concepts, test your comprehension, and complete independent practice challenges.
+                        </div>
+                    </div>
+
+                    <h2>Comparison: Spring Data JPA vs Spring Data MongoDB</h2>
+                    <table class="comparison">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Spring Data JPA (Hibernate)</th>
+                                <th>Spring Data MongoDB</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Primary Annotation</td>
+                                <td><code>@Entity</code>, <code>@Table</code></td>
+                                <td><code>@Document(collection = "...")</code></td>
+                            </tr>
+                            <tr>
+                                <td>Identifier</td>
+                                <td><code>@Id @GeneratedValue(strategy = ...) Long id;</code></td>
+                                <td><code>@Id String id;</code> (BSON ObjectId)</td>
+                            </tr>
+                            <tr>
+                                <td>Repository Base</td>
+                                <td><code>JpaRepository&lt;Entity, Long&gt;</code></td>
+                                <td><code>MongoRepository&lt;Entity, String&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td>Query Language</td>
+                                <td>HQL / JPQL / Native SQL</td>
+                                <td>MongoDB JSON query syntax (<code>@Query</code>)</td>
+                            </tr>
+                            <tr>
+                                <td>Arrays / Lists</td>
+                                <td>Requires <code>@ElementCollection</code> or <code>@OneToMany</code></td>
+                                <td>Native embedded arrays directly in document</td>
+                            </tr>
+                            <tr>
+                                <td>Database Schema</td>
+                                <td>Strict tables and foreign keys</td>
+                                <td>Dynamic schema, nested subdocuments</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Student Self-Check List</h2>
+                    <ul class="checklist">
+                        <li>I can explain the difference between a SQL table and a MongoDB collection.</li>
+                        <li>I can configure <code>spring.data.mongodb.uri</code> in <code>application.properties</code>.</li>
+                        <li>I know why <code>id</code> is defined as a <code>String</code> to hold MongoDB <code>ObjectId</code>.</li>
+                        <li>I can annotate a model with <code>@Document</code>, <code>@Id</code>, <code>@Indexed</code>, and <code>@Field</code>.</li>
+                        <li>I can create a repository by extending <code>MongoRepository&lt;Student, String&gt;</code>.</li>
+                        <li>I can write derived finder methods like <code>findByCourseIgnoreCase</code>.</li>
+                        <li>I can build a layered service with duplicate validation and 404 handling.</li>
+                        <li>I can implement standard HTTP status codes: 201 Created, 200 OK, 204 No Content, and 404 Not Found.</li>
+                        <li>I can use cURL or Postman to test complete CRUD flows.</li>
+                    </ul>
+
+                    <h2>Frequently Asked Questions</h2>
+                    <details class="reveal">
+                        <summary>Why didn't we use @GeneratedValue for the ID field?</summary>
+                        <div>
+                            In MongoDB, when a document is saved with a null <code>id</code>, the MongoDB driver automatically
+                            creates a unique 12-byte <code>ObjectId</code> and assigns it to <code>_id</code>. Spring Data MongoDB
+                            automatically detects this and assigns the generated hexadecimal string back to your entity.
+                        </div>
+                    </details>
+
+                    <details class="reveal">
+                        <summary>How do embedded sub-documents work in MongoDB?</summary>
+                        <div>
+                            Unlike relational tables that require foreign keys, you can define another Java class (e.g., <code>Address</code>
+                            with <code>street</code>, <code>city</code>, <code>zipCode</code>) and include it as a field inside <code>Student</code>:
+                            <code>private Address address;</code>. Spring Data will serialize it directly as a nested JSON object!
+                        </div>
+                    </details>
+
+                    <details class="reveal">
+                        <summary>What is the difference between MongoRepository and MongoTemplate?</summary>
+                        <div>
+                            <code>MongoRepository</code> provides high-level declarative CRUD and derived queries with zero boilerplate.
+                            <code>MongoTemplate</code> is Spring's lower-level fluent template that offers fine-grained control over complex
+                            aggregations, bulk operations, partial updates (<code>$set</code>, <code>$inc</code>), and custom criteria.
+                        </div>
+                    </details>
+
+                    <div class="challenge">
+                        <h3>Hands-On Practice Challenges</h3>
+                        <ol>
+                            <li><strong>Add an Embedded Address Sub-document:</strong> Create an <code>Address</code> class with <code>city</code>, <code>state</code>, and <code>pincode</code>, embed it inside <code>Student</code>, and update your REST endpoints to support it.</li>
+                            <li><strong>Add Pagination &amp; Sorting:</strong> Modify <code>getAllStudents()</code> to accept <code>Pageable pageable</code> so clients can request <code>/api/students?page=0&amp;size=5&amp;sort=gpa,desc</code>.</li>
+                            <li><strong>Implement Skill Search:</strong> Create an endpoint <code>GET /api/students/skill/{skillName}</code> that uses the <code>findBySkill</code> method to retrieve students proficient in a given skill.</li>
+                            <li><strong>Soft Delete Flag:</strong> Instead of deleting the document permanently, add a <code>boolean active = true</code> field to <code>Student</code> and modify the delete operation to set <code>active = false</code>.</li>
+                        </ol>
+                    </div>
+
+                    <div class="finish">
+                        <h2>Congratulations! You Mastered Spring Boot + MongoDB! 🚀</h2>
+                        <p>
+                            You have built a complete, production-grade Spring Boot 3 REST API powered by MongoDB.
+                            You understand the NoSQL document paradigm, repository interfaces, clean service-layer architecture,
+                            and how to write, update, and query documents without SQL.
+                        </p>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        (() => {
+            const steps = [...document.querySelectorAll('.step-view')];
+            const titles = steps.map(step => step.dataset.title);
+            const nav = document.getElementById('stepNav');
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menuBtn');
+            const content = document.getElementById('content');
+            const completed = new Set();
+            let current = 0;
+
+            // Generate Sidebar Navigation
+            nav.innerHTML = titles.map((title, index) => `
+                <button class="step-link" data-step="${index}" type="button">
+                    <span class="step-number">${String(index + 1).padStart(2, '0')}</span>
+                    <span>${title}</span>
+                    <span class="step-status" aria-hidden="true"></span>
+                </button>
+            `).join('');
+
+            const getHashStep = () => {
+                const match = location.hash.match(/^#step-(\d+)$/);
+                const value = match ? Number(match[1]) - 1 : 0;
+                return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+            };
+
+            function render(updateHash = true) {
+                current = Math.max(0, Math.min(current, steps.length - 1));
+
+                // Toggle step view
+                steps.forEach((step, index) => {
+                    const active = index === current;
+                    step.classList.toggle('active', active);
+                    step.setAttribute('aria-hidden', String(!active));
+                });
+
+                // Update sidebar links
+                document.querySelectorAll('.step-link').forEach((button, index) => {
+                    const active = index === current;
+                    button.classList.toggle('active', active);
+                    button.setAttribute('aria-current', active ? 'step' : 'false');
+                    button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '';
+                });
+
+                // Update progress bar
+                const percent = Math.round(((current + 1) / steps.length) * 100);
+                document.getElementById('progressBar').style.width = `${percent}%`;
+                document.getElementById('progressText').textContent = `${percent}%`;
+                document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+
+                // Mobile Title
+                document.getElementById('mobileTitle').textContent = titles[current];
+
+                // Update Buttons
+                document.getElementById('prevBtn').disabled = current === 0;
+                document.getElementById('nextBtn').disabled = current === steps.length - 1;
+                document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Finish Lab 🎉' : 'Next Step →';
+
+                if (updateHash) {
+                    history.pushState({ step: current }, '', `#step-${current + 1}`);
+                }
+
+                window.scrollTo({ top: 0, behavior: 'auto' });
+                sidebar.classList.remove('open');
+                menuBtn.setAttribute('aria-expanded', 'false');
+            }
+
+            function goTo(index) {
+                if (index < 0 || index >= steps.length) return;
+                completed.add(current);
+                current = index;
+                render();
+            }
+
+            // Create Bottom Navigation Bar
+            const navRow = document.createElement('div');
+            navRow.className = 'nav-row';
+            navRow.innerHTML = `
+                <button class="nav-btn" id="prevBtn" type="button">← Previous</button>
+                <button class="nav-btn primary" id="nextBtn" type="button">Next Step →</button>
+            `;
+            content.appendChild(navRow);
+
+            document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                if (current < steps.length - 1) {
+                    goTo(current + 1);
+                } else {
+                    completed.add(current);
+                    render(false);
+                }
+            });
+
+            nav.addEventListener('click', event => {
+                const button = event.target.closest('.step-link');
+                if (button) goTo(Number(button.dataset.step));
+            });
+
+            menuBtn.addEventListener('click', () => {
+                const open = sidebar.classList.toggle('open');
+                menuBtn.setAttribute('aria-expanded', String(open));
+            });
+
+            // Interactive Copy Buttons & Quizzes
+            document.addEventListener('click', async event => {
+                const copy = event.target.closest('.copy-btn');
+                if (copy) {
+                    const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+                    try {
+                        await navigator.clipboard.writeText(code);
+                        copy.textContent = 'Copied!';
+                    } catch {
+                        copy.textContent = 'Select & copy';
+                    }
+                    setTimeout(() => copy.textContent = 'Copy', 1500);
+                    return;
+                }
+
+                const option = event.target.closest('.quiz-option');
+                if (option) {
+                    const quiz = option.closest('.quiz');
+                    if (quiz.dataset.answered) return;
+                    const options = [...quiz.querySelectorAll('.quiz-option')];
+                    const choice = options.indexOf(option);
+                    const answer = Number(quiz.dataset.answer);
+
+                    quiz.dataset.answered = 'true';
+                    options.forEach(button => button.disabled = true);
+                    option.classList.add(choice === answer ? 'correct' : 'wrong');
+                    if (choice !== answer) options[answer].classList.add('correct');
+
+                    const feedback = quiz.querySelector('.quiz-feedback');
+                    feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
+                    feedback.classList.add('show');
+                }
+            });
+
+            window.addEventListener('popstate', () => { current = getHashStep(); render(false); });
+            window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', event => {
+                if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+                if (event.key === 'ArrowRight') goTo(current + 1);
+                if (event.key === 'ArrowLeft') goTo(current - 1);
+            });
+
+            current = getHashStep();
+            render(false);
+        })();
+    </script>
+</body>
+
+</html>

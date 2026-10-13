@@ -1,0 +1,3633 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search — Tere Rang | Modern Fashion</title>
+  <meta name="description"
+    content="Search the Tere Rang collection. Discover dresses, co-ords, ethnic sets, outerwear and accessories by size, collections and price." />
+  <link rel="icon" href="logo.png" />
+
+  <!-- Google Fonts matching index.html -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #1f1420;
+      --muted: #716773;
+      --paper: #fffafc;
+      --white: #ffffff;
+      --pink: #d4008a;
+      --pink-2: #f63a98;
+      --wine: #8a0b72;
+      --blue: #25a9e0;
+      --lime: #c8e534;
+      --yellow: #f5d832;
+      --lav: #7f59c7;
+      --line: rgba(31, 20, 32, .12);
+      --line-light: rgba(31, 20, 32, .06);
+      --shadow: 0 24px 70px rgba(94, 23, 78, .10);
+      --shadow-sm: 0 8px 30px rgba(31, 20, 32, .06);
+      --shadow-lg: 0 30px 90px rgba(31, 20, 32, .15);
+      --ease: cubic-bezier(.22, 1, .36, 1);
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-full: 999px;
+      --nav-h: 81px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    body.no-scroll {
+      overflow: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      background: transparent;
+      border: 0;
+    }
+
+    .container {
+      width: min(1380px, calc(100% - 48px));
+      margin-inline: auto;
+    }
+
+    .kicker {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--wine);
+    }
+
+    h1,
+    h2,
+    h3,
+    .display {
+      font-family: "Playfair Display", Georgia, serif;
+      font-weight: 500;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    /* ---------- Announcement Bar ---------- */
+    .announce {
+      background: var(--ink);
+      color: white;
+      font-size: 12px;
+      letter-spacing: .06em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 4px 16px;
+      text-align: center;
+      gap: 12px;
+    }
+
+    .announce a {
+      color: var(--pink-2);
+      text-decoration: underline;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    /* ---------- Navigation ---------- */
+    .nav-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      background: rgba(255, 250, 252, .88);
+      backdrop-filter: saturate(160%) blur(16px);
+      border-bottom: 1px solid var(--line);
+      transition: .3s var(--ease);
+    }
+
+    .nav-wrap.scrolled {
+      background: rgba(255, 250, 252, .96);
+      box-shadow: 0 10px 40px rgba(31, 20, 32, .05);
+    }
+
+    .nav {
+      min-height: 80px;
+      display: grid;
+      grid-template-columns: 200px 1fr auto;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo img {
+      width: 172px;
+      height: auto;
+    }
+
+    .nav-center {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      font-size: 14px;
+      transition: opacity .3s var(--ease), transform .3s var(--ease);
+    }
+
+    .nav-link {
+      position: relative;
+      padding: 28px 0;
+      color: var(--ink);
+      font-weight: 500;
+      transition: color .2s var(--ease);
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--pink);
+    }
+
+    .nav-link:after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 20px;
+      width: 100%;
+      height: 2px;
+      background: var(--pink);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform .3s var(--ease);
+    }
+
+    .nav-link:hover:after,
+    .nav-link.active:after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    /* Compact search that replaces nav links when hero search scrolls away */
+    .nav-search {
+      position: absolute;
+      inset: 50% 0 auto;
+      transform: translateY(-50%) translateY(8px);
+      width: min(560px, 100%);
+      margin-inline: auto;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s var(--ease), transform .3s var(--ease);
+    }
+
+    .nav-search-field {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 46px;
+      padding: 0 8px 0 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-sm);
+      transition: .25s var(--ease);
+    }
+
+    .nav-search-field:focus-within {
+      border-color: rgba(212, 0, 138, .45);
+      box-shadow: 0 0 0 5px rgba(212, 0, 138, .08);
+    }
+
+    .nav-search-field svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      color: var(--muted);
+    }
+
+    .nav-search-field input {
+      flex: 1;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      font-size: 14px;
+      min-width: 0;
+    }
+
+    .nav-search-field button {
+      height: 32px;
+      padding: 0 14px;
+      border-radius: var(--radius-full);
+      background: var(--ink);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      transition: .2s var(--ease);
+    }
+
+    .nav-search-field button:hover {
+      background: var(--pink);
+    }
+
+    body.compact .nav-links {
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+    }
+
+    body.compact .nav-search {
+      opacity: 1;
+      transform: translateY(-50%);
+      pointer-events: auto;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      position: relative;
+      color: var(--ink);
+      transition: .25s var(--ease);
+    }
+
+    .icon-btn:hover,
+    .icon-btn.active {
+      background: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(31, 20, 32, .08);
+    }
+
+    .icon-btn.active {
+      color: var(--pink);
+    }
+
+    .icon-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 1.6;
+    }
+
+    .badge {
+      position: absolute;
+      right: 2px;
+      top: 2px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 50%;
+      background: var(--pink);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--paper);
+      transition: transform .3s var(--ease);
+    }
+
+    .badge.bump {
+      transform: scale(1.35);
+    }
+
+    .badge[hidden] {
+      display: none;
+    }
+
+    .menu-btn {
+      display: none;
+    }
+
+    /* ---------- Mega Menu ---------- */
+    .mega {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: .28s var(--ease);
+      background: #fff;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .mega.open {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+
+    .mega-inner {
+      width: min(1320px, calc(100% - 48px));
+      margin: auto;
+      padding: 34px 0 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.2fr;
+      gap: 48px;
+    }
+
+    .mega h4 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      margin-bottom: 16px;
+      color: var(--wine);
+    }
+
+    .mega a {
+      display: block;
+      padding: 8px 0;
+      color: var(--muted);
+      font-size: 14px;
+      transition: color .2s var(--ease);
+    }
+
+    .mega a:hover {
+      color: var(--pink);
+    }
+
+    .mega-card {
+      min-height: 190px;
+      border-radius: 6px;
+      background:
+        linear-gradient(180deg, transparent 35%, rgba(18, 7, 18, .78)),
+        url('https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1000&q=86') center/cover;
+      display: flex;
+      align-items: flex-end;
+      padding: 24px;
+      color: white !important;
+    }
+
+    /* ---------- Search Hero ---------- */
+    .search-hero {
+      position: relative;
+      z-index: 45;
+      padding: 40px 0 44px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-inner {
+      position: relative;
+      text-align: center;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      list-style: none;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .breadcrumbs li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .breadcrumbs a:hover {
+      color: var(--pink);
+      text-decoration: underline;
+    }
+
+    .breadcrumbs .sep {
+      color: rgba(31, 20, 32, .3);
+      font-size: 10px;
+    }
+
+    .hero-title {
+      font-size: clamp(38px, 5.2vw, 68px);
+      line-height: 1.05;
+      letter-spacing: -.03em;
+      margin: 10px 0 12px;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--pink);
+      padding-right: 4px;
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* Search Box */
+    .search-box {
+      position: relative;
+      max-width: 820px;
+      margin: 28px auto 0;
+      text-align: left;
+    }
+
+    .search-field {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 64px;
+      padding: 0 10px 0 24px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-sm);
+      transition: border-color .25s var(--ease), box-shadow .25s var(--ease);
+    }
+
+    .search-field:focus-within {
+      border-color: rgba(212, 0, 138, .45);
+      box-shadow: 0 0 0 5px rgba(212, 0, 138, .08), var(--shadow-sm);
+    }
+
+    .search-field>svg {
+      width: 22px;
+      height: 22px;
+      color: var(--pink);
+      flex-shrink: 0;
+    }
+
+    .search-field input {
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      font-size: 17px;
+      letter-spacing: -.01em;
+    }
+
+    .search-field input::placeholder {
+      color: #a99fab;
+    }
+
+    .search-field input::-webkit-search-cancel-button {
+      display: none;
+    }
+
+    .clear-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      background: var(--line-light);
+      transition: .2s var(--ease);
+      opacity: 0;
+      transform: scale(.6);
+      pointer-events: none;
+    }
+
+    .clear-btn.show {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    .clear-btn:hover {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .kbd {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      padding: 2px 8px;
+      background: var(--paper);
+    }
+
+    .search-submit {
+      height: 46px;
+      padding: 0 24px;
+      border-radius: var(--radius-full);
+      background: var(--ink);
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: .02em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background .25s var(--ease), transform .25s var(--ease), box-shadow .25s var(--ease);
+    }
+
+    .search-submit:hover {
+      background: var(--pink);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(212, 0, 138, .25);
+    }
+
+    /* Suggestion Panel */
+    .suggest {
+      position: absolute;
+      top: calc(100% + 12px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow-lg);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 32px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-6px);
+      transition: .25s var(--ease);
+      z-index: 50;
+    }
+
+    .suggest.open {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+
+    .sg-col h4 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-family: "DM Sans", sans-serif;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--wine);
+      margin-bottom: 10px;
+    }
+
+    .sg-col h4 button {
+      font-size: 11px;
+      letter-spacing: .04em;
+      text-transform: none;
+      color: var(--muted);
+      text-decoration: underline;
+    }
+
+    .sg-col h4 button:hover {
+      color: var(--pink);
+    }
+
+    .sg-col+.sg-col {
+      border-left: 1px solid var(--line-light);
+      padding-left: 32px;
+    }
+
+    .sg-block+.sg-block {
+      margin-top: 20px;
+    }
+
+    .sg-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 10px;
+      font-size: 14px;
+      text-align: left;
+      color: var(--ink);
+      transition: background .15s var(--ease), color .15s var(--ease);
+    }
+
+    .sg-item svg {
+      width: 16px;
+      height: 16px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .sg-item .sg-meta {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .sg-item .sg-remove {
+      margin-left: auto;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      color: var(--muted);
+      opacity: 0;
+      transition: .15s;
+    }
+
+    .sg-item:hover .sg-remove {
+      opacity: 1;
+    }
+
+    .sg-item .sg-remove:hover {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .sg-item:hover,
+    .sg-item.active {
+      background: rgba(212, 0, 138, .06);
+      color: var(--pink);
+    }
+
+    .sg-item:hover svg,
+    .sg-item.active svg {
+      color: var(--pink);
+    }
+
+    .sg-item mark,
+    mark {
+      background: linear-gradient(transparent 58%, rgba(246, 58, 152, .28) 58%);
+      color: inherit;
+      font-weight: 700;
+    }
+
+    .sg-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .sg-prod {
+      display: grid;
+      grid-template-columns: 52px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 8px;
+    }
+
+    .sg-prod img {
+      width: 52px;
+      height: 66px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: #f7f3f5;
+    }
+
+    .sg-prod-name {
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 1.3;
+    }
+
+    .sg-prod-cat {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .sg-prod-price {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--ink);
+    }
+
+    .sg-all {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      width: 100%;
+      transition: .2s var(--ease);
+    }
+
+    .sg-all:hover,
+    .sg-all.active {
+      background: var(--pink);
+    }
+
+    .sg-empty {
+      font-size: 13px;
+      color: var(--muted);
+      padding: 6px 10px;
+    }
+
+    /* Trending row */
+    .trending {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+      font-size: 13px;
+    }
+
+    .trending-label {
+      color: var(--muted);
+      font-weight: 600;
+      margin-right: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 34px;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      transition: .22s var(--ease);
+      white-space: nowrap;
+    }
+
+    .chip:hover {
+      border-color: var(--pink);
+      color: var(--pink);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(212, 0, 138, .1);
+    }
+
+    .chip.hot::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--pink);
+    }
+
+    /* ---------- Results Toolbar ---------- */
+    .results-bar {
+      position: sticky;
+      top: var(--nav-h);
+      z-index: 40;
+      background: rgba(255, 250, 252, .92);
+      backdrop-filter: saturate(160%) blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .results-bar-inner {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .filter-toggle {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      height: 40px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-full);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      transition: .2s var(--ease);
+    }
+
+    .filter-toggle:hover {
+      border-color: var(--ink);
+    }
+
+    .filter-toggle svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .filter-toggle .ft-count {
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 10px;
+      background: var(--pink);
+      color: #fff;
+      font-size: 11px;
+      display: grid;
+      place-items: center;
+    }
+
+    .result-count {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .result-count strong {
+      color: var(--ink);
+      font-size: 16px;
+    }
+
+    .result-count em {
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+      color: var(--ink);
+      font-size: 17px;
+    }
+
+    .bar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Custom sort dropdown */
+    .sort {
+      position: relative;
+    }
+
+    .sort-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      height: 40px;
+      padding: 0 14px 0 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-full);
+      background: #fff;
+      font-size: 13px;
+      transition: .2s var(--ease);
+    }
+
+    .sort-btn:hover,
+    .sort.open .sort-btn {
+      border-color: var(--ink);
+    }
+
+    .sort-btn span {
+      color: var(--muted);
+    }
+
+    .sort-btn strong {
+      font-weight: 600;
+    }
+
+    .sort-btn svg {
+      width: 14px;
+      height: 14px;
+      transition: transform .25s var(--ease);
+    }
+
+    .sort.open .sort-btn svg {
+      transform: rotate(180deg);
+    }
+
+    .sort-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      width: 230px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow-lg);
+      padding: 6px;
+      list-style: none;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-6px);
+      transition: .22s var(--ease);
+    }
+
+    .sort.open .sort-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+
+    .sort-menu button {
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 9px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background .15s;
+    }
+
+    .sort-menu button:hover {
+      background: rgba(212, 0, 138, .06);
+    }
+
+    .sort-menu button.active {
+      color: var(--pink);
+      font-weight: 600;
+    }
+
+    .sort-menu button.active::after {
+      content: "✓";
+    }
+
+    .view-toggle {
+      display: flex;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-full);
+      padding: 3px;
+      background: #fff;
+    }
+
+    .view-toggle button {
+      width: 34px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      transition: .2s var(--ease);
+    }
+
+    .view-toggle button.active {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .view-toggle svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ---------- Layout ---------- */
+    .results-layout {
+      display: grid;
+      grid-template-columns: 264px minmax(0, 1fr);
+      gap: 44px;
+      padding: 28px 0 80px;
+      align-items: start;
+    }
+
+    /* ---------- Filters Sidebar ---------- */
+    .filters {
+      position: sticky;
+      top: calc(var(--nav-h) + 84px);
+      max-height: calc(100vh - var(--nav-h) - 104px);
+      overflow-y: auto;
+      padding-right: 6px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(31, 20, 32, .15) transparent;
+    }
+
+    .filters-head,
+    .filters-foot {
+      display: none;
+    }
+
+    .filters-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--ink);
+    }
+
+    .filters-title h2 {
+      font-size: 22px;
+    }
+
+    .link-btn {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: underline;
+      transition: color .2s;
+    }
+
+    .link-btn:hover {
+      color: var(--pink);
+    }
+
+    .f-group {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .f-head {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .f-head .f-sel {
+      margin-left: 8px;
+      font-size: 11px;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--pink);
+      font-weight: 600;
+    }
+
+    .f-head svg {
+      width: 14px;
+      height: 14px;
+      margin-left: auto;
+      transition: transform .3s var(--ease);
+    }
+
+    .f-group.collapsed .f-head svg {
+      transform: rotate(-90deg);
+    }
+
+    .f-body {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows .35s var(--ease);
+    }
+
+    .f-group.collapsed .f-body {
+      grid-template-rows: 0fr;
+    }
+
+    .f-body>div {
+      overflow: hidden;
+    }
+
+    .f-body-inner {
+      padding-bottom: 18px;
+    }
+
+    /* Checkbox option */
+    .opt {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 0;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity .2s, color .2s;
+    }
+
+    .opt:hover {
+      color: var(--pink);
+    }
+
+    .opt input,
+    .size-opt input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .opt .box {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      border: 1.5px solid rgba(31, 20, 32, .3);
+      border-radius: 5px;
+      display: grid;
+      place-items: center;
+      background: #fff;
+      transition: .2s var(--ease);
+    }
+
+    .opt .box svg {
+      width: 12px;
+      height: 12px;
+      stroke: #fff;
+      stroke-width: 3;
+      fill: none;
+      opacity: 0;
+      transform: scale(.4);
+      transition: .2s var(--ease);
+    }
+
+    .opt input:checked+.box {
+      background: var(--pink);
+      border-color: var(--pink);
+    }
+
+    .opt input:checked+.box svg {
+      opacity: 1;
+      transform: none;
+    }
+
+    .opt input:focus-visible+.box,
+    .size-opt input:focus-visible+span {
+      outline: 2px solid var(--pink);
+      outline-offset: 2px;
+    }
+
+    .opt .count {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .is-empty {
+      opacity: .38;
+    }
+
+    /* Size options */
+    .size-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .size-opt span {
+      display: grid;
+      place-items: center;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: .2s var(--ease);
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .size-opt.wide {
+      grid-column: span 2;
+    }
+
+    .size-opt span:hover {
+      border-color: var(--ink);
+    }
+
+    .size-opt input:checked+span {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: #fff;
+    }
+
+    /* Price range */
+    .price-display {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .price-box {
+      flex: 1;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 6px 10px;
+    }
+
+    .price-box small {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--muted);
+    }
+
+    .price-box strong {
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .range-wrap {
+      position: relative;
+      height: 28px;
+      margin: 0 4px;
+    }
+
+    .range-track {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 4px;
+      border-radius: 4px;
+      background: var(--line);
+      transform: translateY(-50%);
+    }
+
+    .range-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--pink-2), var(--wine));
+    }
+
+    .range-wrap input[type=range] {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      margin: 0;
+      -webkit-appearance: none;
+      appearance: none;
+      background: none;
+      pointer-events: none;
+    }
+
+    .range-wrap input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      pointer-events: auto;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid var(--pink);
+      box-shadow: 0 4px 12px rgba(212, 0, 138, .3);
+      cursor: grab;
+      transition: transform .2s var(--ease);
+    }
+
+    .range-wrap input[type=range]::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.15);
+    }
+
+    .range-wrap input[type=range]::-moz-range-thumb {
+      pointer-events: auto;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid var(--pink);
+      box-shadow: 0 4px 12px rgba(212, 0, 138, .3);
+      cursor: grab;
+    }
+
+    .price-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .price-presets button {
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--line);
+      background: #fff;
+      transition: .2s var(--ease);
+    }
+
+    .price-presets button:hover,
+    .price-presets button.active {
+      border-color: var(--pink);
+      color: var(--pink);
+      background: rgba(212, 0, 138, .05);
+    }
+
+    /* Switch rows */
+    .switch-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .switch-row input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .switch {
+      width: 38px;
+      height: 22px;
+      border-radius: 11px;
+      background: rgba(31, 20, 32, .16);
+      position: relative;
+      transition: background .25s var(--ease);
+      flex-shrink: 0;
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .18);
+      transition: transform .25s var(--ease);
+    }
+
+    .switch-row input:checked+.switch {
+      background: var(--pink);
+    }
+
+    .switch-row input:checked+.switch::after {
+      transform: translateX(16px);
+    }
+
+    .switch-row input:focus-visible+.switch {
+      outline: 2px solid var(--pink);
+      outline-offset: 2px;
+    }
+
+    .switch-label small {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .help-card {
+      margin-top: 22px;
+      padding: 18px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #ffe7f3, #f1eaff);
+      font-size: 13px;
+    }
+
+    .help-card strong {
+      font-family: "Playfair Display", serif;
+      font-size: 17px;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .help-card p {
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .help-card a {
+      font-weight: 700;
+      color: var(--wine);
+      text-decoration: underline;
+    }
+
+    /* ---------- Active filter chips ---------- */
+    .active-chips {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .active-chips:empty {
+      display: none;
+    }
+
+    .a-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 32px;
+      padding: 0 8px 0 14px;
+      border-radius: var(--radius-full);
+      background: var(--ink);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 500;
+      animation: pop .3s var(--ease);
+    }
+
+    .a-chip.q {
+      background: linear-gradient(120deg, var(--pink), var(--wine));
+    }
+
+    .a-chip .x {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, .16);
+      font-size: 10px;
+      transition: .2s;
+    }
+
+    .a-chip:hover .x {
+      background: rgba(255, 255, 255, .35);
+    }
+
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: scale(.85);
+      }
+    }
+
+    .dym {
+      margin-bottom: 18px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .dym button {
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+      font-size: 17px;
+      color: var(--pink);
+      text-decoration: underline;
+    }
+
+    /* ---------- Results grid & cards ---------- */
+    .results-grid {
+      --cols: 4;
+      display: grid;
+      grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+      gap: 36px 22px;
+    }
+
+    .s-card {
+      position: relative;
+      animation: rise .6s var(--ease) both;
+      animation-delay: var(--d, 0ms);
+    }
+
+    .s-card.no-anim {
+      animation: none;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+    }
+
+    .s-media {
+      position: relative;
+      aspect-ratio: 3/4;
+      overflow: hidden;
+      border-radius: 6px;
+      background: #f7f3f5;
+    }
+
+    .s-media-link {
+      position: absolute;
+      inset: 0;
+    }
+
+    .s-media img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity .6s var(--ease), transform .9s var(--ease);
+    }
+
+    .s-media .img-alt {
+      opacity: 0;
+      transform: scale(1.06);
+    }
+
+    .s-card:hover .img-main {
+      opacity: 0;
+    }
+
+    .s-card:hover .img-alt {
+      opacity: 1;
+      transform: scale(1.02);
+    }
+
+    .s-tags {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .tag {
+      padding: 5px 9px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 2px 8px rgba(31, 20, 32, .06);
+    }
+
+    .tag.best {
+      background: var(--pink);
+      color: #fff;
+    }
+
+    .tag.new {
+      background: var(--lime);
+    }
+
+    .tag.low {
+      color: var(--wine);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tag.low::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--pink);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(212, 0, 138, .7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 6px rgba(212, 0, 138, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(212, 0, 138, 0);
+      }
+    }
+
+    .s-wish {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .92);
+      backdrop-filter: blur(6px);
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      box-shadow: 0 4px 14px rgba(31, 20, 32, .08);
+      transition: .25s var(--ease);
+    }
+
+    .s-wish svg {
+      width: 17px;
+      height: 17px;
+      transition: transform .3s var(--ease);
+    }
+
+    .s-wish:hover {
+      color: var(--pink);
+      transform: scale(1.08);
+    }
+
+    .s-wish.active {
+      color: var(--pink);
+    }
+
+    .s-wish.active svg {
+      fill: currentColor;
+      animation: heart .45s var(--ease);
+    }
+
+    @keyframes heart {
+      40% {
+        transform: scale(1.35);
+      }
+    }
+
+    .s-quick {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(31, 20, 32, .14);
+      transform: translateY(calc(100% + 14px));
+      transition: transform .4s var(--ease);
+    }
+
+    .s-card:hover .s-quick,
+    .s-card:focus-within .s-quick {
+      transform: none;
+    }
+
+    .s-quick-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .s-sizes {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+    }
+
+    .s-sizes button {
+      flex: 1;
+      min-width: 0;
+      height: 30px;
+      border-radius: 5px;
+      border: 1px solid var(--line);
+      font-size: 11px;
+      font-weight: 700;
+      transition: .18s var(--ease);
+    }
+
+    .s-sizes button:hover {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: #fff;
+    }
+
+    .s-sizes button.added {
+      background: var(--pink);
+      border-color: var(--pink);
+      color: #fff;
+    }
+
+    .s-info {
+      padding-top: 14px;
+    }
+
+    .s-meta {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .s-info h3 {
+      font-family: "DM Sans", sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 6px;
+    }
+
+    .s-info h3 a {
+      transition: color .2s;
+    }
+
+    .s-info h3 a:hover {
+      color: var(--pink);
+    }
+
+    .s-price-row {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .s-price {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .s-old {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+
+    .s-off {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--pink);
+      letter-spacing: .04em;
+    }
+
+    .s-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .s-rating {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .s-rating .star {
+      color: #df9e00;
+    }
+
+    .s-rating em {
+      font-style: normal;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    /* Editorial promo card in grid */
+    .promo-card {
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      color: #fff;
+      min-height: 100%;
+      display: flex;
+      align-items: flex-end;
+      background: var(--ink);
+      animation: rise .6s var(--ease) both;
+      animation-delay: var(--d, 0ms);
+      isolation: isolate;
+      text-align: left;
+    }
+
+    .promo-card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      transition: transform 1s var(--ease);
+    }
+
+    .promo-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(180deg, rgba(138, 11, 114, .1) 0%, rgba(31, 20, 32, .88) 70%);
+    }
+
+    .promo-card:hover img {
+      transform: scale(1.05);
+    }
+
+    .promo-inner {
+      padding: 24px 22px;
+    }
+
+    .promo-inner .kicker {
+      color: var(--lime);
+    }
+
+    .promo-inner h3 {
+      font-size: 26px;
+      line-height: 1.12;
+      margin: 8px 0 10px;
+    }
+
+    .promo-inner p {
+      font-size: 13px;
+      color: #e9dbe8;
+      margin-bottom: 16px;
+    }
+
+    .promo-inner code {
+      font-family: inherit;
+      font-weight: 700;
+      letter-spacing: .1em;
+      color: #fff;
+      border: 1px dashed rgba(255, 255, 255, .5);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .promo-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      border-radius: var(--radius-full);
+      background: #fff;
+      color: var(--ink);
+      transition: .25s var(--ease);
+    }
+
+    .promo-card:hover .promo-cta {
+      background: var(--pink);
+      color: #fff;
+    }
+
+    /* Skeleton loader */
+    .sk-card .sk {
+      border-radius: 6px;
+      background: linear-gradient(100deg, #f4ecf1 30%, #fdf7fa 50%, #f4ecf1 70%);
+      background-size: 300% 100%;
+      animation: shimmer 1.2s linear infinite;
+    }
+
+    .sk-card .sk-media {
+      aspect-ratio: 3/4;
+    }
+
+    .sk-card .sk-line {
+      height: 12px;
+      margin-top: 12px;
+    }
+
+    @keyframes shimmer {
+      from {
+        background-position: 100% 0;
+      }
+
+      to {
+        background-position: -100% 0;
+      }
+    }
+
+    /* Load more */
+    .load-more {
+      margin-top: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .load-track {
+      width: 220px;
+      height: 3px;
+      background: var(--line);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .load-track span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--pink-2), var(--wine));
+      transition: width .5s var(--ease);
+    }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      height: 50px;
+      padding: 0 30px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: .25s var(--ease);
+    }
+
+    .btn-outline:hover {
+      background: var(--ink);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(31, 20, 32, .18);
+    }
+
+    .btn-solid {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      height: 48px;
+      padding: 0 26px;
+      border-radius: var(--radius-full);
+      background: var(--ink);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      transition: .25s var(--ease);
+    }
+
+    .btn-solid:hover {
+      background: var(--pink);
+      transform: translateY(-2px);
+    }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 40px 0 10px;
+      animation: rise .5s var(--ease) both;
+    }
+
+    .empty-art {
+      width: 132px;
+      height: 132px;
+      margin: 0 auto 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffe1f1, #eee6ff);
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+
+    .empty-art::after {
+      content: "";
+      position: absolute;
+      inset: -10px;
+      border-radius: 50%;
+      border: 1px dashed rgba(212, 0, 138, .3);
+      animation: spin 18s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .empty-art svg {
+      width: 54px;
+      height: 54px;
+      color: var(--wine);
+    }
+
+    .empty h2 {
+      font-size: clamp(26px, 3vw, 36px);
+      letter-spacing: -.02em;
+      margin-bottom: 8px;
+    }
+
+    .empty h2 em {
+      color: var(--pink);
+    }
+
+    .empty>p {
+      color: var(--muted);
+      max-width: 460px;
+      margin: 0 auto 20px;
+      font-size: 14px;
+    }
+
+    .empty .sg-chips {
+      justify-content: center;
+      margin-bottom: 22px;
+    }
+
+    .empty-reco {
+      margin-top: 56px;
+      text-align: left;
+      border-top: 1px solid var(--line);
+      padding-top: 36px;
+    }
+
+    .empty-reco h3 {
+      font-size: 28px;
+      margin: 6px 0 24px;
+    }
+
+    .empty-reco .results-grid {
+      --cols: 4;
+    }
+
+    /* Stylist CTA band */
+    .stylist-band {
+      background: #fff;
+      border-top: 1px solid var(--line);
+      padding: 64px 0;
+    }
+
+    .stylist-inner {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      border-radius: 18px;
+      overflow: hidden;
+      background: linear-gradient(120deg, #2a1129, var(--ink));
+      color: #fff;
+      position: relative;
+    }
+
+    .stylist-copy {
+      padding: 48px;
+    }
+
+    .stylist-copy .kicker {
+      color: #ff6bb6;
+    }
+
+    .stylist-copy h2 {
+      font-size: clamp(30px, 3.4vw, 44px);
+      line-height: 1.06;
+      letter-spacing: -.02em;
+      margin: 10px 0 14px;
+    }
+
+    .stylist-copy h2 em {
+      color: var(--lime);
+    }
+
+    .stylist-copy p {
+      color: #cdbfcc;
+      max-width: 440px;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .stylist-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stylist-actions .btn-solid {
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .stylist-actions .btn-solid:hover {
+      background: var(--pink);
+      color: #fff;
+    }
+
+    .stylist-actions .btn-outline {
+      border-color: rgba(255, 255, 255, .4);
+      color: #fff;
+      height: 48px;
+    }
+
+    .stylist-actions .btn-outline:hover {
+      background: rgba(255, 255, 255, .1);
+    }
+
+    .stylist-media {
+      height: 100%;
+      min-height: 320px;
+      position: relative;
+    }
+
+    .stylist-media img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .stylist-media::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(90deg, var(--ink), transparent 40%);
+    }
+
+    /* Drawer backdrop (mobile filters) */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgba(31, 20, 32, .45);
+      backdrop-filter: blur(3px);
+      opacity: 0;
+      visibility: hidden;
+      transition: .3s var(--ease);
+    }
+
+    .drawer-backdrop.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(30px);
+      background: var(--ink);
+      color: #fff;
+      padding: 14px 26px;
+      border-radius: var(--radius-full);
+      box-shadow: 0 12px 40px rgba(31, 20, 32, .25);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .02em;
+      opacity: 0;
+      pointer-events: none;
+      transition: all .3s var(--ease);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(255, 255, 255, .15);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast .t-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--lime);
+    }
+
+    /* Footer matching index.html */
+    footer {
+      background: var(--ink);
+      color: #f7edf5;
+      padding: 70px 0 30px;
+      border-top: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 50px;
+      margin-bottom: 50px;
+    }
+
+    .footer-brand p {
+      color: #a89ba8;
+      max-width: 320px;
+      font-size: 13px;
+      margin-top: 16px;
+      line-height: 1.7;
+    }
+
+    .footer-col h4 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: #ff6bb6;
+      margin-bottom: 20px;
+    }
+
+    .footer-col a {
+      display: block;
+      color: #dfd2de;
+      font-size: 13px;
+      margin-bottom: 12px;
+      transition: color .2s var(--ease);
+    }
+
+    .footer-col a:hover {
+      color: #fff;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, .1);
+      padding-top: 26px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #8c7f8c;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* ---------- Responsiveness ---------- */
+    @media (max-width: 1280px) {
+      .results-grid {
+        --cols: 3;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .results-layout {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .filter-toggle {
+        display: inline-flex;
+      }
+
+      .filters {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 100;
+        width: min(380px, 90vw);
+        max-height: none;
+        background: var(--paper);
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(-102%);
+        transition: transform .4s var(--ease);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .filters.open {
+        transform: none;
+      }
+
+      .filters-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 22px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .filters-head h2 {
+        font-size: 24px;
+      }
+
+      .filters-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 22px 20px;
+      }
+
+      .filters-title {
+        display: none;
+      }
+
+      .filters-foot {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 12px;
+        padding: 16px 22px;
+        border-top: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .filters-foot .btn-solid {
+        justify-content: center;
+      }
+
+      .stylist-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .stylist-media {
+        min-height: 240px;
+        order: -1;
+      }
+
+      .stylist-media::before {
+        background: linear-gradient(0deg, var(--ink), transparent 60%);
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+      }
+    }
+
+    @media (max-width: 860px) {
+
+      .nav-links,
+      .nav-search {
+        display: none;
+      }
+
+      .nav {
+        grid-template-columns: 1fr auto;
+      }
+
+      .nav-center {
+        display: none;
+      }
+
+      .menu-btn {
+        display: grid;
+      }
+
+      .suggest {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+
+      .sg-col+.sg-col {
+        border-left: 0;
+        padding-left: 0;
+        border-top: 1px solid var(--line-light);
+        padding-top: 18px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        width: calc(100% - 32px);
+      }
+
+      .logo img {
+        width: 140px;
+      }
+
+      .search-field {
+        height: 58px;
+        padding-left: 18px;
+      }
+
+      .search-field input {
+        font-size: 16px;
+      }
+
+      .kbd,
+      .search-submit span {
+        display: none;
+      }
+
+      .search-submit {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        justify-content: center;
+      }
+
+      .results-grid,
+      .empty-reco .results-grid {
+        --cols: 2 !important;
+        gap: 28px 14px;
+      }
+
+      .view-toggle {
+        display: none;
+      }
+
+      .sort-btn span {
+        display: none;
+      }
+
+      .result-count {
+        font-size: 13px;
+      }
+
+      .result-count em {
+        font-size: 15px;
+      }
+
+      .s-quick {
+        display: none;
+      }
+
+      .stylist-copy {
+        padding: 32px 24px;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="announce">
+    ✨ Free express shipping on orders over ₹1,999 • Complimentary doorstep return pickup within 7 days
+    <a href="product.html#shipping-info">Details</a>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="nav-wrap" id="navWrap">
+    <div class="container nav">
+      <a href="index.html" class="logo" aria-label="Tere Rang home">
+        <img src="logo.png" onerror="this.src='assets/logo.png'" alt="Tere Rang Logo">
+      </a>
+
+      <div class="nav-center">
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a class="nav-link" href="index.html#new">New Arrivals</a>
+          <a class="nav-link" href="index.html#products" id="shopTrigger">Shop</a>
+          <a class="nav-link" href="index.html#categories">Collections</a>
+          <a class="nav-link" href="index.html#products">Best Sellers</a>
+          <a class="nav-link" href="index.html#story">About</a>
+        </nav>
+
+        <form class="nav-search" id="navSearchForm" role="search" autocomplete="off">
+          <label class="nav-search-field">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="6.5" />
+              <path d="m16 16 4 4" />
+            </svg>
+            <span class="sr-only">Search Tere Rang</span>
+            <input type="search" id="navSearchInput" placeholder="Search dresses, collections…">
+            <button type="submit">Search</button>
+          </label>
+        </form>
+      </div>
+
+      <div class="nav-actions">
+        <button class="icon-btn active" id="searchOpen" aria-label="Search">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="6.5" />
+            <path d="m16 16 4 4" />
+          </svg>
+        </button>
+        <a href="login.html" class="icon-btn" aria-label="Account" title="Sign In">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="3.3" />
+            <path d="M5.5 20c.8-4.2 3-6 6.5-6s5.7 1.8 6.5 6" />
+          </svg>
+        </a>
+        <button class="icon-btn" id="headerWishlistBtn" aria-label="Wishlist">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M20.8 4.9a5.2 5.2 0 0 0-7.4 0L12 6.3l-1.4-1.4a5.2 5.2 0 1 0-7.4 7.4L12 21l8.8-8.7a5.2 5.2 0 0 0 0-7.4Z" />
+          </svg>
+          <span class="badge" id="wishCount" hidden>0</span>
+        </button>
+        <button class="icon-btn" id="cartOpen" aria-label="View Cart">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M4 7h16l-1.3 13H5.3L4 7Z" />
+            <path d="M9 7V5a3 3 0 0 1 6 0v2" />
+          </svg>
+          <span class="badge" id="cartCount">1</span>
+        </button>
+        <button class="icon-btn menu-btn" id="mobileMenuBtn" aria-label="Toggle Menu">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M4 8h16M4 16h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mega Menu -->
+    <div class="mega" id="megaMenu">
+      <div class="mega-inner">
+        <div>
+          <h4>Shop by Edit</h4>
+          <a href="search.html?q=new">New Arrivals</a>
+          <a href="search.html?sort=rating">Best Sellers</a>
+          <a href="search.html?q=festive">Occasion Wear</a>
+          <a href="search.html?q=everyday">Everyday Essentials</a>
+        </div>
+        <div>
+          <h4>Collections</h4>
+          <a href="search.html?collection=Rang+Bloom">Rang Bloom</a>
+          <a href="search.html?collection=Soft+Structure">Soft Structure</a>
+          <a href="search.html?collection=After+Dark">After Dark</a>
+          <a href="search.html?collection=Festive+Edit">Festive Edit</a>
+        </div>
+        <a class="mega-card" href="index.html#new">
+          <div>
+            <span class="kicker" style="color:#fff">Featured Edit</span>
+            <h3 style="font-family:'Playfair Display',serif;margin:6px 0 0;font-size:26px">The Colour Story</h3>
+          </div>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Search Hero -->
+    <section class="search-hero" aria-labelledby="searchTitle">
+      <div class="container hero-inner">
+        <ul class="breadcrumbs" aria-label="Breadcrumb">
+          <li><a href="index.html">Home</a><span class="sep">/</span></li>
+          <li style="color:var(--ink);font-weight:600">Search</li>
+        </ul>
+
+        <div class="kicker">Search the studio</div>
+        <h1 class="hero-title" id="searchTitle">Find your <em>style.</em></h1>
+        <p class="hero-sub" id="heroSub">Search by style, silhouette, collection or moment — try “festive dress under 4000”.
+        </p>
+
+        <form class="search-box" id="searchForm" role="search" autocomplete="off">
+          <div class="search-field">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="6.5" />
+              <path d="m16 16 4 4" />
+            </svg>
+            <label for="searchInput" class="sr-only">Search products</label>
+            <input type="search" id="searchInput" placeholder="Search dresses, co-ords, collections…"
+              aria-autocomplete="list" aria-controls="suggest" aria-expanded="false">
+            <button type="button" class="clear-btn" id="clearSearch" aria-label="Clear search">✕</button>
+            <span class="kbd" aria-hidden="true">/</span>
+            <button type="submit" class="search-submit" id="searchSubmit">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="6.5" />
+                <path d="m16 16 4 4" />
+              </svg>
+              <span>Search</span>
+            </button>
+          </div>
+
+          <!-- Suggestions panel -->
+          <div class="suggest" id="suggest" role="listbox" aria-label="Search suggestions"></div>
+        </form>
+
+        <div class="trending" id="trending">
+          <span class="trending-label">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M3 17l6-6 4 4 8-8M15 7h6v6" />
+            </svg>
+            Trending
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sticky results toolbar -->
+    <div class="results-bar" id="resultsBar">
+      <div class="container results-bar-inner">
+        <button class="filter-toggle" id="filterToggle" aria-controls="filters">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M4 6h16M7 12h10M10 18h4" />
+          </svg>
+          Filters
+          <span class="ft-count" id="ftCount" hidden>0</span>
+        </button>
+
+        <p class="result-count" id="resultCount" aria-live="polite"></p>
+
+        <div class="bar-right">
+          <div class="sort" id="sort">
+            <button class="sort-btn" id="sortBtn" aria-haspopup="listbox" aria-expanded="false">
+              <span>Sort by</span><strong id="sortLabel">Relevance</strong>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            <ul class="sort-menu" id="sortMenu" role="listbox"></ul>
+          </div>
+
+          <div class="view-toggle" role="group" aria-label="Grid density">
+            <button data-cols="3" id="view3" aria-label="3 per row">
+              <svg fill="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="5" height="8" rx="1" />
+                <rect x="9.5" y="3" width="5" height="8" rx="1" />
+                <rect x="16" y="3" width="5" height="8" rx="1" />
+                <rect x="3" y="13" width="5" height="8" rx="1" />
+                <rect x="9.5" y="13" width="5" height="8" rx="1" />
+                <rect x="16" y="13" width="5" height="8" rx="1" />
+              </svg>
+            </button>
+            <button data-cols="4" id="view4" class="active" aria-label="4 per row">
+              <svg fill="currentColor" viewBox="0 0 24 24">
+                <rect x="2" y="3" width="4" height="8" rx="1" />
+                <rect x="7.3" y="3" width="4" height="8" rx="1" />
+                <rect x="12.6" y="3" width="4" height="8" rx="1" />
+                <rect x="17.9" y="3" width="4" height="8" rx="1" />
+                <rect x="2" y="13" width="4" height="8" rx="1" />
+                <rect x="7.3" y="13" width="4" height="8" rx="1" />
+                <rect x="12.6" y="13" width="4" height="8" rx="1" />
+                <rect x="17.9" y="13" width="4" height="8" rx="1" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <section class="container results-layout" id="results" aria-label="Search results">
+
+      <!-- Filters -->
+      <aside class="filters" id="filters" aria-label="Filters">
+        <div class="filters-head">
+          <h2>Filters</h2>
+          <button class="icon-btn" id="filtersClose" aria-label="Close filters">✕</button>
+        </div>
+
+        <div class="filters-scroll">
+          <div class="filters-title">
+            <h2>Refine</h2>
+            <button class="link-btn" id="clearAllSide">Clear all</button>
+          </div>
+
+          <div id="facetGroups"></div>
+
+          <!-- Price -->
+          <div class="f-group" data-group="price">
+            <button class="f-head" type="button">Price <span class="f-sel" id="priceSel"></span>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            <div class="f-body">
+              <div>
+                <div class="f-body-inner">
+                  <div class="price-display">
+                    <div class="price-box"><small>Min</small><strong id="priceMinLabel">₹500</strong></div>
+                    <span style="color:var(--muted)">—</span>
+                    <div class="price-box"><small>Max</small><strong id="priceMaxLabel">₹6,000</strong></div>
+                  </div>
+                  <div class="range-wrap">
+                    <div class="range-track"><span class="range-fill" id="rangeFill"></span></div>
+                    <input type="range" id="priceMin" min="500" max="6000" step="100" value="500"
+                      aria-label="Minimum price">
+                    <input type="range" id="priceMax" min="500" max="6000" step="100" value="6000"
+                      aria-label="Maximum price">
+                  </div>
+                  <div class="price-presets" id="pricePresets">
+                    <button type="button" data-min="500" data-max="2000">Under ₹2,000</button>
+                    <button type="button" data-min="2000" data-max="3500">₹2,000 – ₹3,500</button>
+                    <button type="button" data-min="3500" data-max="6000">₹3,500+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <strong>Need a second opinion?</strong>
+            <p>Our in-house stylists reply on WhatsApp within minutes.</p>
+            <a href="https://wa.me/" target="_blank" rel="noopener">Chat with a stylist →</a>
+          </div>
+        </div>
+
+        <div class="filters-foot">
+          <button class="btn-outline" id="clearAllDrawer" style="height:48px;padding:0 18px">Clear</button>
+          <button class="btn-solid" id="applyDrawer">Show <span id="drawerCount">0</span> styles</button>
+        </div>
+      </aside>
+
+      <!-- Results column -->
+      <div class="results-col">
+        <div class="active-chips" id="activeChips"></div>
+        <div class="dym" id="dym" hidden></div>
+        <div class="results-grid" id="resultsGrid"></div>
+
+        <div class="empty" id="emptyState" hidden></div>
+
+        <div class="load-more" id="loadMore" hidden>
+          <span id="loadMoreText">Showing 12 of 20 styles</span>
+          <div class="load-track"><span id="loadTrack"></span></div>
+          <button class="btn-outline" id="loadMoreBtn">
+            Load more styles
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M12 5v14M5 12l7 7 7-7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stylist CTA -->
+    <section class="stylist-band">
+      <div class="container">
+        <div class="stylist-inner">
+          <div class="stylist-copy">
+            <div class="kicker">Personal styling • Complimentary</div>
+            <h2>Still searching? <em>We'll find it</em> for you.</h2>
+            <p>Share the occasion, your preferences and a budget — a Tere Rang stylist will curate a private edit and
+              send it straight to your phone.</p>
+            <div class="stylist-actions">
+              <a class="btn-solid" href="https://wa.me/" target="_blank" rel="noopener">Book a styling call</a>
+              <a class="btn-outline" href="mailto:care@tererang.com">Email the studio</a>
+            </div>
+          </div>
+          <div class="stylist-media">
+            <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=86"
+              onerror="this.src='https://picsum.photos/1000/700?random=88'" alt="Tere Rang stylist at work"
+              loading="lazy">
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+
+  <!-- Toast Element -->
+  <div class="toast" id="toast" role="status"><span class="t-dot"></span><span id="toastText">Added to
+      bag</span></div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="footer-logo" href="index.html">
+            <img src="logo.png" onerror="this.src='assets/logo.png'" alt="Tere Rang Logo"
+              style="filter: brightness(0) invert(1); width:160px">
+          </a>
+          <p>Tere Rang is an ode to expressive, colour-led fashion. Refined shapes, rich hues, and contemporary elegance
+            designed for women who make an impression.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <a href="index.html#new">New Arrivals</a>
+          <a href="index.html#products">Best Sellers</a>
+          <a href="index.html#categories">Collections</a>
+          <a href="index.html#story">Our Story</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Client Care</h4>
+          <a href="product.html#shipping-info">Shipping &amp; Tracking</a>
+          <a href="product.html">Size Chart &amp; Fit Guide</a>
+          <a href="product.html#shipping-info">Exchange &amp; Returns</a>
+          <a href="mailto:care@tererang.com">Contact Us</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Social &amp; Studio</h4>
+          <a href="https://instagram.com" target="_blank" rel="noopener">Instagram @tererang</a>
+          <a href="https://pinterest.com" target="_blank" rel="noopener">Pinterest</a>
+          <a href="mailto:studio@tererang.com">Press &amp; Collaborations</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 Tere Rang Lifestyle Pvt Ltd. All rights reserved.</div>
+        <div>Handcrafted with care in India • Worldwide Express Shipping</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    /* ================= Data ================= */
+    const IMG = (id, w = 800) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=84`;
+
+    const CATS = ['Dresses', 'Co-ords & Sets', 'Kurtas & Ethnic', 'Tops & Shirts', 'Outerwear', 'Accessories'];
+    const COLLECTIONS = ['Rang Bloom', 'Soft Structure', 'After Dark', 'Festive Edit'];
+    const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size'];
+    const STD = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+    const PRODUCTS = [
+      { id: 'gulabi-drape-dress', name: 'Gulabi Drape Dress', cat: 'Dresses', collection: 'Rang Bloom', price: 2899, old: 3499, sizes: STD, fabric: 'Modal Silk', occasion: ['Party', 'Festive'], tags: 'cowl asymmetric drape signature gown pink rose rang bloom', rating: 4.8, reviews: 214, pop: 98, added: 8, best: true, img: '1595777457583-95e059d581b8', img2: '1539109136881-3be0616acf4b' },
+      { id: 'noor-coord-set', name: 'Noor Co-ord Set', cat: 'Co-ords & Sets', collection: 'Festive Edit', price: 3499, old: 3999, sizes: STD, fabric: 'Georgette', occasion: ['Festive', 'Wedding Guest'], tags: 'coord matching set two piece ivory pink festive edit', rating: 4.7, reviews: 168, pop: 91, added: 19, isNew: true, img: '1490481651871-ab68de25d43d', img2: '1529626455594-4ff0802cfb7e' },
+      { id: 'midnight-wrap-jacket', name: 'Midnight Wrap Jacket', cat: 'Outerwear', collection: 'After Dark', price: 2399, old: 2999, sizes: ['S', 'M', 'L', 'XL'], fabric: 'Crepe', occasion: ['Work', 'Party'], tags: 'jacket layering wrap belted black wine after dark', rating: 4.6, reviews: 92, pop: 76, added: 6, img: '1551028719-00167b16eac5', img2: '1502716119720-b23a93e5fe1b' },
+      { id: 'meher-midi-dress', name: 'Meher Midi Dress', cat: 'Dresses', collection: 'Soft Structure', price: 2699, old: 3199, sizes: STD, fabric: 'Cotton', occasion: ['Everyday', 'Work'], tags: 'midi flowy day dress summer yellow ivory soft structure', rating: 4.5, reviews: 131, pop: 72, added: 5, img: '1585487000160-6ebcfceb0d03', img2: '1496747611176-843222e1e57c' },
+      { id: 'rani-anarkali', name: 'Rani Flared Anarkali', cat: 'Kurtas & Ethnic', collection: 'Festive Edit', price: 4299, old: 5299, sizes: ['XS', 'S', 'M', 'L', 'XL'], fabric: 'Georgette', occasion: ['Festive', 'Wedding Guest'], tags: 'anarkali ethnic flared traditional diwali pink wine festive edit', rating: 4.9, reviews: 76, pop: 88, added: 20, isNew: true, stock: 2, img: '1515886657613-9f3515b0c78f', img2: '1509631179647-0177331693ae' },
+      { id: 'saanjh-tiered-maxi', name: 'Saanjh Tiered Maxi', cat: 'Dresses', collection: 'Soft Structure', price: 3199, old: 3199, sizes: STD, fabric: 'Georgette', occasion: ['Everyday', 'Vacation'], tags: 'maxi tiered long flowy holiday lavender sky soft structure', rating: 4.6, reviews: 58, pop: 64, added: 14, img: '1534528741775-53994a69daeb', img2: '1529139574466-a303027c1d8b' },
+      { id: 'chandni-satin-slip', name: 'Chandni Satin Slip Dress', cat: 'Dresses', collection: 'After Dark', price: 2599, old: 2999, sizes: ['XS', 'S', 'M', 'L'], fabric: 'Satin', occasion: ['Party'], tags: 'slip satin cocktail evening minimal ivory black after dark', rating: 4.7, reviews: 103, pop: 84, added: 12, img: '1539109136881-3be0616acf4b', img2: '1595777457583-95e059d581b8' },
+      { id: 'phool-kurta-set', name: 'Phool Print Kurta Set', cat: 'Kurtas & Ethnic', collection: 'Rang Bloom', price: 2199, old: 2799, sizes: STD, fabric: 'Cotton', occasion: ['Everyday', 'Festive'], tags: 'kurta floral print set ethnic straight pants pink yellow rang bloom', rating: 4.5, reviews: 187, pop: 80, added: 9, img: '1529626455594-4ff0802cfb7e', img2: '1490481651871-ab68de25d43d' },
+      { id: 'ira-pleated-coord', name: 'Ira Pleated Co-ord', cat: 'Co-ords & Sets', collection: 'Soft Structure', price: 2999, old: 3599, sizes: ['XS', 'S', 'M', 'L', 'XL'], fabric: 'Satin', occasion: ['Work', 'Party'], tags: 'pleated skirt coord set two piece lavender ivory soft structure', rating: 4.6, reviews: 49, pop: 61, added: 16, img: '1512316609839-ce289d3eba0a', img2: '1529626455594-4ff0802cfb7e' },
+      { id: 'zoya-cowl-top', name: 'Zoya Cowl Neck Top', cat: 'Tops & Shirts', collection: 'After Dark', price: 1499, old: 1899, sizes: STD, fabric: 'Modal Silk', occasion: ['Party', 'Work'], tags: 'top blouse cowl neck wine black pink after dark', rating: 4.4, reviews: 142, pop: 70, added: 11, img: '1534528741775-53994a69daeb', img2: '1539008835657-9e8e9680c956' },
+      { id: 'tara-sequin-gown', name: 'Tara Sequin Gown', cat: 'Dresses', collection: 'After Dark', price: 5499, old: 6999, sizes: ['XS', 'S', 'M', 'L'], fabric: 'Georgette', occasion: ['Wedding Guest', 'Party'], tags: 'gown sequin embellished reception cocktail sangeet wine black after dark', rating: 4.8, reviews: 54, pop: 79, added: 18, isNew: true, img: '1539008835657-9e8e9680c956', img2: '1515886657613-9f3515b0c78f' },
+      { id: 'mehendi-lime-coord', name: 'Mehendi Lime Co-ord', cat: 'Co-ords & Sets', collection: 'Rang Bloom', price: 2799, old: 3299, sizes: STD, fabric: 'Linen', occasion: ['Everyday', 'Vacation', 'Festive'], tags: 'coord linen set relaxed shirt trousers haldi lime yellow rang bloom', rating: 4.7, reviews: 37, pop: 69, added: 17, isNew: true, img: '1485230895905-ec40ba36b9bc', img2: '1483985988355-763728e1935b' },
+      { id: 'neel-shirt-dress', name: 'Neel Shirt Dress', cat: 'Dresses', collection: 'Soft Structure', price: 2299, old: 2299, sizes: STD, fabric: 'Cotton', occasion: ['Work', 'Everyday'], tags: 'shirt dress collared belted office sky ivory soft structure', rating: 4.5, reviews: 88, pop: 66, added: 7, img: '1542295661-3fd8d8c25ca8', img2: '1485230895905-ec40ba36b9bc' },
+      { id: 'kesar-wrap-dress', name: 'Kesar Wrap Dress', cat: 'Dresses', collection: 'Rang Bloom', price: 2499, old: 2999, sizes: STD, fabric: 'Modal Silk', occasion: ['Festive', 'Everyday'], tags: 'wrap dress tie waist yellow pink rang bloom', rating: 4.6, reviews: 95, pop: 73, added: 10, img: '1483985988355-763728e1935b', img2: '1542295661-3fd8d8c25ca8' },
+      { id: 'aasmaan-kaftan', name: 'Aasmaan Kaftan Kurta', cat: 'Kurtas & Ethnic', collection: 'Soft Structure', price: 1899, old: 2399, sizes: ['S', 'M', 'L', 'XL', 'XXL'], fabric: 'Linen', occasion: ['Vacation', 'Everyday'], tags: 'kaftan kurta relaxed loose resort sky lavender soft structure', rating: 4.4, reviews: 61, pop: 58, added: 13, img: '1529139574466-a303027c1d8b', img2: '1534528741775-53994a69daeb' },
+      { id: 'raat-velvet-blazer', name: 'Raat Velvet Blazer', cat: 'Outerwear', collection: 'After Dark', price: 3899, old: 4599, sizes: ['XS', 'S', 'M', 'L', 'XL'], fabric: 'Velvet', occasion: ['Party', 'Work'], tags: 'blazer velvet tailored jacket winter black wine after dark', rating: 4.8, reviews: 44, pop: 75, added: 15, stock: 3, img: '1502716119720-b23a93e5fe1b', img2: '1551028719-00167b16eac5' },
+      { id: 'gulmohar-sharara', name: 'Gulmohar Sharara Set', cat: 'Kurtas & Ethnic', collection: 'Festive Edit', price: 4799, old: 5799, sizes: ['XS', 'S', 'M', 'L', 'XL'], fabric: 'Georgette', occasion: ['Wedding Guest', 'Festive'], tags: 'sharara set ethnic dupatta mehendi sangeet wedding pink wine festive edit', rating: 4.9, reviews: 121, pop: 94, added: 4, best: true, stock: 3, img: '1509631179647-0177331693ae', img2: '1515886657613-9f3515b0c78f' },
+      { id: 'sitara-clutch', name: 'Sitara Embellished Clutch', cat: 'Accessories', collection: 'Festive Edit', price: 1299, old: 1599, sizes: ['One Size'], fabric: 'Satin', occasion: ['Party', 'Wedding Guest'], tags: 'clutch bag purse embellished pink ivory festive edit', rating: 4.7, reviews: 67, pop: 63, added: 3, img: '1525507119028-ed4c629a60a3', img2: '1584917865442-de89df76afd3' },
+      { id: 'moti-drop-earrings', name: 'Moti Drop Earrings', cat: 'Accessories', collection: 'Festive Edit', price: 899, old: 899, sizes: ['One Size'], fabric: 'Pearl & Brass', occasion: ['Festive', 'Wedding Guest', 'Party'], tags: 'earrings pearl jewellery jewelry statement jhumka ivory yellow festive edit', rating: 4.6, reviews: 152, pop: 77, added: 2, best: true, img: '1584917865442-de89df76afd3', img2: '1525507119028-ed4c629a60a3' },
+      { id: 'lehar-palazzo-set', name: 'Lehar Palazzo Set', cat: 'Co-ords & Sets', collection: 'Soft Structure', price: 2599, old: 3199, sizes: STD, fabric: 'Cotton', occasion: ['Everyday', 'Work'], tags: 'palazzo set coord wide leg sky ivory soft structure', rating: 4.5, reviews: 73, pop: 60, added: 1, img: '1490481651871-ab68de25d43d', img2: '1512316609839-ce289d3eba0a' }
+    ];
+
+    PRODUCTS.forEach(p => {
+      p._hay = [p.name, p.cat, p.collection, p.fabric, p.occasion.join(' '), p.tags, p.isNew ? 'new arrival' : '', p.best ? 'bestseller best seller' : '']
+        .join(' ').toLowerCase();
+    });
+
+    const FACETS = [
+      { key: 'cats', label: 'Category', values: CATS, get: p => [p.cat], type: 'check' },
+      { key: 'collections', label: 'Collections', values: COLLECTIONS, get: p => [p.collection], type: 'check' },
+      { key: 'sizes', label: 'Size', values: SIZES, get: p => p.sizes, type: 'size' }
+    ];
+
+    const SORTS = [
+      { key: 'relevance', label: 'Relevance' },
+      { key: 'new', label: 'Newest first' },
+      { key: 'price-asc', label: 'Price: low to high' },
+      { key: 'price-desc', label: 'Price: high to low' },
+      { key: 'rating', label: 'Top rated' },
+      { key: 'discount', label: 'Biggest savings' }
+    ];
+
+    const TRENDING = ['Pink drape dress', 'Festive co-ords', 'Sharara set', 'Satin slip', 'Under ₹2500', 'Wedding guest'];
+    const POPULAR_QUERIES = ['pink drape dress', 'festive co-ord sets', 'satin slip dress', 'anarkali for wedding', 'velvet blazer',
+      'linen co-ords', 'kurta sets under 2500', 'statement earrings', 'sharara set', 'party dresses', 'work wear', 'lime green',
+      'lavender maxi', 'black party dress', 'ivory co-ord'];
+
+    const PAGE = 12;
+    const PRICE_MIN = 500, PRICE_MAX = 6000;
+
+    /* ================= State ================= */
+    const state = {
+      q: '', sort: 'relevance', visible: PAGE, cols: 4,
+      cats: new Set(), collections: new Set(), sizes: new Set(),
+      price: [PRICE_MIN, PRICE_MAX]
+    };
+    const wishlist = new Set();
+    let cartCount = 1;
+
+    /* ================= Helpers ================= */
+    const $ = s => document.querySelector(s);
+    const $$ = s => [...document.querySelectorAll(s)];
+    const inr = n => '₹' + n.toLocaleString('en-IN');
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+    const FALLBACK = (seed) => `this.onerror=null;this.src='https://picsum.photos/700/930?random=${seed}'`;
+    const HEART = '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.8 4.9a5.2 5.2 0 0 0-7.4 0L12 6.3l-1.4-1.4a5.2 5.2 0 1 0-7.4 7.4L12 21l8.8-8.7a5.2 5.2 0 0 0 0-7.4Z"/></svg>';
+    const CHECK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+    const CHEVRON = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+
+    const STOP = new Set(['for', 'the', 'a', 'an', 'and', 'in', 'with', 'of', 'to', 'rs', '₹', 'me', 'show']);
+
+    function parseQuery(raw) {
+      let s = (raw || '').toLowerCase().trim();
+      let maxPrice = null;
+      const m = s.match(/(?:under|below|less than|<)\s*₹?\s*([\d,]+)\s*(k)?/);
+      if (m) {
+        maxPrice = parseInt(m[1].replace(/,/g, ''), 10) * (m[2] ? 1000 : 1);
+        s = s.replace(m[0], ' ');
+      }
+      const tokens = s.replace(/[^\p{L}\p{N}\s&-]/gu, ' ').split(/\s+/).filter(t => t && !STOP.has(t));
+      return { tokens, maxPrice };
+    }
+
+    function matchToken(hay, t) {
+      if (hay.includes(t)) return true;
+      const st = t.replace(/(es|s)$/, '');
+      return st.length > 2 && hay.includes(st);
+    }
+
+    function score(p, tokens) {
+      let s = p.pop / 100;
+      const name = p.name.toLowerCase(), cat = p.cat.toLowerCase();
+      tokens.forEach(t => {
+        if (name.includes(t)) s += 6;
+        else if (cat.includes(t)) s += 3;
+        else s += 1;
+      });
+      return s;
+    }
+
+    function highlight(text, tokens) {
+      if (!tokens || !tokens.length) return esc(text);
+      const lower = text.toLowerCase();
+      const marks = new Array(text.length).fill(false);
+      tokens.forEach(t => {
+        const variants = [t, t.replace(/(es|s)$/, '')].filter(v => v.length > 1);
+        variants.forEach(v => {
+          let i = lower.indexOf(v);
+          while (i > -1) { for (let k = i; k < i + v.length; k++) marks[k] = true; i = lower.indexOf(v, i + v.length); }
+        });
+      });
+      let out = '', open = false;
+      for (let i = 0; i < text.length; i++) {
+        if (marks[i] && !open) { out += '<mark>'; open = true; }
+        if (!marks[i] && open) { out += '</mark>'; open = false; }
+        out += esc(text[i]);
+      }
+      return out + (open ? '</mark>' : '');
+    }
+
+    function levenshtein(a, b) {
+      const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...new Array(b.length).fill(0)]);
+      for (let j = 1; j <= b.length; j++) dp[0][j] = j;
+      for (let i = 1; i <= a.length; i++)
+        for (let j = 1; j <= b.length; j++)
+          dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      return dp[a.length][b.length];
+    }
+
+    const VOCAB = [...new Set(PRODUCTS.flatMap(p => p._hay.split(/[^a-z-]+/)).filter(w => w.length >= 3))];
+
+    function didYouMean(tokens) {
+      let changed = false;
+      const fixed = tokens.map(t => {
+        if (PRODUCTS.some(p => matchToken(p._hay, t))) return t;
+        const limit = t.length <= 4 ? 1 : 2;
+        let best = null, bestD = Infinity;
+        VOCAB.forEach(w => { const d = levenshtein(t, w); if (d < bestD) { bestD = d; best = w; } });
+        if (best && bestD <= limit) { changed = true; return best; }
+        return t;
+      });
+      return changed ? fixed.join(' ') : null;
+    }
+
+    /* ================= Filtering ================= */
+    function apply(except) {
+      const { tokens, maxPrice } = parseQuery(state.q);
+      const max = Math.min(state.price[1], maxPrice ?? Infinity);
+      return PRODUCTS.filter(p => {
+        if (tokens.length && !tokens.every(t => matchToken(p._hay, t))) return false;
+        if (except !== 'price' && (p.price < state.price[0] || p.price > max)) return false;
+        for (const f of FACETS) {
+          if (f.key === except) continue;
+          const sel = state[f.key];
+          if (sel.size && !f.get(p).some(v => sel.has(v))) return false;
+        }
+        return true;
+      });
+    }
+
+    function sortList(list) {
+      const { tokens } = parseQuery(state.q);
+      const l = [...list];
+      const off = p => (p.old - p.price) / p.old;
+      switch (state.sort) {
+        case 'new': return l.sort((a, b) => b.added - a.added);
+        case 'price-asc': return l.sort((a, b) => a.price - b.price);
+        case 'price-desc': return l.sort((a, b) => b.price - a.price);
+        case 'rating': return l.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
+        case 'discount': return l.sort((a, b) => off(b) - off(a));
+        default: return l.sort((a, b) => score(b, tokens) - score(a, tokens));
+      }
+    }
+
+    function activeFilterCount() {
+      let n = FACETS.reduce((a, f) => a + state[f.key].size, 0);
+      if (state.price[0] !== PRICE_MIN || state.price[1] !== PRICE_MAX) n++;
+      return n;
+    }
+
+    /* ================= Rendering: cards ================= */
+    function cardHTML(p, i, tokens, animStart = 0) {
+      const off = p.old > p.price ? Math.round((p.old - p.price) / p.old * 100) : 0;
+      const tags = [
+        p.best ? '<span class="tag best">Bestseller</span>' : '',
+        p.isNew ? '<span class="tag new">New in</span>' : '',
+        p.stock ? `<span class="tag low">Only ${p.stock} left</span>` : ''
+      ].join('');
+      const anim = i < animStart ? 'no-anim' : '';
+      return `
+        <article class="s-card ${anim}" style="--d:${Math.max(0, i - animStart) * 55}ms">
+          <div class="s-media">
+            <a class="s-media-link" href="product.html?id=${p.id}" aria-label="${esc(p.name)}">
+              <img class="img-main" src="${IMG(p.img)}" alt="${esc(p.name)}" loading="lazy" onerror="${FALLBACK(i + 40)}">
+              <img class="img-alt" src="${IMG(p.img2)}" alt="" loading="lazy" onerror="${FALLBACK(i + 80)}">
+            </a>
+            <div class="s-tags">${tags}</div>
+            <button class="s-wish ${wishlist.has(p.id) ? 'active' : ''}" data-wish="${p.id}"
+              aria-label="Add ${esc(p.name)} to wishlist" aria-pressed="${wishlist.has(p.id)}">${HEART}</button>
+            <div class="s-quick">
+              <div class="s-quick-label">Quick add · pick a size</div>
+              <div class="s-sizes">${p.sizes.map(s => `<button data-add="${p.id}" data-size="${s}">${s === 'One Size' ? 'Add to bag' : s}</button>`).join('')}</div>
+            </div>
+          </div>
+          <div class="s-info">
+            <div class="s-meta">${esc(p.cat)} · ${esc(p.collection)}</div>
+            <h3><a href="product.html?id=${p.id}">${highlight(p.name, tokens)}</a></h3>
+            <div class="s-price-row">
+              <span class="s-price">${inr(p.price)}</span>
+              ${off ? `<span class="s-old">${inr(p.old)}</span><span class="s-off">${off}% OFF</span>` : ''}
+            </div>
+            <div class="s-foot">
+              <span class="s-rating"><span class="star">★</span>${p.rating.toFixed(1)} <em>(${p.reviews})</em></span>
+            </div>
+          </div>
+        </article>`;
+    }
+
+    function promoHTML(i, animStart) {
+      return `
+        <a class="promo-card ${i < animStart ? 'no-anim' : ''}" href="#results" data-promo style="--d:${Math.max(0, i - animStart) * 55}ms">
+          <img src="${IMG('1529626455594-4ff0802cfb7e', 900)}" alt="" loading="lazy" onerror="${FALLBACK(99)}">
+          <div class="promo-inner">
+            <span class="kicker">The Festive Edit</span>
+            <h3>Twenty percent off every co-ord.</h3>
+            <p>Use code <code>RANG20</code> at checkout. This week only.</p>
+            <span class="promo-cta">Shop co-ords →</span>
+          </div>
+        </a>`;
+    }
+
+    function skeletonHTML(n = 8) {
+      return Array.from({ length: n }, () => `
+        <div class="sk-card"><div class="sk sk-media"></div><div class="sk sk-line" style="width:40%"></div>
+        <div class="sk sk-line" style="width:75%"></div><div class="sk sk-line" style="width:30%"></div></div>`).join('');
+    }
+
+    /* ================= Rendering: page ================= */
+    let renderTimer;
+    function refresh({ keepVisible = false, instant = false } = {}) {
+      if (!keepVisible) state.visible = PAGE;
+      updateChrome();
+      clearTimeout(renderTimer);
+      if (instant) return renderResults();
+      $('#emptyState').hidden = true;
+      $('#loadMore').hidden = true;
+      $('#dym').hidden = true;
+      const grid = $('#resultsGrid');
+      grid.hidden = false;
+      grid.innerHTML = skeletonHTML(Math.min(8, Math.max(4, apply().length)));
+      renderTimer = setTimeout(renderResults, 320);
+    }
+
+    function renderResults(animStart = 0) {
+      const list = sortList(apply());
+      const { tokens } = parseQuery(state.q);
+      const grid = $('#resultsGrid');
+
+      if (!list.length) {
+        grid.hidden = true;
+        grid.innerHTML = '';
+        $('#loadMore').hidden = true;
+        $('#dym').hidden = true;
+        renderEmpty(tokens);
+        return;
+      }
+
+      $('#emptyState').hidden = true;
+      grid.hidden = false;
+
+      const shown = list.slice(0, state.visible);
+      const html = shown.map((p, i) => cardHTML(p, i, tokens, animStart));
+      if (shown.length >= 8 && !state.cats.has('Co-ords & Sets')) html.splice(5, 0, promoHTML(5, animStart));
+      grid.innerHTML = html.join('');
+
+      // Did-you-mean for partial typos that still yield some results
+      const dym = didYouMean(tokens);
+      const dymEl = $('#dym');
+      if (dym && dym !== tokens.join(' ')) {
+        dymEl.innerHTML = `Showing close matches. Did you mean <button data-q="${esc(dym)}">${esc(dym)}</button>?`;
+        dymEl.hidden = false;
+      } else dymEl.hidden = true;
+
+      const lm = $('#loadMore');
+      lm.hidden = list.length <= PAGE;
+      $('#loadMoreText').textContent = `Showing ${shown.length} of ${list.length} styles`;
+      $('#loadTrack').style.width = (shown.length / list.length * 100) + '%';
+      $('#loadMoreBtn').hidden = shown.length >= list.length;
+    }
+
+    function renderEmpty(tokens) {
+      const el = $('#emptyState');
+      const fix = tokens.length ? didYouMean(tokens) : null;
+      const hasFilters = activeFilterCount() > 0;
+      const recos = [...PRODUCTS].sort((a, b) => b.pop - a.pop).slice(0, 4);
+      el.innerHTML = `
+        <div class="empty-art">
+          <svg fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4M8.5 9.5l5 3M13.5 9.5l-5 3"/>
+          </svg>
+        </div>
+        <div class="kicker">No exact matches</div>
+        <h2 style="margin-top:8px">${state.q ? `Nothing for <em>“${esc(state.q)}”</em> — yet.` : 'No styles match these filters.'}</h2>
+        <p>${fix ? `Did you mean <button class="link-btn" style="font-size:14px;color:var(--pink)" data-q="${esc(fix)}">${esc(fix)}</button>? ` : ''}
+          Try a broader word, check the spelling, or loosen a filter or two.</p>
+        <div class="sg-chips">${TRENDING.map(t => `<button class="chip" data-q="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+        ${hasFilters ? '<button class="btn-solid" data-clear-filters>Clear all filters</button>' : ''}
+        <div class="empty-reco">
+          <div class="kicker">Most loved right now</div>
+          <h3>You might fall for these.</h3>
+          <div class="results-grid">${recos.map((p, i) => cardHTML(p, i, [])).join('')}</div>
+        </div>`;
+      el.hidden = false;
+    }
+
+    function updateChrome() {
+      const list = apply();
+      const n = list.length;
+      const q = state.q.trim();
+      $('#resultCount').innerHTML = `<strong>${n}</strong> ${n === 1 ? 'style' : 'styles'}${q ? ` for <em>“${esc(q)}”</em>` : ' in the collection'}`;
+      $('#drawerCount').textContent = n;
+      const fc = activeFilterCount();
+      $('#ftCount').hidden = !fc;
+      $('#ftCount').textContent = fc;
+      document.title = q ? `“${q}” — Search | Tere Rang` : 'Search — Tere Rang | Modern Fashion';
+      renderChips();
+      updateFacetCounts();
+      syncURL();
+    }
+
+    function renderChips() {
+      const chips = [];
+      if (state.q.trim()) chips.push(`<button class="a-chip q" data-chip="q">Search: “${esc(state.q.trim())}”<span class="x">✕</span></button>`);
+      FACETS.forEach(f => state[f.key].forEach(v => {
+        chips.push(`<button class="a-chip" data-chip="${f.key}" data-val="${esc(v)}">${esc(v)}<span class="x">✕</span></button>`);
+      }));
+      if (state.price[0] !== PRICE_MIN || state.price[1] !== PRICE_MAX)
+        chips.push(`<button class="a-chip" data-chip="price">${inr(state.price[0])} – ${inr(state.price[1])}<span class="x">✕</span></button>`);
+      if (chips.length > 1) chips.push('<button class="link-btn" data-chip="all" style="margin-left:4px">Clear all</button>');
+      $('#activeChips').innerHTML = chips.join('');
+    }
+
+    /* ================= Facets ================= */
+    function initFacets() {
+      $('#facetGroups').innerHTML = FACETS.map(f => {
+        let body = '';
+        if (f.type === 'check') {
+          body = f.values.map(v => `
+            <label class="opt" data-facet="${f.key}" data-val="${esc(v)}">
+              <input type="checkbox" value="${esc(v)}"><span class="box">${CHECK}</span>
+              <span>${esc(v)}</span><span class="count">0</span>
+            </label>`).join('');
+        } else if (f.type === 'size') {
+          body = `<div class="size-grid">${f.values.map(v => `
+            <label class="size-opt ${v === 'One Size' ? 'wide' : ''}" data-facet="${f.key}" data-val="${v}">
+              <input type="checkbox" value="${v}"><span>${v}</span>
+            </label>`).join('')}</div>`;
+        }
+        return `
+          <div class="f-group ${f.collapsed ? 'collapsed' : ''}" data-group="${f.key}">
+            <button class="f-head" type="button" aria-expanded="${!f.collapsed}">${f.label}<span class="f-sel" data-sel="${f.key}"></span>${CHEVRON}</button>
+            <div class="f-body"><div><div class="f-body-inner">${body}</div></div></div>
+          </div>`;
+      }).join('');
+
+      $$('[data-facet] input').forEach(input => {
+        input.addEventListener('change', () => {
+          const key = input.closest('[data-facet]').dataset.facet;
+          input.checked ? state[key].add(input.value) : state[key].delete(input.value);
+          refresh();
+        });
+      });
+    }
+
+    function updateFacetCounts() {
+      FACETS.forEach(f => {
+        const list = apply(f.key);
+        const counts = {};
+        list.forEach(p => f.get(p).forEach(v => counts[v] = (counts[v] || 0) + 1));
+        $$(`[data-facet="${f.key}"]`).forEach(el => {
+          const v = el.dataset.val;
+          const c = counts[v] || 0;
+          const input = el.querySelector('input');
+          input.checked = state[f.key].has(v);
+          const cnt = el.querySelector('.count');
+          if (cnt) cnt.textContent = c;
+          el.classList.toggle('is-empty', !c && !input.checked);
+          el.title = `${c} ${c === 1 ? 'style' : 'styles'}`;
+        });
+        const sel = $(`[data-sel="${f.key}"]`);
+        sel.textContent = state[f.key].size ? `(${state[f.key].size})` : '';
+      });
+
+      // price
+      const [lo, hi] = state.price;
+      $('#priceMin').value = lo;
+      $('#priceMax').value = hi;
+      $('#priceMinLabel').textContent = inr(lo);
+      $('#priceMaxLabel').textContent = inr(hi) + (hi === PRICE_MAX ? '+' : '');
+      const pct = v => (v - PRICE_MIN) / (PRICE_MAX - PRICE_MIN) * 100;
+      $('#rangeFill').style.left = pct(lo) + '%';
+      $('#rangeFill').style.right = (100 - pct(hi)) + '%';
+      $('#priceSel').textContent = (lo !== PRICE_MIN || hi !== PRICE_MAX) ? '(1)' : '';
+      $$('#pricePresets button').forEach(b => b.classList.toggle('active', +b.dataset.min === lo && +b.dataset.max === hi));
+    }
+
+    /* ================= Suggestions ================= */
+    const input = $('#searchInput');
+    const navInput = $('#navSearchInput');
+    const suggestEl = $('#suggest');
+    let sgIndex = -1;
+
+    const getRecent = () => { try { return JSON.parse(localStorage.getItem('tr_recent') || '[]'); } catch { return []; } };
+    const setRecent = arr => localStorage.setItem('tr_recent', JSON.stringify(arr.slice(0, 6)));
+    function saveRecent(q) {
+      q = q.trim();
+      if (!q) return;
+      setRecent([q, ...getRecent().filter(r => r.toLowerCase() !== q.toLowerCase())]);
+    }
+
+    const ICON_CLOCK = '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
+    const ICON_SEARCH = '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>';
+    const ICON_GRID = '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>';
+
+    function sgProduct(p, tokens) {
+      return `<a class="sg-item sg-prod" href="product.html?id=${p.id}">
+        <img src="${IMG(p.img, 160)}" alt="" loading="lazy" onerror="${FALLBACK(p.pop)}">
+        <span><span class="sg-prod-name">${highlight(p.name, tokens)}</span><br><span class="sg-prod-cat">${esc(p.cat)}</span></span>
+        <span class="sg-prod-price">${inr(p.price)}</span></a>`;
+    }
+
+    function renderSuggest() {
+      const val = input.value.trim();
+      sgIndex = -1;
+      let left = '', right = '';
+
+      if (!val) {
+        const recent = getRecent();
+        left = `
+          ${recent.length ? `<div class="sg-block"><h4>Recent searches <button type="button" data-clear-recent>Clear</button></h4>
+            ${recent.map(r => `<button type="button" class="sg-item" data-q="${esc(r)}">${ICON_CLOCK}<span>${esc(r)}</span><span class="sg-remove" data-remove="${esc(r)}" aria-label="Remove">✕</span></button>`).join('')}</div>` : ''}
+          <div class="sg-block"><h4>Trending now</h4><div class="sg-chips">
+            ${TRENDING.map(t => `<button type="button" class="chip hot" data-q="${esc(t)}">${esc(t)}</button>`).join('')}</div></div>`;
+        right = `<div class="sg-block"><h4>Popular right now</h4>
+          ${[...PRODUCTS].sort((a, b) => b.pop - a.pop).slice(0, 3).map(p => sgProduct(p, [])).join('')}</div>`;
+      } else {
+        const { tokens } = parseQuery(val);
+        const lower = val.toLowerCase();
+        const pool = [...new Set([...POPULAR_QUERIES, ...PRODUCTS.map(p => p.name.toLowerCase())])];
+        const comps = pool.filter(s => tokens.length ? tokens.every(t => s.includes(t) || s.includes(t.replace(/(es|s)$/, ''))) : s.includes(lower))
+          .sort((a, b) => (b.startsWith(lower) - a.startsWith(lower)) || a.length - b.length).slice(0, 5);
+        const tmpQ = state.q; state.q = val;
+        const results = sortList(apply());
+        const catHits = CATS.map(c => ({ c, n: results.filter(p => p.cat === c).length })).filter(x => x.n).slice(0, 3);
+        state.q = tmpQ;
+
+        left = `<div class="sg-block"><h4>Suggestions</h4>
+            ${comps.length ? comps.map(s => `<button type="button" class="sg-item" data-q="${esc(s)}">${ICON_SEARCH}<span>${highlight(s, tokens)}</span></button>`).join('')
+            : `<div class="sg-empty">Press enter to search “${esc(val)}”</div>`}</div>
+          ${catHits.length ? `<div class="sg-block"><h4>In categories</h4>
+            ${catHits.map(x => `<button type="button" class="sg-item" data-q="${esc(val)}" data-cat-pick="${esc(x.c)}">${ICON_GRID}<span><mark>${esc(val)}</mark> in ${esc(x.c)}</span><span class="sg-meta">${x.n}</span></button>`).join('')}</div>` : ''}`;
+
+        right = `<div class="sg-block"><h4>Products</h4>
+          ${results.length ? results.slice(0, 4).map(p => sgProduct(p, tokens)).join('') : '<div class="sg-empty">No products yet — try another word.</div>'}
+          ${results.length ? `<button type="button" class="sg-all sg-item" data-q="${esc(val)}">See all ${results.length} results <span>→</span></button>` : ''}</div>`;
+      }
+
+      suggestEl.innerHTML = `<div class="sg-col">${left}</div><div class="sg-col">${right}</div>`;
+    }
+
+    function openSuggest() {
+      renderSuggest();
+      suggestEl.classList.add('open');
+      input.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeSuggest() {
+      suggestEl.classList.remove('open');
+      input.setAttribute('aria-expanded', 'false');
+      sgIndex = -1;
+    }
+
+    function moveSuggest(dir) {
+      const items = $$('#suggest .sg-item');
+      if (!items.length) return;
+      items.forEach(i => i.classList.remove('active'));
+      sgIndex = (sgIndex + dir + items.length) % items.length;
+      items[sgIndex].classList.add('active');
+      items[sgIndex].scrollIntoView({ block: 'nearest' });
+    }
+
+    function commitSearch(q, { scroll = true } = {}) {
+      state.q = q.trim();
+      input.value = state.q;
+      navInput.value = state.q;
+      $('#clearSearch').classList.toggle('show', !!state.q);
+      saveRecent(state.q);
+      closeSuggest();
+      input.blur();
+      refresh();
+      if (scroll) {
+        const y = $('#resultsBar').getBoundingClientRect().top + window.scrollY - 80;
+        if (window.scrollY < y) window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+
+    const liveSearch = debounce(() => { state.q = input.value.trim(); refresh(); }, 320);
+
+    input.addEventListener('focus', openSuggest);
+    input.addEventListener('input', () => {
+      $('#clearSearch').classList.toggle('show', !!input.value);
+      navInput.value = input.value;
+      openSuggest();
+      liveSearch();
+    });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (!suggestEl.classList.contains('open')) openSuggest(); moveSuggest(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); moveSuggest(-1); }
+      else if (e.key === 'Escape') { closeSuggest(); input.blur(); }
+      else if (e.key === 'Enter' && sgIndex > -1) { e.preventDefault(); $$('#suggest .sg-item')[sgIndex].click(); }
+    });
+
+    $('#searchForm').addEventListener('submit', e => { e.preventDefault(); commitSearch(input.value); });
+    $('#navSearchForm').addEventListener('submit', e => { e.preventDefault(); commitSearch(navInput.value); });
+    navInput.addEventListener('input', debounce(() => {
+      input.value = navInput.value;
+      state.q = navInput.value.trim();
+      $('#clearSearch').classList.toggle('show', !!state.q);
+      refresh();
+    }, 320));
+
+    $('#clearSearch').addEventListener('click', () => {
+      input.value = '';
+      navInput.value = '';
+      state.q = '';
+      $('#clearSearch').classList.remove('show');
+      refresh();
+      input.focus();
+    });
+
+    suggestEl.addEventListener('mousedown', e => e.preventDefault()); // keep focus while clicking
+    suggestEl.addEventListener('click', e => {
+      const rm = e.target.closest('[data-remove]');
+      if (rm) { e.stopPropagation(); setRecent(getRecent().filter(r => r !== rm.dataset.remove)); renderSuggest(); return; }
+      if (e.target.closest('[data-clear-recent]')) { setRecent([]); renderSuggest(); return; }
+      const item = e.target.closest('[data-q]');
+      if (item) {
+        if (item.dataset.catPick) { state.cats.clear(); state.cats.add(item.dataset.catPick); }
+        commitSearch(item.dataset.q);
+      }
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#searchForm')) closeSuggest();
+      if (!e.target.closest('#sort')) closeSort();
+    });
+
+    /* ================= Trending chips ================= */
+    $('#trending').insertAdjacentHTML('beforeend', TRENDING.map(t => `<button class="chip" data-q="${esc(t)}">${esc(t)}</button>`).join(''));
+
+    /* ================= Sort ================= */
+    function initSort() {
+      $('#sortMenu').innerHTML = SORTS.map(s => `<li><button data-sort="${s.key}" role="option">${s.label}</button></li>`).join('');
+      syncSort();
+      $('#sortBtn').addEventListener('click', e => {
+        e.stopPropagation();
+        const open = $('#sort').classList.toggle('open');
+        $('#sortBtn').setAttribute('aria-expanded', open);
+      });
+      $('#sortMenu').addEventListener('click', e => {
+        const b = e.target.closest('[data-sort]');
+        if (!b) return;
+        state.sort = b.dataset.sort;
+        syncSort();
+        closeSort();
+        refresh();
+      });
+    }
+    function syncSort() {
+      $('#sortLabel').textContent = SORTS.find(s => s.key === state.sort).label;
+      $$('#sortMenu button').forEach(b => b.classList.toggle('active', b.dataset.sort === state.sort));
+    }
+    function closeSort() {
+      $('#sort').classList.remove('open');
+      $('#sortBtn').setAttribute('aria-expanded', 'false');
+    }
+
+    /* ================= View toggle ================= */
+    $$('.view-toggle button').forEach(b => b.addEventListener('click', () => {
+      $$('.view-toggle button').forEach(x => x.classList.toggle('active', x === b));
+      $('#resultsGrid').style.setProperty('--cols', b.dataset.cols);
+    }));
+
+    /* ================= Price & toggles ================= */
+    const onPrice = debounce(() => refresh(), 250);
+    ['#priceMin', '#priceMax'].forEach(sel => $(sel).addEventListener('input', e => {
+      let lo = +$('#priceMin').value, hi = +$('#priceMax').value;
+      if (lo > hi - 300) {
+        if (e.target.id === 'priceMin') lo = hi - 300; else hi = lo + 300;
+      }
+      state.price = [Math.max(PRICE_MIN, lo), Math.min(PRICE_MAX, hi)];
+      updateFacetCounts();
+      onPrice();
+    }));
+    $('#pricePresets').addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      const same = state.price[0] === +b.dataset.min && state.price[1] === +b.dataset.max;
+      state.price = same ? [PRICE_MIN, PRICE_MAX] : [+b.dataset.min, +b.dataset.max];
+      refresh();
+    });
+
+    /* ================= Collapsible groups ================= */
+    document.addEventListener('click', e => {
+      const head = e.target.closest('.f-head');
+      if (!head) return;
+      const g = head.closest('.f-group');
+      g.classList.toggle('collapsed');
+      head.setAttribute('aria-expanded', !g.classList.contains('collapsed'));
+    });
+
+    /* ================= Clear & chips ================= */
+    function clearFilters() {
+      FACETS.forEach(f => state[f.key].clear());
+      state.price = [PRICE_MIN, PRICE_MAX];
+    }
+
+    $('#activeChips').addEventListener('click', e => {
+      const c = e.target.closest('[data-chip]');
+      if (!c) return;
+      const k = c.dataset.chip;
+      if (k === 'q') { state.q = ''; input.value = ''; navInput.value = ''; $('#clearSearch').classList.remove('show'); }
+      else if (k === 'all') { clearFilters(); state.q = ''; input.value = ''; navInput.value = ''; $('#clearSearch').classList.remove('show'); }
+      else if (k === 'price') state.price = [PRICE_MIN, PRICE_MAX];
+      else if (state[k]) state[k].delete(c.dataset.val);
+      refresh();
+    });
+
+    ['#clearAllSide', '#clearAllDrawer'].forEach(s => $(s).addEventListener('click', () => { clearFilters(); refresh(); }));
+
+    // Delegated: chips with data-q anywhere outside suggest panel; promo card; clear filters in empty state
+    document.addEventListener('click', e => {
+      if (e.target.closest('#suggest')) return;
+      const q = e.target.closest('[data-q]');
+      if (q) { commitSearch(q.dataset.q); return; }
+      if (e.target.closest('[data-clear-filters]')) { clearFilters(); refresh(); return; }
+      const promo = e.target.closest('[data-promo]');
+      if (promo) {
+        e.preventDefault();
+        state.cats.clear(); state.cats.add('Co-ords & Sets');
+        refresh();
+        showToast('Code RANG20 copied — 20% off co-ords');
+        navigator.clipboard?.writeText('RANG20').catch(() => { });
+      }
+    });
+
+    /* ================= Load more ================= */
+    $('#loadMoreBtn').addEventListener('click', () => {
+      const prev = state.visible;
+      state.visible += PAGE;
+      renderResults(prev);
+    });
+
+    /* ================= Wishlist & Quick add ================= */
+    function bump(el) { el.classList.add('bump'); setTimeout(() => el.classList.remove('bump'), 300); }
+
+    document.addEventListener('click', e => {
+      const w = e.target.closest('[data-wish]');
+      if (w) {
+        const id = w.dataset.wish;
+        const p = PRODUCTS.find(x => x.id === id);
+        const on = !wishlist.has(id);
+        on ? wishlist.add(id) : wishlist.delete(id);
+        $$(`[data-wish="${id}"]`).forEach(b => { b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+        const wc = $('#wishCount');
+        wc.hidden = !wishlist.size;
+        wc.textContent = wishlist.size;
+        bump(wc);
+        showToast(on ? `${p.name} saved to wishlist` : `${p.name} removed from wishlist`);
+        return;
+      }
+      const a = e.target.closest('[data-add]');
+      if (a) {
+        const p = PRODUCTS.find(x => x.id === a.dataset.add);
+        cartCount++;
+        const cc = $('#cartCount');
+        cc.textContent = cartCount;
+        bump(cc);
+        a.classList.add('added');
+        setTimeout(() => a.classList.remove('added'), 900);
+        showToast(`${p.name}${a.dataset.size !== 'One Size' ? ` (${a.dataset.size})` : ''} added to bag`);
+      }
+    });
+
+    $('#cartOpen').addEventListener('click', () => showToast(`${cartCount} ${cartCount === 1 ? 'item' : 'items'} in your bag`));
+    $('#headerWishlistBtn').addEventListener('click', () => showToast(wishlist.size ? `${wishlist.size} saved ${wishlist.size === 1 ? 'style' : 'styles'} in wishlist` : 'Tap ♥ on any style to save it'));
+
+    let toastTimer;
+    function showToast(msg) {
+      $('#toastText').textContent = msg;
+      $('#toast').classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => $('#toast').classList.remove('show'), 2400);
+    }
+
+    /* ================= Mobile filter drawer ================= */
+    function openDrawer() { $('#filters').classList.add('open'); $('#drawerBackdrop').classList.add('open'); document.body.classList.add('no-scroll'); }
+    function closeDrawer() { $('#filters').classList.remove('open'); $('#drawerBackdrop').classList.remove('open'); document.body.classList.remove('no-scroll'); }
+    $('#filterToggle').addEventListener('click', openDrawer);
+    $('#filtersClose').addEventListener('click', closeDrawer);
+    $('#drawerBackdrop').addEventListener('click', closeDrawer);
+    $('#applyDrawer').addEventListener('click', () => {
+      closeDrawer();
+      const y = $('#resultsBar').getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    });
+
+    /* ================= Header behaviours ================= */
+    const navWrap = $('#navWrap');
+    window.addEventListener('scroll', () => navWrap.classList.toggle('scrolled', window.scrollY > 10), { passive: true });
+
+    const shopTrigger = $('#shopTrigger');
+    const mega = $('#megaMenu');
+    let megaTimer;
+    shopTrigger.addEventListener('mouseenter', () => { clearTimeout(megaTimer); mega.classList.add('open'); });
+    navWrap.addEventListener('mouseleave', () => { megaTimer = setTimeout(() => mega.classList.remove('open'), 150); });
+    mega.addEventListener('mouseenter', () => clearTimeout(megaTimer));
+
+    // Show compact search in nav once the hero search scrolls out of view
+    new IntersectionObserver(([entry]) => {
+      document.body.classList.toggle('compact', !entry.isIntersecting && entry.boundingClientRect.top < 0);
+      if (!entry.isIntersecting) closeSuggest();
+    }, { rootMargin: '-81px 0px 0px 0px' }).observe($('.search-field'));
+
+    $('#searchOpen').addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => input.focus(), 350);
+    });
+    $('#mobileMenuBtn').addEventListener('click', () => { window.location.href = 'index.html'; });
+
+    document.addEventListener('keydown', e => {
+      const typing = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
+      if (e.key === '/' && !typing) {
+        e.preventDefault();
+        if (document.body.classList.contains('compact') && getComputedStyle($('.nav-search')).display !== 'none') navInput.focus();
+        else { window.scrollTo({ top: 0, behavior: 'smooth' }); input.focus(); }
+      }
+      if (e.key === 'Escape') { closeDrawer(); closeSort(); }
+    });
+
+    /* ================= URL sync ================= */
+    function syncURL() {
+      const params = new URLSearchParams();
+      if (state.q.trim()) params.set('q', state.q.trim());
+      if (state.cats.size) params.set('cat', [...state.cats].join(','));
+      if (state.collections.size) params.set('collection', [...state.collections].join(','));
+      if (state.sort !== 'relevance') params.set('sort', state.sort);
+      const qs = params.toString();
+      history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+    }
+
+    function readURL() {
+      const p = new URLSearchParams(location.search);
+      state.q = p.get('q') || '';
+      (p.get('cat') || '').split(',').filter(c => CATS.includes(c)).forEach(c => state.cats.add(c));
+      (p.get('collection') || '').split(',').filter(c => COLLECTIONS.includes(c)).forEach(c => state.collections.add(c));
+      if (SORTS.some(s => s.key === p.get('sort'))) state.sort = p.get('sort');
+      input.value = navInput.value = state.q;
+      $('#clearSearch').classList.toggle('show', !!state.q);
+    }
+
+    /* ================= Init ================= */
+    initFacets();
+    initSort();
+    readURL();
+    syncSort();
+    refresh();
+  </script>
+</body>
+
+</html>
