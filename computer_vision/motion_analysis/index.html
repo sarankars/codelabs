@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motion Analysis — Background Modeling, Optical Flow, KLT, Spatio-Temporal &amp; Dynamic Stereo</title>
+<meta name="description" content="Complete interactive codelab on computer vision motion analysis: Background subtraction &amp; modeling (MOG2), Optical Flow, KLT tracker, Spatio-Temporal analysis (MHI), Dynamic Stereo, and Motion Parameter Estimation with RANSAC.">
+<meta name="theme-color" content="#2856d8">
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+  :root{
+    --blue:#2856d8;
+    --blue-dark:#17348e;
+    --blue-light:#e4ebff;
+    --ink:#101010;
+    --paper:#f5f7fb;
+    --white:#fff;
+    --yellow:#ffd83d;
+    --mint:#75e6c5;
+    --pink:#ff9bb7;
+    --orange:#ffb866;
+    --teal:#38bdf8;
+    --purple:#d8b4fe;
+    --border:3px solid var(--ink);
+    --shadow:6px 6px 0 var(--ink);
+    --shadow-sm:4px 4px 0 var(--ink);
+    --sidebar:300px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:auto}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.6}
+  button,a{font:inherit}
+  button{cursor:pointer}
+  :focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+  .app{min-height:100vh}
+  .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}
+  .brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+  .eyebrow,.progress-meta,.step-number,.step-kicker,.label{font-family:"DM Mono",monospace}
+  .eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+  .brand h2{margin:5px 0 3px;font-size:1.35rem;line-height:1.1}
+  .brand p{margin:0;font-size:.82rem;font-weight:600;color:#444}
+  .progress-wrap{margin:0 2px 20px;color:#fff}
+  .progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}
+  .progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}
+  .progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}
+  .steps{display:grid;gap:8px}
+  .step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}
+  .step-link:hover{background:rgba(255,255,255,.14)}
+  .step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}
+  .step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}
+  .step-status{text-align:center}
+  .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}
+  .menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+  .menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}
+  .mobile-title{flex:1;padding:8px 10px;font-weight:800}
+  main{margin-left:var(--sidebar);min-height:100vh}
+  .content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 32px}
+  .step-view{display:none}
+  .step-view.active{display:block;animation:stepIn .18s ease-out}
+  @keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+  .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}
+  .step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}
+  h1,h2,h3{line-height:1.15}
+  h1{margin:0 0 12px;font-size:clamp(1.9rem,4.5vw,3.2rem);letter-spacing:-.04em}
+  h2{margin:32px 0 14px;font-size:clamp(1.4rem,2.8vw,1.95rem)}
+  h3{margin:22px 0 9px;font-size:1.18rem}
+  .lede{max-width:820px;margin:0;font-size:1.06rem;color:#222}
+  .objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+  .panel,.concept,.quiz,.reveal,.math-box{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+  .panel{padding:22px;margin:20px 0}
+  .panel.blue{background:var(--blue-light)}
+  .panel.mint{background:var(--mint)}
+  .panel.pink{background:var(--pink)}
+  .panel.yellow{background:var(--yellow)}
+  .panel.orange{background:var(--orange)}
+  .panel.purple{background:var(--purple)}
+  .callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+  .callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}
+  .grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid-3{display:grid;gap:16px;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .concept{padding:18px}
+  .concept strong{font-size:1.05rem;display:block;margin-bottom:6px}
+  .concept p:last-child{margin-bottom:0}
+  .code-wrap{position:relative;margin:18px 0}
+  pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.83rem;line-height:1.6;tab-size:2}
+  .copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}
+  code:not(pre code){padding:2px 6px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}
+  ul,ol{padding-left:1.4rem}
+  li{margin:8px 0}
+  .comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}
+  .comparison th,.comparison td{padding:12px;border:2px solid var(--ink);text-align:left;vertical-align:top}
+  .comparison th{color:#fff;background:var(--blue)}
+  .quiz{padding:20px;margin:22px 0}
+  .quiz-options{display:grid;gap:9px;margin-top:14px}
+  .quiz-option{text-align:left;padding:12px 14px;background:#fff;border:2px solid var(--ink);font-weight:700}
+  .quiz-option:hover{background:var(--blue-light)}
+  .quiz-option.correct{background:var(--mint)}
+  .quiz-option.wrong{background:var(--pink)}
+  .quiz-feedback{display:none;margin-top:13px;padding:12px;border:2px solid var(--ink);font-weight:700}
+  .quiz-feedback.show{display:block}
+  .reveal{margin:18px 0}
+  .reveal summary{padding:14px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}
+  .reveal>div{padding:16px 18px}
+  .challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}
+  .challenge h3{margin-top:0;color:var(--yellow)}
+  .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.85;overflow:auto}
+  .checklist{list-style:none;padding:0}
+  .checklist li{position:relative;padding-left:32px}
+  .checklist li::before{content:"\25A2";position:absolute;left:0;font-size:1.3rem;font-weight:900}
+  .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}
+  .nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}
+  .nav-btn.primary{color:#fff;background:var(--blue)}
+  .nav-btn:disabled{opacity:.35;cursor:not-allowed}
+  .finish{padding:22px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}
+  .step-by-step{counter-reset:sbstep;list-style:none;padding:0}
+  .step-by-step li{counter-increment:sbstep;position:relative;padding:14px 14px 14px 54px;margin:10px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+  .step-by-step li::before{content:counter(sbstep);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:30px;height:30px;display:grid;place-items:center;background:var(--blue);color:#fff;font-family:"DM Mono",monospace;font-weight:700;border:2px solid var(--ink)}
+  .formula-box{padding:16px 20px;margin:18px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;font-size:1rem;text-align:center;line-height:1.8}
+  .analogy-badge{display:inline-block;padding:3px 8px;background:var(--yellow);border:2px solid var(--ink);font-family:"DM Mono",monospace;font-weight:700;font-size:.74rem;margin-bottom:8px}
+  @media(max-width:880px){
+    :root{--sidebar:270px;--mobile-bar-height:65px}
+    .sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}
+    .sidebar.open{transform:none}
+    .mobile-bar{display:flex;height:var(--mobile-bar-height)}
+    main{margin-left:0}
+    .content{width:min(940px,calc(100% - 28px));padding-top:24px}
+  }
+  @media(max-width:700px){
+    .grid-2,.grid-3{grid-template-columns:1fr}
+    .content{width:calc(100% - 18px);padding-top:16px}
+    .step-header{padding:20px 16px}
+    .panel,.concept,.quiz{padding:16px}
+    .nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}
+    .nav-btn{min-width:0;flex:1;padding:11px 10px}
+    pre{padding:16px 12px;font-size:.76rem}
+    .copy-btn{position:static;align-self:flex-end;margin-bottom:6px}
+    .code-wrap{display:flex;flex-direction:column}
+    .code-wrap pre{order:2}
+    .code-wrap .copy-btn{order:1}
+    .comparison{display:block;overflow-x:auto}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+  <div class="brand">
+    <div class="eyebrow">Computer Vision &middot; Motion</div>
+    <h2>Motion Analysis</h2>
+    <p>Background Modeling, Optical Flow, KLT, Spatio-Temporal &amp; Dynamic Stereo</p>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+    <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+  <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+</aside>
+
+<div class="mobile-bar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">&#9776;</button>
+  <div class="mobile-title" id="mobileTitle">Motion Analysis</div>
+</div>
+
+<main>
+<div class="content" id="content">
+
+<!-- STEP 1 -->
+<section class="step-view" data-title="1. Introduction to Motion Analysis">
+  <header class="step-header">
+    <span class="step-kicker">STEP 1 &middot; FOUNDATIONS</span>
+    <h1>Motion Analysis in Computer Vision</h1>
+    <p class="lede">A single photograph freezes time into a flat grid of pixels. A video unfreezes time, revealing how people move, cars navigate, and the world evolves. This codelab explores how computers perceive, quantify, and model motion across space and time.</p>
+  </header>
+
+  <div class="objective">
+    <strong>By the end of this codelab, you will:</strong>
+    Understand the difference between 3D scene motion and 2D image flow, build robust background models using adaptive Gaussian Mixture Models, master the Optical Flow constraint equation and solve the aperture problem, track features with the Kanade-Lucas-Tomasi (KLT) tracker, inspect spatio-temporal volumes and Motion History Images (MHI), understand Dynamic Stereo in 3D, and estimate global motion parameters with RANSAC.
+  </div>
+
+  <h2>What is Motion to a Camera?</h2>
+  <p>In physics, motion is the change of an object's position in 3D space $(X, Y, Z)$ over time $t$. But a camera captures a 2D projection $(x, y)$.</p>
+
+  <div class="grid-2">
+    <div class="concept">
+      <span class="analogy-badge">CONCEPT 1</span>
+      <strong>2D Motion Field</strong>
+      <p>The true physical projection of 3D velocities $(V_X, V_Y, V_Z)$ onto the 2D camera sensor. Every real point on a physical surface creates an exact mathematical velocity vector $(u, v)$ on the image plane.</p>
+    </div>
+    <div class="concept">
+      <span class="analogy-badge">CONCEPT 2</span>
+      <strong>Optical Flow</strong>
+      <p>The <em>apparent</em> motion of brightness patterns across the image. Note: Optical Flow is what the computer actually measures, which might not always equal the true motion field!</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="label">CRITICAL DISTINCTION: MOTION FIELD VS OPTICAL FLOW</span>
+    <p>Consider a completely smooth, featureless white sphere rotating under fixed lighting. The sphere is spinning (real 3D motion exists &rarr; non-zero motion field), but every pixel remains identically white over time (apparent motion is zero &rarr; zero optical flow!).</p>
+    <p>Conversely, if a stationary object is illuminated by a moving spotlight, the brightness pattern moves across the surface (optical flow &gt; 0), even though the physical object never moved at all!</p>
+  </div>
+
+  <h2>Why is Motion Analysis Difficult?</h2>
+  <ul class="step-by-step">
+    <li><strong>Illumination Variations:</strong> Passing clouds, camera auto-exposure adjustments, and flickering lights change pixel values without any physical motion.</li>
+    <li><strong>Dynamic Backgrounds:</strong> Trees swaying in the wind, rippling water in a pool, and rotating ceiling fans violate the simple assumption that backgrounds never change.</li>
+    <li><strong>Shadows:</strong> Moving objects cast moving shadows on the ground. Computers easily confuse a shadow with the object itself!</li>
+    <li><strong>Camera Motion (Ego-Motion):</strong> If the camera is mounted on a drone or self-driving car, <em>every single pixel</em> in the entire frame moves simultaneously.</li>
+  </ul>
+
+  <div class="quiz" data-answer="1" data-correct="Correct! A rotating uniform cylinder exhibits physical motion (non-zero motion field), but its brightness appearance does not change across frames, resulting in zero optical flow.">
+    <h3>Which scenario produces physical motion but ZERO optical flow?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">A red car driving across a camera's field of view.</button>
+      <button class="quiz-option">A smooth, uniformly painted cylinder rotating under uniform ambient light.</button>
+      <button class="quiz-option">A spotlight sweeping across a static brick wall.</button>
+      <button class="quiz-option">A walking pedestrian casting a shadow.</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 2 -->
+<section class="step-view" data-title="2. Background Subtraction &amp; Modeling">
+  <header class="step-header">
+    <span class="step-kicker">STEP 2 &middot; SEGMENTATION</span>
+    <h1>Background Subtraction &amp; Modeling</h1>
+    <p class="lede">When a stationary camera monitors a doorway, parking lot, or factory floor, our first goal is simple: isolate moving objects (foreground) from the stationary environment (background).</p>
+  </header>
+
+  <h2>1. Simple Frame Differencing</h2>
+  <p>The simplest conceivable method is subtracting the previous frame $I_{t-1}$ from current frame $I_t$:</p>
+  <div class="formula-box">
+    Foreground Mask: M(x, y) = 1 &nbsp;if&nbsp; | I(x, y, t) - I(x, y, t - 1) | &gt; &tau;, &nbsp;else&nbsp; 0
+  </div>
+  <div class="panel orange">
+    <strong>Why Frame Differencing Fails in Practice:</strong>
+    <ul>
+      <li><strong>Aperture / Interior Blindness:</strong> A uniformly colored moving object (e.g., a white truck) only changes pixels at its leading and trailing edges. The interior pixels remain white, causing the truck to appear hollow like a ghost!</li>
+      <li><strong>Stop-and-Go:</strong> If a person pauses to tie their shoe, their frame difference drops to zero and they completely vanish from the detector.</li>
+    </ul>
+  </div>
+
+  <h2>2. Running Average (Adaptive Background)</h2>
+  <p>Instead of comparing only two frames, we maintain a running background estimate $B_t$ that slowly absorbs changes over time:</p>
+  <div class="formula-box">
+    B(x, y, t) = (1 - &alpha;) &middot; B(x, y, t - 1) + &alpha; &middot; I(x, y, t)
+  </div>
+  <p>Where <code>&alpha;</code> (the learning rate, e.g., 0.02) determines how quickly new static objects are absorbed into the background.</p>
+
+  <h2>3. Gaussian Mixture Models (MOG2 / Zivkovic)</h2>
+  <p>What if a pixel contains waving tree branches? Sometimes it sees a green leaf; other times it sees the blue sky behind it. A single average cannot represent both states!</p>
+  <div class="panel mint">
+    <strong>The GMM Solution:</strong>
+    Model each pixel $(x, y)$ as a mixture of $K$ (typically 3 to 5) Gaussian probability distributions:
+    <div class="formula-box">
+      P(I_t) = &Sigma;<sub>k=1..K</sub> &nbsp;&omega;<sub>k,t</sub> &middot; &eta;(I_t; &mu;<sub>k,t</sub>, &Sigma;<sub>k,t</sub>)
+    </div>
+    Each Gaussian has a weight $\omega_k$ (how frequently this color appears), a mean $\mu_k$ (the average color), and a variance $\sigma_k^2$ (how much that color fluctuates).
+    Gaussians with high weight and low variance are ranked highest as background components.
+  </div>
+
+  <h2>4. Shadow Handling</h2>
+  <p>A shadow lowers the brightness (luminance) of a pixel without significantly changing its color tint (chromaticity). Advanced algorithms like OpenCV's <code>MOG2</code> mark shadows in a separate gray color (value 127) so you can ignore them and keep only true objects (value 255).</p>
+
+  <h2>Python Practical: Real-Time MOG2 Background Subtraction</h2>
+  <div class="code-wrap">
+    <button class="copy-btn">Copy</button>
+    <pre><code>import cv2
+import numpy as np
+
+# 1. Initialize MOG2 Subtractor
+#    history=500: frames used to build model
+#    varThreshold=16: Mahalanobis distance threshold
+#    detectShadows=True: highlights shadows as gray (127)
+bg_subtractor = cv2.createBackgroundSubtractorMOG2(
+    history=500, varThreshold=25, detectShadows=True
+)
+
+cap = cv2.VideoCapture(0)  # Or provide a video path: 'traffic.mp4'
+
+# Morphological kernel for noise removal
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # Apply background subtraction
+    fg_mask = bg_subtractor.apply(frame)
+
+    # Filter out shadows (keep only pixels == 255)
+    _, fg_clean = cv2.threshold(fg_mask, 250, 255, cv2.THRESH_BINARY)
+
+    # Morphological Opening (removes speckles) + Closing (fills holes)
+    fg_clean = cv2.morphologyEx(fg_clean, cv2.MORPH_OPEN, kernel)
+    fg_clean = cv2.morphologyEx(fg_clean, cv2.MORPH_CLOSE, kernel)
+
+    # Find contours of moving objects
+    contours, _ = cv2.findContours(fg_clean, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for cnt in contours:
+        if cv2.contourArea(cnt) > 800:  # Ignore tiny noise blobs
+            x, y, w, h = cv2.boundingRect(cnt)
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    cv2.imshow('Camera Feed with Detections', frame)
+    cv2.imshow('Clean Foreground Mask', fg_clean)
+
+    if cv2.waitKey(30) & 0xFF == 27:  # ESC key
+        break
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+  </div>
+
+  <div class="quiz" data-answer="2" data-correct="Correct! Morphological opening (erosion followed by dilation) eliminates isolated single-pixel noise points while preserving larger object contours.">
+    <h3>Which post-processing operation cleans salt-and-pepper noise from a raw foreground mask?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">Histogram Equalization</button>
+      <button class="quiz-option">Bilateral Filter</button>
+      <button class="quiz-option">Morphological Opening (Erosion then Dilation)</button>
+      <button class="quiz-option">Fourier High-Pass Filter</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 3 -->
+<section class="step-view" data-title="3. Optical Flow &amp; Lucas-Kanade">
+  <header class="step-header">
+    <span class="step-kicker">STEP 3 &middot; MOTION EQUATION</span>
+    <h1>The Optical Flow Constraint Equation</h1>
+    <p class="lede">Background subtraction tells us <em>which</em> pixels changed, but not <em>where they went</em>. Optical flow calculates a velocity vector $(u, v)$ for each pixel, describing its direction and speed.</p>
+  </header>
+
+  <h2>The 3 Core Assumptions</h2>
+  <div class="grid-3">
+    <div class="concept">
+      <strong>1. Brightness Constancy</strong>
+      <p>The intensity of a physical surface point does not change as it moves across consecutive frames:</p>
+      <code>I(x, y, t) = I(x + &Delta;x, y + &Delta;y, t + &Delta;t)</code>
+    </div>
+    <div class="concept">
+      <strong>2. Small Motion</strong>
+      <p>Displacements between frames are small enough to be approximated by a first-order Taylor series expansion.</p>
+    </div>
+    <div class="concept">
+      <strong>3. Spatial Coherence</strong>
+      <p>Adjacent pixels on the same physical object share similar motion velocities.</p>
+    </div>
+  </div>
+
+  <h2>Derivation of the Constraint Equation</h2>
+  <p>Expanding $I(x + \Delta x, y + \Delta y, t + \Delta t)$ using 1st-order Taylor series:</p>
+  <div class="formula-box">
+    I(x + &Delta;x, y + &Delta;y, t + &Delta;t) &approx; I(x, y, t) + &part;I/&part;x &middot; &Delta;x + &part;I/&part;y &middot; &Delta;y + &part;I/&part;t &middot; &Delta;t
+  </div>
+  <p>Since $I(x + \Delta x, y + \Delta y, t + \Delta t) = I(x, y, t)$, the original intensity cancels out:</p>
+  <div class="formula-box">
+    I<sub>x</sub> &middot; u + I<sub>y</sub> &middot; v + I<sub>t</sub> = 0
+  </div>
+  <p>Where <code>I<sub>x</sub> = &part;I/&part;x</code>, <code>I<sub>y</sub> = &part;I/&part;y</code> (spatial image gradients), <code>I<sub>t</sub> = &part;I/&part;t</code> (frame difference over time), and <code>u = dx/dt</code>, <code>v = dy/dt</code> are the unknown velocity components.</p>
+
+  <h2>The Aperture Problem Visualized</h2>
+  <div class="panel pink">
+    <strong>1 Equation with 2 Unknowns $(u, v)$!</strong>
+    <p>A single pixel gives only one scalar constraint: $I_x u + I_y v = -I_t$. This means we can only determine the motion component <em>perpendicular</em> (normal) to the edge!</p>
+    <p><strong>Everyday Analogy:</strong> Look at a long barber pole or window blind through a tiny peephole (an aperture). If a vertical striped pole moves straight up, or diagonally up-and-right, the view through the hole looks <em>identical</em>! You cannot determine the parallel component of velocity along an edge.</p>
+  </div>
+
+  <h2>The Lucas-Kanade Solution</h2>
+  <p>Lucas &amp; Kanade (1981) assumed that a small local window (e.g. $5 \times 5 = 25$ neighboring pixels) moves with the exact same velocity $(u, v)$. Now we have 25 equations for just 2 unknowns!</p>
+  <div class="formula-box">
+    [ I<sub>x1</sub> &nbsp; I<sub>y1</sub> ] [ u ] = [ -I<sub>t1</sub> ]<br>
+    [ I<sub>x2</sub> &nbsp; I<sub>y2</sub> ] [ v ] = [ -I<sub>t2</sub> ]<br>
+    ...<br>
+    Matrix form: <strong>A &middot; v&#8407; = b&#8407;</strong>
+  </div>
+  <p>Using the Least Squares normal equations:</p>
+  <div class="formula-box">
+    (A<sup>T</sup> A) &middot; v&#8407; = A<sup>T</sup> b&#8407; &nbsp;&implies;&nbsp;
+    v&#8407; = (A<sup>T</sup> A)<sup>-1</sup> A<sup>T</sup> b&#8407;
+  </div>
+  <div class="callout">
+    <span class="label">THE SURPRISING CONNECTION</span>
+    <p>The matrix $A^T A$ is identical to the <strong>Structure Tensor</strong> used in the Harris Corner Detector:</p>
+    <div class="formula-box">
+      A<sup>T</sup> A = [ &Sigma; I<sub>x</sub>&sup2; &nbsp;&nbsp; &Sigma; I<sub>x</sub>I<sub>y</sub> ]<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ &Sigma; I<sub>x</sub>I<sub>y</sub> &nbsp; &Sigma; I<sub>y</sub>&sup2; ]
+    </div>
+    <p>This means $A^T A$ is invertible <strong>only at corner points</strong> where both eigenvalues $\lambda_1, \lambda_2$ are large! Tracking is physically impossible on flat regions ($\lambda_1 \approx 0, \lambda_2 \approx 0$) and ambiguous on straight edges ($\lambda_2 \approx 0$).</p>
+  </div>
+</section>
+
+<!-- STEP 4 -->
+<section class="step-view" data-title="4. Dense Optical Flow (Farneb&auml;ck)">
+  <header class="step-header">
+    <span class="step-kicker">STEP 4 &middot; DENSE FLOW</span>
+    <h1>Dense Optical Flow with Gunnar Farneb&auml;ck</h1>
+    <p class="lede">While Lucas-Kanade gives velocity for selected feature points (sparse flow), Gunnar Farneb&auml;ck's algorithm computes a motion vector for <em>every single pixel</em> in the frame.</p>
+  </header>
+
+  <h2>How Farneb&auml;ck Flow Works</h2>
+  <p>Farneb&auml;ck (2003) approximates the local neighborhood of each pixel as a 2D quadratic polynomial surface:</p>
+  <div class="formula-box">
+    f<sub>1</sub>(x) &approx; x<sup>T</sup> A<sub>1</sub> x + b<sub>1</sub><sup>T</sup> x + c<sub>1</sub>
+  </div>
+  <p>When the surface shifts by displacement $d$, the new frame polynomial coefficients $A_2, b_2, c_2$ can be compared directly to solve for displacement $d$ analytically. By repeating this across a multi-resolution image pyramid, it handles both subtle movements and fast actions.</p>
+
+  <h2>Visualizing Flow with the HSV Color Wheel</h2>
+  <div class="panel blue">
+    <strong>How to Display a 2D Vector Field as an Image:</strong>
+    <ul>
+      <li><strong>Hue (Color tint):</strong> Encodes the <em>direction</em> (angle $\theta = \text{atan2}(v, u)$). Red = moving right, Cyan = moving left, Green = moving down, Violet = moving up.</li>
+      <li><strong>Value (Brightness):</strong> Encodes the <em>magnitude</em> (speed $\sqrt{u^2 + v^2}$). Static pixels appear black; fast-moving pixels glow vibrantly.</li>
+      <li><strong>Saturation:</strong> Kept at maximum (255) for crisp, vivid visualization.</li>
+    </ul>
+  </div>
+
+  <h2>Python Practical: Real-Time Dense Optical Flow</h2>
+  <div class="code-wrap">
+    <button class="copy-btn">Copy</button>
+    <pre><code>import cv2
+import numpy as np
+
+cap = cv2.VideoCapture(0)
+
+# Read the first frame and convert to grayscale
+ret, prev_frame = cap.read()
+prev_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
+
+# Create an HSV canvas to map flow vectors into colors
+hsv = np.zeros_like(prev_frame)
+hsv[..., 1] = 255  # Full saturation
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Compute dense optical flow using Farneback's algorithm
+    # pyr_scale=0.5, levels=3, winsize=15, iterations=3, poly_n=5, poly_sigma=1.2
+    flow = cv2.calcOpticalFlowFarneback(
+        prev_gray, gray, None,
+        pyr_scale=0.5, levels=3, winsize=15,
+        iterations=3, poly_n=5, poly_sigma=1.2, flags=0
+    )
+
+    # Calculate magnitude and angle of 2D flow vectors (u, v)
+    u, v = flow[..., 0], flow[..., 1]
+    magnitude, angle = cv2.cartToPolar(u, v, angleInDegrees=True)
+
+    # Map angle (0..360 deg) to OpenCV Hue (0..180)
+    hsv[..., 0] = angle / 2
+    # Map magnitude to brightness (clipped to 255)
+    hsv[..., 2] = cv2.normalize(magnitude, None, 0, 255, cv2.NORM_MINMAX)
+
+    # Convert HSV back to BGR for display
+    flow_bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+
+    cv2.imshow('Live Camera', frame)
+    cv2.imshow('Dense Optical Flow (HSV Color Coded)', flow_bgr)
+
+    prev_gray = gray
+
+    if cv2.waitKey(1) & 0xFF == 27:
+        break
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+  </div>
+</section>
+
+<!-- STEP 5 -->
+<section class="step-view" data-title="5. KLT Feature Tracker">
+  <header class="step-header">
+    <span class="step-kicker">STEP 5 &middot; TRACKING</span>
+    <h1>Kanade-Lucas-Tomasi (KLT) Feature Tracker</h1>
+    <p class="lede">KLT is the golden standard of real-time computer vision tracking. It pairs Shi-Tomasi corner detection with iterative Lucas-Kanade tracking and image pyramids.</p>
+  </header>
+
+  <h2>The 2 Pillars of KLT</h2>
+  <div class="grid-2">
+    <div class="concept">
+      <strong>Pillar 1: Shi-Tomasi Feature Selection</strong>
+      <p>Jianbo Shi and Carlo Tomasi (1994) showed that instead of the complex Harris formula $R = \det(M) - k \cdot \text{trace}(M)^2$, the most reliable tracking quality metric is simply:</p>
+      <div class="formula-box">R = min(&lambda;<sub>1</sub>, &lambda;<sub>2</sub>)</div>
+      <p>A point is accepted if $\min(\lambda_1, \lambda_2) &gt; \lambda_{\text{threshold}}$. This directly guarantees numerical stability when inverting $A^T A$.</p>
+    </div>
+    <div class="concept">
+      <strong>Pillar 2: Pyramidal Coarse-to-Fine Search</strong>
+      <p>Lucas-Kanade assumes <em>small motions</em>. If a hand swings quickly across 50 pixels, standard LK fails.</p>
+      <p><strong>The Pyramid Solution:</strong> Downsample images into Gaussian pyramid levels (e.g. 1/8, 1/4, 1/2, 1/1 scale). A 50-pixel jump at full resolution is only ~6 pixels at Level 3! LK tracks at the coarse level first, then refines down to sub-pixel accuracy at full scale.</p>
+    </div>
+  </div>
+
+  <h2>Production Lifecycle Management</h2>
+  <p>In a real video stream, points will inevitably get occluded or move off-screen. A robust tracker must manage the point lifecycle:</p>
+  <div class="flow">
+    1. Detect up to N points with Shi-Tomasi (cv2.goodFeaturesToTrack)<br>
+    &#8595;<br>
+    2. Track points to next frame with cv2.calcOpticalFlowPyrLK<br>
+    &#8595;<br>
+    3. Filter out lost tracks (where status == 0 or error &gt; threshold)<br>
+    &#8595;<br>
+    4. If active points &lt; minimum_count: detect NEW points in empty regions<br>
+    &#8595;<br>
+    5. Repeat seamlessly for thousands of frames
+  </div>
+
+  <h2>Complete Python KLT Tracker with Trajectory Trails</h2>
+  <div class="code-wrap">
+    <button class="copy-btn">Copy</button>
+    <pre><code>import cv2
+import numpy as np
+
+cap = cv2.VideoCapture(0)
+
+# Parameters for Shi-Tomasi corner detection
+feature_params = dict(
+    maxCorners=150,
+    qualityLevel=0.03,
+    minDistance=10,
+    blockSize=7
+)
+
+# Parameters for Lucas-Kanade optical flow
+lk_params = dict(
+    winSize=(21, 21),
+    maxLevel=3,
+    criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 30, 0.01)
+)
+
+ret, first_frame = cap.read()
+prev_gray = cv2.cvtColor(first_frame, cv2.COLOR_BGR2GRAY)
+p0 = cv2.goodFeaturesToTrack(prev_gray, mask=None, **feature_params)
+
+# Canvas to draw long trajectory trails
+mask_canvas = np.zeros_like(first_frame)
+colors = np.random.randint(0, 255, (200, 3))
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    if p0 is not None and len(p0) > 0:
+        # Calculate optical flow
+        p1, status, err = cv2.calcOpticalFlowPyrLK(
+            prev_gray, frame_gray, p0, None, **lk_params
+        )
+
+        # Select valid tracked points (status == 1)
+        if p1 is not None:
+            good_new = p1[status == 1]
+            good_old = p0[status == 1]
+
+            # Draw trajectory tracks
+            for i, (new, old) in enumerate(zip(good_new, good_old)):
+                a, b = new.ravel().astype(int)
+                c, d = old.ravel().astype(int)
+                col = colors[i % len(colors)].tolist()
+                mask_canvas = cv2.line(mask_canvas, (a, b), (c, d), col, 2)
+                frame = cv2.circle(frame, (a, b), 4, col, -1)
+
+            p0 = good_new.reshape(-1, 1, 2)
+
+    # Re-detect if points have dropped below threshold
+    if p0 is None or len(p0) < 30:
+        # Re-detect new features to replenish tracker
+        new_pts = cv2.goodFeaturesToTrack(frame_gray, mask=None, **feature_params)
+        if new_pts is not None:
+            p0 = new_pts
+            mask_canvas = np.zeros_like(frame)  # Reset faded canvas
+
+    output = cv2.add(frame, mask_canvas)
+    cv2.imshow('KLT Point Feature Tracker', output)
+
+    prev_gray = frame_gray.copy()
+    if cv2.waitKey(20) & 0xFF == 27:
+        break
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+  </div>
+</section>
+
+<!-- STEP 6 -->
+<section class="step-view" data-title="6. Spatio-Temporal &amp; MHI">
+  <header class="step-header">
+    <span class="step-kicker">STEP 6 &middot; TIME AS SPACE</span>
+    <h1>Spatio-Temporal Analysis &amp; Motion History Images</h1>
+    <p class="lede">Instead of treating a video as individual disconnected photos, imagine stacking every frame on top of each other like a deck of cards. This creates a 3D block of space-time data: $I(x, y, t)$.</p>
+  </header>
+
+  <h2>The 3D Spatio-Temporal Volume</h2>
+  <p>If you slice this 3D data block horizontally along the $y$-axis, you get an <strong>X-T slice</strong> (Horizontal position vs Time):</p>
+  <div class="panel yellow">
+    <strong>Reading an X-T Slice:</strong>
+    <ul>
+      <li><strong>Vertical Stripes:</strong> The pixel at $x$ remains the same color over time &rarr; <em>Static background object</em>.</li>
+      <li><strong>Tilted Diagonal Lines:</strong> The position $x$ changes steadily as time $t$ progresses &rarr; <em>Moving object!</em></li>
+      <li><strong>Slope of the line ($\Delta x / \Delta t$):</strong> Equals the exact <em>velocity</em> of the object! Steep lines = slow motion; shallow lines = high speed.</li>
+    </ul>
+  </div>
+
+  <h2>Motion Energy vs Motion History Images (Bobick &amp; Davis)</h2>
+  <div class="grid-2">
+    <div class="concept">
+      <strong>Motion Energy Image (MEI)</strong>
+      <p>A binary snapshot indicating <em>where</em> motion occurred over a time window $\tau$:</p>
+      <code>E<sub>&tau;</sub>(x, y, t) = &cup;<sub>i=0..&tau;-1</sub> D(x, y, t - i)</code>
+      <p>Shows the complete spatial footprint of an action (e.g., sitting down vs standing up look like a vertical blob).</p>
+    </div>
+    <div class="concept">
+      <strong>Motion History Image (MHI)</strong>
+      <p>A grayscale image where pixel intensity encodes <em>how recently</em> motion happened:</p>
+      <div class="formula-box">
+        H(x, y, t) = &tau; &nbsp;if motion at (x,y)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= max(0, H(x, y, t-1) - 1) &nbsp;else
+      </div>
+      <p>Bright pixels = motion happened right now. Dim pixels = motion happened seconds ago.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="label">ANALOGY: FOOTPRINTS IN THE SNOW</span>
+    <p>A fresh footprint in freshly fallen snow is crisp and deep (high value $\tau$). Older footprints from 10 minutes ago have slowly accumulated drifting snow and are faint. By looking at the brightness gradient of the footprints, you can instantly see which direction the person walked!</p>
+  </div>
+
+  <h2>Extracting Motion Direction from MHI Gradients</h2>
+  <p>By computing spatial gradients $(\partial H / \partial x, \partial H / \partial y)$ across the MHI, we can extract the precise flow orientation of the action without running expensive optical flow on every frame!</p>
+
+  <h2>Python Practical: Building a Motion History Image (MHI)</h2>
+  <div class="code-wrap">
+    <button class="copy-btn">Copy</button>
+    <pre><code>import cv2
+import numpy as np
+
+cap = cv2.VideoCapture(0)
+
+ret, frame = cap.read()
+h, w = frame.shape[:2]
+
+# Initialize MHI canvas (float32 array)
+mhi = np.zeros((h, w), dtype=np.float32)
+prev_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+MHI_DURATION = 30  # Number of frames motion persists (decay lifespan)
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Frame difference to find active motion
+    diff = cv2.absdiff(prev_gray, gray)
+    _, motion_mask = cv2.threshold(diff, 30, 1, cv2.THRESH_BINARY)
+
+    # 1. Decrement all existing values by 1 (decay over time)
+    mhi[mhi > 0] -= 1
+
+    # 2. Reset pixels with active motion to full duration
+    mhi[motion_mask == 1] = MHI_DURATION
+
+    # Normalize MHI to 0..255 for display
+    mhi_display = np.uint8((mhi / MHI_DURATION) * 255)
+
+    # Apply false-color heatmap (JET) so recency looks like thermal glow
+    mhi_colored = cv2.applyColorMap(mhi_display, cv2.COLORMAP_JET)
+    mhi_colored[mhi_display == 0] = 0  # Keep static background black
+
+    cv2.imshow('Live Feed', frame)
+    cv2.imshow('Motion History Image (Recency Heatmap)', mhi_colored)
+
+    prev_gray = gray
+    if cv2.waitKey(20) & 0xFF == 27:
+        break
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+  </div>
+</section>
+
+<!-- STEP 7 -->
+<section class="step-view" data-title="7. Dynamic Stereo &amp; Scene Flow">
+  <header class="step-header">
+    <span class="step-kicker">STEP 7 &middot; 3D MOTION</span>
+    <h1>Dynamic Stereo &amp; Scene Flow</h1>
+    <p class="lede">Standard stereo cameras give 3D depth $(X, Y, Z)$ at a single instant. Optical flow gives 2D velocities $(u, v)$ across time. <strong>Dynamic Stereo</strong> marries both into <strong>Scene Flow</strong>: the complete 3D velocity vector field in metric meters per second.</p>
+  </header>
+
+  <h2>The Convergence of Stereo and Time</h2>
+  <div class="panel purple">
+    <p>A dynamic stereo rig consists of two calibrated cameras (Left and Right) recording video simultaneously:</p>
+    <ul>
+      <li><strong>Spatial Disparity ($d$):</strong> Between Left and Right frames at time $t$. Using baseline $B$ and focal length $f$, depth is:
+        <div class="formula-box">Z = (f &middot; B) / d</div>
+      </li>
+      <li><strong>Temporal Optical Flow ($u, v$):</strong> Between Left frame at time $t$ and Left frame at time $t + 1$.</li>
+      <li><strong>Scene Flow ($V_X, V_Y, V_Z$):</strong> Combining the 3D position $(X_t, Y_t, Z_t)$ and $(X_{t+1}, Y_{t+1}, Z_{t+1})$ yields the physical 3D velocity vector of the real world.</li>
+    </ul>
+  </div>
+
+  <h2>Autonomous Vehicle Case Study</h2>
+  <p>Imagine a self-driving car equipped with a stereo camera driving down a busy city avenue:</p>
+  <table class="comparison">
+    <tr>
+      <th>Measurement</th>
+      <th>Standard Optical Flow</th>
+      <th>Dynamic Stereo (Scene Flow)</th>
+    </tr>
+    <tr>
+      <td><strong>Crossing Pedestrian</strong></td>
+      <td>Shows 2D vector of 15 pixels/frame leftward. Cannot tell if child is 3 meters away or adult is 30 meters away!</td>
+      <td>Calculates position $X=2.4\text{m}, Z=8.1\text{m}$ and velocity $V_X = -1.2\text{ m/s}$. Emergency braking triggered accurately.</td>
+    </tr>
+    <tr>
+      <td><strong>Ego-Motion</strong></td>
+      <td>Every static building has massive optical flow because the car is moving. Confusing to interpret.</td>
+      <td>Identifies that static buildings have $V_{\text{world}} = 0$ while car has $V_{\text{car}} = 12\text{ m/s}$. Separates camera motion from moving objects.</td>
+    </tr>
+  </table>
+
+  <h2>The 4-Way Correspondence Constraint</h2>
+  <div class="flow">
+    Left Frame (t)  &larr;&mdash; Disparity d(t) &mdash;&rarr;  Right Frame (t)<br>
+         &darr; Temporal Flow                              &darr; Temporal Flow<br>
+    Left Frame (t+1) &larr;&mdash; Disparity d(t+1) &mdash;&rarr; Right Frame (t+1)
+  </div>
+  <p>Because all four images must agree, scene flow algorithms use this closed loop to reject false depth matches and occlusions with remarkable precision.</p>
+</section>
+
+<!-- STEP 8 -->
+<section class="step-view" data-title="8. Motion Estimation &amp; RANSAC">
+  <header class="step-header">
+    <span class="step-kicker">STEP 8 &middot; GLOBAL MOTION</span>
+    <h1>Motion Parameter Estimation &amp; RANSAC</h1>
+    <p class="lede">When a handheld camera or drone moves, how do we estimate the camera's global motion while ignoring independent moving objects (like cars or people walking in front)?</p>
+  </header>
+
+  <h2>Parametric Motion Models</h2>
+  <div class="grid-2">
+    <div class="concept">
+      <strong>Affine Motion (6 Degrees of Freedom)</strong>
+      <p>Handles translation $(t_x, t_y)$, rotation $\theta$, anisotropic scale, and shear. Preserves parallel lines:</p>
+      <div class="formula-box">
+        [ x' ] = [ a<sub>11</sub> &nbsp; a<sub>12</sub> ] [ x ] + [ t<sub>x</sub> ]<br>
+        [ y' ] = [ a<sub>21</sub> &nbsp; a<sub>22</sub> ] [ y ] + [ t<sub>y</sub> ]
+      </div>
+      <p>Ideal for video stabilization when camera rotation and zoom are moderate.</p>
+    </div>
+    <div class="concept">
+      <strong>Planar Homography (8 Parameters)</strong>
+      <p>The exact projective transformation between two views of a flat plane (or pure camera rotation about its center):</p>
+      <div class="formula-box">
+        p' &sim; H &middot; p &nbsp;&nbsp;(where H is a 3x3 matrix)
+      </div>
+      <p>Used for panoramic image stitching and aerial mapping.</p>
+    </div>
+  </div>
+
+  <h2>Why Least Squares Fails: The Outlier Catastrophe</h2>
+  <p>Suppose our tracker finds 100 feature vectors between frames. 80 points belong to background buildings (camera panning right), while 20 points belong to a bus driving left.</p>
+  <div class="panel pink">
+    <strong>Least Squares Disaster:</strong>
+    Standard least squares minimizes $\sum (y_i - \hat{y}_i)^2$. Because errors are squared, those 20 bus points exert enormous leverage, corrupting the solution completely!
+  </div>
+
+  <h2>The RANSAC Algorithm (Random Sample Consensus)</h2>
+  <p>Fischler and Bolles (1981) introduced RANSAC to fit mathematical models in the presence of massive outlier contamination:</p>
+  <ol class="step-by-step">
+    <li><strong>Hypothesize:</strong> Randomly pick the minimum number of points required to fit the model (e.g., 3 point pairs for Affine, or 4 for Homography).</li>
+    <li><strong>Model:</strong> Compute transformation candidate $H_{\text{cand}}$ using only this minimal subset.</li>
+    <li><strong>Test &amp; Score:</strong> Project all $N$ points using $H_{\text{cand}}$. Count how many points have error $\|p'_i - H_{\text{cand}} p_i\| &lt; \epsilon$ (inliers).</li>
+    <li><strong>Iterate:</strong> Repeat steps 1&ndash;3 for $K$ iterations. Keep the model with the largest consensus inlier set.</li>
+    <li><strong>Refine:</strong> Re-estimate the final transformation matrix using all verified inliers via Least Squares.</li>
+  </ol>
+
+  <h2>Python Practical: Video Stabilization via RANSAC Affine Estimation</h2>
+  <div class="code-wrap">
+    <button class="copy-btn">Copy</button>
+    <pre><code>import cv2
+import numpy as np
+
+def estimate_camera_motion(prev_gray, curr_gray):
+    """
+    Estimates global background affine motion while ignoring
+    independently moving objects using RANSAC.
+    """
+    # 1. Detect good features in previous frame
+    prev_pts = cv2.goodFeaturesToTrack(
+        prev_gray, maxCorners=300, qualityLevel=0.01, minDistance=15
+    )
+    if prev_pts is None:
+        return np.eye(2, 3)
+
+    # 2. Track points into current frame
+    curr_pts, status, _ = cv2.calcOpticalFlowPyrLK(
+        prev_gray, curr_gray, prev_pts, None
+    )
+
+    valid_prev = prev_pts[status == 1]
+    valid_curr = curr_pts[status == 1]
+
+    if len(valid_prev) < 10:
+        return np.eye(2, 3)
+
+    # 3. Fit 2D Rigid/Affine motion using RANSAC
+    #    cv2.RANSAC filters out moving pedestrians/vehicles as outliers!
+    M, inliers = cv2.estimateAffinePartial2D(
+        valid_prev, valid_curr, method=cv2.RANSAC, ransacReprojThreshold=3.0
+    )
+
+    return M if M is not None else np.eye(2, 3)
+
+# Example usage on simulated shake:
+# dx, dy = M[0, 2], M[1, 2]  # Translation
+# da = np.arctan2(M[1, 0], M[0, 0])  # Rotation angle
+print("RANSAC motion estimator compiled successfully!")</code></pre>
+  </div>
+</section>
+
+<!-- STEP 9 -->
+<section class="step-view" data-title="9. Synthesis &amp; Challenges">
+  <header class="step-header">
+    <span class="step-kicker">STEP 9 &middot; MASTERY</span>
+    <h1>Synthesis, Review &amp; Challenges</h1>
+    <p class="lede">You now possess a complete theoretical and practical understanding of motion analysis in computer vision. Let's compare all techniques and test your knowledge.</p>
+  </header>
+
+  <h2>Comparison Matrix: Motion Analysis Paradigms</h2>
+  <table class="comparison">
+    <tr>
+      <th>Technique</th>
+      <th>Key Assumption</th>
+      <th>Output</th>
+      <th>Ideal Use Case</th>
+    </tr>
+    <tr>
+      <td><strong>Frame Differencing</strong></td>
+      <td>Static camera, high contrast objects</td>
+      <td>Binary edge change mask</td>
+      <td>Simple motion triggers, burglar alarms</td>
+    </tr>
+    <tr>
+      <td><strong>Gaussian Mixture Models (MOG2)</strong></td>
+      <td>Multimodal static background, stationary camera</td>
+      <td>Clean foreground mask with shadows</td>
+      <td>Security surveillance, highway vehicle counting</td>
+    </tr>
+    <tr>
+      <td><strong>Lucas-Kanade (Sparse)</strong></td>
+      <td>Spatial coherence, small motion, corners</td>
+      <td>Vectors at sparse keypoints</td>
+      <td>Robotics visual odometry, camera tracking</td>
+    </tr>
+    <tr>
+      <td><strong>Farneb&auml;ck (Dense)</strong></td>
+      <td>Local polynomial constancy across pyramid</td>
+      <td>Full 2D vector field $(u, v)$ for all pixels</td>
+      <td>Action recognition, fluid dynamics, video editing</td>
+    </tr>
+    <tr>
+      <td><strong>Motion History Images (MHI)</strong></td>
+      <td>Temporal decay of motion boundaries</td>
+      <td>Scalar recency map $H(x, y)$</td>
+      <td>Gesture recognition, athletic form analysis</td>
+    </tr>
+    <tr>
+      <td><strong>Dynamic Stereo / Scene Flow</strong></td>
+      <td>Calibrated stereo rig + temporal flow</td>
+      <td>3D metric velocities $(V_X, V_Y, V_Z)$</td>
+      <td>Self-driving cars, drone obstacle avoidance</td>
+    </tr>
+    <tr>
+      <td><strong>RANSAC Parametric Motion</strong></td>
+      <td>Dominant background motion + outlier objects</td>
+      <td>Rigid/Affine/Homography matrix</td>
+      <td>Electronic video stabilization, panorama mosaic</td>
+    </tr>
+  </table>
+
+  <h2>Deep-Dive Concept Checks</h2>
+  <div class="reveal">
+    <summary>Why does the aperture problem disappear at corner points?</summary>
+    <div>At a flat edge, the image gradient exists in only one direction, leaving motion along the edge unconstrained. At a corner, image gradients point in at least two orthogonal directions ($\lambda_1 &gt; 0$ and $\lambda_2 &gt; 0$), making the structure tensor $A^T A$ full rank and invertible.</div>
+  </div>
+  <div class="reveal">
+    <summary>How does an image pyramid allow Lucas-Kanade to track fast-moving objects?</summary>
+    <div>Lucas-Kanade uses a 1st-order Taylor series approximation which breaks if displacements exceed a few pixels. By downsampling the image into a pyramid (e.g. 1/8 scale), a 40-pixel displacement shrinks to 5 pixels, which LK solves easily before refining progressively down to the native resolution.</div>
+  </div>
+  <div class="reveal">
+    <summary>What is the difference between Scene Flow and Optical Flow?</summary>
+    <div>Optical Flow is 2D and measures apparent pixel velocities $(dx/dt, dy/dt)$ on the flat sensor. Scene Flow is 3D and measures real-world physical velocities $(dX/dt, dY/dt, dZ/dt)$ in meters per second in 3D Euclidean space.</div>
+  </div>
+
+  <h2>Mastery Checklist</h2>
+  <ul class="checklist">
+    <li>I understand why physical 3D motion does not always produce 2D optical flow.</li>
+    <li>I know why simple frame differencing creates hollow "ghosting" effects on uniform objects.</li>
+    <li>I can explain how Gaussian Mixture Models handle swaying trees and water ripples.</li>
+    <li>I can derive the optical flow constraint equation: $I_x u + I_y v + I_t = 0$.</li>
+    <li>I can explain the aperture problem and how Lucas-Kanade solves it using a local neighborhood.</li>
+    <li>I know why $A^T A$ is identical to the Harris/Shi-Tomasi structure tensor.</li>
+    <li>I can implement dense optical flow and visualize motion direction with the HSV color wheel.</li>
+    <li>I understand the KLT feature lifecycle: detection, pyramidal tracking, and replenishment.</li>
+    <li>I can read an X-T slice and interpret line slopes as velocities.</li>
+    <li>I can build Motion Energy and Motion History Images (MHI) in Python.</li>
+    <li>I understand Dynamic Stereo and the 4-way correspondence loop for Scene Flow.</li>
+    <li>I can use RANSAC to estimate camera ego-motion while rejecting moving objects.</li>
+  </ul>
+
+  <div class="challenge">
+    <h3>Hands-on Practice Exercises</h3>
+    <ol>
+      <li><strong>Shadow Threshold Tuning:</strong> Modify the MOG2 code to visualize detected shadows in bright cyan and compare with the binary foreground mask.</li>
+      <li><strong>Motion Direction Gate:</strong> Write a Farneb&auml;ck dense flow filter that highlights only pixels moving downward (e.g. falling raindrops or pedestrian walking south).</li>
+      <li><strong>KLT Speed Meter:</strong> Compute the average velocity vector of all active KLT features across 30 frames. When does the average spike?</li>
+      <li><strong>MHI Action Classifier:</strong> Record two short video clips: one waving your hand left-to-right, one waving right-to-left. Inspect the spatial gradient of the resulting MHI.</li>
+      <li><strong>Video Stabilizer:</strong> Run the RANSAC affine motion estimator on a handheld camera video, invert the affine transform, and warp each frame with <code>cv2.warpAffine</code> to produce a stabilized video stream.</li>
+    </ol>
+  </div>
+
+  <div class="finish">
+    <h2>Motion Analysis Codelab Complete! &#127881;</h2>
+    <p>Congratulations! You have mastered the full spectrum of classical and modern motion analysis in computer vision, from pixel-level background subtraction to 3D scene flow and robust parametric motion estimation.</p>
+  </div>
+</section>
+
+</div>
+</main>
+</div>
+
+<script>
+(() => {
+  const steps = [...document.querySelectorAll('.step-view')];
+  const titles = steps.map(step => step.dataset.title);
+  const nav = document.getElementById('stepNav');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const content = document.getElementById('content');
+  const completed = new Set();
+  let current = 0;
+
+  // Build sidebar step buttons
+  nav.innerHTML = titles.map((title, index) =>
+    `<button class="step-link" data-step="${index}" type="button">
+       <span class="step-number">${String(index + 1).padStart(2, '0')}</span>
+       <span>${title}</span>
+       <span class="step-status" aria-hidden="true"></span>
+     </button>`
+  ).join('');
+
+  const getHashStep = () => {
+    const match = location.hash.match(/^#step-(\d+)$/);
+    const value = match ? Number(match[1]) - 1 : 0;
+    return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+  };
+
+  function render(updateHash = true) {
+    current = Math.max(0, Math.min(current, steps.length - 1));
+    steps.forEach((step, index) => {
+      const active = index === current;
+      step.classList.toggle('active', active);
+      step.setAttribute('aria-hidden', String(!active));
+    });
+
+    document.querySelectorAll('.step-link').forEach((button, index) => {
+      button.classList.toggle('active', index === current);
+      button.setAttribute('aria-current', index === current ? 'step' : 'false');
+      button.querySelector('.step-status').textContent = completed.has(index) ? '✓' : '';
+    });
+
+    const percent = Math.round(((current + 1) / steps.length) * 100);
+    document.getElementById('progressBar').style.width = `${percent}%`;
+    document.getElementById('progressText').textContent = `${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+    document.getElementById('mobileTitle').textContent = titles[current];
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === steps.length - 1;
+    document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Codelab Complete' : 'Next Step →';
+
+    if (updateHash) {
+      history.pushState({ step: current }, '', `#step-${current + 1}`);
+    }
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    sidebar.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= steps.length) return;
+    completed.add(current);
+    current = index;
+    render();
+  }
+
+  // Inject bottom navigation buttons
+  const navRow = document.createElement('div');
+  navRow.className = 'nav-row';
+  navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">&#8592; Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next Step &#8594;</button>';
+  content.appendChild(navRow);
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+  nav.addEventListener('click', event => {
+    const button = event.target.closest('.step-link');
+    if (button) goTo(Number(button.dataset.step));
+  });
+
+  menuBtn.addEventListener('click', () => {
+    const open = sidebar.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+  });
+
+  // Global click handler: copy buttons & interactive quizzes
+  document.addEventListener('click', async event => {
+    const copy = event.target.closest('.copy-btn');
+    if (copy) {
+      const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+      try {
+        await navigator.clipboard.writeText(code);
+        copy.textContent = 'Copied!';
+      } catch {
+        copy.textContent = 'Select & copy';
+      }
+      setTimeout(() => copy.textContent = 'Copy', 1200);
+      return;
+    }
+
+    const option = event.target.closest('.quiz-option');
+    if (option) {
+      const quiz = option.closest('.quiz');
+      if (quiz.dataset.answered) return;
+      const options = [...quiz.querySelectorAll('.quiz-option')];
+      const choice = options.indexOf(option);
+      const answer = Number(quiz.dataset.answer);
+      quiz.dataset.answered = 'true';
+      options.forEach(button => button.disabled = true);
+      option.classList.add(choice === answer ? 'correct' : 'wrong');
+      if (choice !== answer) options[answer].classList.add('correct');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
+      feedback.classList.add('show');
+    }
+  });
+
+  window.addEventListener('popstate', () => { current = getHashStep(); render(false); });
+  window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+
+  document.addEventListener('keydown', event => {
+    if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+    if (event.key === 'ArrowRight') goTo(current + 1);
+    if (event.key === 'ArrowLeft') goTo(current - 1);
+  });
+
+  current = getHashStep();
+  render(false);
+})();
+</script>
+</body>
+</html>

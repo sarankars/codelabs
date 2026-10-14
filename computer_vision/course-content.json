@@ -120,6 +120,34 @@
           ]
         }
       ]
+    },
+    {
+      "id": "module-cv-4-motion-analysis",
+      "title": "Motion Analysis",
+      "description": "Understand 2D and 3D motion in computer vision through background subtraction, optical flow estimation, KLT feature tracking, spatio-temporal volume analysis, dynamic stereo scene flow, and RANSAC parametric motion estimation.",
+      "order": 3,
+      "topics": [
+        {
+          "id": "topic-cv-4-1-motion-analysis",
+          "title": "Motion Analysis: Background Subtraction, Optical Flow, KLT & Dynamic Stereo",
+          "description": "Comprehensive study of motion in video: Background Subtraction and Modeling (MOG2), Optical Flow and the aperture problem, Lucas-Kanade and Farnebäck algorithms, KLT tracker, Spatio-Temporal Analysis (MHI), Dynamic Stereo Scene Flow, and Motion Parameter Estimation using RANSAC.",
+          "order": 0,
+          "resources": [
+            {
+              "id": "codelab-cv-4-1-motion-analysis",
+              "type": "codelab",
+              "title": "Motion Analysis Codelab",
+              "order": 0,
+              "description": "Interactive codelab covering Background Subtraction and Modeling, Optical Flow, KLT Tracker, Spatio-Temporal Analysis, Dynamic Stereo, and Motion Parameter Estimation with RANSAC.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/computer_vision/motion_analysis/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }
