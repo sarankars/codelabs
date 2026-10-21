@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motion Analysis — Background Subtraction &amp; Modeling Codelab</title>
+<meta name="description" content="Beginner-friendly interactive codelab teaching Motion Analysis: Background Subtraction and Modeling with intuitive explanations, step-by-step math, and practical Python + OpenCV code examples.">
+<meta name="theme-color" content="#2856d8">
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+  :root{
+    --blue:#2856d8;
+    --blue-dark:#17348e;
+    --blue-light:#e4ebff;
+    --ink:#101010;
+    --paper:#f5f7fb;
+    --white:#fff;
+    --yellow:#ffd83d;
+    --mint:#75e6c5;
+    --pink:#ff9bb7;
+    --orange:#ffb866;
+    --teal:#38bdf8;
+    --purple:#d8b4fe;
+    --border:3px solid var(--ink);
+    --shadow:6px 6px 0 var(--ink);
+    --shadow-sm:4px 4px 0 var(--ink);
+    --sidebar:292px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:auto}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.55}
+  button,a{font:inherit}
+  button{cursor:pointer}
+  :focus-visible{outline:4px solid var(--yellow);outline-offset:3px}
+  .app{min-height:100vh}
+  .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar);padding:22px 18px;background:var(--blue);border-right:var(--border);overflow:auto;z-index:20}
+  .brand{padding:16px;margin-bottom:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+  .eyebrow,.progress-meta,.step-number,.step-kicker,.label,.formula-box{font-family:"DM Mono",monospace}
+  .eyebrow{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+  .brand h2{margin:5px 0 3px;font-size:1.35rem;line-height:1.1}
+  .brand p{margin:0;font-size:.82rem;font-weight:600;color:#333}
+  .progress-wrap{margin:0 2px 20px;color:#fff}
+  .progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-size:.72rem}
+  .progress-track{height:16px;padding:2px;background:#fff;border:var(--border)}
+  .progress-bar{height:100%;width:0;background:var(--yellow);transition:width .2s ease}
+  .steps{display:grid;gap:8px}
+  .step-link{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:9px 8px;color:#fff;background:transparent;border:3px solid transparent;text-align:left;font-weight:700;line-height:1.15}
+  .step-link:hover{background:rgba(255,255,255,.14)}
+  .step-link.active{color:var(--ink);background:#fff;border-color:var(--ink);box-shadow:var(--shadow-sm)}
+  .step-number{width:30px;height:30px;display:grid;place-items:center;border:2px solid currentColor;font-size:.78rem}
+  .step-status{text-align:center}
+  .mobile-bar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px;background:var(--blue);border-bottom:var(--border)}
+  .menu-btn,.mobile-title{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+  .menu-btn{width:46px;height:42px;font-size:1.25rem;font-weight:900}
+  .mobile-title{flex:1;padding:8px 10px;font-weight:800}
+  main{margin-left:var(--sidebar);min-height:100vh}
+  .content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:42px 0 28px}
+  .step-view{display:none}
+  .step-view.active{display:block;animation:stepIn .18s ease-out}
+  @keyframes stepIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+  .step-header{padding:28px;margin-bottom:24px;background:#fff;border:var(--border);box-shadow:var(--shadow)}
+  .step-kicker{display:inline-block;margin-bottom:13px;padding:5px 9px;color:#fff;background:var(--blue);border:2px solid var(--ink);font-size:.72rem}
+  h1,h2,h3{line-height:1.12}
+  h1{margin:0 0 12px;font-size:clamp(1.9rem,4.5vw,3.2rem);letter-spacing:-.04em}
+  h2{margin:30px 0 12px;font-size:clamp(1.4rem,2.8vw,1.95rem)}
+  h3{margin:22px 0 9px;font-size:1.15rem}
+  .lede{max-width:820px;margin:0;font-size:1.06rem;color:#222}
+  .objective{margin-top:20px;padding:14px 16px;background:var(--yellow);border:var(--border);box-shadow:var(--shadow-sm);font-weight:700}
+  .panel,.concept,.quiz,.reveal,.formula-box{background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+  .panel{padding:20px;margin:20px 0}
+  .panel.blue{background:var(--blue-light)}
+  .panel.mint{background:var(--mint)}
+  .panel.pink{background:var(--pink)}
+  .panel.yellow{background:var(--yellow)}
+  .panel.orange{background:var(--orange)}
+  .panel.teal{background:#e0f7ff}
+  .panel.purple{background:var(--purple)}
+  .callout{padding:16px 18px;margin:20px 0;background:#fff;border:var(--border);box-shadow:var(--shadow-sm)}
+  .callout .label{display:inline-block;margin-bottom:8px;padding:3px 7px;color:#fff;background:var(--ink);border:2px solid var(--ink);font-size:.72rem}
+  .grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid-3{display:grid;gap:16px;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .concept{padding:18px}
+  .concept strong{font-size:1.05rem;display:block;margin-bottom:6px}
+  .concept p:last-child{margin-bottom:0}
+  .code-wrap{position:relative;margin:18px 0}
+  pre{margin:0;padding:20px;overflow:auto;color:#f7f7f7;background:#111;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",ui-monospace,monospace;font-size:.83rem;line-height:1.6;tab-size:2}
+  .copy-btn{position:absolute;top:8px;right:8px;z-index:2;padding:5px 9px;background:var(--yellow);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:.75rem;font-weight:800}
+  code:not(pre code){padding:2px 6px;background:#e8edf7;border:1px solid #9da9bb;font-family:"DM Mono",monospace;font-size:.88em}
+  ul,ol{padding-left:1.4rem}
+  li{margin:7px 0}
+  .comparison{width:100%;margin:18px 0;background:#fff;border:var(--border);border-collapse:collapse}
+  .comparison th,.comparison td{padding:11px;border:2px solid var(--ink);text-align:left;vertical-align:top}
+  .comparison th{color:#fff;background:var(--blue)}
+  .quiz{padding:20px;margin:22px 0}
+  .quiz-options{display:grid;gap:9px;margin-top:14px}
+  .quiz-option{text-align:left;padding:11px 13px;background:#fff;border:2px solid var(--ink);font-weight:700}
+  .quiz-option:hover{background:var(--blue-light)}
+  .quiz-option.correct{background:var(--mint)}
+  .quiz-option.wrong{background:var(--pink)}
+  .quiz-feedback{display:none;margin-top:13px;padding:10px;border:2px solid var(--ink);font-weight:700}
+  .quiz-feedback.show{display:block}
+  .reveal{margin:18px 0}
+  .reveal summary{padding:13px 16px;cursor:pointer;background:var(--blue-light);font-weight:800}
+  .reveal>div{padding:15px 16px}
+  .challenge{padding:22px;margin:24px 0;color:#fff;background:var(--ink);border:var(--border);box-shadow:var(--shadow)}
+  .challenge h3{margin-top:0;color:var(--yellow)}
+  .flow{margin:20px 0;padding:20px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-family:"DM Mono",monospace;line-height:1.9;overflow:auto}
+  .formula-box{padding:14px 18px;margin:16px 0;font-size:.95rem;text-align:center;line-height:1.8;background:#fff}
+  .checklist{list-style:none;padding:0}
+  .checklist li{position:relative;padding-left:30px}
+  .checklist li::before{content:"\25A1";position:absolute;left:0;font-size:1.25rem;font-weight:900}
+  .nav-row{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:20px;border-top:var(--border)}
+  .nav-btn{min-width:130px;padding:12px 18px;background:#fff;border:var(--border);box-shadow:var(--shadow-sm);font-weight:900}
+  .nav-btn.primary{color:#fff;background:var(--blue)}
+  .nav-btn:disabled{opacity:.35;cursor:not-allowed}
+  .finish{padding:20px;margin-top:24px;background:var(--mint);border:var(--border);box-shadow:var(--shadow)}
+  @media(max-width:850px){
+    :root{--sidebar:270px;--mobile-bar-height:65px}
+    .sidebar{inset:var(--mobile-bar-height) auto 0 0;transform:translateX(-100%);transition:transform .2s ease}
+    .sidebar.open{transform:none}
+    .mobile-bar{display:flex;height:var(--mobile-bar-height)}
+    main{margin-left:0}
+    .content{width:min(940px,calc(100% - 28px));padding-top:24px}
+  }
+  @media(max-width:680px){
+    .grid-2,.grid-3{grid-template-columns:1fr}
+    .content{width:calc(100% - 18px);padding-top:16px}
+    .step-header{padding:20px 16px}
+    .panel,.concept,.quiz{padding:16px}
+    .nav-row{position:sticky;bottom:0;z-index:10;padding:12px 0;background:var(--paper)}
+    .nav-btn{min-width:0;flex:1;padding:11px 10px}
+    pre{padding:16px 12px;font-size:.76rem}
+    .copy-btn{position:static;align-self:flex-end;margin-bottom:6px}
+    .code-wrap{display:flex;flex-direction:column}
+    .code-wrap pre{order:2}
+    .code-wrap .copy-btn{order:1}
+    .comparison{display:block;overflow-x:auto}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar" aria-label="Codelab navigation">
+  <div class="brand">
+    <div class="eyebrow">Computer Vision &middot; Motion</div>
+    <h2>Motion Analysis</h2>
+    <p>Background Subtraction &amp; Modeling</p>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-meta"><span>YOUR PROGRESS</span><span id="progressText">0%</span></div>
+    <div class="progress-track" id="progressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+  <nav class="steps" id="stepNav" aria-label="Lesson steps"></nav>
+</aside>
+
+<div class="mobile-bar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Open lesson navigation" aria-expanded="false">&#9776;</button>
+  <div class="mobile-title" id="mobileTitle">Motion Analysis</div>
+</div>
+
+<main>
+<div class="content" id="content">
+
+<!-- STEP 1: Big Picture -->
+<section class="step-view" data-title="1. The Big Picture">
+  <header class="step-header">
+    <span class="step-kicker">STEP 1 &middot; INTUITION &amp; FOUNDATIONS</span>
+    <h1>What is Background Subtraction?</h1>
+    <p class="lede">Imagine a security camera pointed at an empty hallway. The floor, walls, and ceiling remain the same every second. Suddenly, a student walks through. How does a computer automatically detect them? It <strong>subtracts the background!</strong></p>
+  </header>
+
+  <div class="objective">
+    <strong>Core Lesson Goal:</strong> Learn how computer vision isolates moving objects (foreground) from stationary environments (background). We start with simple subtraction, uncover its real-world failures, and master adaptive statistical modeling (MOG2 &amp; KNN) with Python and OpenCV.
+  </div>
+
+  <h2>Why is Motion Analysis Important?</h2>
+  <p>In a standard video, you have 30 images every second. Processing every single pixel for deep object recognition is computationally wasteful. Background subtraction gives us a lightweight, real-time "filter": it discards 95% of static pixels and directs our focus exclusively to moving objects.</p>
+
+  <div class="grid-3">
+    <div class="concept">
+      <strong>1. Security &amp; Surveillance</strong>
+      <p>Detect trespassers, perimeter breaches, or unattended bags in airports and train stations.</p>
+    </div>
+    <div class="concept">
+      <strong>2. Traffic &amp; Smart Cities</strong>
+      <p>Count passing vehicles, monitor vehicle speed, and detect illegal lane changes or stalled cars.</p>
+    </div>
+    <div class="concept">
+      <strong>3. Human-Computer Interaction</strong>
+      <p>Track body gestures, sports players on a field, or customers browsing retail store aisles.</p>
+    </div>
+  </div>
+
+  <h2>The Mathematical Formulation</h2>
+  <p>A video is a 3-dimensional array of pixel values: $I(x, y, t)$, where $(x, y)$ is the spatial pixel position and $t$ is time (frame number).</p>
+
+  <div class="formula-box">
+    <strong>Foreground Mask:</strong><br>
+    M(x, y, t) = 1 &nbsp; (Foreground / Motion), &nbsp; if &nbsp; | I(x, y, t) - B(x, y, t) | &gt; &tau;<br>
+    M(x, y, t) = 0 &nbsp; (Background / Static), &nbsp;&nbsp; otherwise
+  </div>
+
+  <ul>
+    <li><code>I(x, y, t)</code>: The current video frame.</li>
+    <li><code>B(x, y, t)</code>: Our computer's model/estimate of what the scene looks like without any moving objects.</li>
+    <li><code>&tau; (tau)</code>: A detection threshold that ignores tiny camera sensor noise.</li>
+    <li><code>M(x, y, t)</code>: A binary black-and-white mask where white pixels (255) indicate motion!</li>
+  </ul>
+
+  <h2>The 5-Stage Motion Pipeline</h2>
+  <div class="flow">
+    [1. Video Frame I(t)]<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&darr;<br>
+    [2. Background Modeling B(t)] &larr; (Continuous update over time)<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&darr;<br>
+    [3. Subtraction &amp; Thresholding] &rarr; Raw Binary Mask (0 or 255)<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&darr;<br>
+    [4. Morphological Cleanup] &rarr; Noise suppression &amp; hole filling<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&darr;<br>
+    [5. Contours &amp; Bounding Boxes] &rarr; Tracking, counting &amp; alerts
+  </div>
+
+  <div class="quiz" data-answer="1" data-correct="Correct! The foreground mask is a binary image where 1 (white / 255) represents moving objects and 0 (black / 0) represents the stationary background.">
+    <h3>Quick Check: What is the primary output of a background subtraction algorithm?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">A 3D mesh model of the scene</button>
+      <button class="quiz-option">A binary mask separating moving pixels from static scene pixels</button>
+      <button class="quiz-option">A compressed MP4 video file</button>
+      <button class="quiz-option">A color histogram of the entire frame</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 2: Frame Differencing -->
+<section class="step-view" data-title="2. Frame Differencing">
+  <header class="step-header">
+    <span class="step-kicker">STEP 2 &middot; SIMPLEST APPROACH</span>
+    <h1>Frame Differencing: The Naive Method</h1>
+    <p class="lede">What is the simplest way to see if something moved? Compare the photo you just took with the photo you took one tenth of a second ago!</p>
+  </header>
+
+  <h2>Two-Frame Differencing</h2>
+  <p>In two-frame differencing, our background model is simply the previous frame: <code>B(t) = I(t - 1)</code>.</p>
+  <div class="formula-box">
+    &Delta;I = | I(x, y, t) - I(x, y, t - 1) |
+  </div>
+  <p>If the absolute pixel difference &Delta;I exceeds a threshold &tau; (for example 25 out of 255), we say motion occurred at that pixel.</p>
+
+  <h2>Python Code: Two-Frame Difference</h2>
+  <p>Let's write a complete OpenCV script to test this. If you don't have a webcam, the code includes a synthetic moving square simulator!</p>
+
+  <div class="code-wrap">
+    <button class="copy-btn">Copy</button>
+    <pre><code>import cv2
+import numpy as np
+
+# Open webcam (or replace 0 with 'sample_video.mp4')
+cap = cv2.VideoCapture(0)
+
+# Read the first frame
+ret, prev_frame = cap.read()
+if not ret:
+    print("Cannot read camera, generating synthetic frames instead...")
+
+# Convert previous frame to grayscale and blur slightly to suppress camera noise
+prev_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
+prev_gray = cv2.GaussianBlur(prev_gray, (21, 21), 0)
+
+while cap.isOpened():
+    ret, curr_frame = cap.read()
+    if not ret:
+        break
+
+    # 1. Convert current frame to grayscale & blur
+    curr_gray = cv2.cvtColor(curr_frame, cv2.COLOR_BGR2GRAY)
+    curr_gray = cv2.GaussianBlur(curr_gray, (21, 21), 0)
+
+    # 2. Compute absolute difference between current & previous frame
+    diff = cv2.absdiff(curr_gray, prev_gray)
+
+    # 3. Apply threshold: differences > 25 become 255 (white)
+    _, thresh = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)
+
+    # 4. Dilate mask to fill in small holes
+    thresh = cv2.dilate(thresh, None, iterations=2)
+
+    # Display results
+    cv2.imshow("Camera Feed", curr_frame)
+    cv2.imshow("Difference (|I_t - I_{t-1}|)", diff)
+    cv2.imshow("Binary Motion Mask", thresh)
+
+    # Update previous frame for the next iteration
+    prev_gray = curr_gray.copy()
+
+    if cv2.waitKey(30) & 0xFF == 27:  # ESC to exit
+        break
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+  </div>
+
+  <h2>Why Frame Differencing Fails in Real Life</h2>
+  <div class="panel orange">
+    <strong>Two Fatal Flaws of Frame Differencing:</strong>
+    <ol>
+      <li>
+        <strong>The "Hollow Ghost" (Interior Blindness):</strong><br>
+        Suppose a large white delivery truck drives across the street. The truck's front bumper replaces the asphalt (difference!), and the back bumper is replaced by asphalt (difference!). But the entire middle side of the truck is uniformly white! Frame $t$ is white, and Frame $t-1$ was also white. Their difference is <strong>0</strong>! The truck appears like two floating edges with a hollow transparent center.
+      </li>
+      <li>
+        <strong>The "Stop-and-Go" Disappearance:</strong><br>
+        If a person walks into the room and stands still to talk, $I(t)$ and $I(t-1)$ become identical. The difference drops to zero, and the person completely vanishes from the motion detector!
+      </li>
+    </ol>
+  </div>
+
+  <div class="quiz" data-answer="2" data-correct="Correct! When a uniformly textured object moves, interior pixels match between consecutive frames, leaving only the boundary edges detected.">
+    <h3>Why does a uniformly colored moving object look hollow in two-frame differencing?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">Because the camera lens refracts the light around the object</button>
+      <button class="quiz-option">Because the Gaussian blur erases the entire object</button>
+      <button class="quiz-option">Because interior pixels have the same color across adjacent frames, yielding zero difference</button>
+      <button class="quiz-option">Because OpenCV automatically crops out solid shapes</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 3: Running Average Modeling -->
+<section class="step-view" data-title="3. Running Average Model">
+  <header class="step-header">
+    <span class="step-kicker">STEP 3 &middot; ACCUMULATING TEMPORAL MEMORY</span>
+    <h1>Adaptive Background: The Running Average</h1>
+    <p class="lede">Instead of comparing only with the single previous frame, what if our computer maintains an "ongoing memory" of the scene that slowly adapts over time?</p>
+  </header>
+
+  <h2>The Exponential Moving Average (EMA)</h2>
+  <p>We keep a running background image $B(x, y, t)$. On every new frame $I(x, y, t)$, we gently update $B$ using a small learning rate &alpha; (alpha):</p>
+
+  <div class="formula-box">
+    B(x, y, t) = (1 - &alpha;) &middot; B(x, y, t - 1) &nbsp;+&nbsp; &alpha; &middot; I(x, y, t)
+  </div>
+
+  <div class="panel yellow">
+    <strong>Understanding the Learning Rate (&alpha;):</strong>
+    <ul>
+      <li><code>&alpha; = 0.05</code> (Typical value): The background is 95% old memory and 5% new frame.</li>
+      <li><strong>If &alpha; is too large (e.g., 0.5):</strong> A person walking slowly will get painted directly into the background, leaving a dark smudge!</li>
+      <li><strong>If &alpha; is too small (e.g., 0.001):</strong> If clouds move and the sun dims, the background model takes minutes to catch up, triggering false alarms everywhere.</li>
+    </ul>
+  </div>
+
+  <h2>Python Code: Running Average with cv2.accumulateWeighted()</h2>
+  <p>OpenCV provides a built-in optimized function <code>cv2.accumulateWeighted()</code> that computes this exact formula using floating-point accumulation:</p>
+
+  <div class="code-wrap">
+    <button class="copy-btn">Copy</button>
+    <pre><code>import cv2
+import numpy as np
+
+cap = cv2.VideoCapture(0)
+
+# 1. Read first frame to initialize running average
+ret, frame = cap.read()
+gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+gray = cv2.GaussianBlur(gray, (21, 21), 0)
+
+# Running average requires a 32-bit floating point image
+avg_bg = np.float32(gray)
+
+# Learning rate: 0.02 = adapts over ~50 frames (~1.5 seconds)
+alpha = 0.02
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    curr_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    curr_gray = cv2.GaussianBlur(curr_gray, (21, 21), 0)
+
+    # 2. Accumulate current frame into background model
+    cv2.accumulateWeighted(curr_gray, avg_bg, alpha)
+
+    # 3. Convert background model back to 8-bit integer for subtraction
+    bg_model_uint8 = cv2.convertScaleAbs(avg_bg)
+
+    # 4. Difference between current frame and long-term background model
+    diff = cv2.absdiff(curr_gray, bg_model_uint8)
+    _, thresh = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)
+
+    cv2.imshow("Live Video", frame)
+    cv2.imshow("Learned Background Model B(t)", bg_model_uint8)
+    cv2.imshow("Foreground Mask", thresh)
+
+    if cv2.waitKey(30) & 0xFF == 27:
+        break
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+  </div>
+
+  <h2>The Remaining Limitation: The "Multimodal" Problem</h2>
+  <p>The running average works remarkably well for static indoor rooms. But take the camera outdoors to a park:</p>
+  <div class="panel pink">
+    <strong>Why Running Average fails outdoors:</strong>
+    <ul>
+      <li>Tree branches sway in the wind. A pixel alternating between green leaves and blue sky gets averaged into a muddy brown/teal color that represents <em>neither</em>! Every time the leaf moves, both leaf and sky trigger motion.</li>
+      <li>Water ripples on a fountain or lake reflect sunlight intermittently.</li>
+      <li>Fluorescent office lights flicker at 50/60 Hz.</li>
+    </ul>
+    <strong>Key insight:</strong> A single average value per pixel is not enough. We need a <em>mixture of distributions</em>!
+  </div>
+
+  <div class="quiz" data-answer="3" data-correct="Correct! 32-bit floating point (np.float32) prevents rounding errors when accumulating small fractional updates over hundreds of frames.">
+    <h3>What data type must the background accumulator image be when calling cv2.accumulateWeighted?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">8-bit unsigned integer (uint8)</button>
+      <button class="quiz-option">Boolean array (bool)</button>
+      <button class="quiz-option">16-bit signed integer (int16)</button>
+      <button class="quiz-option">32-bit or 64-bit floating point (float32 / float64)</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 4: Gaussian Mixture Models (MOG2) -->
+<section class="step-view" data-title="4. Gaussian Mixture Models (MOG2)">
+  <header class="step-header">
+    <span class="step-kicker">STEP 4 &middot; STATE-OF-THE-ART CLASSICAL</span>
+    <h1>Gaussian Mixture Models (MOG &amp; MOG2)</h1>
+    <p class="lede">How do we model a pixel that can legitimately be two or three different colors at different moments (like waving grass or ocean waves)? We use <strong>Mixtures of Gaussians</strong>.</p>
+  </header>
+
+  <h2>The Intuitive Explanation</h2>
+  <p>Think of each pixel $(x, y)$ as having a small committee of 3 to 5 "Gaussian bell curves".</p>
+  <div class="grid-3">
+    <div class="concept">
+      <strong>Gaussian 1 (Weight: 60%)</strong>
+      <p>Represents green tree leaf (Mean color = Forest Green, small variance).</p>
+    </div>
+    <div class="concept">
+      <strong>Gaussian 2 (Weight: 35%)</strong>
+      <p>Represents blue sky seen when the wind blows the leaf aside (Mean = Sky Blue).</p>
+    </div>
+    <div class="concept">
+      <strong>Gaussian 3 (Weight: 5%)</strong>
+      <p>A red ball suddenly thrown across the scene. Since it only appeared for 2 frames, its weight is low!</p>
+    </div>
+  </div>
+
+  <div class="panel mint">
+    <strong>How MOG Decides Background vs Foreground:</strong><br>
+    The Gaussians are ranked by the ratio: <code>Weight / Variance</code> (&omega; / &sigma;).
+    <br><br>
+    Gaussians that appear <strong>very frequently</strong> (high &omega;) and are <strong>very steady</strong> (low variance &sigma;) are classified as the <strong>BACKGROUND</strong>.
+    Any new pixel observation that doesn't fit within 2.5 standard deviations of these top background Gaussians is classified as <strong>FOREGROUND</strong>!
+  </div>
+
+  <h2>What Makes MOG2 So Special? (Zivkovic's Improvement)</h2>
+  <p>Original MOG (Stauffer &amp; Grimson, 1999) used a fixed number of Gaussians (e.g. exactly 5) for every pixel. Zivkovic (2004) introduced <strong>MOG2</strong>, which adaptively chooses how many Gaussians each individual pixel needs:</p>
+  <ul>
+    <li>A blank white wall only needs 1 Gaussian &rarr; saves CPU!</li>
+    <li>A swaying tree or water fountain gets 4 or 5 Gaussians &rarr; high accuracy!</li>
+    <li>Built-in shadow detection: detects when an area simply got darker without changing its chromaticity.</li>
+  </ul>
+
+  <h2>Python Practical: cv2.createBackgroundSubtractorMOG2()</h2>
+  <p>OpenCV implements this algorithm directly. Let's see how simple it is to use:</p>
+
+  <div class="code-wrap">
+    <button class="copy-btn">Copy</button>
+    <pre><code>import cv2
+
+# Initialize MOG2 Subtractor
+# history=500: remembers approximately 500 frames of history (~15-20 seconds)
+# varThreshold=25: threshold on the Mahalanobis distance to decide if pixel fits background
+# detectShadows=True: identifies shadows and marks them in gray (value 127)
+bg_subtractor = cv2.createBackgroundSubtractorMOG2(
+    history=500, varThreshold=25, detectShadows=True
+)
+
+cap = cv2.VideoCapture(0)
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # 1. Apply background subtractor to obtain foreground mask
+    # Values: 0 = Background (black), 127 = Shadow (gray), 255 = Moving object (white)
+    fg_mask = bg_subtractor.apply(frame)
+
+    # 2. Extract background image reconstruction
+    bg_image = bg_subtractor.getBackgroundImage()
+
+    cv2.imshow("Original Video", frame)
+    cv2.imshow("MOG2 Foreground Mask", fg_mask)
+    if bg_image is not None:
+        cv2.imshow("Computed Background Model", bg_image)
+
+    if cv2.waitKey(30) & 0xFF == 27:
+        break
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+  </div>
+
+  <div class="quiz" data-answer="0" data-correct="Correct! MOG2 marks shadows as value 127 (gray) when detectShadows=True, allowing you to easily filter them out.">
+    <h3>What pixel value does MOG2 assign to detected shadows when detectShadows=True?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">127 (Gray)</button>
+      <button class="quiz-option">255 (Pure White)</button>
+      <button class="quiz-option">0 (Pure Black)</button>
+      <button class="quiz-option">-1 (Negative)</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 5: KNN Subtractor -->
+<section class="step-view" data-title="5. KNN Background Subtractor">
+  <header class="step-header">
+    <span class="step-kicker">STEP 5 &middot; NON-PARAMETRIC ALTERNATIVE</span>
+    <h1>KNN (K-Nearest Neighbors) Subtraction</h1>
+    <p class="lede">What if we don't want to assume pixel colors follow a Gaussian bell curve? We can use non-parametric sample buffers with K-Nearest Neighbors.</p>
+  </header>
+
+  <h2>How KNN Subtraction Works</h2>
+  <p>Instead of calculating statistical formulas (mean $\mu$ and variance $\sigma$), KNN keeps a rolling sample buffer of recent pixel color observations. When a new pixel arrives:</p>
+  <ol>
+    <li>It checks how many stored background samples are close to the current pixel color.</li>
+    <li>If at least $K$ stored samples are within a distance threshold, the pixel is declared <strong>background</strong>.</li>
+    <li>Otherwise, it is flagged as <strong>foreground</strong>.</li>
+  </ol>
+
+  <h2>MOG2 vs. KNN: Which should you choose?</h2>
+  <table class="comparison">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>MOG2 (Gaussian Mixture)</th>
+        <th>KNN (K-Nearest Neighbors)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Modeling Approach</strong></td>
+        <td>Parametric (Gaussians per pixel)</td>
+        <td>Non-parametric (Sample memory buffer)</td>
+      </tr>
+      <tr>
+        <td><strong>Shadow Detection</strong></td>
+        <td>Yes (Marks as gray 127)</td>
+        <td>Yes (Marks as gray 127)</td>
+      </tr>
+      <tr>
+        <td><strong>Small/Distant Objects</strong></td>
+        <td>Can sometimes blur thin moving edges</td>
+        <td>Often captures fine edges and small objects better</td>
+      </tr>
+      <tr>
+        <td><strong>Memory Usage</strong></td>
+        <td>Very low (only stores parameters &mu;, &sigma;, &omega;)</td>
+        <td>Slightly higher (stores actual historical samples)</td>
+      </tr>
+      <tr>
+        <td><strong>Computation Speed</strong></td>
+        <td>Extremely fast, highly optimized</td>
+        <td>Fast, very comparable to MOG2</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Python Code: Side-by-Side MOG2 vs KNN</h2>
+  <div class="code-wrap">
+    <button class="copy-btn">Copy</button>
+    <pre><code>import cv2
+
+cap = cv2.VideoCapture(0)
+
+# Create both subtractors
+mog2 = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=25, detectShadows=True)
+knn  = cv2.createBackgroundSubtractorKNN(history=500, dist2Threshold=400.0, detectShadows=True)
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # Resize for faster side-by-side display
+    small = cv2.resize(frame, (480, 270))
+
+    mask_mog2 = mog2.apply(small)
+    mask_knn  = knn.apply(small)
+
+    cv2.imshow("MOG2 Mask", mask_mog2)
+    cv2.imshow("KNN Mask", mask_knn)
+
+    if cv2.waitKey(30) & 0xFF == 27:
+        break
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+  </div>
+
+  <div class="quiz" data-answer="1" data-correct="Correct! KNN is non-parametric; it does not force pixel distributions into mathematical Gaussian bell curves, which helps when backgrounds have arbitrary color distributions.">
+    <h3>What is the key theoretical difference between MOG2 and KNN background subtractors?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">MOG2 only works on black-and-white cameras, whereas KNN works on color</button>
+      <button class="quiz-option">MOG2 assumes Gaussian distributions (parametric), whereas KNN uses sample buffers (non-parametric)</button>
+      <button class="quiz-option">KNN requires a GPU to run, whereas MOG2 runs on CPU</button>
+      <button class="quiz-option">KNN can only run on recorded videos, not live webcams</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 6: Shadows & Morphology -->
+<section class="step-view" data-title="6. Shadows &amp; Morphology">
+  <header class="step-header">
+    <span class="step-kicker">STEP 6 &middot; ESSENTIAL POST-PROCESSING</span>
+    <h1>Conquering Shadows &amp; Mask Noise</h1>
+    <p class="lede">Raw background subtraction masks are never clean. They suffer from salt-and-pepper camera noise, holes inside objects, and elongated shadows. Here is how to fix them!</p>
+  </header>
+
+  <h2>The Shadow Dilemma</h2>
+  <p>When a person walks under a ceiling light, their body casts a dark shadow on the floor. To a naive subtraction algorithm, those floor pixels changed from bright gray to dark gray &mdash; so it marks the shadow as part of the person! This distorts bounding boxes, making people look like giant blobs attached to the floor.</p>
+
+  <div class="panel teal">
+    <strong>How Shadow Removal Works:</strong><br>
+    Shadows decrease <strong>Luminance</strong> (brightness) without significantly changing <strong>Chromaticity</strong> (color ratio).
+    <br><br>
+    Since MOG2 flags shadow pixels as <code>127</code>, we can isolate ONLY true foreground objects with a binary threshold:
+    <div class="formula-box">
+      _, clean_fg = cv2.threshold(raw_mask, 250, 255, cv2.THRESH_BINARY)
+    </div>
+    Any pixel with value &le; 250 (including shadows at 127 and background at 0) becomes 0 (black). Only true moving objects (value 255) remain!
+  </div>
+
+  <h2>Morphological Operations: Opening &amp; Closing</h2>
+  <div class="grid-2">
+    <div class="concept">
+      <strong>1. Morphological Opening (Erosion &rarr; Dilation)</strong>
+      <p>Removes tiny stray white pixels (salt-and-pepper noise caused by camera sensor noise) without shrinking the real object.</p>
+    </div>
+    <div class="concept">
+      <strong>2. Morphological Closing (Dilation &rarr; Erosion)</strong>
+      <p>Fills small black holes inside detected objects (e.g., if a person's shirt had a patch that matched the background wall).</p>
+    </div>
+  </div>
+
+  <h2>Python Code: The Complete Mask Cleaning Pipeline</h2>
+  <div class="code-wrap">
+    <button class="copy-btn">Copy</button>
+    <pre><code>import cv2
+import numpy as np
+
+subtractor = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=25, detectShadows=True)
+cap = cv2.VideoCapture(0)
+
+# Define morphological structuring elements (kernels)
+# 3x3 ellipse for opening (noise removal), 7x7 ellipse for closing (hole filling)
+kernel_open  = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # Stage 1: Raw Subtraction
+    raw_mask = subtractor.apply(frame)
+
+    # Stage 2: Shadow Suppression (keep only pure white pixels > 250)
+    _, no_shadows = cv2.threshold(raw_mask, 250, 255, cv2.THRESH_BINARY)
+
+    # Stage 3: Morphological Opening (Erosion then Dilation -> removes speckle noise)
+    opened = cv2.morphologyEx(no_shadows, cv2.MORPH_OPEN, kernel_open)
+
+    # Stage 4: Morphological Closing (Dilation then Erosion -> fills internal holes)
+    cleaned = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel_close)
+
+    cv2.imshow("1. Raw MOG2 (Has Shadows & Noise)", raw_mask)
+    cv2.imshow("2. Shadow Removed", no_shadows)
+    cv2.imshow("3. Cleaned Foreground Mask", cleaned)
+
+    if cv2.waitKey(30) & 0xFF == 27:
+        break
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+  </div>
+
+  <div class="quiz" data-answer="2" data-correct="Correct! Morphological Opening is erosion followed by dilation, perfectly suited for erasing small noise dots.">
+    <h3>Which morphological operation is defined as erosion followed by dilation?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option">Morphological Closing</button>
+      <button class="quiz-option">Morphological Gradient</button>
+      <button class="quiz-option">Morphological Opening</button>
+      <button class="quiz-option">Top Hat Transformation</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+</section>
+
+<!-- STEP 7: Practical Project -->
+<section class="step-view" data-title="7. Hands-on Security Project">
+  <header class="step-header">
+    <span class="step-kicker">STEP 7 &middot; COMPLETE END-TO-END SYSTEM</span>
+    <h1>Building a Real-Time Security Intrusion Detector</h1>
+    <p class="lede">Let's combine everything we've learned into a complete, professional computer vision application: real-time motion detection with contour bounding boxes, object counting, and live security HUD alerts!</p>
+  </header>
+
+  <h2>System Architecture</h2>
+  <div class="flow">
+    Webcam Video Stream<br>
+    &nbsp;&nbsp;&darr;<br>
+    MOG2 Background Subtraction (with shadow detection)<br>
+    &nbsp;&nbsp;&darr;<br>
+    Thresholding &amp; Morphological Cleaning (Open + Close)<br>
+    &nbsp;&nbsp;&darr;<br>
+    Contour Finding (`cv2.findContours`)<br>
+    &nbsp;&nbsp;&darr;<br>
+    Area Filter: Ignore contours with area &lt; 1000 pixels<br>
+    &nbsp;&nbsp;&darr;<br>
+    Draw Green Bounding Boxes, Centroids &amp; "INTRUSION ALERT" HUD
+  </div>
+
+  <h2>Complete Runnable Python Code</h2>
+  <div class="code-wrap">
+    <button class="copy-btn">Copy</button>
+    <pre><code>import cv2
+import numpy as np
+import time
+
+def run_intrusion_detector():
+    # 1. Initialize video stream & MOG2 subtractor
+    cap = cv2.VideoCapture(0)
+    subtractor = cv2.createBackgroundSubtractorMOG2(
+        history=500, varThreshold=25, detectShadows=True
+    )
+
+    # Kernels for morphological filtering
+    kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
+
+    # Minimum contour area in pixels to be considered a real object (ignores pets/bugs)
+    MIN_CONTOUR_AREA = 1200
+
+    prev_time = time.time()
+
+    print("[INFO] Security Monitor running. Press 'q' or 'ESC' to exit.")
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Calculate FPS
+        curr_time = time.time()
+        fps = 1.0 / (curr_time - prev_time + 1e-6)
+        prev_time = curr_time
+
+        # 2. Extract foreground mask
+        raw_mask = subtractor.apply(frame)
+
+        # 3. Suppress shadows (keep only values > 250)
+        _, thresh = cv2.threshold(raw_mask, 250, 255, cv2.THRESH_BINARY)
+
+        # 4. Clean up noise and bridge gaps
+        cleaned = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel_open)
+        cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_CLOSE, kernel_close)
+
+        # 5. Find contours of moving objects
+        contours, _ = cv2.findContours(cleaned, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        motion_detected = False
+        object_count = 0
+
+        # Create output frame
+        display_frame = frame.copy()
+
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            if area < MIN_CONTOUR_AREA:
+                continue
+
+            motion_detected = True
+            object_count += 1
+
+            # Get bounding rectangle
+            x, y, w, h = cv2.boundingRect(cnt)
+
+            # Draw vibrant bounding box
+            cv2.rectangle(display_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+            # Draw centroid (center point)
+            cx, cy = x + w // 2, y + h // 2
+            cv2.circle(display_frame, (cx, cy), 5, (0, 0, 255), -1)
+
+            # Label area size above box
+            cv2.putText(
+                display_frame, f"Obj #{object_count} ({int(area)}px)",
+                (x, max(20, y - 8)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2
+            )
+
+        # 6. Draw Security HUD Banner
+        hud_color = (0, 0, 255) if motion_detected else (0, 200, 0)
+        status_text = f"ALERT: {object_count} TARGETS DETECTED" if motion_detected else "STATUS: SYSTEM SECURE"
+
+        # Top banner background
+        cv2.rectangle(display_frame, (0, 0), (display_frame.shape[1], 45), (20, 20, 20), -1)
+        cv2.putText(
+            display_frame, status_text, (15, 30),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.75, hud_color, 2
+        )
+        cv2.putText(
+            display_frame, f"FPS: {int(fps)}", (display_frame.shape[1] - 120, 30),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2
+        )
+
+        # Display output windows
+        cv2.imshow("Security Monitor Live Feed", display_frame)
+        cv2.imshow("Cleaned Motion Mask", cleaned)
+
+        key = cv2.waitKey(20) & 0xFF
+        if key == 27 or key == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    run_intrusion_detector()</code></pre>
+  </div>
+
+  <div class="panel mint">
+    <strong>Try this in your terminal:</strong>
+    <p>Run the script, stand in front of your webcam, and observe:
+    <br>1. When you walk, a bright green box tracks you smoothly.
+    <br>2. When you stop moving for 10-15 seconds, notice how the MOG2 model gradually accepts you as the new background!
+    <br>3. When you step away again, you leave a temporary "ghost" that quickly fades as the background model re-learns the empty wall.</p>
+  </div>
+</section>
+
+<!-- STEP 8: Challenges & Summary -->
+<section class="step-view" data-title="8. Summary &amp; Exercises">
+  <header class="step-header">
+    <span class="step-kicker">STEP 8 &middot; MASTERY &amp; CHECKLIST</span>
+    <h1>Summary, Pitfalls &amp; Challenges</h1>
+    <p class="lede">Congratulations! You now understand the theory, mathematical formulation, and practical implementation of motion background modeling.</p>
+  </header>
+
+  <h2>Quick Reference Cheat Sheet</h2>
+  <table class="comparison">
+    <thead>
+      <tr>
+        <th>Method</th>
+        <th>OpenCV API</th>
+        <th>Best Used For</th>
+        <th>Main Drawback</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Frame Differencing</strong></td>
+        <td><code>cv2.absdiff(curr, prev)</code></td>
+        <td>Super quick motion triggers, ultra-low power microcontrollers</td>
+        <td>Hollow objects &amp; stops moving = invisible</td>
+      </tr>
+      <tr>
+        <td><strong>Running Average</strong></td>
+        <td><code>cv2.accumulateWeighted()</code></td>
+        <td>Controlled indoor rooms with single background color</td>
+        <td>Cannot handle swaying trees or flickering lights</td>
+      </tr>
+      <tr>
+        <td><strong>MOG2</strong></td>
+        <td><code>cv2.createBackgroundSubtractorMOG2()</code></td>
+        <td>General outdoor/indoor surveillance, traffic cameras</td>
+        <td>Higher memory footprint than running average</td>
+      </tr>
+      <tr>
+        <td><strong>KNN</strong></td>
+        <td><code>cv2.createBackgroundSubtractorKNN()</code></td>
+        <td>Non-Gaussian backgrounds, crisp object boundaries</td>
+        <td>Slightly higher compute than MOG2 on large frames</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Common Pitfalls &amp; How to Solve Them</h2>
+  <div class="reveal">
+    <summary>1. Camera Shake / Wind Jitter</summary>
+    <div>
+      <strong>Problem:</strong> The camera itself vibrates in the wind, making every pixel move and lighting up the entire mask.<br>
+      <strong>Solution:</strong> Apply video stabilization before subtraction (e.g., rigid affine transformation using feature matching or <code>cv2.videostab</code>).
+    </div>
+  </div>
+
+  <div class="reveal">
+    <summary>2. Sudden Global Lighting Changes (Clouds / Room Light Switched On)</summary>
+    <div>
+      <strong>Problem:</strong> Turning on an overhead light causes 100% of the screen to register as foreground.<br>
+      <strong>Solution:</strong> Compute the fraction of white pixels in the mask. If &gt; 60% of the image suddenly becomes foreground, trigger a global reset: call <code>subtractor = cv2.createBackgroundSubtractorMOG2(...)</code> to flush history.
+    </div>
+  </div>
+
+  <div class="reveal">
+    <summary>3. Camouflage (Foreground object color matches background)</summary>
+    <div>
+      <strong>Problem:</strong> A person in a black shirt walks in front of a black wall.<br>
+      <strong>Solution:</strong> Standard color subtraction will fail on their torso. Combine background subtraction with Optical Flow or Deep Learning (YOLO) detectors to track the silhouette.
+    </div>
+  </div>
+
+  <h2>Student Completion Checklist</h2>
+  <ul class="checklist">
+    <li>I understand why video motion analysis isolates foreground $M(x, y)$ from background $B(x, y)$.</li>
+    <li>I can explain why two-frame differencing causes hollow objects and fails on stationary targets.</li>
+    <li>I can write an adaptive running average model with <code>cv2.accumulateWeighted</code>.</li>
+    <li>I understand why multimodal scenes (swaying leaves, water) require Mixture of Gaussians (MOG).</li>
+    <li>I know how MOG2 ranks Gaussians using the ratio &omega; / &sigma; (frequency / stability).</li>
+    <li>I can explain how shadow detection works and how to filter out value 127 pixels.</li>
+    <li>I can clean up salt-and-pepper noise using Morphological Opening and Closing.</li>
+    <li>I have built and tested a complete end-to-end security motion detector with bounding boxes.</li>
+  </ul>
+
+  <div class="challenge">
+    <h3>Hands-On Coding Challenges for Students</h3>
+    <ol>
+      <li><strong>Traffic Counter:</strong> Draw a virtual horizontal line across the center of the video frame. Whenever a detected bounding box centroid crosses the line from top to bottom, increment a "Cars Passed" counter.</li>
+      <li><strong>Heatmap of Activity:</strong> Create an empty accumulation matrix. Every time a pixel is classified as foreground, add 1 to its counter. At the end of the video, normalize and display a color heatmap showing where motion happened most frequently in the room!</li>
+      <li><strong>Adaptive Shadow Thresholding:</strong> Experiment with changing <code>detectShadows=False</code> vs <code>True</code> in MOG2. Inspect how bounding box heights change on a walking subject.</li>
+      <li><strong>Auto-Reset on Light Switch:</strong> Add code to detect if more than 50% of the frame is suddenly flagged as foreground. If so, print "[ALERT] Global Lighting Shift Detected &mdash; Resetting Model" and reinitialize the subtractor.</li>
+    </ol>
+  </div>
+
+  <div class="finish">
+    <h2>Background Subtraction &amp; Modeling Mastered! &#127881;</h2>
+    <p>You have mastered the foundations of video motion segmentation! You can now analyze real-time video streams, filter out environmental noise and shadows, and reliably track moving objects using Python and OpenCV.</p>
+  </div>
+</section>
+
+</div>
+</main>
+</div>
+
+<script>
+(() => {
+  const steps = [...document.querySelectorAll('.step-view')];
+  const titles = steps.map(step => step.dataset.title);
+  const nav = document.getElementById('stepNav');
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const content = document.getElementById('content');
+  const completed = new Set();
+  let current = 0;
+
+  nav.innerHTML = titles.map((title, index) => 
+    `<button class="step-link" data-step="${index}" type="button"><span class="step-number">${String(index + 1).padStart(2, '0')}</span><span>${title}</span><span class="step-status" aria-hidden="true"></span></button>`
+  ).join('');
+
+  const getHashStep = () => {
+    const match = location.hash.match(/^#step-(\d+)$/);
+    const value = match ? Number(match[1]) - 1 : 0;
+    return Number.isInteger(value) && value >= 0 && value < steps.length ? value : 0;
+  };
+
+  function render(updateHash = true) {
+    current = Math.max(0, Math.min(current, steps.length - 1));
+    steps.forEach((step, index) => {
+      const active = index === current;
+      step.classList.toggle('active', active);
+      step.setAttribute('aria-hidden', String(!active));
+    });
+
+    document.querySelectorAll('.step-link').forEach((button, index) => {
+      button.classList.toggle('active', index === current);
+      button.setAttribute('aria-current', index === current ? 'step' : 'false');
+      button.querySelector('.step-status').textContent = completed.has(index) ? '\u2713' : '';
+    });
+
+    const percent = Math.round(((current + 1) / steps.length) * 100);
+    document.getElementById('progressBar').style.width = `${percent}%`;
+    document.getElementById('progressText').textContent = `${percent}%`;
+    document.getElementById('progressTrack').setAttribute('aria-valuenow', String(percent));
+    document.getElementById('mobileTitle').textContent = titles[current];
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === steps.length - 1;
+    document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Lesson complete' : 'Next \u2192';
+
+    if (updateHash) history.pushState({step: current}, '', `#step-${current + 1}`);
+    window.scrollTo({top: 0, behavior: 'auto'});
+    sidebar.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= steps.length) return;
+    completed.add(current);
+    current = index;
+    render();
+  }
+
+  const navRow = document.createElement('div');
+  navRow.className = 'nav-row';
+  navRow.innerHTML = '<button class="nav-btn" id="prevBtn" type="button">&#8592; Previous</button><button class="nav-btn primary" id="nextBtn" type="button">Next &#8594;</button>';
+  content.appendChild(navRow);
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+  nav.addEventListener('click', event => {
+    const button = event.target.closest('.step-link');
+    if (button) goTo(Number(button.dataset.step));
+  });
+
+  menuBtn.addEventListener('click', () => {
+    const open = sidebar.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+  });
+
+  document.addEventListener('click', async event => {
+    const copy = event.target.closest('.copy-btn');
+    if (copy) {
+      const code = copy.parentElement.querySelector('pre code')?.textContent ?? '';
+      try {
+        await navigator.clipboard.writeText(code);
+        copy.textContent = 'Copied!';
+      } catch {
+        copy.textContent = 'Select & copy';
+      }
+      setTimeout(() => copy.textContent = 'Copy', 1200);
+      return;
+    }
+
+    const option = event.target.closest('.quiz-option');
+    if (option) {
+      const quiz = option.closest('.quiz');
+      if (quiz.dataset.answered) return;
+      const options = [...quiz.querySelectorAll('.quiz-option')];
+      const choice = options.indexOf(option);
+      const answer = Number(quiz.dataset.answer);
+      quiz.dataset.answered = 'true';
+      options.forEach(button => button.disabled = true);
+      option.classList.add(choice === answer ? 'correct' : 'wrong');
+      if (choice !== answer) options[answer].classList.add('correct');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      feedback.textContent = choice === answer ? quiz.dataset.correct : `Not quite. ${quiz.dataset.correct}`;
+      feedback.classList.add('show');
+    }
+  });
+
+  window.addEventListener('popstate', () => { current = getHashStep(); render(false); });
+  window.addEventListener('hashchange', () => { current = getHashStep(); render(false); });
+  document.addEventListener('keydown', event => {
+    if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+    if (event.key === 'ArrowRight') goTo(current + 1);
+    if (event.key === 'ArrowLeft') goTo(current - 1);
+  });
+
+  current = getHashStep();
+  render(false);
+})();
+</script>
+</body>
+</html>

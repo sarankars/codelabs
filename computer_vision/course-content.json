@@ -128,13 +128,33 @@
       "order": 3,
       "topics": [
         {
-          "id": "topic-cv-4-1-motion-analysis",
-          "title": "Motion Analysis: Background Subtraction, Optical Flow, KLT & Dynamic Stereo",
-          "description": "Comprehensive study of motion in video: Background Subtraction and Modeling (MOG2), Optical Flow and the aperture problem, Lucas-Kanade and Farnebäck algorithms, KLT tracker, Spatio-Temporal Analysis (MHI), Dynamic Stereo Scene Flow, and Motion Parameter Estimation using RANSAC.",
+          "id": "topic-cv-4-1-background-subtraction",
+          "title": "Background Subtraction and Modeling",
+          "description": "Learn how stationary cameras isolate moving objects from static backgrounds. Master frame differencing, adaptive running averages, Gaussian Mixture Models (MOG2), non-parametric KNN subtractors, shadow suppression, and morphological mask cleanup in Python and OpenCV.",
           "order": 0,
           "resources": [
             {
-              "id": "codelab-cv-4-1-motion-analysis",
+              "id": "codelab-cv-4-1-background-subtraction",
+              "type": "codelab",
+              "title": "Background Subtraction & Modeling Codelab",
+              "order": 0,
+              "description": "Interactive codelab teaching background subtraction, adaptive models, MOG2, KNN, shadow suppression, and building an automated security intrusion detector in Python + OpenCV.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/computer_vision/background_subtraction_and_modeling/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
+        },
+        {
+          "id": "topic-cv-4-2-motion-analysis",
+          "title": "Motion Analysis: Background Subtraction, Optical Flow, KLT & Dynamic Stereo",
+          "description": "Comprehensive study of motion in video: Background Subtraction and Modeling (MOG2), Optical Flow and the aperture problem, Lucas-Kanade and Farnebäck algorithms, KLT tracker, Spatio-Temporal Analysis (MHI), Dynamic Stereo Scene Flow, and Motion Parameter Estimation using RANSAC.",
+          "order": 1,
+          "resources": [
+            {
+              "id": "codelab-cv-4-2-motion-analysis",
               "type": "codelab",
               "title": "Motion Analysis Codelab",
               "order": 0,
