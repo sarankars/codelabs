@@ -1,0 +1,2273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB &amp; Full Stack Development — Comprehensive Theory, Architecture &amp; Exam Notes</title>
+    <meta name="description"
+        content="Complete interactive theory and exam preparation codelab for Full Stack Development covering MongoDB, Drivers, Installation, CRUD, UI, Form Validation, BCrypt, Authentication, Spring Boot MongoDB, and Frontend-Backend Integration with 5-mark questions and answers.">
+    <meta name="theme-color" content="#00684a">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+        :root {
+            --primary: #00684a;
+            --primary-dark: #004d37;
+            --primary-light: #e6f7ef;
+            --accent-mint: #00ed64;
+            --ink: #101010;
+            --paper: #f6f9f8;
+            --white: #ffffff;
+            --yellow: #ffd83d;
+            --pink: #ff9bb7;
+            --orange: #ff9f43;
+            --purple: #9d72ff;
+            --blue: #2856d8;
+            --border: 3px solid var(--ink);
+            --shadow: 6px 6px 0 var(--ink);
+            --shadow-sm: 4px 4px 0 var(--ink);
+            --sidebar: 310px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: auto;
+        }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+        }
+
+        button,
+        a {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        :focus-visible {
+            outline: 4px solid var(--yellow);
+            outline-offset: 3px;
+        }
+
+        .app {
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: var(--sidebar);
+            padding: 22px 18px;
+            background: var(--primary);
+            border-right: var(--border);
+            overflow-y: auto;
+            z-index: 20;
+            color: var(--white);
+        }
+
+        .brand {
+            padding: 16px;
+            margin-bottom: 20px;
+            background: var(--white);
+            color: var(--ink);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .eyebrow,
+        .progress-meta,
+        .step-number,
+        .step-kicker,
+        .label,
+        .footer-note,
+        .http-badge,
+        .tag,
+        .marks-badge {
+            font-family: "DM Mono", monospace;
+        }
+
+        .eyebrow {
+            font-size: .72rem;
+            font-weight: 500;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--primary-dark);
+        }
+
+        .brand h2 {
+            margin: 6px 0 4px;
+            font-size: 1.25rem;
+            line-height: 1.15;
+            font-weight: 700;
+        }
+
+        .brand p {
+            margin: 0;
+            font-size: .82rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .progress-wrap {
+            margin: 0 2px 20px;
+            color: var(--white);
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 7px;
+            font-size: .75rem;
+            font-weight: 500;
+        }
+
+        .progress-track {
+            height: 16px;
+            padding: 2px;
+            background: var(--white);
+            border: var(--border);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-mint);
+            transition: width .25s ease;
+        }
+
+        .steps {
+            display: grid;
+            gap: 7px;
+        }
+
+        .step-link {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 30px 1fr 20px;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            color: var(--white);
+            background: transparent;
+            border: 3px solid transparent;
+            text-align: left;
+            font-weight: 700;
+            font-size: .84rem;
+            line-height: 1.2;
+            transition: background 0.15s ease;
+        }
+
+        .step-link:hover {
+            background: rgba(255, 255, 255, .15);
+        }
+
+        .step-link.active {
+            color: var(--ink);
+            background: var(--white);
+            border-color: var(--ink);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .step-number {
+            width: 26px;
+            height: 26px;
+            display: grid;
+            place-items: center;
+            border: 2px solid currentColor;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        .step-status {
+            text-align: center;
+            font-weight: 900;
+            color: var(--accent-mint);
+        }
+
+        .step-link.active .step-status {
+            color: var(--primary);
+        }
+
+        .mobile-bar {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--primary);
+            border-bottom: var(--border);
+        }
+
+        .menu-btn,
+        .mobile-title {
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .menu-btn {
+            width: 44px;
+            height: 42px;
+            font-size: 1.2rem;
+            font-weight: 900;
+        }
+
+        .mobile-title {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: .9rem;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        main {
+            margin-left: var(--sidebar);
+            min-height: 100vh;
+        }
+
+        .content {
+            width: min(1000px, calc(100% - 56px));
+            margin: 0 auto;
+            padding: 42px 0 60px;
+        }
+
+        .step-view {
+            display: none;
+        }
+
+        .step-view.active {
+            display: block;
+            animation: fadeIn .18s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: .35;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .hero {
+            padding: 24px;
+            margin-bottom: 28px;
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .hero h1 {
+            margin: 10px 0 12px;
+            font-size: clamp(1.6rem, 2.8vw, 2.3rem);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p {
+            margin: 0;
+            font-size: 1.05rem;
+            color: #333;
+        }
+
+        h2 {
+            margin: 32px 0 16px;
+            font-size: 1.45rem;
+            letter-spacing: -0.01em;
+            border-bottom: 3px solid var(--ink);
+            padding-bottom: 6px;
+            display: inline-block;
+        }
+
+        h3 {
+            margin: 22px 0 10px;
+            font-size: 1.2rem;
+        }
+
+        p,
+        li {
+            font-size: 1rem;
+            line-height: 1.65;
+        }
+
+        .grid {
+            display: grid;
+            gap: 18px;
+            margin: 20px 0;
+        }
+
+        .grid.two {
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        }
+
+        .grid.three {
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+
+        .grid.four {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .card {
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 20px;
+            position: relative;
+        }
+
+        .card h3 {
+            margin-top: 0;
+        }
+
+        .card.accent-mint {
+            border-top: 8px solid var(--accent-mint);
+        }
+
+        .card.accent-yellow {
+            border-top: 8px solid var(--yellow);
+        }
+
+        .card.accent-orange {
+            border-top: 8px solid var(--orange);
+        }
+
+        .card.accent-blue {
+            border-top: 8px solid var(--blue);
+        }
+
+        .card.accent-purple {
+            border-top: 8px solid var(--purple);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: .75rem;
+            font-weight: 700;
+            border: 2px solid var(--ink);
+            background: var(--yellow);
+            margin-bottom: 8px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            margin: 20px 0;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            background: var(--white);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: .94rem;
+        }
+
+        th,
+        td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background: var(--primary);
+            color: var(--white);
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 700;
+            border: 1px solid var(--ink);
+        }
+
+        tr:nth-child(even) {
+            background: #f8faf9;
+        }
+
+        /* 5-Marks Exam Question Component */
+        .exam-box {
+            background: #fffdf5;
+            border: 3px solid var(--ink);
+            box-shadow: var(--shadow);
+            margin: 32px 0;
+            padding: 24px;
+            position: relative;
+        }
+
+        .exam-box::before {
+            content: "5 MARKS EXAM QUESTION & MODEL ANSWER";
+            display: inline-block;
+            font-family: "DM Mono", monospace;
+            font-size: .75rem;
+            font-weight: 700;
+            background: var(--orange);
+            color: var(--ink);
+            border: 2px solid var(--ink);
+            padding: 4px 10px;
+            margin-bottom: 14px;
+            box-shadow: 2px 2px 0 var(--ink);
+        }
+
+        .exam-q {
+            font-size: 1.18rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 0 0 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px dashed #bbb;
+        }
+
+        .exam-rubric {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .rubric-item {
+            background: var(--white);
+            border: 1.5px solid var(--ink);
+            padding: 2px 8px;
+            font-size: .76rem;
+            font-family: "DM Mono", monospace;
+            font-weight: 600;
+        }
+
+        .exam-ans {
+            background: var(--white);
+            border: 2px solid var(--ink);
+            padding: 18px;
+        }
+
+        .exam-ans h4 {
+            margin: 12px 0 6px;
+            color: var(--primary-dark);
+            font-size: 1.05rem;
+        }
+
+        .exam-ans ul,
+        .exam-ans ol {
+            margin: 6px 0 12px 20px;
+            padding: 0;
+        }
+
+        /* Callouts */
+        .callout {
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 16px 20px;
+            margin: 22px 0;
+            background: var(--white);
+        }
+
+        .callout.info {
+            background: #eef5ff;
+            border-left: 10px solid var(--blue);
+        }
+
+        .callout.tip {
+            background: #eafaf1;
+            border-left: 10px solid var(--accent-mint);
+        }
+
+        .callout.warn {
+            background: #fff8e6;
+            border-left: 10px solid var(--orange);
+        }
+
+        /* Flow / Pipeline diagram */
+        .pipeline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            margin: 22px 0;
+        }
+
+        .stage {
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 14px;
+            position: relative;
+        }
+
+        .stage strong {
+            display: block;
+            font-size: .95rem;
+            margin-bottom: 4px;
+            color: var(--primary);
+        }
+
+        .stage p {
+            font-size: .85rem;
+            margin: 0;
+            color: #444;
+        }
+
+        /* Code Blocks */
+        .code-wrap {
+            margin: 18px 0;
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            background: #1e1e1e;
+            position: relative;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 14px;
+            background: #2d2d2d;
+            border-bottom: 2px solid var(--ink);
+            color: #e0e0e0;
+            font-family: "DM Mono", monospace;
+            font-size: .78rem;
+        }
+
+        .copy-btn {
+            background: var(--white);
+            color: var(--ink);
+            border: 2px solid var(--ink);
+            padding: 3px 10px;
+            font-family: "DM Mono", monospace;
+            font-size: .72rem;
+            font-weight: 700;
+            box-shadow: 2px 2px 0 var(--ink);
+            transition: transform .1s;
+        }
+
+        .copy-btn:hover {
+            transform: translate(-1px, -1px);
+        }
+
+        .copy-btn:active {
+            transform: translate(1px, 1px);
+        }
+
+        pre {
+            margin: 0;
+            padding: 16px;
+            overflow-x: auto;
+            color: #d4d4d4;
+            font-family: "DM Mono", monospace;
+            font-size: .88rem;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family: "DM Mono", monospace;
+            background: #eceff1;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: .9em;
+            color: #c7254e;
+        }
+
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+        }
+
+        /* Quiz */
+        .quiz {
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 22px;
+            margin: 28px 0;
+        }
+
+        .quiz h4 {
+            margin: 0 0 12px;
+            font-size: 1.1rem;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 9px;
+            margin: 14px 0;
+        }
+
+        .quiz-option {
+            background: var(--paper);
+            border: 2px solid var(--ink);
+            padding: 10px 14px;
+            text-align: left;
+            font-size: .92rem;
+            font-weight: 600;
+            transition: background .15s;
+        }
+
+        .quiz-option:hover:not(:disabled) {
+            background: #e3ebff;
+        }
+
+        .quiz-option.correct {
+            background: #bbf7d0 !important;
+            border-color: #166534;
+        }
+
+        .quiz-option.wrong {
+            background: #fecaca !important;
+            border-color: #991b1b;
+        }
+
+        .quiz-feedback {
+            margin-top: 12px;
+            font-size: .9rem;
+            font-weight: 700;
+            display: none;
+            padding: 10px;
+            border: 2px solid var(--ink);
+        }
+
+        .quiz-feedback.show {
+            display: block;
+        }
+
+        /* Navigation footer */
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: var(--border);
+        }
+
+        .nav-btn {
+            background: var(--white);
+            color: var(--ink);
+            border: var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 12px 22px;
+            font-weight: 700;
+            font-size: .95rem;
+            transition: transform .1s, box-shadow .1s;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: var(--shadow);
+        }
+
+        .nav-btn:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 var(--ink);
+        }
+
+        .nav-btn:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        .nav-btn.primary {
+            background: var(--accent-mint);
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform .22s ease-out;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-bar {
+                display: flex;
+            }
+
+            main {
+                margin-left: 0;
+            }
+
+            .content {
+                width: calc(100% - 32px);
+                padding: 24px 0 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar" aria-label="Course navigation">
+            <div class="brand">
+                <span class="eyebrow">Full Stack Development · Notes</span>
+                <h2>MongoDB &amp; FSD</h2>
+                <p>Theory, Architecture &amp; 5M Q&amp;A</p>
+            </div>
+
+            <div class="progress-wrap">
+                <div class="progress-meta">
+                    <span>Topic Progress</span>
+                    <span id="progressText">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+
+            <nav class="steps" id="stepNav" aria-label="Step by step topics">
+                <!-- Dynamically generated via JS -->
+            </nav>
+        </aside>
+
+        <!-- Mobile Header Bar -->
+        <div class="mobile-bar">
+            <button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">☰</button>
+            <div class="mobile-title" id="mobileTitle">MongoDB Introduction</div>
+        </div>
+
+        <!-- Main Content Area -->
+        <main>
+            <div class="content" id="content">
+
+                <!-- STEP 1: Introduction to MongoDB & NoSQL -->
+                <section class="step-view" data-title="1. Introduction to MongoDB">
+                    <header class="hero">
+                        <span class="eyebrow">Module IV · Database Foundations</span>
+                        <h1>Introduction to MongoDB &amp; NoSQL</h1>
+                        <p>Understand document-oriented storage, schema flexibility, and how MongoDB differs fundamentally from relational DBMS.</p>
+                    </header>
+
+                    <h2>What is MongoDB?</h2>
+                    <p><strong>MongoDB</strong> is an open-source, high-performance, document-oriented <strong>NoSQL database</strong> designed for scalability, flexibility, and developer agility. Instead of storing data in rigid rows and columns like traditional relational databases (MySQL, Oracle, PostgreSQL), MongoDB stores records as flexible, self-describing <strong>BSON (Binary JSON)</strong> documents.</p>
+
+                    <div class="grid three">
+                        <div class="card accent-mint">
+                            <span class="tag">Architecture</span>
+                            <h3>Document-Oriented</h3>
+                            <p>Data is stored in JSON-like BSON documents. Fields can vary from document to document, enabling agile evolution without table alters.</p>
+                        </div>
+                        <div class="card accent-yellow">
+                            <span class="tag">Scalability</span>
+                            <h3>Horizontal Sharding</h3>
+                            <p>Distributes data across clusters of cheap commodity servers seamlessly to handle massive read/write traffic.</p>
+                        </div>
+                        <div class="card accent-purple">
+                            <span class="tag">Reliability</span>
+                            <h3>Replica Sets</h3>
+                            <p>Provides high availability and automatic failover through primary-secondary replica replication sets.</p>
+                        </div>
+                    </div>
+
+                    <h2>Relational DBMS (RDBMS) vs. MongoDB (NoSQL)</h2>
+                    <p>Understanding the mapping between relational concepts and MongoDB equivalents is fundamental for university exams and real-world system architecture:</p>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Feature / Concept</th>
+                                    <th>Relational DBMS (SQL)</th>
+                                    <th>MongoDB (NoSQL)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Data Model</strong></td>
+                                    <td>Tables composed of Rows and Columns</td>
+                                    <td>Collections composed of BSON Documents</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Schema</strong></td>
+                                    <td>Strict, pre-defined schema (DDL required)</td>
+                                    <td>Dynamic, schema-less (fields vary per document)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Entity Record</strong></td>
+                                    <td>Tuple / Row / Record</td>
+                                    <td>BSON Document (Key-Value pairs)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Primary Key</strong></td>
+                                    <td>Primary Key constraint (`PRIMARY KEY`)</td>
+                                    <td>Unique default field: `_id` (ObjectId)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Relationship Strategy</strong></td>
+                                    <td>Foreign Keys with SQL <code>JOIN</code>s</td>
+                                    <td>Embedded sub-documents OR Document references (`$lookup`)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Scaling</strong></td>
+                                    <td>Vertical Scaling (Upgrade CPU/RAM)</td>
+                                    <td>Horizontal Scaling (Sharding across distributed nodes)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Query Language</strong></td>
+                                    <td>Structured Query Language (SQL)</td>
+                                    <td>MQL (MongoDB Query Language) / JSON expressions</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h2>JSON vs. BSON: Why MongoDB uses BSON internally</h2>
+                    <p>While developers write and view queries in human-readable JSON, MongoDB stores and transmits data over the wire as <strong>BSON (Binary JSON)</strong>:</p>
+                    <ul>
+                        <li><strong>Traversability &amp; Speed:</strong> BSON adds field length prefixes, allowing the database engine to skip unneeded fields rapidly during queries.</li>
+                        <li><strong>Rich Data Types:</strong> Standard JSON only supports strings, numbers, booleans, arrays, and null. BSON adds essential enterprise types such as <code>Date</code>, <code>ObjectId</code>, <code>64-bit Integer (long)</code>, <code>Decimal128</code>, and raw <code>Binary</code> data.</li>
+                    </ul>
+
+                    <!-- 5 MARKS EXAM QUESTION 1 -->
+                    <div class="exam-box">
+                        <div class="exam-q">Q1. Explain the characteristics and architecture of MongoDB. Compare MongoDB with traditional Relational Database Management Systems (RDBMS). [5 Marks]</div>
+                        <div class="exam-rubric">
+                            <span class="rubric-item">Definition &amp; Characteristics: 1.5 M</span>
+                            <span class="rubric-item">Comparison Table: 2.0 M</span>
+                            <span class="rubric-item">BSON &amp; ObjectId Concept: 1.5 M</span>
+                        </div>
+                        <div class="exam-ans">
+                            <h4>1. Definition of MongoDB:</h4>
+                            <p>MongoDB is an open-source, document-oriented NoSQL database system that stores data in flexible, schema-free BSON (Binary JSON) format. Key characteristics include:</p>
+                            <ul>
+                                <li><strong>Schema Flexibility:</strong> Documents in the same collection do not need to share identical fields.</li>
+                                <li><strong>High Availability:</strong> Implemented using Replica Sets with automatic master failover.</li>
+                                <li><strong>Horizontal Scalability:</strong> Uses Sharding to distribute data across multiple physical machines.</li>
+                                <li><strong>Rich Query Language:</strong> Supports aggregation pipelines, text search, and geospatial indexing.</li>
+                            </ul>
+
+                            <h4>2. Tabular Comparison: RDBMS vs. MongoDB:</h4>
+                            <ul>
+                                <li><strong>Structure:</strong> RDBMS uses Tables and Rows; MongoDB uses Collections and Documents.</li>
+                                <li><strong>Schema:</strong> RDBMS has a fixed schema; MongoDB is dynamic and schema-free.</li>
+                                <li><strong>Relationships:</strong> RDBMS relies on Foreign Keys and multi-table JOINs; MongoDB favors embedding sub-documents for fast atomic reads or manual references.</li>
+                                <li><strong>Transactions:</strong> RDBMS emphasizes ACID across normalized tables; MongoDB guarantees single-document atomicity and multi-document ACID transactions.</li>
+                            </ul>
+
+                            <h4>3. BSON &amp; Primary Key `_id`:</h4>
+                            <p>Every MongoDB document requires a unique primary key in the <code>_id</code> field. If omitted, MongoDB automatically generates a 12-byte <code>ObjectId</code> composed of a 4-byte timestamp, 5-byte random value, and a 3-byte incrementing counter, ensuring global uniqueness across distributed systems.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step Quiz -->
+                    <div class="quiz" data-answer="1" data-correct="BSON stores binary encodings with extra data types (Date, ObjectId, Long) and length prefixes for fast traversal.">
+                        <h4>Knowledge Check: Why does MongoDB internally store documents in BSON instead of plain text JSON?</h4>
+                        <div class="quiz-options">
+                            <button class="quiz-option">Because JSON is not capable of storing string values.</button>
+                            <button class="quiz-option">BSON supports richer data types (Date, ObjectId) and enables faster parsing via length headers.</button>
+                            <button class="quiz-option">BSON enforces a strict relational table schema on every collection.</button>
+                            <button class="quiz-option">Plain JSON requires multi-table SQL joins that MongoDB does not support.</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <!-- STEP 2: Drivers & Client Architecture -->
+                <section class="step-view" data-title="2. MongoDB Drivers">
+                    <header class="hero">
+                        <span class="eyebrow">Module IV · Application Connectivity</span>
+                        <h1>MongoDB Drivers &amp; Client Architecture</h1>
+                        <p>Learn how application code bridges to MongoDB servers using official client libraries, connection pooling, and the wire protocol.</p>
+                    </header>
+
+                    <h2>What is a MongoDB Driver?</h2>
+                    <p>A <strong>MongoDB Driver</strong> is an officially supported software client library that exposes an idiomatic programming language API (Java, Python, Node.js, C#, Go) to communicate with the MongoDB database cluster. It translates high-level application calls (such as inserting an object or executing a query) into MongoDB's binary <strong>Wire Protocol</strong> (OP_MSG over TCP/IP).</p>
+
+                    <div class="pipeline">
+                        <div class="stage">
+                            <strong>1. Application Code</strong>
+                            <p>Calls Java / JS methods (e.g. <code>collection.insertOne(doc)</code>)</p>
+                        </div>
+                        <div class="stage">
+                            <strong>2. Driver Library</strong>
+                            <p>Serializes POJO/Object into BSON bytes</p>
+                        </div>
+                        <div class="stage">
+                            <strong>3. Wire Protocol</strong>
+                            <p>TCP/IP Socket stream on default port <code>27017</code></p>
+                        </div>
+                        <div class="stage">
+                            <strong>4. mongod Engine</strong>
+                            <p>WiredTiger storage engine writes to disk/memory</p>
+                        </div>
+                    </div>
+
+                    <h2>Key Responsibilities of a MongoDB Driver</h2>
+                    <div class="grid two">
+                        <div class="card accent-blue">
+                            <h3>1. Connection Pooling</h3>
+                            <p>Creating TCP connections is computationally expensive. Drivers maintain a warm pool of reusable connections (default 100 in Java) to eliminate handshake overhead on concurrent requests.</p>
+                        </div>
+                        <div class="card accent-orange">
+                            <h3>2. Replica Set Monitoring &amp; SDAM</h3>
+                            <p>Server Discovery and Monitoring (SDAM): The driver continuously monitors replica set topology, automatically routing writes to the Primary and reads to Secondaries (if configured).</p>
+                        </div>
+                        <div class="card accent-purple">
+                            <h3>3. BSON Serialization</h3>
+                            <p>Converts native language objects (Java POJOs, Python dicts, JS objects) into binary BSON for storage, and deserializes BSON back into memory structures.</p>
+                        </div>
+                        <div class="card accent-mint">
+                            <h3>4. Authentication &amp; TLS/SSL</h3>
+                            <p>Handles SCRAM-SHA-256 password handshakes, Kerberos, X.509 certificates, and TLS encrypted transport transparently.</p>
+                        </div>
+                    </div>
+
+                    <h2>Standard Connection String URI</h2>
+                    <p>All drivers parse the standardized MongoDB connection URI format:</p>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>Standard URI Format</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>mongodb://[username:password@]host1[:port1][,...hostN[:portN]][/[defaultauthdb][?options]]
+
+// Example Local Development URI:
+mongodb://localhost:27017/fsd_database
+
+// Example Production Replica Set with Auth & TLS:
+mongodb://admin:Secret123@node1.example.com:27017,node2.example.com:27017/fsd_db?replicaSet=rs0&amp;ssl=true&amp;authSource=admin</code></pre>
+                    </div>
+
+                    <!-- 5 MARKS EXAM QUESTION 2 -->
+                    <div class="exam-box">
+                        <div class="exam-q">Q2. What is a MongoDB Driver? Explain the role of drivers in client-server communication and connection pooling with an example. [5 Marks]</div>
+                        <div class="exam-rubric">
+                            <span class="rubric-item">Driver Definition &amp; Architecture: 1.5 M</span>
+                            <span class="rubric-item">Connection Pooling &amp; Wire Protocol: 1.5 M</span>
+                            <span class="rubric-item">Code / URI Example: 2.0 M</span>
+                        </div>
+                        <div class="exam-ans">
+                            <h4>1. Definition:</h4>
+                            <p>A MongoDB Driver is a language-specific client library (e.g., MongoDB Java Driver, PyMongo, Mongoose) providing an abstraction layer for application code to communicate with a MongoDB database instance over network sockets.</p>
+                            
+                            <h4>2. Core Functions of a Driver:</h4>
+                            <ul>
+                                <li><strong>Wire Protocol Encoding:</strong> Translates native application objects (POJOs) into BSON binary wire packets using the standard OP_MSG protocol.</li>
+                                <li><strong>Connection Pooling:</strong> Maintains an internal cache of pre-established TCP connections. When a thread requires database access, it leases a connection from the pool and releases it upon completion, preventing server exhaustion.</li>
+                                <li><strong>Failover Handling:</strong> If a Primary replica fails, the driver discovers the newly elected Primary automatically without requiring an application restart.</li>
+                            </ul>
+
+                            <h4>3. Example in Java (Connecting to MongoDB):</h4>
+                            <div class="code-wrap">
+                                <div class="code-header"><span>Java Mongo Driver Snippet</span><button class="copy-btn">Copy</button></div>
+                                <pre><code>// 1. Define Connection URI
+String uri = "mongodb://localhost:27017";
+
+// 2. Instantiate MongoClient (creates connection pool automatically)
+try (MongoClient mongoClient = MongoClients.create(uri)) {
+    // 3. Access Database and Collection
+    MongoDatabase database = mongoClient.getDatabase("college_db");
+    MongoCollection&lt;Document&gt; collection = database.getCollection("students");
+    
+    // 4. Perform database operation
+    Document doc = new Document("name", "Alice").append("dept", "CSE");
+    collection.insertOne(doc);
+    System.out.println("Inserted successfully!");
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step Quiz -->
+                    <div class="quiz" data-answer="2" data-correct="Connection pooling reuses open network connections, avoiding repeated TCP and authentication handshakes.">
+                        <h4>Knowledge Check: What is the primary performance benefit of driver Connection Pooling?</h4>
+                        <div class="quiz-options">
+                            <button class="quiz-option">It converts BSON documents into relational SQL tables.</button>
+                            <button class="quiz-option">It automatically encrypts user passwords in plain text.</button>
+                            <button class="quiz-option">It reuses active TCP sockets, avoiding costly connection and authentication handshakes per request.</button>
+                            <button class="quiz-option">It eliminates the need for MongoDB Compass.</button>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </section>
+
+                <!-- STEP 3: Installation & Server Architecture -->
+                <section class="step-view" data-title="3. MongoDB Installation">
+                    <header class="hero">
+                        <span class="eyebrow">Module IV · System Setup</span>
+                        <h1>MongoDB Installation &amp; Core Daemons</h1>
+                        <p>Learn how to install MongoDB Community Server, configure the database daemon, use mongosh, and verify server health.</p>
+                    </header>
+
+                    <h2>Core MongoDB Components</h2>
+                    <div class="grid three">
+                        <div class="card accent-mint">
+                            <span class="tag">Daemon</span>
+                            <h3>mongod</h3>
+                            <p>The primary background service process. It manages data files, handles client requests, executes queries, and manages background tasks like journaling and indexing.</p>
+                        </div>
+                        <div class="card accent-yellow">
+                            <span class="tag">CLI Shell</span>
+                            <h3>mongosh</h3>
+                            <p>The modern interactive JavaScript shell used by developers and DBAs to connect to the server, run queries, and execute administration scripts.</p>
+                        </div>
+                        <div class="card accent-blue">
+                            <span class="tag">GUI Tool</span>
+                            <h3>MongoDB Compass</h3>
+                            <p>Official Graphical User Interface for visually exploring schemas, viewing document trees, running queries, analyzing performance, and managing indexes.</p>
+                        </div>
+                    </div>
+
+                    <h2>Installation &amp; Startup Steps</h2>
+                    <div class="grid two">
+                        <div class="card">
+                            <h3>macOS (Homebrew)</h3>
+                            <div class="code-wrap">
+                                <div class="code-header"><span>Terminal</span><button class="copy-btn">Copy</button></div>
+                                <pre><code># 1. Tap official MongoDB tap
+brew tap mongodb/brew
+
+# 2. Install MongoDB Community Server
+brew install mongodb-community@7.0
+
+# 3. Start background daemon
+brew services start mongodb-community@7.0
+
+# 4. Connect via MongoDB Shell
+mongosh</code></pre>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>Linux (Ubuntu / Debian)</h3>
+                            <div class="code-wrap">
+                                <div class="code-header"><span>Bash</span><button class="copy-btn">Copy</button></div>
+                                <pre><code># 1. Import public GPG key & add repo
+sudo apt-get install gnupg curl
+curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
+   sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
+
+# 2. Install packages
+sudo apt-get update
+sudo apt-get install -y mongodb-org
+
+# 3. Start & enable systemd service
+sudo systemctl start mongod
+sudo systemctl enable mongod
+
+# 4. Check status
+sudo systemctl status mongod</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="callout info">
+                        <p><strong>Default Configuration Parameters:</strong></p>
+                        <ul>
+                            <li><strong>Default Port:</strong> <code>27017</code></li>
+                            <li><strong>Default Bind IP:</strong> <code>127.0.0.1</code> (Restricted to localhost for security)</li>
+                            <li><strong>Data Directory:</strong> <code>/var/lib/mongodb</code> (Linux) or <code>/usr/local/var/mongodb</code> (macOS)</li>
+                            <li><strong>Log File:</strong> <code>/var/log/mongodb/mongod.log</code></li>
+                        </ul>
+                    </div>
+
+                    <!-- 5 MARKS EXAM QUESTION 3 -->
+                    <div class="exam-box">
+                        <div class="exam-q">Q3. Describe the installation process and essential architecture components of MongoDB (`mongod`, `mongosh`, Compass). How do you verify that the MongoDB service is active? [5 Marks]</div>
+                        <div class="exam-rubric">
+                            <span class="rubric-item">Component Descriptions: 2.0 M</span>
+                            <span class="rubric-item">Installation Steps &amp; Daemon Management: 2.0 M</span>
+                            <span class="rubric-item">Service Verification: 1.0 M</span>
+                        </div>
+                        <div class="exam-ans">
+                            <h4>1. Key Architecture Components:</h4>
+                            <ul>
+                                <li><strong>`mongod` (Database Engine):</strong> The core background daemon responsible for I/O operations, memory management (WiredTiger cache), concurrency control, write-ahead journaling, and listening on network port 27017.</li>
+                                <li><strong>`mongosh` (MongoDB Shell):</strong> A Node.js-based interactive command-line interface that allows developers to run JavaScript commands, administrative scripts, and CRUD queries directly on the database.</li>
+                                <li><strong>MongoDB Compass:</strong> A desktop GUI application allowing schema visualization, visual query building, index inspection, and performance profiling.</li>
+                            </ul>
+
+                            <h4>2. Installation &amp; Service Management:</h4>
+                            <p>Installed via package managers (Homebrew on macOS, APT on Ubuntu, MSI installer on Windows). After installation, the daemon service is controlled using:</p>
+                            <ul>
+                                <li>Start: <code>sudo systemctl start mongod</code></li>
+                                <li>Enable on Boot: <code>sudo systemctl enable mongod</code></li>
+                            </ul>
+
+                            <h4>3. Verifying the Service:</h4>
+                            <p>To verify the database is active and accepting connections:</p>
+                            <ol>
+                                <li>Check process status: <code>sudo systemctl status mongod</code> (shows active (running)).</li>
+                                <li>Execute connection test in terminal: <code>mongosh --eval "db.adminCommand('ping')"</code>. Receiving <code>{ ok: 1 }</code> confirms the service is operational.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 4: Database & Collection Management -->
+                <section class="step-view" data-title="4. Databases &amp; Collections">
+                    <header class="hero">
+                        <span class="eyebrow">Module IV · Schema Design</span>
+                        <h1>Databases &amp; Collections (Create &amp; Drop)</h1>
+                        <p>Master the commands to switch databases, create collections, inspect metadata, and drop storage containers safely.</p>
+                    </header>
+
+                    <h2>Dynamic Database Creation</h2>
+                    <p>Unlike SQL databases where you must execute <code>CREATE DATABASE dbname;</code> before inserting tables, MongoDB adopts a <strong>lazy / dynamic allocation strategy</strong>. When you switch to a database using <code>use &lt;dbname&gt;</code>, MongoDB creates the database in memory, but does not persist it to disk until the first document is inserted.</p>
+
+                    <div class="grid two">
+                        <div class="card accent-mint">
+                            <h3>Database Operations</h3>
+                            <div class="code-wrap">
+                                <div class="code-header"><span>mongosh</span><button class="copy-btn">Copy</button></div>
+                                <pre><code>// 1. Switch to (or create) database
+use college_db
+
+// 2. Show currently active database
+db
+
+// 3. List all persisted databases
+show dbs
+
+// 4. Drop current active database
+db.dropDatabase()</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="card accent-orange">
+                            <h3>Collection Operations</h3>
+                            <div class="code-wrap">
+                                <div class="code-header"><span>mongosh</span><button class="copy-btn">Copy</button></div>
+                                <pre><code>// 1. Implicit collection creation
+db.students.insertOne({ name: "Ravi", marks: 88 })
+
+// 2. Explicit collection creation
+db.createCollection("teachers")
+
+// 3. List all collections in current DB
+show collections
+
+// 4. Drop an existing collection
+db.students.drop()</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2>Capped Collections</h2>
+                    <p>MongoDB allows creating <strong>Capped Collections</strong>: fixed-size, circular collections that automatically overwrite the oldest documents when allocated disk space is reached. They are ideal for high-throughput logging, telemetry, or cache buffers:</p>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>Capped Collection Example</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>// Creates a capped collection of max 5 MB and max 5000 documents
+db.createCollection("system_logs", {
+    capped: true,
+    size: 5242880, // Size in bytes (5 MB)
+    max: 5000      // Maximum number of documents
+})</code></pre>
+                    </div>
+
+                    <!-- 5 MARKS EXAM QUESTION 4 -->
+                    <div class="exam-box">
+                        <div class="exam-q">Q4. Explain how databases and collections are created and dropped in MongoDB with syntax and examples. What is the difference between explicit and implicit creation? [5 Marks]</div>
+                        <div class="exam-rubric">
+                            <span class="rubric-item">Database Commands (use, dropDatabase): 1.5 M</span>
+                            <span class="rubric-item">Collection Commands (createCollection, drop): 1.5 M</span>
+                            <span class="rubric-item">Implicit vs Explicit Creation &amp; Capped: 2.0 M</span>
+                        </div>
+                        <div class="exam-ans">
+                            <h4>1. Database Management:</h4>
+                            <ul>
+                                <li><strong>Creation / Switch:</strong> <code>use university_db;</code>. If the database does not exist, MongoDB creates it in memory. It appears in <code>show dbs</code> only after data is inserted.</li>
+                                <li><strong>Dropping Database:</strong> <code>db.dropDatabase();</code> drops the database currently in use and deletes its physical data files.</li>
+                            </ul>
+
+                            <h4>2. Collection Creation:</h4>
+                            <ul>
+                                <li><strong>Implicit Creation:</strong> When an insert command is issued on a non-existent collection, MongoDB automatically provisions it:
+                                    <br><code>db.students.insertOne({ rollNo: 101, name: "Kiran" });</code>
+                                </li>
+                                <li><strong>Explicit Creation:</strong> Using <code>db.createCollection(name, options)</code>. Useful when configuring custom options such as capped size, collation, or JSON schema validation:
+                                    <br><code>db.createCollection("audit_logs", { capped: true, size: 1048576 });</code>
+                                </li>
+                            </ul>
+
+                            <h4>3. Dropping a Collection:</h4>
+                            <p>Syntax: <code>db.students.drop();</code>. Returns <code>true</code> if the collection was dropped successfully and removes all associated indexes.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 5: Core CRUD Operations Deep Dive -->
+                <section class="step-view" data-title="5. CRUD Operations Deep Dive">
+                    <header class="hero">
+                        <span class="eyebrow">Module IV · Data Manipulation</span>
+                        <h1>CRUD Operations Deep Dive</h1>
+                        <p>Master Create, Read, Update, and Delete commands with comparison operators, projection, and update operators.</p>
+                    </header>
+
+                    <h2>1. CREATE (Insert Documents)</h2>
+                    <p>MongoDB provides two primary insert methods: <code>insertOne()</code> and <code>insertMany()</code>.</p>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>Insert Operations</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>// Insert a single document
+db.students.insertOne({
+    name: "Sneha Sharma",
+    email: "sneha@gmail.com",
+    department: "CSE",
+    gpa: 8.9,
+    skills: ["Java", "React", "MongoDB"],
+    registeredAt: new Date()
+});
+
+// Insert multiple documents at once
+db.students.insertMany([
+    { name: "Rahul Verma", email: "rahul@gmail.com", department: "ECE", gpa: 7.8 },
+    { name: "Pooja Nair", email: "pooja@gmail.com", department: "CSE", gpa: 9.2 }
+]);</code></pre>
+                    </div>
+
+                    <h2>2. READ (Find &amp; Query Documents)</h2>
+                    <p>Read operations use <code>db.collection.find(query, projection)</code>. If query is <code>{}</code>, it matches all documents.</p>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>Query Operations &amp; Operators</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>// 1. Find all students in CSE department
+db.students.find({ department: "CSE" });
+
+// 2. Comparison Operators: $gt (greater than), $gte, $lt, $lte, $in
+db.students.find({ gpa: { $gte: 8.5 } });
+
+// 3. Logical Operators: $and, $or
+db.students.find({
+    $or: [
+        { department: "CSE" },
+        { gpa: { $gt: 9.0 } }
+    ]
+});
+
+// 4. Projection: Select only specific fields (1 = include, 0 = exclude)
+// Suppress default _id and return only name and email
+db.students.find({ department: "CSE" }, { name: 1, email: 1, _id: 0 });
+
+// 5. Sorting, Skipping, and Pagination
+db.students.find().sort({ gpa: -1 }).skip(0).limit(5); // -1 = DESC, 1 = ASC</code></pre>
+                    </div>
+
+                    <h2>3. UPDATE (Modify Documents)</h2>
+                    <p>Always use atomic update operators like <code>$set</code>, <code>$inc</code>, or <code>$push</code>. Without an operator, you risk replacing the entire document!</p>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>Update Operations</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>// 1. updateOne: Update a single document's GPA
+db.students.updateOne(
+    { email: "sneha@gmail.com" },             // Filter criteria
+    { $set: { gpa: 9.1, status: "Active" } }   // Atomic update operator
+);
+
+// 2. updateMany: Increment semester by 1 for all CSE students
+db.students.updateMany(
+    { department: "CSE" },
+    { $inc: { semester: 1 } }
+);
+
+// 3. Array modification with $push
+db.students.updateOne(
+    { email: "sneha@gmail.com" },
+    { $push: { skills: "Docker" } }
+);
+
+// 4. Upsert (Update or Insert if document not found)
+db.students.updateOne(
+    { email: "vikram@gmail.com" },
+    { $set: { name: "Vikram Rao", department: "IT" } },
+    { upsert: true }
+);</code></pre>
+                    </div>
+
+                    <h2>4. DELETE (Remove Documents)</h2>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>Delete Operations</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>// Delete a single matching document
+db.students.deleteOne({ email: "rahul@gmail.com" });
+
+// Delete all documents matching condition
+db.students.deleteMany({ status: "Inactive" });
+
+// Remove all documents from a collection (leaves collection and indexes intact)
+db.students.deleteMany({});</code></pre>
+                    </div>
+
+                    <!-- 5 MARKS EXAM QUESTION 5 -->
+                    <div class="exam-box">
+                        <div class="exam-q">Q5. Explain CRUD operations in MongoDB with syntax and complete code examples for each operation. What is the significance of the `$set` operator in updates? [5 Marks]</div>
+                        <div class="exam-rubric">
+                            <span class="rubric-item">Create (insertOne / insertMany): 1.0 M</span>
+                            <span class="rubric-item">Read (find with criteria &amp; projection): 1.5 M</span>
+                            <span class="rubric-item">Update &amp; $set explanation: 1.5 M</span>
+                            <span class="rubric-item">Delete (deleteOne / deleteMany): 1.0 M</span>
+                        </div>
+                        <div class="exam-ans">
+                            <h4>1. Create (Insert):</h4>
+                            <p>Used to store new BSON documents in a collection.</p>
+                            <pre><code>db.users.insertOne({ username: "john_doe", age: 22, role: "student" });</code></pre>
+
+                            <h4>2. Read (Query):</h4>
+                            <p>Retrieves documents matching conditions with optional projection to limit returned fields.</p>
+                            <pre><code>// Returns username only for users older than 20
+db.users.find({ age: { $gt: 20 } }, { username: 1, _id: 0 });</code></pre>
+
+                            <h4>3. Update &amp; Role of `$set`:</h4>
+                            <p>The <code>$set</code> operator modifies only the specified field values without overwriting or deleting other attributes in the document. If a field does not exist, <code>$set</code> appends it.</p>
+                            <pre><code>db.users.updateOne(
+    { username: "john_doe" },
+    { $set: { role: "admin", verified: true } }
+);</code></pre>
+
+                            <h4>4. Delete:</h4>
+                            <p>Removes documents from the collection based on filter criteria.</p>
+                            <pre><code>db.users.deleteOne({ username: "john_doe" });</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 6: Creating UI & Form Basics -->
+                <section class="step-view" data-title="6. Creating User Interface (UI)">
+                    <header class="hero">
+                        <span class="eyebrow">Module IV · Frontend Development</span>
+                        <h1>Creating Frontend UI &amp; Forms</h1>
+                        <p>Design modern, responsive, accessible forms in HTML5 and CSS for user authentication and data management.</p>
+                    </header>
+
+                    <h2>Principles of Modern Full-Stack UI</h2>
+                    <p>In a Full Stack Architecture, the <strong>User Interface (UI)</strong> layer is responsible for:</p>
+                    <ul>
+                        <li><strong>Data Collection:</strong> Capturing clean user input through intuitive controls (text, email, password, dropdowns).</li>
+                        <li><strong>Accessibility &amp; Semantics:</strong> Associating <code>&lt;label for="..."&gt;</code> with input IDs for screen readers and usability.</li>
+                        <li><strong>State &amp; Feedback:</strong> Showing loading spinners, inline error banners, and success toasts.</li>
+                    </ul>
+
+                    <h2>HTML5 Registration &amp; Login UI Structure</h2>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>auth.html</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>&lt;!-- User Registration Form Component --&gt;
+&lt;div class="auth-card"&gt;
+    &lt;h2&gt;Create an Account&lt;/h2&gt;
+    &lt;form id="registerForm" novalidate&gt;
+        &lt;div class="form-group"&gt;
+            &lt;label for="regUsername"&gt;Username&lt;/label&gt;
+            &lt;input type="text" id="regUsername" name="username" required minlength="4" /&gt;
+            &lt;span class="error-msg" id="usernameError"&gt;&lt;/span&gt;
+        &lt;/div&gt;
+
+        &lt;div class="form-group"&gt;
+            &lt;label for="regEmail"&gt;Email Address&lt;/label&gt;
+            &lt;input type="email" id="regEmail" name="email" required /&gt;
+            &lt;span class="error-msg" id="emailError"&gt;&lt;/span&gt;
+        &lt;/div&gt;
+
+        &lt;div class="form-group"&gt;
+            &lt;label for="regPassword"&gt;Password&lt;/label&gt;
+            &lt;input type="password" id="regPassword" name="password" required minlength="8" /&gt;
+            &lt;span class="error-msg" id="passwordError"&gt;&lt;/span&gt;
+        &lt;/div&gt;
+
+        &lt;button type="submit" class="btn-primary" id="btnRegister"&gt;Register&lt;/button&gt;
+    &lt;/form&gt;
+    &lt;div id="statusAlert" class="alert-box"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                    </div>
+
+                    <!-- 5 MARKS EXAM QUESTION 6 -->
+                    <div class="exam-box">
+                        <div class="exam-q">Q6. Explain how a responsive User Interface (UI) for user registration is constructed in Full Stack Web Development. Detail the role of semantic HTML5 form controls and client-side styling. [5 Marks]</div>
+                        <div class="exam-rubric">
+                            <span class="rubric-item">UI Requirements &amp; Architecture: 1.5 M</span>
+                            <span class="rubric-item">Semantic HTML5 Controls: 1.5 M</span>
+                            <span class="rubric-item">Code Implementation: 2.0 M</span>
+                        </div>
+                        <div class="exam-ans">
+                            <h4>1. Architecture of Frontend UI:</h4>
+                            <p>The UI serves as the presentation tier of a Full Stack application. It coordinates user interactions, captures input parameters, provides real-time feedback, and dispatches JSON asynchronous requests to backend REST controllers.</p>
+
+                            <h4>2. Semantic HTML5 Form Elements:</h4>
+                            <ul>
+                                <li><code>&lt;form&gt;</code>: Groups related input fields and triggers standard submit events.</li>
+                                <li><code>&lt;label for="id"&gt;</code>: Establishes programmatic binding between text and form controls for accessibility.</li>
+                                <li><code>&lt;input type="email"&gt;</code>: Enforces native browser email syntax validation.</li>
+                                <li><code>&lt;input type="password"&gt;</code>: Masks credentials on the screen to prevent shoulder-surfing.</li>
+                                <li><code>novalidate</code> attribute: Disables default browser tooltip popups when custom JavaScript error messages are used.</li>
+                            </ul>
+
+                            <h4>3. Core Structure Snippet:</h4>
+                            <p>The form is encapsulated inside a container with clear labels, designated error placeholders (<code>&lt;span class="error-msg"&gt;</code>), and an event listener on the form's submit event preventing default browser page reloads via <code>event.preventDefault()</code>.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 7: Form Validation & Registration Flow -->
+                <section class="step-view" data-title="7. Validation &amp; User Register">
+                    <header class="hero">
+                        <span class="eyebrow">Module IV · Application Logic</span>
+                        <h1>Form Validation &amp; User Registration</h1>
+                        <p>Explore dual-layer validation strategy, regular expressions, and the end-to-end user registration pipeline.</p>
+                    </header>
+
+                    <h2>The Dual-Layer Validation Strategy</h2>
+                    <p>A fundamental security law of Full Stack Engineering: <strong>Client-side validation enhances User Experience (UX), but Server-side validation guarantees Security.</strong></p>
+
+                    <div class="grid two">
+                        <div class="card accent-yellow">
+                            <h3>Client-Side Validation (Browser)</h3>
+                            <ul>
+                                <li>Runs instantly in JavaScript without network latency.</li>
+                                <li>Provides immediate visual feedback to the user (e.g. red borders, password strength meters).</li>
+                                <li><strong>Can be easily bypassed</strong> by attackers using Postman, cURL, or disabling JavaScript.</li>
+                            </ul>
+                        </div>
+                        <div class="card accent-mint">
+                            <h3>Server-Side Validation (Spring Boot)</h3>
+                            <ul>
+                                <li>Validates incoming JSON DTOs before touching service logic or database.</li>
+                                <li>Protects against malicious payloads, SQL/NoSQL injection, and malformed inputs.</li>
+                                <li><strong>Mandatory &amp; authoritative</strong>: Invalid requests are rejected with HTTP 400 Bad Request.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h2>Client-Side Registration Logic (JavaScript)</h2>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>register.js</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>const registerForm = document.getElementById("registerForm");
+
+registerForm.addEventListener("submit", async (e) => {
+    e.preventDefault(); // Stop standard page reload
+
+    const username = document.getElementById("regUsername").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const password = document.getElementById("regPassword").value;
+
+    // 1. Client-Side Regex Validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (username.length &lt; 4) {
+        alert("Username must be at least 4 characters!");
+        return;
+    }
+    if (!emailRegex.test(email)) {
+        alert("Please enter a valid email address!");
+        return;
+    }
+    if (password.length &lt; 8) {
+        alert("Password must be at least 8 characters long!");
+        return;
+    }
+
+    // 2. Dispatch payload to Backend API
+    try {
+        const response = await fetch("http://localhost:8080/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, email, password })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            alert("Registration successful! Please login.");
+            window.location.href = "login.html";
+        } else {
+            alert("Registration failed: " + data.message);
+        }
+    } catch (err) {
+        console.error("Network error:", err);
+    }
+});</code></pre>
+                    </div>
+
+                    <!-- 5 MARKS EXAM QUESTION 7 -->
+                    <div class="exam-box">
+                        <div class="exam-q">Q7. Differentiate between client-side and server-side form validation. Explain the end-to-end user registration workflow in a full-stack application. [5 Marks]</div>
+                        <div class="exam-rubric">
+                            <span class="rubric-item">Client vs Server Comparison: 2.0 M</span>
+                            <span class="rubric-item">End-to-End Registration Workflow: 2.0 M</span>
+                            <span class="rubric-item">Security Justification: 1.0 M</span>
+                        </div>
+                        <div class="exam-ans">
+                            <h4>1. Client-Side vs. Server-Side Validation:</h4>
+                            <ul>
+                                <li><strong>Location:</strong> Client validation executes inside the browser engine using JavaScript/HTML5; Server validation executes in the Spring Boot backend container.</li>
+                                <li><strong>Purpose:</strong> Client validation prevents avoidable round-trips and improves user feedback; Server validation ensures data integrity, authorization constraints, and business rules.</li>
+                                <li><strong>Security:</strong> Client validation provides zero security since HTTP requests can be forged directly; Server validation cannot be bypassed.</li>
+                            </ul>
+
+                            <h4>2. End-to-End User Registration Workflow:</h4>
+                            <ol>
+                                <li><strong>Form Input:</strong> User enters details (username, email, password) in the HTML form.</li>
+                                <li><strong>Client Pre-Check:</strong> JavaScript validates syntax (regex for email, length constraints) and halts invalid submissions.</li>
+                                <li><strong>API Request:</strong> JavaScript packages fields into a JSON payload and dispatches an asynchronous HTTP <code>POST</code> request via <code>fetch()</code> to <code>/api/auth/register</code>.</li>
+                                <li><strong>Backend Ingestion:</strong> Spring Boot REST Controller receives <code>RegisterDTO</code> and triggers Jakarta Bean Validation (<code>@Valid</code>).</li>
+                                <li><strong>Duplicate Check:</strong> Service layer queries MongoDB (<code>existsByEmail</code>). If email exists, returns HTTP 409 Conflict.</li>
+                                <li><strong>Password Hashing:</strong> Raw password is encrypted using BCrypt before persisting the user document into MongoDB.</li>
+                                <li><strong>Response:</strong> Backend returns HTTP 201 Created; frontend redirects user to Login.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 8: Password Encryption & BCrypt -->
+                <section class="step-view" data-title="8. Password Encryption">
+                    <header class="hero">
+                        <span class="eyebrow">Module IV · Application Security</span>
+                        <h1>Password Encryption &amp; BCrypt Hashing</h1>
+                        <p>Learn why plain-text passwords must never be stored, how salt works, and how to configure BCryptPasswordEncoder.</p>
+                    </header>
+
+                    <h2>Hashing vs. Encryption: Critical Distinction</h2>
+                    <div class="grid two">
+                        <div class="card accent-orange">
+                            <h3>Encryption (Two-Way)</h3>
+                            <p>Transforming plaintext into ciphertext using a secret key (e.g., AES-256). <strong>Reversible</strong>: anyone with the key can decrypt ciphertext back into the original password. Unsuitable for user passwords because a compromised key compromises all credentials.</p>
+                        </div>
+                        <div class="card accent-mint">
+                            <h3>Hashing (One-Way)</h3>
+                            <p>A mathematical one-way cryptographic function (e.g., SHA-256, BCrypt). <strong>Irreversible</strong>: it is computationally impossible to invert a hash back into the plain password. Passwords must ALWAYS be hashed.</p>
+                        </div>
+                    </div>
+
+                    <h2>Why BCrypt and Salting are Essential</h2>
+                    <p>Standard hashing algorithms like MD5 and SHA-256 are extremely fast, making them vulnerable to <strong>brute-force attacks</strong> and <strong>Rainbow Table lookups</strong> (pre-computed hash lookup tables).</p>
+                    <ul>
+                        <li><strong>Cryptographic Salt:</strong> A random 16-byte string generated per password and prepended before hashing. Even if two users choose <code>"Password123"</code>, their resulting hashes are completely different, rendering rainbow tables useless.</li>
+                        <li><strong>Adaptive Work Factor (Cost):</strong> BCrypt includes a configurable cost parameter (default 10 = 2<sup>10</sup> iterations). As hardware becomes faster, developers can increase the cost to keep brute-force attacks computationally infeasible.</li>
+                    </ul>
+
+                    <h2>BCrypt Hash Structure</h2>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>Deconstructing a BCrypt String</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
+\__/ \/ \____________________/\_____________________________/
+ |    |            |                         |
+Algorithm Cost      22-character Salt         31-character Hash
+($2a)     (10)     (Randomly generated)     (Result of hashing)</code></pre>
+                    </div>
+
+                    <h2>Spring Security BCrypt Implementation</h2>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>SecurityConfig.java</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>@Configuration
+public class SecurityConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(); // Default cost factor = 10
+    }
+}
+
+// In UserService.java:
+@Service
+public class UserService {
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public User registerUser(UserDTO dto) {
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        
+        // Hash password before saving to MongoDB
+        String hashedPassword = passwordEncoder.encode(dto.getPassword());
+        user.setPassword(hashedPassword);
+        
+        return userRepository.save(user);
+    }
+}</code></pre>
+                    </div>
+
+                    <!-- 5 MARKS EXAM QUESTION 8 -->
+                    <div class="exam-box">
+                        <div class="exam-q">Q8. What is password hashing and salting? Explain how the BCrypt algorithm secures user credentials in a Spring Boot &amp; MongoDB application. [5 Marks]</div>
+                        <div class="exam-rubric">
+                            <span class="rubric-item">Hashing vs Encryption &amp; Salt definition: 1.5 M</span>
+                            <span class="rubric-item">BCrypt Algorithm &amp; Hash Breakdown: 2.0 M</span>
+                            <span class="rubric-item">Spring Boot Code Example: 1.5 M</span>
+                        </div>
+                        <div class="exam-ans">
+                            <h4>1. Password Hashing and Salting:</h4>
+                            <ul>
+                                <li><strong>Hashing:</strong> A one-way cryptographic transformation that converts plain text into a fixed-length string. It cannot be mathematically reversed.</li>
+                                <li><strong>Salting:</strong> Appending a cryptographically random string (salt) to the plaintext password prior to hashing. This ensures that identical passwords yield distinct hashes, defeating Rainbow Table dictionary attacks.</li>
+                            </ul>
+
+                            <h4>2. BCrypt Algorithm Features:</h4>
+                            <ul>
+                                <li><strong>Adaptive Work Factor:</strong> Slows down hashing deliberately to thwart GPU-based brute-force cracking.</li>
+                                <li><strong>Self-Contained Storage:</strong> The resulting 60-character string embeds the algorithm identifier, cost factor, salt, and hash value in a single record.</li>
+                            </ul>
+
+                            <h4>3. Spring Boot Implementation:</h4>
+                            <p>Spring Security provides <code>BCryptPasswordEncoder</code> implementing <code>PasswordEncoder</code>:</p>
+                            <ul>
+                                <li><strong>Encoding on Register:</strong> <code>passwordEncoder.encode(rawPassword)</code></li>
+                                <li><strong>Verifying on Login:</strong> <code>passwordEncoder.matches(rawPassword, storedHash)</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 9: Login Functionality & Authentication -->
+                <section class="step-view" data-title="9. Login Functionality">
+                    <header class="hero">
+                        <span class="eyebrow">Module IV · Authentication</span>
+                        <h1>Login Functionality &amp; Authentication</h1>
+                        <p>Understand authentication verification, session cookies vs. stateless JWT tokens, and token lifecycle management.</p>
+                    </header>
+
+                    <h2>Authentication vs. Authorization</h2>
+                    <div class="grid two">
+                        <div class="card accent-blue">
+                            <h3>Authentication (AuthN)</h3>
+                            <p><strong>"Who are you?"</strong> Verifying identity through credentials (e.g. comparing username and BCrypt password against the MongoDB database).</p>
+                        </div>
+                        <div class="card accent-purple">
+                            <h3>Authorization (AuthZ)</h3>
+                            <p><strong>"What are you allowed to do?"</strong> Checking permissions or roles (e.g., ADMIN vs. USER) to access protected REST endpoints.</p>
+                        </div>
+                    </div>
+
+                    <h2>Stateful Sessions vs. Stateless JWT</h2>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Criteria</th>
+                                    <th>Session-Based (Stateful)</th>
+                                    <th>JWT-Based (Stateless)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Server State</strong></td>
+                                    <td>Server maintains session in memory/Redis</td>
+                                    <td>Server is completely stateless (no session store)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Client Token</strong></td>
+                                    <td>Session ID stored in Cookie (JSESSIONID)</td>
+                                    <td>Signed JWT token in LocalStorage / Cookie</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Scalability</strong></td>
+                                    <td>Challenging across distributed server nodes</td>
+                                    <td>Excellent for microservices &amp; REST APIs</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Header Format</strong></td>
+                                    <td>Automatic <code>Cookie: JSESSIONID=...</code></td>
+                                    <td>Explicit <code>Authorization: Bearer &lt;token&gt;</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h2>Step-by-Step Login Verification Workflow</h2>
+                    <div class="pipeline">
+                        <div class="stage">
+                            <strong>1. Login Request</strong>
+                            <p>Client sends email &amp; raw password</p>
+                        </div>
+                        <div class="stage">
+                            <strong>2. Fetch Document</strong>
+                            <p>Repository queries MongoDB for user by email</p>
+                        </div>
+                        <div class="stage">
+                            <strong>3. BCrypt Match</strong>
+                            <p><code>encoder.matches(raw, hash)</code> verifies password</p>
+                        </div>
+                        <div class="stage">
+                            <strong>4. Generate JWT</strong>
+                            <p>Server signs JWT with secret key and expiry</p>
+                        </div>
+                        <div class="stage">
+                            <strong>5. Client Storage</strong>
+                            <p>Frontend saves token and attaches to future API calls</p>
+                        </div>
+                    </div>
+
+                    <!-- 5 MARKS EXAM QUESTION 9 -->
+                    <div class="exam-box">
+                        <div class="exam-q">Q9. Explain the architecture and step-by-step mechanism of user login functionality in a modern Full Stack web application using Spring Boot and JWT. [5 Marks]</div>
+                        <div class="exam-rubric">
+                            <span class="rubric-item">Login Flow Steps: 2.0 M</span>
+                            <span class="rubric-item">JWT Structure (Header, Payload, Signature): 1.5 M</span>
+                            <span class="rubric-item">Client-Side Authorization Header: 1.5 M</span>
+                        </div>
+                        <div class="exam-ans">
+                            <h4>1. Step-by-Step Login Mechanism:</h4>
+                            <ol>
+                                <li><strong>Submission:</strong> The client sends an asynchronous HTTP <code>POST</code> request to <code>/api/auth/login</code> containing <code>email</code> and <code>password</code>.</li>
+                                <li><strong>User Lookup:</strong> Spring Boot service queries MongoDB via <code>userRepository.findByEmail(email)</code>. If absent, responds with HTTP 401 Unauthorized.</li>
+                                <li><strong>Password Verification:</strong> Service verifies credentials using <code>passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())</code>. If mismatch, responds with HTTP 401.</li>
+                                <li><strong>Token Generation:</strong> Upon successful match, backend creates a cryptographically signed JSON Web Token (JWT) containing user claims (sub, role, exp).</li>
+                                <li><strong>Response &amp; Storage:</strong> Server returns HTTP 200 with the token. The browser saves it in <code>localStorage</code> or an <code>HttpOnly</code> cookie.</li>
+                            </ol>
+
+                            <h4>2. Structure of JWT Token:</h4>
+                            <p>A JWT consists of three Base64URL-encoded parts separated by dots:</p>
+                            <ul>
+                                <li><strong>Header:</strong> Algorithm and token type (e.g., <code>{"alg": "HS256", "typ": "JWT"}</code>).</li>
+                                <li><strong>Payload (Claims):</strong> User attributes and expiry (e.g., <code>{"sub": "user@gmail.com", "role": "USER", "exp": 1730000000}</code>).</li>
+                                <li><strong>Signature:</strong> Hash of Header + Payload using the server's private secret key, preventing tampering.</li>
+                            </ul>
+
+                            <h4>3. Client Authorization:</h4>
+                            <p>In subsequent authenticated requests, the client attaches the token in the HTTP header:</p>
+                            <pre><code>headers: { "Authorization": "Bearer " + token }</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 10: Spring Boot & MongoDB Integration -->
+                <section class="step-view" data-title="10. Spring Boot MongoDB">
+                    <header class="hero">
+                        <span class="eyebrow">Module IV · Enterprise Integration</span>
+                        <h1>Spring Boot &amp; MongoDB Integration</h1>
+                        <p>Configure Spring Data MongoDB, define Document entities, build Repositories, and create full CRUD REST endpoints.</p>
+                    </header>
+
+                    <h2>1. Maven Dependency Configuration</h2>
+                    <p>Spring Boot provides a dedicated starter that bundles the MongoDB Java driver, connection pool, and repository abstractions:</p>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>pom.xml</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-data-mongodb&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+                    </div>
+
+                    <h2>2. Application Properties Configuration</h2>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>application.properties</span><button class="copy-btn">Copy</button></div>
+                        <pre><code># MongoDB Connection URI and Database Name
+spring.data.mongodb.uri=mongodb://localhost:27017/fsd_db
+
+# Server Port
+server.port=8080</code></pre>
+                    </div>
+
+                    <h2>3. Document Entity Model (`@Document`, `@Id`)</h2>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>Student.java</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>package com.example.model;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
+@Document(collection = "students") // Maps class to MongoDB collection
+public class Student {
+
+    @Id // Maps to MongoDB default primary key: _id
+    private String id;
+
+    @Field("student_name")
+    private String name;
+
+    private String email;
+    private String department;
+    private double gpa;
+
+    // Constructors, Getters, and Setters
+    public Student() {}
+    public Student(String name, String email, String department, double gpa) {
+        this.name = name;
+        this.email = email;
+        this.department = department;
+        this.gpa = gpa;
+    }
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
+    public double getGpa() { return gpa; }
+    public void setGpa(double gpa) { this.gpa = gpa; }
+}</code></pre>
+                    </div>
+
+                    <h2>4. Repository Interface (`MongoRepository`)</h2>
+                    <p>By extending <code>MongoRepository&lt;T, ID&gt;</code>, Spring Data generates complete CRUD implementations at runtime without writing any boilerplate SQL or MongoDB queries:</p>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>StudentRepository.java</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>package com.example.repository;
+
+import com.example.model.Student;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
+import java.util.List;
+import java.util.Optional;
+
+public interface StudentRepository extends MongoRepository&lt;Student, String&gt; {
+
+    // Derived Query Methods (automatically parsed by Spring Data)
+    Optional&lt;Student&gt; findByEmail(String email);
+    List&lt;Student&gt; findByDepartment(String department);
+    List&lt;Student&gt; findByGpaGreaterThan(double minGpa);
+
+    // Custom JSON query using @Query
+    @Query("{ 'department': ?0, 'gpa': { $gte: ?1 } }")
+    List&lt;Student&gt; findTopStudents(String department, double minGpa);
+}</code></pre>
+                    </div>
+
+                    <!-- 5 MARKS EXAM QUESTION 10 -->
+                    <div class="exam-box">
+                        <div class="exam-q">Q10. Explain how Spring Boot integrates with MongoDB using Spring Data MongoDB. Detail the role of `@Document`, `@Id`, and `MongoRepository` with code snippets. [5 Marks]</div>
+                        <div class="exam-rubric">
+                            <span class="rubric-item">Spring Data MongoDB Overview: 1.0 M</span>
+                            <span class="rubric-item">Annotations (@Document, @Id, @Field): 2.0 M</span>
+                            <span class="rubric-item">MongoRepository &amp; Derived Queries: 2.0 M</span>
+                        </div>
+                        <div class="exam-ans">
+                            <h4>1. Spring Data MongoDB Overview:</h4>
+                            <p>Spring Data MongoDB provides an Object-Document Mapping (ODM) framework that simplifies building document-based applications. It removes low-level driver boilerplate and provides automated repository proxy generation.</p>
+
+                            <h4>2. Essential Annotations:</h4>
+                            <ul>
+                                <li><code>@Document(collection = "name")</code>: Applied at class level to indicate that instances of this class represent BSON documents inside the specified MongoDB collection.</li>
+                                <li><code>@Id</code>: Marks the entity's primary key property. It maps directly to MongoDB's internal <code>_id</code> field and can be of type <code>String</code> or <code>ObjectId</code>.</li>
+                                <li><code>@Field("custom_name")</code>: Specifies a custom field key name in the persisted BSON document.</li>
+                            </ul>
+
+                            <h4>3. Role of `MongoRepository`:</h4>
+                            <p><code>MongoRepository&lt;Entity, ID&gt;</code> extends <code>PagingAndSortingRepository</code> and supplies built-in methods: <code>save()</code>, <code>findAll()</code>, <code>findById()</code>, <code>deleteById()</code>. In addition, it supports:</p>
+                            <ul>
+                                <li><strong>Derived Queries:</strong> Method names like <code>findByDepartment(String dept)</code> are automatically parsed into MongoDB query selectors.</li>
+                                <li><strong>Custom `@Query`:</strong> Direct BSON query templates can be supplied with positional parameters (<code>?0</code>, <code>?1</code>).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 11: Connecting Backend with Frontend -->
+                <section class="step-view" data-title="11. Backend &amp; Frontend Wiring">
+                    <header class="hero">
+                        <span class="eyebrow">Module IV · Full-Stack Integration</span>
+                        <h1>Connecting Backend with Frontend</h1>
+                        <p>Resolve CORS restrictions, execute asynchronous fetch calls, and bind backend REST endpoints to UI components.</p>
+                    </header>
+
+                    <h2>What is CORS and Why Does It Occur?</h2>
+                    <p><strong>CORS (Cross-Origin Resource Sharing)</strong> is a browser security mechanism enforced by the <strong>Same-Origin Policy</strong>. An origin is defined by the combination of <strong>Scheme + Domain + Port</strong>.</p>
+                    <div class="callout warn">
+                        <p>If your frontend is running on <code>http://localhost:3000</code> or <code>http://127.0.0.1:5500</code> and makes an HTTP request to Spring Boot running on <code>http://localhost:8080</code>, the browser will block the response with a <strong>CORS error</strong> unless the backend explicitly declares that the calling origin is allowed.</p>
+                    </div>
+
+                    <h2>Enabling CORS in Spring Boot</h2>
+                    <div class="grid two">
+                        <div class="card accent-mint">
+                            <h3>Method 1: Controller-Level `@CrossOrigin`</h3>
+                            <div class="code-wrap">
+                                <div class="code-header"><span>StudentController.java</span><button class="copy-btn">Copy</button></div>
+                                <pre><code>@RestController
+@RequestMapping("/api/students")
+@CrossOrigin(origins = "http://localhost:3000")
+public class StudentController {
+    // Endpoints...
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="card accent-blue">
+                            <h3>Method 2: Global Configuration</h3>
+                            <div class="code-wrap">
+                                <div class="code-header"><span>WebConfig.java</span><button class="copy-btn">Copy</button></div>
+                                <pre><code>@Configuration
+public class WebConfig implements WebMvcConfigurer {
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOrigins("http://localhost:3000", "http://127.0.0.1:5500")
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedHeaders("*")
+                .allowCredentials(true);
+    }
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2>Frontend Asynchronous Integration with `fetch()`</h2>
+                    <div class="code-wrap">
+                        <div class="code-header"><span>app.js (Fetching & Rendering Student List)</span><button class="copy-btn">Copy</button></div>
+                        <pre><code>const API_URL = "http://localhost:8080/api/students";
+
+// 1. Asynchronous GET Request
+async function loadStudents() {
+    try {
+        const response = await fetch(API_URL, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const students = await response.json();
+        renderTable(students);
+    } catch (error) {
+        console.error("Failed to load students:", error);
+    }
+}
+
+// 2. Render HTML Table dynamically
+function renderTable(students) {
+    const tableBody = document.getElementById("studentTableBody");
+    tableBody.innerHTML = "";
+
+    students.forEach(student => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            &lt;td&gt;${student.id}&lt;/td&gt;
+            &lt;td&gt;${student.name}&lt;/td&gt;
+            &lt;td&gt;${student.email}&lt;/td&gt;
+            &lt;td&gt;${student.department}&lt;/td&gt;
+            &lt;td&gt;${student.gpa}&lt;/td&gt;
+            &lt;td&gt;
+                &lt;button onclick="deleteStudent('${student.id}')"&gt;Delete&lt;/button&gt;
+            &lt;/td&gt;
+        `;
+        tableBody.appendChild(row);
+    });
+}</code></pre>
+                    </div>
+
+                    <!-- 5 MARKS EXAM QUESTION 11 -->
+                    <div class="exam-box">
+                        <div class="exam-q">Q11. What is CORS and why does it occur? Explain how frontend web applications communicate asynchronously with a Spring Boot REST backend using `fetch()` and JSON. [5 Marks]</div>
+                        <div class="exam-rubric">
+                            <span class="rubric-item">CORS Explanation &amp; Same-Origin Policy: 2.0 M</span>
+                            <span class="rubric-item">Spring Boot Solution (@CrossOrigin / Config): 1.5 M</span>
+                            <span class="rubric-item">Fetch API Implementation: 1.5 M</span>
+                        </div>
+                        <div class="exam-ans">
+                            <h4>1. Definition of CORS:</h4>
+                            <p>Cross-Origin Resource Sharing (CORS) is a security protocol implemented by web browsers to restrict web pages from making AJAX requests to a different domain, port, or protocol than the one that served the web page (Same-Origin Policy). When a client application at <code>http://localhost:3000</code> calls a backend at <code>http://localhost:8080</code>, the browser sends an HTTP <code>OPTIONS</code> pre-flight request. If the backend fails to respond with <code>Access-Control-Allow-Origin</code>, the browser blocks the response.</p>
+
+                            <h4>2. Resolving CORS in Spring Boot:</h4>
+                            <ul>
+                                <li>Annotating controllers with <code>@CrossOrigin(origins = "http://localhost:3000")</code>.</li>
+                                <li>Implementing a global <code>WebMvcConfigurer</code> bean overriding <code>addCorsMappings()</code> to allow specific origins, HTTP verbs (GET, POST, PUT, DELETE), and headers.</li>
+                            </ul>
+
+                            <h4>3. Asynchronous Communication using `fetch()`:</h4>
+                            <p>Modern frontend JavaScript uses the Promise-based <code>fetch()</code> API with <code>async/await</code> syntax:</p>
+                            <ul>
+                                <li>Serializing payloads: <code>body: JSON.stringify(data)</code></li>
+                                <li>Setting content headers: <code>headers: { 'Content-Type': 'application/json' }</code></li>
+                                <li>Parsing responses: <code>const result = await response.json();</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STEP 12: Comprehensive 5-Mark Question Bank -->
+                <section class="step-view" data-title="12. Exam Question Bank &amp; Revision">
+                    <header class="hero">
+                        <span class="eyebrow">Module IV · Final Review</span>
+                        <h1>5-Mark Exam Question Bank &amp; Cheat Sheet</h1>
+                        <p>Quick reference revision guide covering all top probable university examination questions and answers.</p>
+                    </header>
+
+                    <h2>Master University Exam Question Bank (5 Marks Each)</h2>
+
+                    <div class="grid two">
+                        <div class="card accent-mint">
+                            <span class="tag">Question 1</span>
+                            <h3>MongoDB vs. RDBMS</h3>
+                            <p><strong>Core Focus:</strong> Tabular comparison covering data models (Tables vs Documents), schemas (rigid vs dynamic), joins vs embedding, and vertical vs horizontal scaling.</p>
+                            <a href="#step-1" class="step-nav-btn" onclick="goToStep(0)">Review Answer in Step 1 &rarr;</a>
+                        </div>
+
+                        <div class="card accent-blue">
+                            <span class="tag">Question 2</span>
+                            <h3>Role of MongoDB Drivers</h3>
+                            <p><strong>Core Focus:</strong> Connection pooling, wire protocol (OP_MSG), BSON serialization, and replica set discovery.</p>
+                            <a href="#step-2" class="step-nav-btn" onclick="goToStep(1)">Review Answer in Step 2 &rarr;</a>
+                        </div>
+
+                        <div class="card accent-yellow">
+                            <span class="tag">Question 3</span>
+                            <h3>mongod, mongosh &amp; Compass</h3>
+                            <p><strong>Core Focus:</strong> Distinguishing the core daemon service from the CLI client and GUI management tools, including verification commands.</p>
+                            <a href="#step-3" class="step-nav-btn" onclick="goToStep(2)">Review Answer in Step 3 &rarr;</a>
+                        </div>
+
+                        <div class="card accent-orange">
+                            <span class="tag">Question 4</span>
+                            <h3>Dynamic Schema &amp; Collections</h3>
+                            <p><strong>Core Focus:</strong> Implicit vs explicit creation (<code>createCollection</code>), dropping databases, and capped collection benefits.</p>
+                            <a href="#step-4" class="step-nav-btn" onclick="goToStep(3)">Review Answer in Step 4 &rarr;</a>
+                        </div>
+
+                        <div class="card accent-purple">
+                            <span class="tag">Question 5</span>
+                            <h3>CRUD Commands &amp; `$set`</h3>
+                            <p><strong>Core Focus:</strong> Syntax and example for <code>insertOne</code>, <code>find</code> with selectors, <code>updateOne</code> with atomic operators, and <code>deleteOne</code>.</p>
+                            <a href="#step-5" class="step-nav-btn" onclick="goToStep(4)">Review Answer in Step 5 &rarr;</a>
+                        </div>
+
+                        <div class="card accent-mint">
+                            <span class="tag">Question 6</span>
+                            <h3>Client vs Server Validation</h3>
+                            <p><strong>Core Focus:</strong> Contrasting immediate UX feedback with authoritative backend security enforcement.</p>
+                            <a href="#step-7" class="step-nav-btn" onclick="goToStep(6)">Review Answer in Step 7 &rarr;</a>
+                        </div>
+
+                        <div class="card accent-yellow">
+                            <span class="tag">Question 7</span>
+                            <h3>BCrypt Hashing &amp; Salting</h3>
+                            <p><strong>Core Focus:</strong> Why plain passwords fail, one-way hashing vs encryption, salt generation, and Spring <code>BCryptPasswordEncoder</code>.</p>
+                            <a href="#step-8" class="step-nav-btn" onclick="goToStep(7)">Review Answer in Step 8 &rarr;</a>
+                        </div>
+
+                        <div class="card accent-blue">
+                            <span class="tag">Question 8</span>
+                            <h3>JWT Login Authentication</h3>
+                            <p><strong>Core Focus:</strong> Step-by-step verification, JWT three-part structure (Header, Claims, Signature), and Bearer authorization.</p>
+                            <a href="#step-9" class="step-nav-btn" onclick="goToStep(8)">Review Answer in Step 9 &rarr;</a>
+                        </div>
+
+                        <div class="card accent-orange">
+                            <span class="tag">Question 9</span>
+                            <h3>Spring Data Mongo Integration</h3>
+                            <p><strong>Core Focus:</strong> Annotations (<code>@Document</code>, <code>@Id</code>), <code>MongoRepository</code> interface, and derived queries.</p>
+                            <a href="#step-10" class="step-nav-btn" onclick="goToStep(9)">Review Answer in Step 10 &rarr;</a>
+                        </div>
+
+                        <div class="card accent-purple">
+                            <span class="tag">Question 10</span>
+                            <h3>CORS &amp; Async Fetch API</h3>
+                            <p><strong>Core Focus:</strong> Same-origin policy causes, Spring <code>@CrossOrigin</code> configuration, and Promise-based JavaScript <code>fetch()</code> wiring.</p>
+                            <a href="#step-11" class="step-nav-btn" onclick="goToStep(10)">Review Answer in Step 11 &rarr;</a>
+                        </div>
+                    </div>
+
+                    <div class="callout tip">
+                        <p><strong>Exam Success Strategy:</strong> For every 5-mark answer in Full Stack Development:</p>
+                        <ol>
+                            <li>Provide a clear 2-3 line technical definition.</li>
+                            <li>Include a clean syntax or ASCII architecture diagram.</li>
+                            <li>Write a working, syntactically correct code snippet (Java / JavaScript / MongoDB command).</li>
+                            <li>Highlight key technical keywords (e.g., <em>BSON, Connection Pooling, Same-Origin Policy, BCrypt Salt, MongoRepository</em>).</li>
+                        </ol>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        (function () {
+            const steps = Array.from(document.querySelectorAll('.step-view'));
+            const stepNav = document.getElementById('stepNav');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const mobileTitle = document.getElementById('mobileTitle');
+            const menuBtn = document.getElementById('menuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+
+            let currentStep = 0;
+            const completedSteps = new Set();
+
+            // Populate Sidebar Nav Links
+            steps.forEach((step, index) => {
+                const title = step.dataset.title || `Step ${index + 1}`;
+                const link = document.createElement('button');
+                link.className = `step-link ${index === 0 ? 'active' : ''}`;
+                link.dataset.step = index;
+                link.innerHTML = `
+                    <span class="step-number">${index + 1}</span>
+                    <span class="step-title">${title}</span>
+                    <span class="step-status"></span>
+                `;
+                stepNav.appendChild(link);
+            });
+
+            const stepLinks = Array.from(document.querySelectorAll('.step-link'));
+
+            function getHashStep() {
+                const hash = window.location.hash;
+                if (!hash) return 0;
+                const match = hash.match(/#step-(\d+)/);
+                if (match) {
+                    const idx = parseInt(match[1], 10) - 1;
+                    return (idx >= 0 && idx < steps.length) ? idx : 0;
+                }
+                return 0;
+            }
+
+            function updateUI(pushState = true) {
+                // Update Step Views
+                steps.forEach((step, idx) => {
+                    step.classList.toggle('active', idx === currentStep);
+                });
+
+                // Update Sidebar Links
+                stepLinks.forEach((link, idx) => {
+                    link.classList.toggle('active', idx === currentStep);
+                    const statusSpan = link.querySelector('.step-status');
+                    if (completedSteps.has(idx) && idx !== currentStep) {
+                        statusSpan.textContent = '✓';
+                    } else {
+                        statusSpan.textContent = '';
+                    }
+                });
+
+                // Update Mobile Title
+                const activeTitle = steps[currentStep].dataset.title || `Step ${currentStep + 1}`;
+                mobileTitle.textContent = activeTitle;
+
+                // Update Progress Bar
+                const pct = Math.round(((completedSteps.size + (completedSteps.has(currentStep) ? 0 : 0.5)) / steps.length) * 100);
+                const displayPct = Math.min(100, pct);
+                progressBar.style.width = `${displayPct}%`;
+                progressText.textContent = `${displayPct}%`;
+
+                // Update Hash
+                if (pushState) {
+                    history.pushState(null, '', `#step-${currentStep + 1}`);
+                }
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Update Bottom Nav Buttons
+                document.getElementById('prevBtn').disabled = currentStep === 0;
+                const nextBtn = document.getElementById('nextBtn');
+                if (currentStep === steps.length - 1) {
+                    nextBtn.textContent = 'Complete Course ✓';
+                    nextBtn.classList.remove('primary');
+                    nextBtn.style.background = 'var(--yellow)';
+                } else {
+                    nextBtn.textContent = 'Next Topic →';
+                    nextBtn.classList.add('primary');
+                    nextBtn.style.background = '';
+                }
+            }
+
+            window.goToStep = function (index) {
+                if (index < 0 || index >= steps.length) return;
+                completedSteps.add(currentStep);
+                currentStep = index;
+                updateUI();
+                if (window.innerWidth <= 900) {
+                    sidebar.classList.remove('open');
+                }
+            };
+
+            // Bottom Navigation Row
+            const navRow = document.createElement('div');
+            navRow.className = 'nav-row';
+            navRow.innerHTML = `
+                <button class="nav-btn" id="prevBtn" type="button">← Previous Topic</button>
+                <button class="nav-btn primary" id="nextBtn" type="button">Next Topic →</button>
+            `;
+            content.appendChild(navRow);
+
+            document.getElementById('prevBtn').addEventListener('click', () => goToStep(currentStep - 1));
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                if (currentStep === steps.length - 1) {
+                    completedSteps.add(currentStep);
+                    updateUI();
+                    alert('🎉 Congratulations! You have completed all MongoDB & Full Stack Development theory notes and 5-mark exam preparation!');
+                } else {
+                    goToStep(currentStep + 1);
+                }
+            });
+
+            // Sidebar link clicks
+            stepNav.addEventListener('click', (e) => {
+                const link = e.target.closest('.step-link');
+                if (link) {
+                    goToStep(parseInt(link.dataset.step, 10));
+                }
+            });
+
+            // Mobile toggle
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            // Copy button logic
+            document.addEventListener('click', async (e) => {
+                const copyBtn = e.target.closest('.copy-btn');
+                if (copyBtn) {
+                    const code = copyBtn.closest('.code-wrap').querySelector('pre code')?.innerText || '';
+                    try {
+                        await navigator.clipboard.writeText(code);
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => copyBtn.textContent = 'Copy', 1500);
+                    } catch (err) {
+                        copyBtn.textContent = 'Error';
+                    }
+                    return;
+                }
+
+                // Quiz logic
+                const quizOption = e.target.closest('.quiz-option');
+                if (quizOption) {
+                    const quiz = quizOption.closest('.quiz');
+                    if (quiz.dataset.answered) return;
+                    const options = Array.from(quiz.querySelectorAll('.quiz-option'));
+                    const selectedIdx = options.indexOf(quizOption);
+                    const correctIdx = parseInt(quiz.dataset.answer, 10);
+
+                    quiz.dataset.answered = 'true';
+                    options.forEach(opt => opt.disabled = true);
+
+                    if (selectedIdx === correctIdx) {
+                        quizOption.classList.add('correct');
+                    } else {
+                        quizOption.classList.add('wrong');
+                        options[correctIdx].classList.add('correct');
+                    }
+
+                    const feedback = quiz.querySelector('.quiz-feedback');
+                    feedback.textContent = (selectedIdx === correctIdx ? '✓ Correct! ' : '✗ Incorrect. ') + quiz.dataset.correct;
+                    feedback.classList.add('show');
+                }
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+                if (e.key === 'ArrowRight') goToStep(currentStep + 1);
+                if (e.key === 'ArrowLeft') goToStep(currentStep - 1);
+            });
+
+            window.addEventListener('popstate', () => {
+                currentStep = getHashStep();
+                updateUI(false);
+            });
+
+            // Initial load
+            currentStep = getHashStep();
+            updateUI(false);
+        })();
+    </script>
+</body>
+
+</html>

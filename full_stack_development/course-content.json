@@ -138,6 +138,26 @@
               "storageKey": ""
             }
           ]
+        },
+        {
+          "id": "topic-fsd-3-7-mongodb-theory-and-exam-notes",
+          "title": "MongoDB & FSD Architecture: Theory & Exam Guide",
+          "description": "Comprehensive theoretical explanation of MongoDB drivers, installation, database/collection management, CRUD, UI creation, form validation, password encryption, login flow, Spring Boot integration, and backend-frontend connectivity with 5-mark exam questions and model answers.",
+          "order": 6,
+          "resources": [
+            {
+              "id": "codelab-fsd-3-7-mongodb-theory-and-exam-notes",
+              "type": "codelab",
+              "title": "Notes: MongoDB & FSD Theory & 5-Mark Exam Questions",
+              "order": 0,
+              "description": "Interactive study guide covering all essential theoretical concepts, architecture diagrams, and 5-mark examination questions and answers for Full Stack Development with MongoDB and Spring Boot.",
+              "instructions": "",
+              "starterCode": "",
+              "sourceUrl": "https://codelab.sarankar.com/full_stack_development/mongodb-theory-notes/",
+              "fileName": "",
+              "storageKey": ""
+            }
+          ]
         }
       ]
     }
